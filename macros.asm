@@ -25,3 +25,10 @@ true set $FF
 		STA RB3_COPY
 	%endmacro
 	
+;Misc
+;====
+
+	%macro halt 0
+		BRK
+		BRK
+	%endmacro

@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e1a03b6a-2e3c-4a21-b121-1ff4e26b66f3" name="Default Changelist" comment="" />
+    <list default="true" id="e1a03b6a-2e3c-4a21-b121-1ff4e26b66f3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../asm.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../asm.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../emu.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../emu.hex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../emu6507.asm" beforeDir="false" afterPath="$PROJECT_DIR$/../emu6507.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../font_8x8.asm" beforeDir="false" afterPath="$PROJECT_DIR$/../font_8x8.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../hex.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../hex.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../main.asm" beforeDir="false" afterPath="$PROJECT_DIR$/../main.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../main.i" beforeDir="false" afterPath="$PROJECT_DIR$/../main.i" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../output/callgraph.html" beforeDir="false" afterPath="$PROJECT_DIR$/../output/callgraph.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../output/processed.html" beforeDir="false" afterPath="$PROJECT_DIR$/../output/processed.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../processed.asm" beforeDir="false" afterPath="$PROJECT_DIR$/../processed.asm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../processed.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../processed.hex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../processed.i" beforeDir="false" afterPath="$PROJECT_DIR$/../processed.i" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../processed.lst" beforeDir="false" afterPath="$PROJECT_DIR$/../processed.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../processed.map" beforeDir="false" afterPath="$PROJECT_DIR$/../processed.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../processed.p" beforeDir="false" afterPath="$PROJECT_DIR$/../processed.p" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,7 +31,11 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="ProjectId" id="1fOOJXMDnQXsYsAwDXdHKMJrr8D" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -86,22 +107,22 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="832" y="48" key="#main/0.0.1536.824@0.0.1536.824" timestamp="1596085751470" />
-    <state width="1038" height="195" key="GridCell.Tab.0.bottom" timestamp="1596418490670">
+    <state width="1038" height="195" key="GridCell.Tab.0.bottom" timestamp="1596591918831">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1038" height="195" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1596418490670" />
-    <state width="1038" height="195" key="GridCell.Tab.0.center" timestamp="1596418490668">
+    <state width="1038" height="195" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1596591918831" />
+    <state width="1038" height="195" key="GridCell.Tab.0.center" timestamp="1596591918830">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1038" height="195" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1596418490668" />
-    <state width="1038" height="195" key="GridCell.Tab.0.left" timestamp="1596418490665">
+    <state width="1038" height="195" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1596591918830" />
+    <state width="1038" height="195" key="GridCell.Tab.0.left" timestamp="1596591918829">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1038" height="195" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1596418490665" />
-    <state width="1038" height="195" key="GridCell.Tab.0.right" timestamp="1596418490669">
+    <state width="1038" height="195" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1596591918829" />
+    <state width="1038" height="195" key="GridCell.Tab.0.right" timestamp="1596591918831">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1038" height="195" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1596418490669" />
+    <state width="1038" height="195" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1596591918831" />
     <state x="555" y="76" key="SettingsEditor" timestamp="1596086120122">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

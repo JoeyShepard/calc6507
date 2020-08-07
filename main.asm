@@ -25,6 +25,7 @@
 ;=========
 	;Unlimited lines per page in listing
 	PAGE 0
+	
 DEBUG_MODE set "off"
 	
 	;Macros at very beginning
@@ -35,28 +36,40 @@ DEBUG_MODE set "off"
 	;ORG $FFFC
 	ORG $1FFC
 	FDB main
-	
-	;Locals usage
-LOCALS_BEGIN set	$20
-LOCALS_END set		$3F
-	
+		
 	
 ;Variables in zero page
 ;======================
 	ORG $0000
+	
+	;Locals usage
+LOCALS_BEGIN set	$0
+LOCALS_END set		$1F
+	
+	ORG $20
+	;For macros
 	BYTE dummy
 	WORD ret_val
-	BYTE cx, cy
+	
 	WORD screen_ptr
 	
 	R0: DFS 9
+	R1: DFS 9
+	R2: DFS 9
+	R3: DFS 9
+	R4: DFS 9
+	R5: DFS 9
+	R6: DFS 9
+	R7: DFS 9
+	
+STACK_END:
 	
 	
 ;Variables in main RAM
 ;=====================
 	ORG $130
 	;Must come after include const.asm for constants
-	;include globals.asm
+	include globals.asm
 
 
 ;Functions in ROM
@@ -70,6 +83,10 @@ LOCALS_END set		$3F
 
 	;include calc6507.asm
 	include emu6507.asm
+	
+	include math.asm
+	include output.asm
+	include forth.asm
 	
 	
 ;System functions
@@ -89,244 +106,213 @@ LOCALS_END set		$3F
 			BNE .loop
 	END
 	
-	FUNC DigitHigh
-		ARGS
-			BYTE digit
-		END
-		
-		LDA digit
-		LSR
-		LSR
-		LSR
-		LSR
-		CLC
-		ADC #'0'
-		STA digit
-		CALL LCD_char, digit
-	END
+		special_chars:
+	FCB " e."
 	
-	FUNC DigitLow
-		ARGS
-			BYTE digit
-		END
-		
-		LDA digit
-		AND #$F
-		CLC
-		ADC #'0'
-		STA digit
-		CALL LCD_char, digit
-	END
-	
-	FUNC DrawFloat
-		ARGS
-			WORD source
+	;Can save space here by removing cursor draw after key
+	FUNC ReadLine
 		VARS
-			BYTE index, arg, sign
-			WORD buff
+			BYTE cursor, cursor_timer
+			BYTE arg
+			BYTE index, str_index
 		END
 		
-		CALL MemCopy,source,#R0,#9
-		
-		LDA #' '
-		STA sign
-		LDY #6
-		LDA (source),Y
-		CMP #$50
-		BCC .positive
-			LDA #'-'
-			STA sign
-			CALL BCD_Reverse, #R0+1, #6
-		.positive:
-		CALL LCD_char,sign
-				
-		LDY #6
-		LDA R0,Y
-		STA arg
-		CALL DigitHigh, arg
-		CALL LCD_char, #'.'
-		CALL DigitLow, arg
-		LDA #5
+		LDA #0
+		STA cursor
 		STA index
-		.loop:
-			LDY index
-			LDA R0,Y
-			STA arg
-			CALL DigitHigh, arg
-			CALL DigitLow, arg
-			DEC index
-			LDA index
-			CMP #2
-			BNE .loop
-		LDA #'+'
-		STA sign
-		LDY #8
-		LDA (source),Y
-		CMP #$50
-		BCC .positive_e
-			LDA #'-'
-			STA sign
-			CALL BCD_Reverse, #R0+7, #2
-		.positive_e:
-		CALL LCD_char,sign
-		LDY #8
-		LDA R0,Y
-		STA arg
-		CALL DigitLow, arg
-		LDY #7
-		LDA R0,Y
-		STA arg
-		CALL DigitHigh, arg
-		CALL DigitLow, arg
-			
-	END
-	
-	FUNC HexHigh
-		ARGS
-			BYTE digit
-		VARS
-			BYTE arg
-		END
+		STA screen_ptr
+		LDA #INPUT_Y
+		STA screen_ptr+1
+		CALL LCD_print,"a               "
+		LDA TIMER_S
+		STA cursor_timer
 		
-		LDA digit
-		LSR
-		LSR
-		LSR
-		LSR
-		CMP #$A
-		BCC .print_digit
-			CLC
-			ADC #'A'-10
-			STA arg
-			JMP .done
-		.print_digit:
-			CLC
-			ADC #'0'
-			STA arg
-		.done:
-		CALL LCD_char, arg
-	END
-	
-	FUNC HexLow
-		ARGS
-			BYTE digit
-		VARS
-			BYTE arg
-		END
-		
-		LDA digit
-		AND #$F
-		CMP #$A
-		BCC .print_digit
-			CLC
-			ADC #'A'-10
-			STA arg
-			JMP .done
-		.print_digit:
-			CLC
-			ADC #'0'
-			STA arg
-		.done:
-		CALL LCD_char, arg
-	END
-	
-	FUNC DrawHex
-		ARGS
-			WORD source
-		VARS
-			BYTE arg
-		END
-		
-		CALL LCD_print, "$"
-		
-		LDY #8
-		LDA (source),Y
-		STA arg
-		CALL HexHigh, arg
-		CALL HexLow, arg
-		LDY #7
-		LDA (source),Y
-		STA arg
-		CALL HexHigh, arg
-		CALL HexLow, arg
-	END
-	
-	
-;Math functions
-;==============
-	FUNC BCD_Reverse
-		ARGS
-			WORD source
-			BYTE count
-		END
-		
-		LDY #0
-		SED
-		SEC
 		.loop:
 			LDA #0
-			SBC (source),Y
-			STA (source),Y
-			INY
-			CPY count
-			BNE .loop
-		CLD
+			STA arg
+			LDA KB_INPUT
+			BNE .key_read
+				JMP .no_key
+			.key_read:
+			
+				;Enter key
+				CMP #KEY_ENTER
+				BNE .not_enter
+					LDA index
+					BEQ .loop
+					LDA #0
+					STA input_buff_begin
+					LDA index
+					STA input_buff_end
+					RTS
+				.not_enter:
+			
+				;Backspace
+				CMP #KEY_BACKSPACE
+				BNE .not_backspace
+					LDA index
+					BEQ .backspace_done
+						DEC index
+						CMP #CHAR_SCREEN_WIDTH
+						BCS .backspace_scroll
+							CALL LCD_char, #' '
+							LDA screen_ptr
+							SEC
+							SBC #CHAR_WIDTH*2
+							STA screen_ptr
+							PHA
+							CALL LCD_char, #CHAR_ARROW
+							PLA
+							STA screen_ptr
+							JMP .draw_done
+						.backspace_scroll:
+							LDY index
+							DEY
+							JMP .scroll_buffer
+						
+					.backspace_done:
+					JMP .no_key
+				.not_backspace:
+				
+				;Special character
+				LDY #0
+				.special_loop:
+					CMP special_chars,Y
+					BNE .special_next
+						STA arg
+						JMP .key_done
+					.special_next:
+					INY
+					CPY #3	;Length of string
+					BNE .special_loop
+				
+				;Number
+				CMP #'0'
+				BCC .not_num
+				CMP #'9'+1
+				BCS .not_num
+					STA arg
+					JMP .key_done
+				.not_num:
+				
+				;Uppercase
+				CMP #'A'
+				BCC .not_upper
+				CMP #'Z'+1
+				BCS .not_upper
+					STA arg
+					JMP .key_done
+				.not_upper:
+				
+				;Lowercase
+				CMP #'a'
+				BCC .not_lower
+				CMP #'z'+1
+				BCS .not_lower
+					;Convert to uppercase
+					SEC
+					SBC #$20
+					STA arg
+				.not_lower:
+				
+				.key_done:
+				LDA arg
+				BEQ .not_valid
+					LDY index
+					CPY #BUFF_SIZE
+					BCS .buffer_full
+						STA input_buff,Y
+						INC index
+						CPY #CHAR_SCREEN_WIDTH-1
+						BCS .scroll_buffer
+							CALL LCD_char, arg
+							LDA screen_ptr
+							PHA
+							CALL LCD_char, #CHAR_ARROW
+							PLA
+							STA screen_ptr
+							JMP .draw_done
+						.scroll_buffer:
+							LDA #0
+							STA screen_ptr
+							TYA
+							SEC
+							SBC #CHAR_SCREEN_WIDTH-2
+							STA str_index
+							.scroll_loop:
+								LDY str_index
+								INC str_index
+								LDA input_buff,Y
+								STA arg
+								CALL LCD_char, arg
+								LDA index
+								CMP str_index
+								BNE .scroll_loop
+							LDA screen_ptr
+							PHA
+							CALL LCD_char, #CHAR_ARROW
+							PLA
+							STA screen_ptr
+						.draw_done:
+					.buffer_full:
+				.not_valid:
+
+			.no_key:
+			LDA TIMER_S
+			CMP cursor_timer
+			BEQ .cursor_done
+				STA cursor_timer
+				LDA cursor
+				BEQ .draw_blank
+					LDA #0
+					STA cursor
+					LDA #' '
+					JMP .draw
+				.draw_blank:
+					LDA #$FF
+					STA cursor
+					LDA #CHAR_ARROW
+				.draw:
+				STA arg
+				CALL LCD_char, arg
+				LDA screen_ptr
+				SEC
+				SBC #CHAR_WIDTH
+				STA screen_ptr
+			.cursor_done:
+		JMP .loop
 	END
-
-
-
 	
-
-;Test data
-;=========
-	test_val1:
-	FCB OBJ_FLOAT,	$12, $90, $78, $56, $34, $12, $1, $00
-	test_val2:
-	FCB OBJ_FLOAT,	$23, $01, $89, $67, $45, $23, $03, $00
-	test_val3:
-	FCB OBJ_HEX,	$00, $00, $00, $00, $00, $00, $DE, $BC
-	
-	
+		
 ;Main function
 ;=============
 	FUNC main, begin
+		VARS
+			BYTE counter
+		END
+	
 		;Only use bottom 48 bytes of stack
 		;May need a lot more for R stack
 		;Must come before any JSR
 		LDX #$2F
 		TXS
-		
+				
 		CALL setup
 		
-		CALL LCD_print, "RAD"
+		CALL ReadLine
 		
-		LDA #((SCREEN_ADDRESS / 256)+16)
-		STA screen_ptr+1
-		LDA #0
-		STA screen_ptr
+		CALL LineWord
+		halt		
+		CALL LineWord
+		halt		
+		CALL LineWord
+		halt		
+		CALL LineWord
+		halt		
+		CALL LineWord
+		halt		
 		
-		CALL MemCopy, #test_val1, #247, #9
-		LDX #247
-		
-		CALL LCD_char, #'5'
-		CALL LCD_char, #':'
-		CALL DrawFloat, #247
-		
-		LDA screen_ptr+1
-		CLC
-		ADC #16
-		STA screen_ptr+1
-		
-		CALL MemCopy, #test_val3, #238, #9
-		LDX #238
-		
-		CALL LCD_char, #'4'
-		CALL LCD_char, #':'
-		CALL DrawHex, #238
-		
-		
-		BRK
-		BRK
+		halt
 	END
 	
 	

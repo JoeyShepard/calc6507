@@ -1,5 +1,9 @@
 ;I/O and setup for emulator
 ;==========================
+	
+	BG_COLOR = $2A
+	FG_COLOR = $0
+	
 	FUNC setup
 		SEI
 		CLD
@@ -9,8 +13,32 @@
 		
 		;Emulator only!
 		MOV #BANK_GFX_RAM1,RAM_BANK2		
+		MOV #BANK_GFX_RAM2,RAM_BANK3		
 		
-		MOV.W #SCREEN_ADDRESS,screen_ptr
+		;Not necessary if call to DrawStack
+		;MOV.W #SCREEN_ADDRESS, screen_ptr
+		
+		CALL DrawStack
+	END
+
+	FUNC LCD_clrscr
+		VARS
+			BYTE counter
+		END
+		
+		MOV.W #SCREEN_ADDRESS, screen_ptr
+		;Rows on screen
+		MOV #128, counter
+		LDA #BG_COLOR
+		LDY #0
+		.loop:
+			STA (screen_ptr),Y
+			INY
+			BNE .loop
+			INC screen_ptr+1
+			DEC counter
+			BNE .loop
+		MOV.W #SCREEN_ADDRESS, screen_ptr
 	END
 
 	FUNC LCD_char
@@ -29,7 +57,7 @@
 			RTS
 		END_IF
 		
-		CMP #'`'	;_ + 1
+		CMP #'e'+1	
 		IF_GE
 			RTS
 		END_IF
@@ -68,9 +96,9 @@
 			LDY #0
 			.loop.inner:
 				ROL pixel
-				LDA #$3F
+				LDA #FG_COLOR
 				BCS .color
-					LDA #0
+					LDA #BG_COLOR
 				.color:
 				;16x24 - ie 8x8 stretched over half pixels :/
 				;STA (screen_ptr),Y

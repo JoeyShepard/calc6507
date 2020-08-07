@@ -178,7 +178,7 @@
 ;[
   FCB $78, $60, $60, $60, $60, $60, $78, $0
 
-;\
+;forward slash
   FCB $c0, $60, $30, $18, $c, $6, $2, $0
 
 ;]
@@ -189,4 +189,31 @@
 
 ;_
   FCB $0, $0, $0, $0, $0, $0, $0, $ff
+ 
+;` - filler! not defined
+  FCB $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
 
+
+;Custom characters
+;=================
+ 
+CHAR_ARROW = 'a'
+
+;a - left arrow
+  ;FCB $4, $C, $1C, $3C, $1C, $C, $4, $0
+  ;shifted left one space
+  FCB $8, $18, $38, $78, $38, $18, $8, $0
+  
+  FCB $8, $18, $38, $78, $38, $18, $8, $0
+  
+  FCB $8, $18, $38, $78, $38, $18, $8, $0
+  
+  FCB $8, $18, $38, $78, $38, $18, $8, $0
+  
+ ;e - exponent
+  FCB $0, $0, $EE, $88, $EE, $88, $EE, $0
+  
+  
+  
+  
+  
