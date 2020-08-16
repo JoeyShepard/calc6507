@@ -51,6 +51,7 @@ LOCALS_END set		$1F
 	BYTE dummy
 	WORD ret_val
 	
+	;Output
 	WORD screen_ptr
 	
 	R0: DFS 9
@@ -106,8 +107,10 @@ STACK_END:
 			BNE .loop
 	END
 	
-		special_chars:
-	FCB " e."
+SPECIAL_CHARS_LEN = 5
+	special_chars:
+	FCB CHAR_EXP, CHAR_QUOTE		;2
+	FCB " .$"						;3
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -183,7 +186,7 @@ STACK_END:
 						JMP .key_done
 					.special_next:
 					INY
-					CPY #3	;Length of string
+					CPY #SPECIAL_CHARS_LEN
 					BNE .special_loop
 				
 				;Number
@@ -300,17 +303,17 @@ STACK_END:
 		CALL setup
 		
 		CALL ReadLine
+		CALL LineWord
+		CALL FindWord
+		LDA ret_val
+		ORA ret_val+1
+		BEQ .not_found
+			;Found
+			halt
+		.not_found:
 		
-		CALL LineWord
-		halt		
-		CALL LineWord
-		halt		
-		CALL LineWord
-		halt		
-		CALL LineWord
-		halt		
-		CALL LineWord
-		halt		
+		CALL CheckData
+		
 		
 		halt
 	END

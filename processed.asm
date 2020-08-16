@@ -56,7 +56,10 @@ new_word_len:
  DFS $1
  
 new_word_buff:
- DFS $12
+ DFS $13
+ 
+new_stack_item:
+ DFS $9
  ORG $900
  JMP main
  
@@ -127,9 +130,9 @@ font_table:
  FCB $0,$0,$0,$0,$0,$0,$0,$FF
  FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  FCB $8,$18,$38,$78,$38,$18,$8,$0
- FCB $8,$18,$38,$78,$38,$18,$8,$0
- FCB $8,$18,$38,$78,$38,$18,$8,$0
- FCB $8,$18,$38,$78,$38,$18,$8,$0
+ FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  FCB $0,$0,$EE,$88,$EE,$88,$EE,$0
  
 setup:
@@ -149,7 +152,7 @@ LCD_clrscr:
  LDA #$40
  STA screen_ptr+$1
  LDA #$80
- STA $1 ;counter
+ STA $3 ;counter
  LDA #$2A
  LDY #$0
  .loop:
@@ -157,7 +160,7 @@ LCD_clrscr:
  INY
  BNE .loop
  INC screen_ptr+$1
- DEC $1 ;counter
+ DEC $3 ;counter
  BNE .loop
  LDA #$0
  STA screen_ptr
@@ -460,9 +463,9 @@ DrawStack:
  STA $7 ;LCD_print.source
  JSR LCD_print
  LDA #$35
- STA $3 ;character
+ STA $2 ;character
  LDA #$D3
- STA $2 ;counter
+ STA $1 ;counter
  .loop:
  LDA #$0
  STA screen_ptr
@@ -470,17 +473,17 @@ DrawStack:
  CLC
  ADC #$10
  STA screen_ptr+$1
- LDA $3 ;character
+ LDA $2 ;character
  STA $A ;LCD_char.c_out
  JSR LCD_char
  LDA #$3A
  STA $A ;LCD_char.c_out
  JSR LCD_char
- DEC $3 ;character
- LDA $2 ;counter
+ DEC $2 ;character
+ LDA $1 ;counter
  CLC
  ADC #$9
- STA $2 ;counter
+ STA $1 ;counter
  BNE .loop
  LDA #$0
  STA screen_ptr
@@ -514,8 +517,6 @@ LineWord:
  BNE .chars_left
  RTS
  .chars_left:
- LDA #$0
- STA $1 ;mode
  .loop:
  LDY input_buff_begin
  LDA input_buff,Y
@@ -530,7 +531,7 @@ LineWord:
  STA new_word_buff,Y
  INY
  STY new_word_len
- CPY #$12
+ CPY #$13
  BNE .word_size_good
  LDA #$1
  STA global_error
@@ -545,6 +546,264 @@ LineWord:
  RTS
  RTS
  
+FindWord:
+ LDA # (FORTH_WORDS) # $100
+ STA ret_val
+ LDA # (FORTH_WORDS)/$100
+ STA ret_val+$1
+ .loop:
+ LDY #$0
+ LDA (ret_val),Y
+ CMP new_word_len
+ BNE .loop_next
+ INY
+ .str_loop:
+ LDA (ret_val),Y
+ CMP new_word_buff-$1,Y
+ BNE .no_match
+ CPY new_word_len
+ BEQ .word_found
+ INY
+ JMP .str_loop
+ .no_match:
+ .loop_next:
+ LDY #$0
+ LDA (ret_val),Y
+ TAY
+ INY
+ LDA (ret_val),Y
+ PHA
+ INY
+ LDA (ret_val),Y
+ STA ret_val+$1
+ PLA
+ STA ret_val
+ LDY #$0
+ LDA (ret_val),Y
+ INY
+ ORA (ret_val),Y
+ BNE .loop
+ STA ret_val
+ STA ret_val+$1
+ .word_found:
+ RTS
+ 
+CheckData:
+ LDA #$4
+ STA new_stack_item
+ LDA new_word_len
+ BNE .not_zero_len
+ RTS
+ .not_zero_len:
+ LDY #$8
+ LDA #$0
+ .zero_loop:
+ STA new_stack_item,Y
+ DEY
+ BNE .zero_loop
+ LDY #$0
+ LDA new_word_buff
+ CMP #$22
+ BNE .not_string
+ LDA new_word_len
+ CMP #$1
+ BNE .not_single_quote
+ RTS
+ .not_single_quote:
+ DEC new_word_len
+ .loop_str:
+ LDA new_word_buff+$1,y
+ CMP #$22
+ BEQ .str_done
+ STA new_stack_item+$1,Y
+ INY
+ CPY #$9
+ BEQ .string_too_long
+ CPY new_word_len
+ BEQ .string_unterminated
+ BNE .loop_str
+ .string_too_long:
+ .string_unterminated:
+ RTS
+ .str_done:
+ INY
+ CPY new_word_len
+ BNE .str_return
+ LDA #$2
+ STA new_stack_item
+ .str_return:
+ RTS
+ .not_string:
+ CMP #$24
+ BNE .not_hex
+ LDA new_word_len
+ CMP #$1
+ BEQ .hex_error
+ CMP #$6
+ BCS .hex_error
+ DEC new_word_len
+ LDY #$0
+ .loop_hex:
+ LDA new_word_buff+$1,Y
+ CMP #$30
+ BCC .hex_error
+ CMP #$3A
+ BCS .not_digit
+ SEC
+ SBC #$30
+ JSR .hex_rotate
+ ORA new_stack_item+$1
+ STA new_stack_item+$1
+ JMP .hex_char_next
+ .not_digit:
+ CMP #$41
+ BCC .hex_error
+ CMP #$47
+ BCS .hex_error
+ SEC
+ SBC #$37
+ JSR .hex_rotate
+ ORA new_stack_item+$1
+ STA new_stack_item+$1
+ .hex_char_next:
+ INY
+ CPY new_word_len
+ BEQ .hex_done
+ CPY #$4
+ BNE .loop_hex
+ .hex_done:
+ LDA #$3
+ STA new_stack_item
+ RTS
+ .hex_error:
+ RTS
+ .not_hex:
+ BRK
+ BRK
+ LDA #$6
+ STA $3 ;index
+ LDA #$0
+ STA $4 ;which_digit
+ STA $5 ;negative
+ STA $6 ;exp_offset
+ STA $7 ;digit_count
+ LDA new_word_buff
+ CMP #$2D
+ BNE .float_no_neg
+ LDA #$1
+ STA $5 ;negative
+ INY
+ .float_no_neg:
+ .loop_float:
+ LDA new_word_buff,Y
+ JSR .digit
+ BCC .float_not_digit
+ PHA
+ LDA $7 ;digit_count
+ CMP #$C
+ BNE .digit_ok
+ PLA
+ RTS
+ .digit_ok:
+ PLA
+ JSR .add_digit
+ INY
+ CPY new_word_len
+ BEQ .float_done
+ LDA $7 ;digit_count
+ BNE .loop_float
+ .float_not_digit:
+ .float_done:
+ RTS
+ .hex_rotate:
+ STY $2 ;y_buff
+ LDY #$4
+ .hex_rot_loop:
+ ASL new_stack_item+$1
+ ROL new_stack_item+$2
+ DEY
+ BNE .hex_rot_loop
+ LDY $2 ;y_buff
+ RTS
+ .digit:
+ CMP #$30
+ BCC .is_digit_no
+ CMP #$3A
+ BCS .is_digit_no
+ SEC
+ SBC #$30
+ RTS
+ .is_digit_no:
+ CLC
+ RTS
+ .add_digit:
+ PHA
+ STY $2 ;y_buff
+ LDY $3 ;index
+ INC $7 ;digit_count
+ LDA $4 ;which_digit
+ EOR #$FF
+ STA $4 ;which_digit
+ BEQ .second_digit
+ PLA
+ ASL
+ ASL
+ ASL
+ ASL
+ STA new_stack_item,Y
+ LDY $2 ;y_buff
+ RTS
+ .second_digit:
+ PLA
+ ORA new_stack_item,Y
+ STA new_stack_item,Y
+ DEC $3 ;index
+ LDY $2 ;y_buff
+ RTS
+ RTS
+ 
+FORTH_WORDS:
+ 
+WORD_DUP:
+ FCB $3,"DUP"
+ FDB WORD_SWAP
+ FCB $1
+ FCB $2
+ 
+CODE_DUP:
+ LDA #$5
+ RTS
+ 
+WORD_SWAP:
+ FCB $4,"SWAP"
+ FDB WORD_DROP
+ FCB $2
+ FCB $4
+ 
+CODE_SWAP:
+ LDA #$6
+ RTS
+ 
+WORD_DROP:
+ FCB $4,"DROP"
+ FDB WORD_OVER
+ FCB $1
+ FCB $6
+ 
+CODE_DROP:
+ LDA #$7
+ RTS
+ 
+WORD_OVER:
+ FCB $4,"OVER"
+ FDB $0
+ FCB $2
+ FCB $8
+ 
+CODE_OVER:
+ LDA #$8
+ RTS
+ 
 MemCopy:
  LDY #$0
  .loop:
@@ -556,7 +815,8 @@ MemCopy:
  RTS
  
 special_chars:
- FCB " e."
+ FCB 'e',$22
+ FCB " .$"
  
 ReadLine:
  LDA #$0
@@ -565,13 +825,13 @@ ReadLine:
  STA screen_ptr
  LDA #$AC
  STA screen_ptr+$1
- JMP .._884.str_skip
- .._884.str_addr:
+ JMP .._909.str_skip
+ .._909.str_addr:
  FCB "a               ",$0
- .._884.str_skip:
- LDA # (.._884.str_addr) # $100
+ .._909.str_skip:
+ LDA # (.._909.str_addr) # $100
  STA $6 ;LCD_print.source
- LDA # (.._884.str_addr)/$100
+ LDA # (.._909.str_addr)/$100
  STA $7 ;LCD_print.source
  JSR LCD_print
  LDA $FFE6
@@ -629,7 +889,7 @@ ReadLine:
  JMP .key_done
  .special_next:
  INY
- CPY #$3
+ CPY #$5
  BNE .special_loop
  CMP #$30
  BCC .not_num
@@ -736,20 +996,14 @@ main:
  JSR setup
  JSR ReadLine
  JSR LineWord
+ JSR FindWord
+ LDA ret_val
+ ORA ret_val+$1
+ BEQ .not_found
  BRK
  BRK
- JSR LineWord
- BRK
- BRK
- JSR LineWord
- BRK
- BRK
- JSR LineWord
- BRK
- BRK
- JSR LineWord
- BRK
- BRK
+ .not_found:
+ JSR CheckData
  BRK
  BRK
  RTS

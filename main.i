@@ -83,13 +83,19 @@ CHAR_SCREEN_WIDTH = 16
 CHAR_SCREEN_HEIGHT = 16
 
 
+CHAR_EXP = 'e'
+CHAR_QUOTE = 34
+
+
+
 OBJ_FLOAT = 1
 OBJ_STR = 2
 OBJ_HEX = 3
+OBJ_ERROR = 4
 
 
 BUFF_SIZE = 64
-WORD_MAX_SIZE = 18
+WORD_MAX_SIZE = 19
 INPUT_Y = (SCREEN_ADDRESS / 256)+CHAR_HEIGHT*6+12
 
 
@@ -98,12 +104,25 @@ KEY_ENTER = 13
 KEY_ESCAPE = 27
 
 
-MODE_NONE = 0
-MODE_STRING = 1
+MODE_NONE = 1
+MODE_DIGITS_PRE = 2
+MODE_DIGITS_POST = 3
+MODE_E_FOUND = 4
+MODE_E_DIGITS = 5
 
 
 ERROR_NONE = 0
 ERROR_WORD_TOO_LONG = 1
+
+ERROR_STRING = 2
+
+
+
+
+
+FORTH_1ITEM = 1
+FORTH_2ITEMS = 2
+FORTH_3ITEMS = 3
 %line 21+1 main.asm
 
 
@@ -335,10 +354,11 @@ LOCALS_END set $1F
  DFS 2
 %line 53+1 main.asm
 
+
  screen_ptr:
-%line 54+0 main.asm
+%line 55+0 main.asm
  DFS 2
-%line 55+1 main.asm
+%line 56+1 main.asm
 
  R0: DFS 9
  R1: DFS 9
@@ -369,9 +389,11 @@ STACK_END:
 
  new_word_len: DFS 1
  new_word_buff: DFS WORD_MAX_SIZE
+ new_stack_item: DFS 9
 
 
-%line 72+1 main.asm
+
+%line 73+1 main.asm
 
 
 
@@ -589,11 +611,11 @@ CHAR_ARROW = 'a'
 
  FCB $8, $18, $38, $78, $38, $18, $8, $0
 
- FCB $8, $18, $38, $78, $38, $18, $8, $0
+ FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
- FCB $8, $18, $38, $78, $38, $18, $8, $0
+ FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
- FCB $8, $18, $38, $78, $38, $18, $8, $0
+ FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
 
  FCB $0, $0, $EE, $88, $EE, $88, $EE, $0
@@ -602,7 +624,7 @@ CHAR_ARROW = 'a'
 
 
 
-%line 82+1 main.asm
+%line 83+1 main.asm
 
 
 
@@ -961,7 +983,7 @@ CHAR_ARROW = 'a'
  .done:
  RTS
 
-%line 85+1 main.asm
+%line 86+1 main.asm
 
 
 %line 1+1 math.asm
@@ -994,7 +1016,7 @@ CHAR_ARROW = 'a'
  RTS
 
 
-%line 87+1 main.asm
+%line 88+1 main.asm
 
 %line 1+1 output.asm
 
@@ -2924,7 +2946,7 @@ CHAR_ARROW = 'a'
  BNE .loop_line
  RTS
 
-%line 88+1 main.asm
+%line 89+1 main.asm
 
 %line 1+1 forth.asm
 
@@ -2939,9 +2961,6 @@ CHAR_ARROW = 'a'
 
  LineWord:
 
- mode set ASSIGN_LOCAL_BYTE
-
-
  LDA #0
  STA new_word_len
 
@@ -2951,9 +2970,6 @@ CHAR_ARROW = 'a'
 
  RTS
  .chars_left:
-
- LDA #MODE_NONE
- STA mode
 
  .loop:
  LDY input_buff_begin
@@ -2987,7 +3003,362 @@ CHAR_ARROW = 'a'
  RTS
  RTS
 
-%line 89+1 main.asm
+ FindWord:
+
+
+%line 57+0 forth.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(FORTH_WORDS) % 256
+ STA ret_val
+ LDA #(FORTH_WORDS) / 256
+ STA ret_val+1
+
+%line 58+1 forth.asm
+ .loop:
+ LDY #0
+ LDA (ret_val),Y
+ CMP new_word_len
+ BNE .loop_next
+ INY
+ .str_loop:
+ LDA (ret_val),Y
+ CMP new_word_buff-1,Y
+ BNE .no_match
+ CPY new_word_len
+ BEQ .word_found
+ INY
+ JMP .str_loop
+ .no_match:
+ .loop_next:
+ LDY #0
+ LDA (ret_val),Y
+ TAY
+ INY
+ LDA (ret_val),Y
+ PHA
+ INY
+ LDA (ret_val),Y
+ STA ret_val+1
+ PLA
+ STA ret_val
+
+
+ LDY #0
+ LDA (ret_val),Y
+ INY
+ ORA (ret_val),Y
+ BNE .loop
+
+ STA ret_val
+ STA ret_val+1
+ .word_found:
+
+
+
+
+
+
+
+
+
+
+
+
+
+ RTS
+
+ CheckData:
+
+ input_mode set ASSIGN_LOCAL_BYTE
+ y_buff set ASSIGN_LOCAL_BYTE
+ index set ASSIGN_LOCAL_BYTE
+ which_digit set ASSIGN_LOCAL_BYTE
+ negative set ASSIGN_LOCAL_BYTE
+ exp_offset set ASSIGN_LOCAL_BYTE
+ digit_count set ASSIGN_LOCAL_BYTE
+
+ LDA #OBJ_ERROR
+ STA new_stack_item
+
+ LDA new_word_len
+ BNE .not_zero_len
+
+ RTS
+ .not_zero_len:
+
+ LDY #8
+ LDA #0
+ .zero_loop:
+ STA new_stack_item,Y
+ DEY
+ BNE .zero_loop
+
+ LDY #0
+ LDA new_word_buff
+ CMP #'"'
+ BNE .not_string
+
+ LDA new_word_len
+ CMP #1
+ BNE .not_single_quote
+
+ RTS
+ .not_single_quote:
+
+ DEC new_word_len
+ .loop_str:
+ LDA new_word_buff+1,y
+ CMP #'"'
+ BEQ .str_done
+ STA new_stack_item+1,Y
+ INY
+ CPY #9
+ BEQ .string_too_long
+ CPY new_word_len
+ BEQ .string_unterminated
+ BNE .loop_str
+ .string_too_long:
+
+ .string_unterminated:
+
+
+
+
+
+
+
+ RTS
+ .str_done:
+
+ INY
+ CPY new_word_len
+ BNE .str_return
+
+
+ LDA #OBJ_STR
+ STA new_stack_item
+ .str_return:
+ RTS
+ .not_string:
+
+ CMP #'$'
+ BNE .not_hex
+
+
+ LDA new_word_len
+
+ CMP #1
+ BEQ .hex_error
+
+ CMP #6
+ BCS .hex_error
+
+
+ DEC new_word_len
+ LDY #0
+ .loop_hex:
+ LDA new_word_buff+1,Y
+ CMP #'0'
+ BCC .hex_error
+ CMP #'9'+1
+ BCS .not_digit
+ SEC
+ SBC #'0'
+ JSR .hex_rotate
+ ORA new_stack_item+1
+ STA new_stack_item+1
+ JMP .hex_char_next
+ .not_digit:
+
+ CMP #'A'
+ BCC .hex_error
+ CMP #'F'+1
+ BCS .hex_error
+ SEC
+ SBC #'A'-10
+ JSR .hex_rotate
+ ORA new_stack_item+1
+ STA new_stack_item+1
+
+ .hex_char_next:
+ INY
+ CPY new_word_len
+ BEQ .hex_done
+ CPY #4
+ BNE .loop_hex
+
+
+ .hex_done:
+ LDA #OBJ_HEX
+ STA new_stack_item
+ RTS
+ .hex_error:
+ RTS
+ .not_hex:
+
+ BRK
+%line 240+0 forth.asm
+ BRK
+%line 241+1 forth.asm
+
+
+ LDA #6
+ STA index
+ LDA #0
+ STA which_digit
+ STA negative
+ STA exp_offset
+ STA digit_count
+
+
+
+
+ LDA new_word_buff
+ CMP #'-'
+ BNE .float_no_neg
+
+ LDA #1
+ STA negative
+ INY
+ .float_no_neg:
+
+ .loop_float:
+ LDA new_word_buff,Y
+ JSR .digit
+ BCC .float_not_digit
+ PHA
+ LDA digit_count
+ CMP #12
+ BNE .digit_ok
+
+ PLA
+ RTS
+ .digit_ok:
+ PLA
+ JSR .add_digit
+ INY
+ CPY new_word_len
+ BEQ .float_done
+ LDA digit_count
+ BNE .loop_float
+ .float_not_digit:
+
+
+ .float_done:
+
+ RTS
+
+
+ .hex_rotate:
+ STY y_buff
+ LDY #4
+ .hex_rot_loop:
+ ASL new_stack_item+1
+ ROL new_stack_item+2
+ DEY
+ BNE .hex_rot_loop
+ LDY y_buff
+ RTS
+
+
+ .digit:
+ CMP #'0'
+ BCC .is_digit_no
+ CMP #'9'+1
+ BCS .is_digit_no
+ SEC
+ SBC #'0'
+ RTS
+ .is_digit_no:
+ CLC
+ RTS
+
+ .add_digit:
+ PHA
+ STY y_buff
+ LDY index
+ INC digit_count
+ LDA which_digit
+ EOR #$FF
+ STA which_digit
+ BEQ .second_digit
+
+ PLA
+ ASL
+ ASL
+ ASL
+ ASL
+ STA new_stack_item,Y
+ LDY y_buff
+ RTS
+ .second_digit:
+ PLA
+ ORA new_stack_item,Y
+ STA new_stack_item,Y
+ DEC index
+ LDY y_buff
+ RTS
+
+ RTS
+
+
+
+
+ FORTH_WORDS:
+
+ WORD_DUP:
+ FCB 3, "DUP"
+ FDB WORD_SWAP
+ FCB FORTH_1ITEM
+ FCB 2
+ CODE_DUP:
+ LDA #5
+ RTS
+
+ WORD_SWAP:
+ FCB 4, "SWAP"
+ FDB WORD_DROP
+ FCB FORTH_2ITEMS
+ FCB 4
+ CODE_SWAP:
+ LDA #6
+ RTS
+
+ WORD_DROP:
+ FCB 4, "DROP"
+ FDB WORD_OVER
+ FCB FORTH_1ITEM
+ FCB 6
+ CODE_DROP:
+ LDA #7
+ RTS
+
+ WORD_OVER:
+ FCB 4, "OVER"
+ FDB 0
+ FCB FORTH_2ITEMS
+ FCB 8
+ CODE_OVER:
+ LDA #8
+ RTS
+
+%line 90+1 main.asm
 
 
 
@@ -2996,15 +3367,15 @@ CHAR_ARROW = 'a'
  MemCopy:
 
  source set ASSIGN_LOCAL_WORD
-%line 96+0 main.asm
+%line 97+0 main.asm
  MemCopy.a0 set MemCopy.source
  dest set ASSIGN_LOCAL_WORD
  MemCopy.a1 set MemCopy.dest
-%line 97+1 main.asm
- count set ASSIGN_LOCAL_BYTE
-%line 97+0 main.asm
- MemCopy.a2 set MemCopy.count
 %line 98+1 main.asm
+ count set ASSIGN_LOCAL_BYTE
+%line 98+0 main.asm
+ MemCopy.a2 set MemCopy.count
+%line 99+1 main.asm
 
 
  LDY #0
@@ -3016,21 +3387,23 @@ CHAR_ARROW = 'a'
  BNE .loop
  RTS
 
+SPECIAL_CHARS_LEN = 5
  special_chars:
- FCB " e."
+ FCB CHAR_EXP, CHAR_QUOTE
+ FCB " .$"
 
 
  ReadLine:
 
  cursor set ASSIGN_LOCAL_BYTE
-%line 115+0 main.asm
+%line 118+0 main.asm
  cursor_timer set ASSIGN_LOCAL_BYTE
-%line 116+1 main.asm
+%line 119+1 main.asm
  arg set ASSIGN_LOCAL_BYTE
  index set ASSIGN_LOCAL_BYTE
-%line 117+0 main.asm
+%line 120+0 main.asm
  str_index set ASSIGN_LOCAL_BYTE
-%line 118+1 main.asm
+%line 121+1 main.asm
 
 
  LDA #0
@@ -3040,7 +3413,7 @@ CHAR_ARROW = 'a'
  LDA #INPUT_Y
  STA screen_ptr+1
 
-%line 126+0 main.asm
+%line 129+0 main.asm
 
 
 
@@ -3056,10 +3429,10 @@ CHAR_ARROW = 'a'
 
 
 
- JMP ..@884.str_skip
- ..@884.str_addr:
+ JMP ..@909.str_skip
+ ..@909.str_addr:
  FCB "a               ",0
- ..@884.str_skip:
+ ..@909.str_skip:
 
 
 
@@ -3108,9 +3481,9 @@ CHAR_ARROW = 'a'
 
 
 
- LDA #(..@884.str_addr) % 256
+ LDA #(..@909.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@884.str_addr) / 256
+ LDA #(..@909.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -3123,7 +3496,7 @@ CHAR_ARROW = 'a'
 
 
  JSR LCD_print
-%line 127+1 main.asm
+%line 130+1 main.asm
  LDA TIMER_S
  STA cursor_timer
 
@@ -3156,7 +3529,7 @@ CHAR_ARROW = 'a'
  CMP #CHAR_SCREEN_WIDTH
  BCS .backspace_scroll
 
-%line 158+0 main.asm
+%line 161+0 main.asm
 
 
 
@@ -3228,14 +3601,14 @@ CHAR_ARROW = 'a'
 
 
  JSR LCD_char
-%line 159+1 main.asm
+%line 162+1 main.asm
  LDA screen_ptr
  SEC
  SBC #CHAR_WIDTH*2
  STA screen_ptr
  PHA
 
-%line 164+0 main.asm
+%line 167+0 main.asm
 
 
 
@@ -3307,7 +3680,7 @@ CHAR_ARROW = 'a'
 
 
  JSR LCD_char
-%line 165+1 main.asm
+%line 168+1 main.asm
  PLA
  STA screen_ptr
  JMP .draw_done
@@ -3329,7 +3702,7 @@ CHAR_ARROW = 'a'
  JMP .key_done
  .special_next:
  INY
- CPY #3
+ CPY #SPECIAL_CHARS_LEN
  BNE .special_loop
 
 
@@ -3371,90 +3744,6 @@ CHAR_ARROW = 'a'
  INC index
  CPY #CHAR_SCREEN_WIDTH-1
  BCS .scroll_buffer
-
-%line 228+0 main.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA arg
- STA LCD_char.a0
-
-
-
-
-
-
-
-
-
- JSR LCD_char
-%line 229+1 main.asm
- LDA screen_ptr
- PHA
 
 %line 231+0 main.asm
 
@@ -3515,6 +3804,90 @@ CHAR_ARROW = 'a'
 
 
 
+
+
+
+
+
+
+
+
+
+ LDA arg
+ STA LCD_char.a0
+
+
+
+
+
+
+
+
+
+ JSR LCD_char
+%line 232+1 main.asm
+ LDA screen_ptr
+ PHA
+
+%line 234+0 main.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  LDA #(CHAR_ARROW) % 256
  STA LCD_char.a0
 
@@ -3528,7 +3901,7 @@ CHAR_ARROW = 'a'
 
 
  JSR LCD_char
-%line 232+1 main.asm
+%line 235+1 main.asm
  PLA
  STA screen_ptr
  JMP .draw_done
@@ -3545,7 +3918,7 @@ CHAR_ARROW = 'a'
  LDA input_buff,Y
  STA arg
 
-%line 247+0 main.asm
+%line 250+0 main.asm
 
 
 
@@ -3625,14 +3998,14 @@ CHAR_ARROW = 'a'
 
 
  JSR LCD_char
-%line 248+1 main.asm
+%line 251+1 main.asm
  LDA index
  CMP str_index
  BNE .scroll_loop
  LDA screen_ptr
  PHA
 
-%line 253+0 main.asm
+%line 256+0 main.asm
 
 
 
@@ -3704,7 +4077,7 @@ CHAR_ARROW = 'a'
 
 
  JSR LCD_char
-%line 254+1 main.asm
+%line 257+1 main.asm
  PLA
  STA screen_ptr
  .draw_done:
@@ -3729,7 +4102,7 @@ CHAR_ARROW = 'a'
  .draw:
  STA arg
 
-%line 277+0 main.asm
+%line 280+0 main.asm
 
 
 
@@ -3809,7 +4182,7 @@ CHAR_ARROW = 'a'
 
 
  JSR LCD_char
-%line 278+1 main.asm
+%line 281+1 main.asm
  LDA screen_ptr
  SEC
  SBC #CHAR_WIDTH
@@ -3822,9 +4195,9 @@ CHAR_ARROW = 'a'
 
 
  BEGIN_FUNC set main
-%line 289+0 main.asm
+%line 292+0 main.asm
  main:
-%line 291+1 main.asm
+%line 294+1 main.asm
  counter set ASSIGN_LOCAL_BYTE
 
 
@@ -3835,7 +4208,7 @@ CHAR_ARROW = 'a'
  TXS
 
 
-%line 300+0 main.asm
+%line 303+0 main.asm
 
 
 
@@ -3846,10 +4219,10 @@ CHAR_ARROW = 'a'
 
 
  JSR setup
-%line 301+1 main.asm
+%line 304+1 main.asm
 
 
-%line 302+0 main.asm
+%line 305+0 main.asm
 
 
 
@@ -3860,24 +4233,6 @@ CHAR_ARROW = 'a'
 
 
  JSR ReadLine
-%line 303+1 main.asm
-
-
-%line 304+0 main.asm
-
-
-
-
-
-
-
-
-
- JSR LineWord
-%line 305+1 main.asm
- BRK
-%line 305+0 main.asm
- BRK
 %line 306+1 main.asm
 
 %line 306+0 main.asm
@@ -3892,66 +4247,48 @@ CHAR_ARROW = 'a'
 
  JSR LineWord
 %line 307+1 main.asm
- BRK
+
 %line 307+0 main.asm
- BRK
+
+
+
+
+
+
+
+
+
+ JSR FindWord
 %line 308+1 main.asm
+ LDA ret_val
+ ORA ret_val+1
+ BEQ .not_found
 
-%line 308+0 main.asm
-
-
-
-
-
-
-
-
-
- JSR LineWord
-%line 309+1 main.asm
  BRK
-%line 309+0 main.asm
- BRK
-%line 310+1 main.asm
-
-%line 310+0 main.asm
-
-
-
-
-
-
-
-
-
- JSR LineWord
-%line 311+1 main.asm
- BRK
-%line 311+0 main.asm
- BRK
-%line 312+1 main.asm
-
 %line 312+0 main.asm
-
-
-
-
-
-
-
-
-
- JSR LineWord
+ BRK
 %line 313+1 main.asm
- BRK
-%line 313+0 main.asm
- BRK
-%line 314+1 main.asm
+ .not_found:
+
+
+%line 315+0 main.asm
+
+
+
+
+
+
+
+
+
+ JSR CheckData
+%line 316+1 main.asm
+
 
  BRK
-%line 315+0 main.asm
+%line 318+0 main.asm
  BRK
-%line 316+1 main.asm
+%line 319+1 main.asm
  RTS
 
 

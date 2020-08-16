@@ -203,14 +203,14 @@ CHAR_ARROW = 'a'
   ;FCB $4, $C, $1C, $3C, $1C, $C, $4, $0
   ;shifted left one space
   FCB $8, $18, $38, $78, $38, $18, $8, $0
+
+  FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   
-  FCB $8, $18, $38, $78, $38, $18, $8, $0
+  FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   
-  FCB $8, $18, $38, $78, $38, $18, $8, $0
+  FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   
-  FCB $8, $18, $38, $78, $38, $18, $8, $0
-  
- ;e - exponent
+;e - exponent
   FCB $0, $0, $EE, $88, $EE, $88, $EE, $0
   
   
