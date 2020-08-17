@@ -130,8 +130,8 @@ font_table:
  FCB $0,$0,$0,$0,$0,$0,$0,$FF
  FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  FCB $8,$18,$38,$78,$38,$18,$8,$0
- FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
- FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ FCB $0,$0,$0,$0,$FF,$FF,$FF,$FF
+ FCB $FF,$FF,$FF,$FF,$0,$0,$0,$0
  FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  FCB $0,$0,$EE,$88,$EE,$88,$EE,$0
  
@@ -143,7 +143,10 @@ setup:
  STA $FFE1
  LDA #$5
  STA $FFE2
- JSR DrawStack
+ RTS
+ 
+ReadKey:
+ LDA $FFE4
  RTS
  
 LCD_clrscr:
@@ -169,49 +172,50 @@ LCD_clrscr:
  RTS
  
 LCD_char:
- LDA $A ;c_out
+ LDA $B ;c_out
  CMP #$20
- BCC .._92.skip
+ BCC .._96.skip
  JMP .if0
- .._92.skip:
+ .._96.skip:
  RTS
  .if0:
  CMP #$66
- BCS .._97.skip
+ BCS .._101.skip
  JMP .if1
- .._97.skip:
+ .._101.skip:
  RTS
  .if1:
  SEC
  SBC #$20
- STA $B ;pixel_ptr
+ STA $D ;pixel_ptr
  LDA #$0
- STA $C ;pixel_ptr
- ASL $B ;pixel_ptr
- ASL $B ;pixel_ptr
- ROL $C ;pixel_ptr
- ASL $B ;pixel_ptr
- ROL $C ;pixel_ptr
+ STA $E ;pixel_ptr
+ ASL $D ;pixel_ptr
+ ASL $D ;pixel_ptr
+ ROL $E ;pixel_ptr
+ ASL $D ;pixel_ptr
+ ROL $E ;pixel_ptr
  LDA #font_table # $100
- ADC $B ;pixel_ptr
- STA $B ;pixel_ptr
+ ADC $D ;pixel_ptr
+ STA $D ;pixel_ptr
  LDA #font_table/$100
- ADC $C ;pixel_ptr
- STA $C ;pixel_ptr
+ ADC $E ;pixel_ptr
+ STA $E ;pixel_ptr
  LDA #$0
- STA $D ;pixel_index
+ STA $F ;pixel_index
  LDA #$8
- STA $F ;lc1
+ STA $11 ;lc1
  .loop:
  LDA #$8
- STA $10 ;lc2
- LDY $D ;pixel_index
- INC $D ;pixel_index
- LDA ($B),Y ;pixel_ptr
- STA $E ;pixel
+ STA $12 ;lc2
+ LDY $F ;pixel_index
+ INC $F ;pixel_index
+ LDA ($D),Y ;pixel_ptr
+ EOR $C ;inverted
+ STA $10 ;pixel
  LDY #$0
  .loop.inner:
- ROL $E ;pixel
+ ROL $10 ;pixel
  LDA #$0
  BCS .color
  LDA #$2A
@@ -224,11 +228,11 @@ LCD_char:
  DEC screen_ptr+$1
  STA (screen_ptr),Y
  INY
- DEC $10 ;lc2
+ DEC $12 ;lc2
  BNE .loop.inner
  INC screen_ptr+$1
  INC screen_ptr+$1
- DEC $F ;lc1
+ DEC $11 ;lc1
  BNE .loop
  CLC
  LDA screen_ptr
@@ -242,16 +246,18 @@ LCD_char:
  
 LCD_print:
  LDA #$0
- STA $8 ;index
+ STA $9 ;index
  .loop:
- LDY $8 ;index
+ LDY $9 ;index
  LDA ($6),Y ;source
  BEQ .done
- STA $9 ;arg
- LDA $9 ;arg
- STA $A ;LCD_char.c_out
+ STA $A ;arg
+ LDA $A ;arg
+ STA $B ;LCD_char.c_out
+ LDA $8 ;inverted
+ STA $C ;LCD_char.inverted
  JSR LCD_char
- INC $8 ;index
+ INC $9 ;index
  JMP .loop
  .done:
  RTS
@@ -280,7 +286,7 @@ DigitHigh:
  ADC #$30
  STA dummy
  LDA dummy
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  RTS
  
@@ -291,7 +297,7 @@ DigitLow:
  ADC #$30
  STA dummy
  LDA dummy
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  RTS
  
@@ -314,7 +320,7 @@ DrawFloat:
  JSR BCD_Reverse
  .positive:
  LDA dummy
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  LDY #$6
  LDA R0,Y
@@ -323,7 +329,7 @@ DrawFloat:
  STA dummy
  JSR DigitHigh
  LDA #$2E
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  LDA dummy
  STA dummy
@@ -361,7 +367,7 @@ DrawFloat:
  JSR BCD_Reverse
  .positive_e:
  LDA dummy
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  LDY #$8
  LDA R0,Y
@@ -398,7 +404,7 @@ HexHigh:
  STA dummy
  .done:
  LDA dummy
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  RTS
  
@@ -417,19 +423,21 @@ HexLow:
  STA dummy
  .done:
  LDA dummy
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  RTS
  
 DrawHex:
- JMP .._638.str_skip
- .._638.str_addr:
+ JMP .._659.str_skip
+ .._659.str_addr:
  FCB "$",$0
- .._638.str_skip:
- LDA # (.._638.str_addr) # $100
+ .._659.str_skip:
+ LDA # (.._659.str_addr) # $100
  STA $6 ;LCD_print.source
- LDA # (.._638.str_addr)/$100
+ LDA # (.._659.str_addr)/$100
  STA $7 ;LCD_print.source
+ LDA #$0
+ STA $8 ;LCD_print.inverted
  JSR LCD_print
  LDY #$8
  LDA (dummy),Y
@@ -453,14 +461,16 @@ DrawHex:
  
 DrawStack:
  JSR LCD_clrscr
- JMP .._760.str_skip
- .._760.str_addr:
+ JMP .._791.str_skip
+ .._791.str_addr:
  FCB "RAD",$0
- .._760.str_skip:
- LDA # (.._760.str_addr) # $100
+ .._791.str_skip:
+ LDA # (.._791.str_addr) # $100
  STA $6 ;LCD_print.source
- LDA # (.._760.str_addr)/$100
+ LDA # (.._791.str_addr)/$100
  STA $7 ;LCD_print.source
+ LDA #$0
+ STA $8 ;LCD_print.inverted
  JSR LCD_print
  LDA #$35
  STA $2 ;character
@@ -474,10 +484,10 @@ DrawStack:
  ADC #$10
  STA screen_ptr+$1
  LDA $2 ;character
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  LDA #$3A
- STA $A ;LCD_char.c_out
+ STA $B ;LCD_char.c_out
  JSR LCD_char
  DEC $2 ;character
  LDA $1 ;counter
@@ -509,7 +519,187 @@ InitForth:
  STA new_word_len
  RTS
  
+special_chars:
+ FCB 'e',$22
+ FCB " .$-"
+ 
+ReadLine:
+ LDA #$0
+ STA $1 ;cursor
+ STA $4 ;index
+ STA screen_ptr
+ LDA #$AC
+ STA screen_ptr+$1
+ JMP .._904.str_skip
+ .._904.str_addr:
+ FCB "a               ",$0
+ .._904.str_skip:
+ LDA # (.._904.str_addr) # $100
+ STA $6 ;LCD_print.source
+ LDA # (.._904.str_addr)/$100
+ STA $7 ;LCD_print.source
+ LDA #$0
+ STA $8 ;LCD_print.inverted
+ JSR LCD_print
+ LDA $FFE6
+ STA $2 ;cursor_timer
+ .loop:
+ LDA #$0
+ STA $3 ;arg
+ JSR ReadKey
+ BNE .key_read
+ JMP .no_key
+ .key_read:
+ CMP #$D
+ BNE .not_enter
+ LDA $4 ;index
+ BEQ .loop
+ LDA #$0
+ STA input_buff_begin
+ LDA $4 ;index
+ STA input_buff_end
+ RTS
+ .not_enter:
+ CMP #$8
+ BNE .not_backspace
+ LDA $4 ;index
+ BEQ .backspace_done
+ DEC $4 ;index
+ CMP #$10
+ BCS .backspace_scroll
+ LDA #$20
+ STA $B ;LCD_char.c_out
+ JSR LCD_char
+ LDA screen_ptr
+ SEC
+ SBC #$20
+ STA screen_ptr
+ PHA
+ LDA #$61
+ STA $B ;LCD_char.c_out
+ JSR LCD_char
+ PLA
+ STA screen_ptr
+ JMP .draw_done
+ .backspace_scroll:
+ LDY $4 ;index
+ DEY
+ JMP .scroll_buffer
+ .backspace_done:
+ JMP .no_key
+ .not_backspace:
+ LDY #$0
+ .special_loop:
+ CMP special_chars,Y
+ BNE .special_next
+ STA $3 ;arg
+ JMP .key_done
+ .special_next:
+ INY
+ CPY #$6
+ BNE .special_loop
+ CMP #$30
+ BCC .not_num
+ CMP #$3A
+ BCS .not_num
+ STA $3 ;arg
+ JMP .key_done
+ .not_num:
+ CMP #$41
+ BCC .not_upper
+ CMP #$5B
+ BCS .not_upper
+ STA $3 ;arg
+ JMP .key_done
+ .not_upper:
+ CMP #$61
+ BCC .not_lower
+ CMP #$7B
+ BCS .not_lower
+ SEC
+ SBC #$20
+ STA $3 ;arg
+ .not_lower:
+ .key_done:
+ LDA $3 ;arg
+ BEQ .not_valid
+ LDY $4 ;index
+ CPY #$40
+ BCS .buffer_full
+ STA input_buff,Y
+ INC $4 ;index
+ CPY #$F
+ BCS .scroll_buffer
+ LDA $3 ;arg
+ STA $B ;LCD_char.c_out
+ JSR LCD_char
+ LDA screen_ptr
+ PHA
+ LDA #$61
+ STA $B ;LCD_char.c_out
+ JSR LCD_char
+ PLA
+ STA screen_ptr
+ JMP .draw_done
+ .scroll_buffer:
+ LDA #$0
+ STA screen_ptr
+ TYA
+ SEC
+ SBC #$E
+ STA $5 ;str_index
+ .scroll_loop:
+ LDY $5 ;str_index
+ INC $5 ;str_index
+ LDA input_buff,Y
+ STA $3 ;arg
+ LDA $3 ;arg
+ STA $B ;LCD_char.c_out
+ JSR LCD_char
+ LDA $4 ;index
+ CMP $5 ;str_index
+ BNE .scroll_loop
+ LDA screen_ptr
+ PHA
+ LDA #$61
+ STA $B ;LCD_char.c_out
+ JSR LCD_char
+ PLA
+ STA screen_ptr
+ .draw_done:
+ .buffer_full:
+ .not_valid:
+ .no_key:
+ LDA $FFE6
+ CMP $2 ;cursor_timer
+ BEQ .cursor_done
+ STA $2 ;cursor_timer
+ LDA $1 ;cursor
+ BEQ .draw_blank
+ LDA #$0
+ STA $1 ;cursor
+ LDA #$20
+ JMP .draw
+ .draw_blank:
+ LDA #$FF
+ STA $1 ;cursor
+ LDA #$61
+ .draw:
+ STA $3 ;arg
+ LDA $3 ;arg
+ STA $B ;LCD_char.c_out
+ JSR LCD_char
+ LDA screen_ptr
+ SEC
+ SBC #$10
+ STA screen_ptr
+ .cursor_done:
+ JMP .loop
+ RTS
+ 
 LineWord:
+ LDA #$0
+ STA global_error
  LDA #$0
  STA new_word_len
  LDY input_buff_begin
@@ -678,19 +868,21 @@ CheckData:
  .hex_error:
  RTS
  .not_hex:
- BRK
- BRK
  LDA #$6
  STA $3 ;index
  LDA #$0
  STA $4 ;which_digit
  STA $5 ;negative
- STA $6 ;exp_offset
- STA $7 ;digit_count
+ STA $6 ;exp_negative
+ STA $7 ;exp_count
+ STA $B ;digit_count
+ STA $A ;nonzero_found
+ STA $9 ;dec_found
+ STA $8 ;exp_found
  LDA new_word_buff
  CMP #$2D
  BNE .float_no_neg
- LDA #$1
+ LDA #$FF
  STA $5 ;negative
  INY
  .float_no_neg:
@@ -699,21 +891,109 @@ CheckData:
  JSR .digit
  BCC .float_not_digit
  PHA
- LDA $7 ;digit_count
+ LDA $A ;nonzero_found
+ BNE .digit_good
+ PLA
+ PHA
+ BEQ .digit_zero
+ LDA #$FF
+ STA $A ;nonzero_found
+ BNE .digit_good
+ .digit_zero:
+ PLA
+ LDA $8 ;exp_found
+ BNE .float_next
+ LDA $9 ;dec_found
+ BEQ .float_next
+ DEC $7 ;exp_count
+ BNE .float_next
+ .digit_good:
+ LDA $8 ;exp_found
+ BNE .exp_digit
+ LDA $B ;digit_count
  CMP #$C
  BNE .digit_ok
  PLA
  RTS
  .digit_ok:
+ LDA $9 ;dec_found
+ BNE .no_dec_yet
+ INC $7 ;exp_count
+ .no_dec_yet:
  PLA
  JSR .add_digit
+ .float_next:
  INY
  CPY new_word_len
  BEQ .float_done
- LDA $7 ;digit_count
- BNE .loop_float
+ JMP .loop_float
+ .exp_digit:
+ LDA $B ;digit_count
+ CMP #$3
+ BNE .exp_digit_ok
+ PLA
+ RTS
+ .exp_digit_ok:
+ PLA
+ STY $2 ;y_buff
+ LDY #$4
+ .exp_loop:
+ ASL new_stack_item+$7
+ ROL new_stack_item+$8
+ DEY
+ BNE .exp_loop
+ LDY $2 ;y_buff
+ ORA new_stack_item+$7
+ STA new_stack_item+$7
+ INC $3 ;index
+ JMP .float_next
  .float_not_digit:
+ CMP #$2E
+ BNE .not_decimal_point
+ LDA $9 ;dec_found
+ BEQ .decimal_good
+ RTS
+ .decimal_good:
+ LDA $8 ;exp_found
+ BEQ .exp_good
+ RTS
+ .exp_good:
+ LDA #$FF
+ STA $9 ;dec_found
+ BNE .float_next
+ .not_decimal_point:
+ CMP #$65
+ BNE .not_exp
+ LDA $8 ;exp_found
+ BEQ .first_exp
+ RTS
+ .first_exp:
+ LDA #$0
+ STA $3 ;index
+ STA $4 ;which_digit
+ STA $B ;digit_count
+ STA $A ;nonzero_found
+ LDA #$FF
+ STA $8 ;exp_found
+ BNE .float_next
+ .not_exp:
+ CMP #$2D
+ BNE .not_minus
+ LDA $8 ;exp_found
+ EOR #$FF
+ ORA $3 ;index
+ ORA $6 ;exp_negative
+ BEQ .minus_good
+ RTS
+ .minus_good:
+ LDA #$FF
+ STA $6 ;exp_negative
+ BNE .float_next
+ .not_minus:
+ RTS
  .float_done:
+ LDA #$1
+ STA new_stack_item
  RTS
  .hex_rotate:
  STY $2 ;y_buff
@@ -726,11 +1006,10 @@ CheckData:
  LDY $2 ;y_buff
  RTS
  .digit:
- CMP #$30
- BCC .is_digit_no
  CMP #$3A
  BCS .is_digit_no
- SEC
+ CMP #$30
+ BCC .is_digit_no
  SBC #$30
  RTS
  .is_digit_no:
@@ -740,7 +1019,7 @@ CheckData:
  PHA
  STY $2 ;y_buff
  LDY $3 ;index
- INC $7 ;digit_count
+ INC $B ;digit_count
  LDA $4 ;which_digit
  EOR #$FF
  STA $4 ;which_digit
@@ -814,198 +1093,88 @@ MemCopy:
  BNE .loop
  RTS
  
-special_chars:
- FCB 'e',$22
- FCB " .$"
- 
-ReadLine:
- LDA #$0
- STA $1 ;cursor
- STA $4 ;index
+ErrorMsg:
+ LDA #$20
  STA screen_ptr
- LDA #$AC
+ LDA #$60
  STA screen_ptr+$1
- JMP .._909.str_skip
- .._909.str_addr:
- FCB "a               ",$0
- .._909.str_skip:
- LDA # (.._909.str_addr) # $100
+ JMP .._1179.str_skip
+ .._1179.str_addr:
+ FCB "bbbbbbbbbbbb",$0
+ .._1179.str_skip:
+ LDA # (.._1179.str_addr) # $100
  STA $6 ;LCD_print.source
- LDA # (.._909.str_addr)/$100
+ LDA # (.._1179.str_addr)/$100
  STA $7 ;LCD_print.source
+ LDA #$0
+ STA $8 ;LCD_print.inverted
  JSR LCD_print
- LDA $FFE6
- STA $2 ;cursor_timer
- .loop:
- LDA #$0
- STA $3 ;arg
- LDA $FFE4
- BNE .key_read
- JMP .no_key
- .key_read:
- CMP #$D
- BNE .not_enter
- LDA $4 ;index
- BEQ .loop
- LDA #$0
- STA input_buff_begin
- LDA $4 ;index
- STA input_buff_end
- RTS
- .not_enter:
- CMP #$8
- BNE .not_backspace
- LDA $4 ;index
- BEQ .backspace_done
- DEC $4 ;index
- CMP #$10
- BCS .backspace_scroll
  LDA #$20
- STA $A ;LCD_char.c_out
- JSR LCD_char
- LDA screen_ptr
- SEC
- SBC #$20
  STA screen_ptr
- PHA
- LDA #$61
- STA $A ;LCD_char.c_out
- JSR LCD_char
- PLA
- STA screen_ptr
- JMP .draw_done
- .backspace_scroll:
- LDY $4 ;index
- DEY
- JMP .scroll_buffer
- .backspace_done:
- JMP .no_key
- .not_backspace:
- LDY #$0
- .special_loop:
- CMP special_chars,Y
- BNE .special_next
- STA $3 ;arg
- JMP .key_done
- .special_next:
- INY
- CPY #$5
- BNE .special_loop
- CMP #$30
- BCC .not_num
- CMP #$3A
- BCS .not_num
- STA $3 ;arg
- JMP .key_done
- .not_num:
- CMP #$41
- BCC .not_upper
- CMP #$5B
- BCS .not_upper
- STA $3 ;arg
- JMP .key_done
- .not_upper:
- CMP #$61
- BCC .not_lower
- CMP #$7B
- BCS .not_lower
- SEC
- SBC #$20
- STA $3 ;arg
- .not_lower:
- .key_done:
- LDA $3 ;arg
- BEQ .not_valid
- LDY $4 ;index
- CPY #$40
- BCS .buffer_full
- STA input_buff,Y
- INC $4 ;index
- CPY #$F
- BCS .scroll_buffer
- LDA $3 ;arg
- STA $A ;LCD_char.c_out
- JSR LCD_char
- LDA screen_ptr
- PHA
- LDA #$61
- STA $A ;LCD_char.c_out
- JSR LCD_char
- PLA
- STA screen_ptr
- JMP .draw_done
- .scroll_buffer:
- LDA #$0
- STA screen_ptr
- TYA
- SEC
- SBC #$E
- STA $5 ;str_index
- .scroll_loop:
- LDY $5 ;str_index
- INC $5 ;str_index
- LDA input_buff,Y
- STA $3 ;arg
- LDA $3 ;arg
- STA $A ;LCD_char.c_out
- JSR LCD_char
- LDA $4 ;index
- CMP $5 ;str_index
- BNE .scroll_loop
- LDA screen_ptr
- PHA
- LDA #$61
- STA $A ;LCD_char.c_out
- JSR LCD_char
- PLA
- STA screen_ptr
- .draw_done:
- .buffer_full:
- .not_valid:
- .no_key:
- LDA $FFE6
- CMP $2 ;cursor_timer
- BEQ .cursor_done
- STA $2 ;cursor_timer
- LDA $1 ;cursor
- BEQ .draw_blank
- LDA #$0
- STA $1 ;cursor
- LDA #$20
- JMP .draw
- .draw_blank:
+ LDA #$70
+ STA screen_ptr+$1
+ LDA $1 ;msg
+ STA $6 ;LCD_print.source
+ LDA $2 ;msg
+ STA $7 ;LCD_print.source
  LDA #$FF
- STA $1 ;cursor
- LDA #$61
- .draw:
- STA $3 ;arg
- LDA $3 ;arg
- STA $A ;LCD_char.c_out
- JSR LCD_char
- LDA screen_ptr
- SEC
- SBC #$10
+ STA $8 ;LCD_print.inverted
+ JSR LCD_print
+ LDA #$20
  STA screen_ptr
- .cursor_done:
- JMP .loop
+ LDA #$80
+ STA screen_ptr+$1
+ JMP .._1238.str_skip
+ .._1238.str_addr:
+ FCB "bbbbbbbbbbbb",$0
+ .._1238.str_skip:
+ LDA # (.._1238.str_addr) # $100
+ STA $6 ;LCD_print.source
+ LDA # (.._1238.str_addr)/$100
+ STA $7 ;LCD_print.source
+ LDA #$FF
+ STA $8 ;LCD_print.inverted
+ JSR LCD_print
+ .loop:
+ JSR ReadKey
+ CMP #$D
+ BNE .loop
+ RTS
  RTS
  
 main:
  LDX #$2F
  TXS
  JSR setup
+ .input_loop:
+ JSR DrawStack
  JSR ReadLine
+ .process_loop:
  JSR LineWord
+ LDA new_word_len
+ BEQ .input_loop
  JSR FindWord
  LDA ret_val
  ORA ret_val+$1
  BEQ .not_found
- BRK
- BRK
+ JMP .process_loop
  .not_found:
  JSR CheckData
- BRK
- BRK
+ LDA new_stack_item
+ CMP #$4
+ BNE .input_good
+ JMP .._1291.str_skip
+ .._1291.str_addr:
+ FCB "INPUT ERROR ",$0
+ .._1291.str_skip:
+ LDA # (.._1291.str_addr) # $100
+ STA $1 ;ErrorMsg.msg
+ LDA # (.._1291.str_addr)/$100
+ STA $2 ;ErrorMsg.msg
+ JSR ErrorMsg
+ JMP .input_loop
+ .input_good:
+ JMP .process_loop
  RTS
 
 

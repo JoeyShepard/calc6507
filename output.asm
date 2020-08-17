@@ -150,7 +150,7 @@
 			BYTE arg
 		END
 		
-		CALL LCD_print, "$"
+		CALL LCD_print, "$", #FONT_NORMAL
 		
 		LDY #8
 		LDA (source),Y
@@ -172,7 +172,7 @@
 		
 		CALL LCD_clrscr
 		
-		CALL LCD_print, "RAD"
+		CALL LCD_print, "RAD", #FONT_NORMAL
 		
 		MOV #'5',character
 		MOV #211,counter

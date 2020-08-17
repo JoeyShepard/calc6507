@@ -4,6 +4,12 @@
 	BG_COLOR = $2A
 	FG_COLOR = $0
 	
+	;Layout
+	INPUT_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*6+12
+	ERROR_X =				2*8*2
+	ERROR_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
+	
+	
 	FUNC setup
 		SEI
 		CLD
@@ -15,10 +21,10 @@
 		MOV #BANK_GFX_RAM1,RAM_BANK2		
 		MOV #BANK_GFX_RAM2,RAM_BANK3		
 		
-		;Not necessary if call to DrawStack
-		;MOV.W #SCREEN_ADDRESS, screen_ptr
-		
-		CALL DrawStack
+	END
+
+	FUNC ReadKey
+		LDA KB_INPUT
 	END
 
 	FUNC LCD_clrscr
@@ -43,7 +49,7 @@
 
 	FUNC LCD_char
 		ARGS
-			BYTE c_out
+			BYTE c_out, inverted
 		VARS
 			WORD pixel_ptr
 			BYTE pixel_index
@@ -92,6 +98,7 @@
 			LDY pixel_index
 			INC pixel_index
 			LDA (pixel_ptr),Y
+			EOR inverted
 			STA pixel
 			LDY #0
 			.loop.inner:
@@ -134,6 +141,7 @@
 	FUNC LCD_print
 		ARGS
 			STRING source
+			BYTE inverted
 		VARS
 			BYTE index, arg
 		END
@@ -145,7 +153,7 @@
 			LDA (source),Y
 			BEQ .done
 			STA arg
-			CALL LCD_char, arg
+			CALL LCD_char, arg, inverted
 			INC index
 			JMP .loop
 		.done:

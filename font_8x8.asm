@@ -196,17 +196,16 @@
 
 ;Custom characters
 ;=================
- 
-CHAR_ARROW = 'a'
 
 ;a - left arrow
   ;FCB $4, $C, $1C, $3C, $1C, $C, $4, $0
   ;shifted left one space
   FCB $8, $18, $38, $78, $38, $18, $8, $0
 
-  FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+;b - dark square
+  FCB $00, $00, $00, $00, $FF, $FF, $FF, $FF
   
-  FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+  FCB $FF, $FF, $FF, $FF, $00, $00, $00, $00
   
   FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   

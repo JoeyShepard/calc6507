@@ -106,187 +106,36 @@ STACK_END:
 			CPY count
 			BNE .loop
 	END
-	
-SPECIAL_CHARS_LEN = 5
-	special_chars:
-	FCB CHAR_EXP, CHAR_QUOTE		;2
-	FCB " .$"						;3
-	
-	;Can save space here by removing cursor draw after key
-	FUNC ReadLine
-		VARS
-			BYTE cursor, cursor_timer
-			BYTE arg
-			BYTE index, str_index
+		
+	FUNC ErrorMsg
+		ARGS
+			STRING msg
 		END
 		
-		LDA #0
-		STA cursor
-		STA index
+		LDA #ERROR_X
 		STA screen_ptr
-		LDA #INPUT_Y
+		LDA #ERROR_Y
 		STA screen_ptr+1
-		CALL LCD_print,"a               "
-		LDA TIMER_S
-		STA cursor_timer
+		CALL LCD_print, "bbbbbbbbbbbb", #FONT_NORMAL
+		LDA #ERROR_X
+		STA screen_ptr
+		LDA #ERROR_Y+CHAR_HEIGHT
+		STA screen_ptr+1
+		CALL LCD_print, msg, #FONT_INVERTED
+		LDA #ERROR_X
+		STA screen_ptr
+		LDA #ERROR_Y+CHAR_HEIGHT*2
+		STA screen_ptr+1
+		CALL LCD_print, "bbbbbbbbbbbb", #FONT_INVERTED
 		
 		.loop:
-			LDA #0
-			STA arg
-			LDA KB_INPUT
-			BNE .key_read
-				JMP .no_key
-			.key_read:
-			
-				;Enter key
-				CMP #KEY_ENTER
-				BNE .not_enter
-					LDA index
-					BEQ .loop
-					LDA #0
-					STA input_buff_begin
-					LDA index
-					STA input_buff_end
-					RTS
-				.not_enter:
-			
-				;Backspace
-				CMP #KEY_BACKSPACE
-				BNE .not_backspace
-					LDA index
-					BEQ .backspace_done
-						DEC index
-						CMP #CHAR_SCREEN_WIDTH
-						BCS .backspace_scroll
-							CALL LCD_char, #' '
-							LDA screen_ptr
-							SEC
-							SBC #CHAR_WIDTH*2
-							STA screen_ptr
-							PHA
-							CALL LCD_char, #CHAR_ARROW
-							PLA
-							STA screen_ptr
-							JMP .draw_done
-						.backspace_scroll:
-							LDY index
-							DEY
-							JMP .scroll_buffer
-						
-					.backspace_done:
-					JMP .no_key
-				.not_backspace:
-				
-				;Special character
-				LDY #0
-				.special_loop:
-					CMP special_chars,Y
-					BNE .special_next
-						STA arg
-						JMP .key_done
-					.special_next:
-					INY
-					CPY #SPECIAL_CHARS_LEN
-					BNE .special_loop
-				
-				;Number
-				CMP #'0'
-				BCC .not_num
-				CMP #'9'+1
-				BCS .not_num
-					STA arg
-					JMP .key_done
-				.not_num:
-				
-				;Uppercase
-				CMP #'A'
-				BCC .not_upper
-				CMP #'Z'+1
-				BCS .not_upper
-					STA arg
-					JMP .key_done
-				.not_upper:
-				
-				;Lowercase
-				CMP #'a'
-				BCC .not_lower
-				CMP #'z'+1
-				BCS .not_lower
-					;Convert to uppercase
-					SEC
-					SBC #$20
-					STA arg
-				.not_lower:
-				
-				.key_done:
-				LDA arg
-				BEQ .not_valid
-					LDY index
-					CPY #BUFF_SIZE
-					BCS .buffer_full
-						STA input_buff,Y
-						INC index
-						CPY #CHAR_SCREEN_WIDTH-1
-						BCS .scroll_buffer
-							CALL LCD_char, arg
-							LDA screen_ptr
-							PHA
-							CALL LCD_char, #CHAR_ARROW
-							PLA
-							STA screen_ptr
-							JMP .draw_done
-						.scroll_buffer:
-							LDA #0
-							STA screen_ptr
-							TYA
-							SEC
-							SBC #CHAR_SCREEN_WIDTH-2
-							STA str_index
-							.scroll_loop:
-								LDY str_index
-								INC str_index
-								LDA input_buff,Y
-								STA arg
-								CALL LCD_char, arg
-								LDA index
-								CMP str_index
-								BNE .scroll_loop
-							LDA screen_ptr
-							PHA
-							CALL LCD_char, #CHAR_ARROW
-							PLA
-							STA screen_ptr
-						.draw_done:
-					.buffer_full:
-				.not_valid:
-
-			.no_key:
-			LDA TIMER_S
-			CMP cursor_timer
-			BEQ .cursor_done
-				STA cursor_timer
-				LDA cursor
-				BEQ .draw_blank
-					LDA #0
-					STA cursor
-					LDA #' '
-					JMP .draw
-				.draw_blank:
-					LDA #$FF
-					STA cursor
-					LDA #CHAR_ARROW
-				.draw:
-				STA arg
-				CALL LCD_char, arg
-				LDA screen_ptr
-				SEC
-				SBC #CHAR_WIDTH
-				STA screen_ptr
-			.cursor_done:
-		JMP .loop
+			CALL ReadKey
+			CMP #KEY_ENTER
+			BNE .loop
+		RTS
 	END
+
 	
-		
 ;Main function
 ;=============
 	FUNC main, begin
@@ -302,20 +151,33 @@ SPECIAL_CHARS_LEN = 5
 				
 		CALL setup
 		
-		CALL ReadLine
-		CALL LineWord
-		CALL FindWord
-		LDA ret_val
-		ORA ret_val+1
-		BEQ .not_found
-			;Found
-			halt
-		.not_found:
+		.input_loop:
+			CALL DrawStack
+			CALL ReadLine
+			
+			.process_loop:
+				CALL LineWord
+				LDA new_word_len
+				BEQ .input_loop
+			
+				CALL FindWord
+				LDA ret_val
+				ORA ret_val+1
+				BEQ .not_found
+					;Word found
+					JMP .process_loop
+				.not_found:
 		
-		CALL CheckData
-		
-		
-		halt
+				CALL CheckData
+				LDA new_stack_item
+				CMP #OBJ_ERROR
+				BNE .input_good
+					CALL ErrorMsg,"INPUT ERROR "
+					JMP .input_loop
+				.input_good:
+				;add new data to stack
+				JMP .process_loop
+				
 	END
 	
 	
