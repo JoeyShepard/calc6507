@@ -21,9 +21,7 @@ OBJ_STR = 				2
 OBJ_HEX = 				3
 OBJ_ERROR =				4
 
-;Font
-FONT_NORMAL	=			0
-FONT_INVERTED =			$FF
+OBJ_SIZE =				9
 
 ;Input buffer
 BUFF_SIZE =				64
@@ -44,6 +42,7 @@ ERROR_STRING =			2
 
 ;Forth
 	;Word flags
-	FORTH_1ITEM =			1
-	FORTH_2ITEMS =			2
-	FORTH_3ITEMS =			3
+	MIN_1 =				1
+	MIN_2 =				2
+	MIN_3 =				3
+	ADD_1 =				4

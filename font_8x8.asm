@@ -202,9 +202,9 @@
   ;shifted left one space
   FCB $8, $18, $38, $78, $38, $18, $8, $0
 
-;b - dark square
+;b - dark square bottom
   FCB $00, $00, $00, $00, $FF, $FF, $FF, $FF
-  
+
   FCB $FF, $FF, $FF, $FF, $00, $00, $00, $00
   
   FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF

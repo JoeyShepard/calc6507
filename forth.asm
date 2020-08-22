@@ -26,7 +26,7 @@
 		STA screen_ptr
 		LDA #INPUT_Y
 		STA screen_ptr+1
-		CALL LCD_print,"a               ", #FONT_NORMAL
+		CALL LCD_print,"a               "
 		LDA TIMER_S
 		STA cursor_timer
 		
@@ -262,13 +262,8 @@
 			LDA (ret_val),Y
 			STA ret_val+1
 			PLA
-			STA ret_val
-				
-			;Check if done searching
-			LDY #0
-			LDA (ret_val),Y
-			INY 
-			ORA (ret_val),Y
+			STA ret_val			
+			ORA ret_val+1
 			BNE .loop
 			;Done searching - zero ret_val
 			STA ret_val
@@ -336,10 +331,10 @@
 				LDA new_word_buff+1,y	;+1 to skip first quote
 				CMP #'"'
 				BEQ .str_done
+				CPY #8
+				BEQ .string_too_long
 				STA new_stack_item+1,Y
 				INY
-				CPY #9
-				BEQ .string_too_long
 				CPY new_word_len
 				BEQ .string_unterminated
 				BNE .loop_str
@@ -369,7 +364,6 @@
 		
 		CMP #'$'
 		BNE .not_hex
-		
 			;hex
 			LDA new_word_len
 			;single dollar sign - invalid hex
@@ -633,6 +627,47 @@
 			
 	END
 	
+	FUNC GetToken
+		ARGS
+			WORD address
+		END
+	END
+	
+	FUNC ExecToken
+		ARGS
+			BYTE token
+		END
+		
+		halt
+		
+		start here - cant rely on this address to execute
+		will be relying on token to execute, so look up token then do this
+		
+		;check flags before 
+		;LDY #0
+		;LDA (address),Y
+		;TAY
+		;INY
+		;INY
+		;LDA (address),Y
+		
+		;Needs to be modified for flag byte at beginning of code
+		LDY #0
+		LDA (address),Y
+		CLC
+		ADC #4	;point past header		
+		ADC address
+		TAY
+		LDA #0
+		ADC address+1
+		PHA
+		TYA
+		PHA
+		;RTS
+		
+		;RTS here jumps to calculated address
+		;RTS there jumps back to caller of Execute
+	END
 	
 	
 	;Word list
@@ -641,36 +676,48 @@
 	WORD_DUP:
 		FCB 3, "DUP" 		;Name
 		FDB	WORD_SWAP		;Next word
-		FCB FORTH_1ITEM		;Flags
 		FCB 2				;ID
 		CODE_DUP:
+			FCB MIN_1|ADD_1	;Flags
 			LDA #5			;Test
 			RTS
 	
 	WORD_SWAP:
 		FCB 4, "SWAP" 		;Name
 		FDB	WORD_DROP		;Next word
-		FCB FORTH_2ITEMS	;Flags
 		FCB 4				;ID
 		CODE_SWAP:
+			FCB MIN_2		;Flags
 			LDA #6			;Test
 			RTS	
 	
 	WORD_DROP:
 		FCB 4, "DROP" 		;Name
 		FDB	WORD_OVER		;Next word
-		FCB FORTH_1ITEM		;Flags
 		FCB 6				;ID
 		CODE_DROP:
-			LDA #7			;Test
+			FCB MIN_1		;Flags
+			TXA
+			CLC
+			ADC #OBJ_SIZE
+			TAX
+			DEC stack_count
 			RTS
 	
 	WORD_OVER:
 		FCB 4, "OVER" 		;Name
 		FDB	0				;Next word
-		FCB FORTH_2ITEMS	;Flags
 		FCB 8				;ID
 		CODE_OVER:
+			FCB MIN_2|ADD_1	;Flags
 			LDA #8			;Test
 			RTS
 	
+	JUMP_TABLE:
+		FDB 0				;0 - reserved
+		FDB CODE_DUP		;2
+		FDB CODE_SWAP		;4
+		FDB CODE_DROP		;6
+		FDB CODE_OVER		;8
+		
+		

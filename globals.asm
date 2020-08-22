@@ -12,5 +12,11 @@
 	new_word_buff:		DFS WORD_MAX_SIZE
 	new_stack_item:		DFS 9
 	
+	;Font
+	BYTE font_inverted
+	
+	;Forth
+	BYTE stack_count
+
 	
 	

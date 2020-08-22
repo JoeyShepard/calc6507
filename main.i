@@ -32,6 +32,8 @@
 
 
 
+
+
 %line 1+1 emu.asm
 
 
@@ -68,7 +70,7 @@ RB1 = $0200
 RB2 = $4000
 RB3 = $8000
 ROMB = $C000
-%line 20+1 main.asm
+%line 22+1 main.asm
 
 %line 1+1 const.asm
 
@@ -94,9 +96,7 @@ OBJ_STR = 2
 OBJ_HEX = 3
 OBJ_ERROR = 4
 
-
-FONT_NORMAL = 0
-FONT_INVERTED = $FF
+OBJ_SIZE = 9
 
 
 BUFF_SIZE = 64
@@ -117,10 +117,11 @@ ERROR_STRING = 2
 
 
 
- FORTH_1ITEM = 1
- FORTH_2ITEMS = 2
- FORTH_3ITEMS = 3
-%line 21+1 main.asm
+ MIN_1 = 1
+ MIN_2 = 2
+ MIN_3 = 3
+ ADD_1 = 4
+%line 23+1 main.asm
 
 
 
@@ -151,7 +152,7 @@ true set $FF
 
 
 
-%line 32+1 main.asm
+%line 34+1 main.asm
 
 %line 1+1 optimizer_nmos.asm
 
@@ -323,7 +324,7 @@ LOCALS_END set $FF
 
 %line 1343+1 optimizer_nmos.asm
 
-%line 33+1 main.asm
+%line 35+1 main.asm
 
 
 
@@ -343,28 +344,28 @@ LOCALS_END set $1F
  ORG $20
 
  dummy:
-%line 51+0 main.asm
+%line 53+0 main.asm
  DFS 1
-%line 52+1 main.asm
+%line 54+1 main.asm
  ret_val:
-%line 52+0 main.asm
+%line 54+0 main.asm
  DFS 2
-%line 53+1 main.asm
+%line 55+1 main.asm
 
 
  screen_ptr:
-%line 55+0 main.asm
+%line 57+0 main.asm
  DFS 2
-%line 56+1 main.asm
+%line 58+1 main.asm
 
- R0: DFS 9
- R1: DFS 9
- R2: DFS 9
- R3: DFS 9
- R4: DFS 9
- R5: DFS 9
- R6: DFS 9
- R7: DFS 9
+ R0: DFS OBJ_SIZE
+ R1: DFS OBJ_SIZE
+ R2: DFS OBJ_SIZE
+ R3: DFS OBJ_SIZE
+ R4: DFS OBJ_SIZE
+ R5: DFS OBJ_SIZE
+ R6: DFS OBJ_SIZE
+ R7: DFS OBJ_SIZE
 
 STACK_END:
 
@@ -389,8 +390,20 @@ STACK_END:
  new_stack_item: DFS 9
 
 
+ font_inverted:
+%line 16+0 globals.asm
+ DFS 1
+%line 17+1 globals.asm
 
-%line 73+1 main.asm
+
+ stack_count:
+%line 19+0 globals.asm
+ DFS 1
+%line 20+1 globals.asm
+
+
+
+%line 75+1 main.asm
 
 
 
@@ -620,7 +633,7 @@ STACK_END:
 
 
 
-%line 83+1 main.asm
+%line 85+1 main.asm
 
 
 
@@ -643,10 +656,14 @@ STACK_END:
 
 
  LDX #0
+ STX stack_count
+
+ LDA #0
+ STA font_inverted
 
 
 
-%line 21+0 emu6507.asm
+%line 25+0 emu6507.asm
 
 
 
@@ -663,9 +680,9 @@ STACK_END:
  LDA #(BANK_GFX_RAM1) % 256
  STA RAM_BANK2
 
-%line 22+1 emu6507.asm
+%line 26+1 emu6507.asm
 
-%line 22+0 emu6507.asm
+%line 26+0 emu6507.asm
 
 
 
@@ -682,7 +699,7 @@ STACK_END:
  LDA #(BANK_GFX_RAM2) % 256
  STA RAM_BANK3
 
-%line 23+1 emu6507.asm
+%line 27+1 emu6507.asm
 
  RTS
 
@@ -696,7 +713,7 @@ STACK_END:
 
 
 
-%line 35+0 emu6507.asm
+%line 39+0 emu6507.asm
 
 
 
@@ -725,10 +742,10 @@ STACK_END:
  LDA #(SCREEN_ADDRESS) / 256
  STA screen_ptr+1
 
-%line 36+1 emu6507.asm
+%line 40+1 emu6507.asm
 
 
-%line 37+0 emu6507.asm
+%line 41+0 emu6507.asm
 
 
 
@@ -748,7 +765,7 @@ STACK_END:
  LDA #(128) % 256
  STA counter
 
-%line 38+1 emu6507.asm
+%line 42+1 emu6507.asm
  LDA #BG_COLOR
  LDY #0
  .loop:
@@ -759,7 +776,7 @@ STACK_END:
  DEC counter
  BNE .loop
 
-%line 47+0 emu6507.asm
+%line 51+0 emu6507.asm
 
 
 
@@ -788,43 +805,41 @@ STACK_END:
  LDA #(SCREEN_ADDRESS) / 256
  STA screen_ptr+1
 
-%line 48+1 emu6507.asm
+%line 52+1 emu6507.asm
  RTS
 
  LCD_char:
 
  c_out set ASSIGN_LOCAL_BYTE
-%line 52+0 emu6507.asm
+%line 56+0 emu6507.asm
  LCD_char.a0 set LCD_char.c_out
- inverted set ASSIGN_LOCAL_BYTE
- LCD_char.a1 set LCD_char.inverted
-%line 53+1 emu6507.asm
+%line 57+1 emu6507.asm
 
  pixel_ptr set ASSIGN_LOCAL_WORD
  pixel_index set ASSIGN_LOCAL_BYTE
  pixel set ASSIGN_LOCAL_BYTE
  lc1 set ASSIGN_LOCAL_BYTE
-%line 57+0 emu6507.asm
+%line 61+0 emu6507.asm
  lc2 set ASSIGN_LOCAL_BYTE
-%line 58+1 emu6507.asm
+%line 62+1 emu6507.asm
 
 
  LDA c_out
  CMP #' '
- BCC ..@96.skip
-%line 62+0 emu6507.asm
+ BCC ..@98.skip
+%line 66+0 emu6507.asm
  JMP .if0
- ..@96.skip:
-%line 63+1 emu6507.asm
+ ..@98.skip:
+%line 67+1 emu6507.asm
  RTS
  .if0:
 
  CMP #'e'+1
- BCS ..@101.skip
-%line 67+0 emu6507.asm
+ BCS ..@103.skip
+%line 71+0 emu6507.asm
  JMP .if1
- ..@101.skip:
-%line 68+1 emu6507.asm
+ ..@103.skip:
+%line 72+1 emu6507.asm
  RTS
  .if1:
 
@@ -858,7 +873,7 @@ STACK_END:
  LDY pixel_index
  INC pixel_index
  LDA (pixel_ptr),Y
- EOR inverted
+ EOR font_inverted
  STA pixel
  LDY #0
  .loop.inner:
@@ -901,18 +916,14 @@ STACK_END:
  LCD_print:
 
  source set ASSIGN_LOCAL_WORD
-%line 143+0 emu6507.asm
+%line 147+0 emu6507.asm
  LCD_print.a0 set LCD_print.source
-%line 144+1 emu6507.asm
- inverted set ASSIGN_LOCAL_BYTE
-%line 144+0 emu6507.asm
- LCD_print.a1 set LCD_print.inverted
-%line 145+1 emu6507.asm
+%line 148+1 emu6507.asm
 
  index set ASSIGN_LOCAL_BYTE
-%line 146+0 emu6507.asm
+%line 149+0 emu6507.asm
  arg set ASSIGN_LOCAL_BYTE
-%line 147+1 emu6507.asm
+%line 150+1 emu6507.asm
 
 
  LDA #0
@@ -923,13 +934,7 @@ STACK_END:
  BEQ .done
  STA arg
 
-%line 156+0 emu6507.asm
-
-
-
-
-
-
+%line 159+0 emu6507.asm
 
 
 
@@ -984,64 +989,43 @@ STACK_END:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA inverted
- STA LCD_char.a1
-
-
-
-
-
-
-
-
  JSR LCD_char
-%line 157+1 emu6507.asm
+%line 160+1 emu6507.asm
  INC index
  JMP .loop
  .done:
  RTS
 
-%line 86+1 main.asm
+%line 88+1 main.asm
 
+
+%line 1+1 system.asm
+
+
+ MemCopy:
+
+ source set ASSIGN_LOCAL_WORD
+%line 5+0 system.asm
+ MemCopy.a0 set MemCopy.source
+ dest set ASSIGN_LOCAL_WORD
+ MemCopy.a1 set MemCopy.dest
+%line 6+1 system.asm
+ count set ASSIGN_LOCAL_BYTE
+%line 6+0 system.asm
+ MemCopy.a2 set MemCopy.count
+%line 7+1 system.asm
+
+
+ LDY #0
+ .loop:
+ LDA (source),Y
+ STA (dest),Y
+ INY
+ CPY count
+ BNE .loop
+ RTS
+
+%line 90+1 main.asm
 
 %line 1+1 math.asm
 
@@ -1073,7 +1057,7 @@ STACK_END:
  RTS
 
 
-%line 88+1 main.asm
+%line 91+1 main.asm
 
 %line 1+1 output.asm
 
@@ -1230,6 +1214,190 @@ STACK_END:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA source
+ STA MemCopy.a0
+ LDA source+1
+ STA MemCopy.a0+1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(R0) % 256
+ STA MemCopy.a1
+ LDA #(R0) / 256
+ STA MemCopy.a1+1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(9) % 256
+ STA MemCopy.a2
+
+
+
+
+
+
+
+
  JSR MemCopy
 %line 42+1 output.asm
 
@@ -1370,7 +1538,8 @@ STACK_END:
 %line 52+1 output.asm
  .positive:
 
-%line 53+0 output.asm
+
+%line 54+0 output.asm
 
 
 
@@ -1438,13 +1607,13 @@ STACK_END:
 
 
  JSR LCD_char
-%line 54+1 output.asm
+%line 55+1 output.asm
 
  LDY #6
  LDA R0,Y
  STA arg
 
-%line 58+0 output.asm
+%line 59+0 output.asm
 
 
 
@@ -1518,10 +1687,10 @@ STACK_END:
 
 
  JSR DigitHigh
-%line 59+1 output.asm
+%line 60+1 output.asm
 
 
-%line 60+0 output.asm
+%line 61+0 output.asm
 
 
 
@@ -1593,9 +1762,9 @@ STACK_END:
 
 
  JSR LCD_char
-%line 61+1 output.asm
+%line 62+1 output.asm
 
-%line 61+0 output.asm
+%line 62+0 output.asm
 
 
 
@@ -1669,7 +1838,7 @@ STACK_END:
 
 
  JSR DigitLow
-%line 62+1 output.asm
+%line 63+1 output.asm
  LDA #5
  STA index
  .loop:
@@ -1677,7 +1846,7 @@ STACK_END:
  LDA R0,Y
  STA arg
 
-%line 68+0 output.asm
+%line 69+0 output.asm
 
 
 
@@ -1751,9 +1920,9 @@ STACK_END:
 
 
  JSR DigitHigh
-%line 69+1 output.asm
+%line 70+1 output.asm
 
-%line 69+0 output.asm
+%line 70+0 output.asm
 
 
 
@@ -1827,7 +1996,7 @@ STACK_END:
 
 
  JSR DigitLow
-%line 70+1 output.asm
+%line 71+1 output.asm
  DEC index
  LDA index
  CMP #2
@@ -1841,7 +2010,7 @@ STACK_END:
  LDA #'-'
  STA sign
 
-%line 82+0 output.asm
+%line 83+0 output.asm
 
 
 
@@ -1966,10 +2135,10 @@ STACK_END:
 
 
  JSR BCD_Reverse
-%line 83+1 output.asm
+%line 84+1 output.asm
  .positive_e:
 
-%line 84+0 output.asm
+%line 85+0 output.asm
 
 
 
@@ -2037,12 +2206,12 @@ STACK_END:
 
 
  JSR LCD_char
-%line 85+1 output.asm
+%line 86+1 output.asm
  LDY #8
  LDA R0,Y
  STA arg
 
-%line 88+0 output.asm
+%line 89+0 output.asm
 
 
 
@@ -2116,12 +2285,12 @@ STACK_END:
 
 
  JSR DigitLow
-%line 89+1 output.asm
+%line 90+1 output.asm
  LDY #7
  LDA R0,Y
  STA arg
 
-%line 92+0 output.asm
+%line 93+0 output.asm
 
 
 
@@ -2195,9 +2364,9 @@ STACK_END:
 
 
  JSR DigitHigh
-%line 93+1 output.asm
+%line 94+1 output.asm
 
-%line 93+0 output.asm
+%line 94+0 output.asm
 
 
 
@@ -2271,16 +2440,16 @@ STACK_END:
 
 
  JSR DigitLow
-%line 94+1 output.asm
+%line 95+1 output.asm
 
  RTS
 
  HexHigh:
 
  digit set ASSIGN_LOCAL_BYTE
-%line 99+0 output.asm
+%line 100+0 output.asm
  HexHigh.a0 set HexHigh.digit
-%line 100+1 output.asm
+%line 101+1 output.asm
 
  arg set ASSIGN_LOCAL_BYTE
 
@@ -2302,7 +2471,7 @@ STACK_END:
  STA arg
  .done:
 
-%line 120+0 output.asm
+%line 121+0 output.asm
 
 
 
@@ -2352,15 +2521,15 @@ STACK_END:
 
 
  JSR LCD_char
-%line 121+1 output.asm
+%line 122+1 output.asm
  RTS
 
  HexLow:
 
  digit set ASSIGN_LOCAL_BYTE
-%line 125+0 output.asm
+%line 126+0 output.asm
  HexLow.a0 set HexLow.digit
-%line 126+1 output.asm
+%line 127+1 output.asm
 
  arg set ASSIGN_LOCAL_BYTE
 
@@ -2379,7 +2548,7 @@ STACK_END:
  STA arg
  .done:
 
-%line 143+0 output.asm
+%line 144+0 output.asm
 
 
 
@@ -2429,21 +2598,21 @@ STACK_END:
 
 
  JSR LCD_char
-%line 144+1 output.asm
+%line 145+1 output.asm
  RTS
 
  DrawHex:
 
  source set ASSIGN_LOCAL_WORD
-%line 148+0 output.asm
+%line 149+0 output.asm
  DrawHex.a0 set DrawHex.source
-%line 149+1 output.asm
+%line 150+1 output.asm
 
  arg set ASSIGN_LOCAL_BYTE
 
 
 
-%line 153+0 output.asm
+%line 154+0 output.asm
 
 
 
@@ -2459,10 +2628,6 @@ STACK_END:
 
 
 
- JMP ..@659.str_skip
- ..@659.str_addr:
- FCB "$",0
- ..@659.str_skip:
 
 
 
@@ -2488,112 +2653,24 @@ STACK_END:
 
 
 
+ LDA #('$') % 256
+ STA LCD_char.a0
 
 
 
 
 
- LDA #(..@659.str_addr) % 256
- STA LCD_print.a0
- LDA #(..@659.str_addr) / 256
- STA LCD_print.a0+1
 
 
 
 
 
+ JSR LCD_char
+%line 155+1 output.asm
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(FONT_NORMAL) % 256
- STA LCD_print.a1
-
-
-
-
-
-
-
-
-
- JSR LCD_print
-%line 154+1 output.asm
-
- LDY #8
+ LDY #2
  LDA (source),Y
  STA arg
-
-%line 158+0 output.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA arg
- STA HexHigh.a0
-
-
-
-
-
-
-
-
-
- JSR HexHigh
-%line 159+1 output.asm
 
 %line 159+0 output.asm
 
@@ -2634,6 +2711,58 @@ STACK_END:
 
 
  LDA arg
+ STA HexHigh.a0
+
+
+
+
+
+
+
+
+
+ JSR HexHigh
+%line 160+1 output.asm
+
+%line 160+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA arg
  STA HexLow.a0
 
 
@@ -2645,12 +2774,12 @@ STACK_END:
 
 
  JSR HexLow
-%line 160+1 output.asm
- LDY #7
+%line 161+1 output.asm
+ LDY #1
  LDA (source),Y
  STA arg
 
-%line 163+0 output.asm
+%line 164+0 output.asm
 
 
 
@@ -2700,9 +2829,9 @@ STACK_END:
 
 
  JSR HexHigh
-%line 164+1 output.asm
+%line 165+1 output.asm
 
-%line 164+0 output.asm
+%line 165+0 output.asm
 
 
 
@@ -2752,17 +2881,239 @@ STACK_END:
 
 
  JSR HexLow
-%line 165+1 output.asm
+%line 166+1 output.asm
+ RTS
+
+ DrawString:
+
+ source set ASSIGN_LOCAL_WORD
+%line 170+0 output.asm
+ DrawString.a0 set DrawString.source
+%line 171+1 output.asm
+
+ arg set ASSIGN_LOCAL_BYTE
+ index set ASSIGN_LOCAL_BYTE
+
+
+
+%line 176+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(CHAR_QUOTE) % 256
+ STA LCD_char.a0
+
+
+
+
+
+
+
+
+
+
+ JSR LCD_char
+%line 177+1 output.asm
+
+ LDA #1
+ STA index
+ .loop:
+ LDY index
+ LDA (source),Y
+ BEQ .done
+ STA arg
+
+%line 185+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA arg
+ STA LCD_char.a0
+
+
+
+
+
+
+
+
+
+ JSR LCD_char
+%line 186+1 output.asm
+ INC index
+ LDA index
+ CMP #9
+ BNE .loop
+ .done:
+
+%line 191+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(CHAR_QUOTE) % 256
+ STA LCD_char.a0
+
+
+
+
+
+
+
+
+
+
+ JSR LCD_char
+%line 192+1 output.asm
  RTS
 
  DrawStack:
 
- counter set ASSIGN_LOCAL_BYTE
  character set ASSIGN_LOCAL_BYTE
+ counter set ASSIGN_LOCAL_BYTE
+ address set ASSIGN_LOCAL_WORD
 
 
+ TXA
+ CLC
+ ADC #(4*OBJ_SIZE)
+ STA address
+ LDA #0
+ STA address+1
 
-%line 173+0 output.asm
+
+%line 208+0 output.asm
 
 
 
@@ -2773,12 +3124,9 @@ STACK_END:
 
 
  JSR LCD_clrscr
-%line 174+1 output.asm
+%line 209+1 output.asm
 
-
-%line 175+0 output.asm
-
-
+%line 209+0 output.asm
 
 
 
@@ -2792,10 +3140,12 @@ STACK_END:
 
 
 
- JMP ..@791.str_skip
- ..@791.str_addr:
+
+
+ JMP ..@913.str_skip
+ ..@913.str_addr:
  FCB "RAD",0
- ..@791.str_skip:
+ ..@913.str_skip:
 
 
 
@@ -2826,9 +3176,15 @@ STACK_END:
 
 
 
- LDA #(..@791.str_addr) % 256
+
+
+
+
+
+
+ LDA #(..@913.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@791.str_addr) / 256
+ LDA #(..@913.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -2840,40 +3196,17 @@ STACK_END:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(FONT_NORMAL) % 256
- STA LCD_print.a1
-
-
-
-
-
-
-
-
-
  JSR LCD_print
-%line 176+1 output.asm
+%line 210+1 output.asm
 
 
-%line 177+0 output.asm
+%line 211+0 output.asm
+
+
+
+
+
+
 
 
 
@@ -2893,11 +3226,9 @@ STACK_END:
  LDA #('5') % 256
  STA character
 
-%line 178+1 output.asm
+%line 212+1 output.asm
 
-%line 178+0 output.asm
-
-
+%line 212+0 output.asm
 
 
 
@@ -2914,14 +3245,11 @@ STACK_END:
 
 
 
-
-
-
-
- LDA #(211) % 256
+ LDA #(5) % 256
  STA counter
 
-%line 179+1 output.asm
+%line 213+1 output.asm
+
  .loop:
  LDA #0
  STA screen_ptr
@@ -2930,7 +3258,19 @@ STACK_END:
  ADC #CHAR_HEIGHT
  STA screen_ptr+1
 
-%line 186+0 output.asm
+%line 221+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2980,9 +3320,15 @@ STACK_END:
 
 
  JSR LCD_char
-%line 187+1 output.asm
+%line 222+1 output.asm
 
-%line 187+0 output.asm
+%line 222+0 output.asm
+
+
+
+
+
+
 
 
 
@@ -3036,12 +3382,255 @@ STACK_END:
 
 
  JSR LCD_char
-%line 188+1 output.asm
+%line 223+1 output.asm
+
+ DEC counter
+ LDA counter
+ CMP stack_count
+ BCS .no_item
+ LDY #0
+ LDA (address),Y
+ CMP #OBJ_FLOAT
+ BNE .not_float
+
+%line 232+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA address
+ STA DrawFloat.a0
+ LDA address+1
+ STA DrawFloat.a0+1
+
+
+
+
+
+
+
+
+
+ JSR DrawFloat
+%line 233+1 output.asm
+ JMP .item_done
+ .not_float:
+ CMP #OBJ_STR
+ BNE .not_str
+
+%line 237+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA address
+ STA DrawString.a0
+ LDA address+1
+ STA DrawString.a0+1
+
+
+
+
+
+
+
+
+
+ JSR DrawString
+%line 238+1 output.asm
+ JMP .item_done
+ .not_str:
+ CMP #OBJ_HEX
+ BNE .not_hex
+
+%line 242+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA address
+ STA DrawHex.a0
+ LDA address+1
+ STA DrawHex.a0+1
+
+
+
+
+
+
+
+
+
+ JSR DrawHex
+%line 243+1 output.asm
+ JMP .item_done
+ .not_hex:
+ .item_done:
+ .no_item:
+
+ LDA address
+ SEC
+ SBC #OBJ_SIZE
+ STA address
+
  DEC character
  LDA counter
- CLC
- ADC #9
- STA counter
  BNE .loop
  LDA #0
  STA screen_ptr
@@ -3061,7 +3650,269 @@ STACK_END:
  BNE .loop_line
  RTS
 
-%line 89+1 main.asm
+ ErrorMsg:
+
+ msg set ASSIGN_LOCAL_WORD
+%line 276+0 output.asm
+ ErrorMsg.a0 set ErrorMsg.msg
+%line 277+1 output.asm
+
+
+ LDA #ERROR_X
+ STA screen_ptr
+ LDA #ERROR_Y
+ STA screen_ptr+1
+
+%line 283+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@1087.str_skip
+ ..@1087.str_addr:
+ FCB "bbbbbbbbbbbb",0
+ ..@1087.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@1087.str_addr) % 256
+ STA LCD_print.a0
+ LDA #(..@1087.str_addr) / 256
+ STA LCD_print.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR LCD_print
+%line 284+1 output.asm
+ LDA #ERROR_X
+ STA screen_ptr
+ LDA #ERROR_Y+CHAR_HEIGHT
+ STA screen_ptr+1
+
+%line 288+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #($FF) % 256
+ STA font_inverted
+
+%line 289+1 output.asm
+
+%line 289+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA msg
+ STA LCD_print.a0
+ LDA msg+1
+ STA LCD_print.a0+1
+
+
+
+
+
+
+
+
+
+ JSR LCD_print
+%line 290+1 output.asm
+ LDA #ERROR_X
+ STA screen_ptr
+ LDA #ERROR_Y+CHAR_HEIGHT*2
+ STA screen_ptr+1
+
+%line 294+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@1137.str_skip
+ ..@1137.str_addr:
+ FCB "bbbbbbbbbbbb",0
+ ..@1137.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@1137.str_addr) % 256
+ STA LCD_print.a0
+ LDA #(..@1137.str_addr) / 256
+ STA LCD_print.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR LCD_print
+%line 295+1 output.asm
+
+%line 295+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(0) % 256
+ STA font_inverted
+
+%line 296+1 output.asm
+
+ .loop:
+
+%line 298+0 output.asm
+
+
+
+
+
+
+
+
+
+ JSR ReadKey
+%line 299+1 output.asm
+ CMP #KEY_ENTER
+ BNE .loop
+ RTS
+ RTS
+
+
+%line 92+1 main.asm
 
 %line 1+1 forth.asm
 
@@ -3115,10 +3966,10 @@ STACK_END:
 
 
 
- JMP ..@904.str_skip
- ..@904.str_addr:
+ JMP ..@1186.str_skip
+ ..@1186.str_addr:
  FCB "a               ",0
- ..@904.str_skip:
+ ..@1186.str_skip:
 
 
 
@@ -3167,58 +4018,11 @@ STACK_END:
 
 
 
- LDA #(..@904.str_addr) % 256
+ LDA #(..@1186.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@904.str_addr) / 256
+ LDA #(..@1186.str_addr) / 256
  STA LCD_print.a0+1
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(FONT_NORMAL) % 256
- STA LCD_print.a1
 
 
 
@@ -4037,12 +4841,7 @@ STACK_END:
  STA ret_val+1
  PLA
  STA ret_val
-
-
- LDY #0
- LDA (ret_val),Y
- INY
- ORA (ret_val),Y
+ ORA ret_val+1
  BNE .loop
 
  STA ret_val
@@ -4110,10 +4909,10 @@ STACK_END:
  LDA new_word_buff+1,y
  CMP #'"'
  BEQ .str_done
+ CPY #8
+ BEQ .string_too_long
  STA new_stack_item+1,Y
  INY
- CPY #9
- BEQ .string_too_long
  CPY new_word_len
  BEQ .string_unterminated
  BNE .loop_str
@@ -4143,7 +4942,6 @@ STACK_END:
 
  CMP #'$'
  BNE .not_hex
-
 
  LDA new_word_len
 
@@ -4407,6 +5205,30 @@ STACK_END:
 
  RTS
 
+ Execute:
+
+ address set ASSIGN_LOCAL_WORD
+%line 632+0 forth.asm
+ Execute.a0 set Execute.address
+%line 633+1 forth.asm
+
+
+ LDY #0
+ LDA (address),Y
+ CLC
+ ADC #4
+ ADC address
+ TAY
+ LDA #0
+ ADC address+1
+ PHA
+ TYA
+ PHA
+
+
+
+
+ RTS
 
 
 
@@ -4415,7 +5237,7 @@ STACK_END:
  WORD_DUP:
  FCB 3, "DUP"
  FDB WORD_SWAP
- FCB FORTH_1ITEM
+ FCB MIN_1|ADD_1
  FCB 2
  CODE_DUP:
  LDA #5
@@ -4424,7 +5246,7 @@ STACK_END:
  WORD_SWAP:
  FCB 4, "SWAP"
  FDB WORD_DROP
- FCB FORTH_2ITEMS
+ FCB MIN_2
  FCB 4
  CODE_SWAP:
  LDA #6
@@ -4433,338 +5255,36 @@ STACK_END:
  WORD_DROP:
  FCB 4, "DROP"
  FDB WORD_OVER
- FCB FORTH_1ITEM
+ FCB MIN_1
  FCB 6
  CODE_DROP:
- LDA #7
+ TXA
+ CLC
+ ADC #OBJ_SIZE
+ TAX
+ DEC stack_count
  RTS
 
  WORD_OVER:
  FCB 4, "OVER"
  FDB 0
- FCB FORTH_2ITEMS
+ FCB MIN_2|ADD_1
  FCB 8
  CODE_OVER:
  LDA #8
  RTS
 
-%line 90+1 main.asm
+%line 93+1 main.asm
 
-
-
-
-
- MemCopy:
-
- source set ASSIGN_LOCAL_WORD
-%line 97+0 main.asm
- MemCopy.a0 set MemCopy.source
- dest set ASSIGN_LOCAL_WORD
- MemCopy.a1 set MemCopy.dest
-%line 98+1 main.asm
- count set ASSIGN_LOCAL_BYTE
-%line 98+0 main.asm
- MemCopy.a2 set MemCopy.count
-%line 99+1 main.asm
-
-
- LDY #0
- .loop:
- LDA (source),Y
- STA (dest),Y
- INY
- CPY count
- BNE .loop
- RTS
-
- ErrorMsg:
-
- msg set ASSIGN_LOCAL_WORD
-%line 112+0 main.asm
- ErrorMsg.a0 set ErrorMsg.msg
-%line 113+1 main.asm
-
-
- LDA #ERROR_X
- STA screen_ptr
- LDA #ERROR_Y
- STA screen_ptr+1
-
-%line 119+0 main.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@1179.str_skip
- ..@1179.str_addr:
- FCB "bbbbbbbbbbbb",0
- ..@1179.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@1179.str_addr) % 256
- STA LCD_print.a0
- LDA #(..@1179.str_addr) / 256
- STA LCD_print.a0+1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(FONT_NORMAL) % 256
- STA LCD_print.a1
-
-
-
-
-
-
-
-
-
- JSR LCD_print
-%line 120+1 main.asm
- LDA #ERROR_X
- STA screen_ptr
- LDA #ERROR_Y+CHAR_HEIGHT
- STA screen_ptr+1
-
-%line 124+0 main.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA msg
- STA LCD_print.a0
- LDA msg+1
- STA LCD_print.a0+1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(FONT_INVERTED) % 256
- STA LCD_print.a1
-
-
-
-
-
-
-
-
-
- JSR LCD_print
-%line 125+1 main.asm
- LDA #ERROR_X
- STA screen_ptr
- LDA #ERROR_Y+CHAR_HEIGHT*2
- STA screen_ptr+1
-
-%line 129+0 main.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@1238.str_skip
- ..@1238.str_addr:
- FCB "bbbbbbbbbbbb",0
- ..@1238.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@1238.str_addr) % 256
- STA LCD_print.a0
- LDA #(..@1238.str_addr) / 256
- STA LCD_print.a0+1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(FONT_INVERTED) % 256
- STA LCD_print.a1
-
-
-
-
-
-
-
-
-
- JSR LCD_print
-%line 130+1 main.asm
-
- .loop:
-
-%line 132+0 main.asm
-
-
-
-
-
-
-
-
-
- JSR ReadKey
-%line 133+1 main.asm
- CMP #KEY_ENTER
- BNE .loop
- RTS
- RTS
 
 
 
 
  BEGIN_FUNC set main
-%line 141+0 main.asm
+%line 98+0 main.asm
  main:
-%line 143+1 main.asm
- counter set ASSIGN_LOCAL_BYTE
+%line 100+1 main.asm
+ dest set ASSIGN_LOCAL_WORD
 
 
 
@@ -4774,7 +5294,7 @@ STACK_END:
  TXS
 
 
-%line 152+0 main.asm
+%line 109+0 main.asm
 
 
 
@@ -4785,11 +5305,11 @@ STACK_END:
 
 
  JSR setup
-%line 153+1 main.asm
+%line 110+1 main.asm
 
  .input_loop:
 
-%line 155+0 main.asm
+%line 112+0 main.asm
 
 
 
@@ -4800,9 +5320,9 @@ STACK_END:
 
 
  JSR DrawStack
-%line 156+1 main.asm
+%line 113+1 main.asm
 
-%line 156+0 main.asm
+%line 113+0 main.asm
 
 
 
@@ -4813,11 +5333,11 @@ STACK_END:
 
 
  JSR ReadLine
-%line 157+1 main.asm
+%line 114+1 main.asm
 
  .process_loop:
 
-%line 159+0 main.asm
+%line 116+0 main.asm
 
 
 
@@ -4828,12 +5348,12 @@ STACK_END:
 
 
  JSR LineWord
-%line 160+1 main.asm
+%line 117+1 main.asm
  LDA new_word_len
  BEQ .input_loop
 
 
-%line 163+0 main.asm
+%line 120+0 main.asm
 
 
 
@@ -4844,16 +5364,69 @@ STACK_END:
 
 
  JSR FindWord
-%line 164+1 main.asm
+%line 121+1 main.asm
  LDA ret_val
  ORA ret_val+1
  BEQ .not_found
 
- JMP .process_loop
+
+
+%line 126+0 main.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA ret_val
+ STA Execute.a0
+ LDA ret_val+1
+ STA Execute.a0+1
+
+
+
+
+
+
+
+
+
+ JSR Execute
+%line 127+1 main.asm
+ JMP .input_loop
  .not_found:
 
 
-%line 171+0 main.asm
+%line 130+0 main.asm
 
 
 
@@ -4864,12 +5437,12 @@ STACK_END:
 
 
  JSR CheckData
-%line 172+1 main.asm
+%line 131+1 main.asm
  LDA new_stack_item
  CMP #OBJ_ERROR
  BNE .input_good
 
-%line 175+0 main.asm
+%line 134+0 main.asm
 
 
 
@@ -4885,10 +5458,10 @@ STACK_END:
 
 
 
- JMP ..@1291.str_skip
- ..@1291.str_addr:
+ JMP ..@1480.str_skip
+ ..@1480.str_addr:
  FCB "INPUT ERROR ",0
- ..@1291.str_skip:
+ ..@1480.str_skip:
 
 
 
@@ -4913,9 +5486,9 @@ STACK_END:
 
 
 
- LDA #(..@1291.str_addr) % 256
+ LDA #(..@1480.str_addr) % 256
  STA ErrorMsg.a0
- LDA #(..@1291.str_addr) / 256
+ LDA #(..@1480.str_addr) / 256
  STA ErrorMsg.a0+1
 
 
@@ -4928,9 +5501,121 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 176+1 main.asm
+%line 135+1 main.asm
  JMP .input_loop
  .input_good:
+
+
+ TXA
+ SEC
+ SBC #OBJ_SIZE
+ TAX
+ INC stack_count
+
+ STA dest
+ LDA #0
+ STA dest+1
+
+%line 148+0 main.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(new_stack_item) % 256
+ STA MemCopy.a0
+ LDA #(new_stack_item) / 256
+ STA MemCopy.a0+1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA dest
+ STA MemCopy.a1
+ LDA dest+1
+ STA MemCopy.a1+1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(OBJ_SIZE) % 256
+ STA MemCopy.a2
+
+
+
+
+
+
+
+
+ JSR MemCopy
+%line 149+1 main.asm
 
  JMP .process_loop
 

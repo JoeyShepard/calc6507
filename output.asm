@@ -50,7 +50,8 @@
 			STA sign
 			CALL BCD_Reverse, #R0+1, #6
 		.positive:
-		CALL LCD_char,sign
+		
+		CALL LCD_char, sign
 				
 		LDY #6
 		LDA R0,Y
@@ -150,32 +151,66 @@
 			BYTE arg
 		END
 		
-		CALL LCD_print, "$", #FONT_NORMAL
+		CALL LCD_char, #'$'
 		
-		LDY #8
+		LDY #2
 		LDA (source),Y
 		STA arg
 		CALL HexHigh, arg
 		CALL HexLow, arg
-		LDY #7
+		LDY #1
 		LDA (source),Y
 		STA arg
 		CALL HexHigh, arg
 		CALL HexLow, arg
 	END
+	
+	FUNC DrawString
+		ARGS
+			WORD source
+		VARS
+			BYTE arg
+			BYTE index
+		END
+
+		CALL LCD_char, #CHAR_QUOTE
 		
+		LDA #1
+		STA index
+		.loop:
+			LDY index
+			LDA (source),Y
+			BEQ .done
+			STA arg
+			CALL LCD_char, arg
+			INC index
+			LDA index
+			CMP #9
+			BNE .loop
+		.done:
+		CALL LCD_char, #CHAR_QUOTE
+	END
+	
 	FUNC DrawStack
 		VARS
-			BYTE counter
 			BYTE character
+			BYTE counter
+			WORD address
 		END
 		
-		CALL LCD_clrscr
+		TXA
+		CLC
+		ADC #(4*OBJ_SIZE)
+		STA address
+		LDA #0
+		STA address+1
 		
-		CALL LCD_print, "RAD", #FONT_NORMAL
+		CALL LCD_clrscr
+		CALL LCD_print, "RAD"
 		
 		MOV #'5',character
-		MOV #211,counter
+		MOV #5,counter
+		
 		.loop:
 			LDA #0
 			STA screen_ptr
@@ -183,13 +218,40 @@
 			CLC
 			ADC #CHAR_HEIGHT
 			STA screen_ptr+1
-			CALL LCD_char,character
-			CALL LCD_char,#':'
+			CALL LCD_char, character
+			CALL LCD_char, #':'
+			
+			DEC counter
+			LDA counter
+			CMP stack_count
+			BCS .no_item
+				LDY #0
+				LDA (address),Y
+				CMP #OBJ_FLOAT
+				BNE .not_float
+					CALL DrawFloat, address
+					JMP .item_done
+				.not_float:
+				CMP #OBJ_STR
+				BNE .not_str
+					CALL DrawString, address
+					JMP .item_done
+				.not_str:
+				CMP #OBJ_HEX
+				BNE .not_hex
+					CALL DrawHex, address
+					JMP .item_done
+				.not_hex:
+				.item_done:
+			.no_item:
+			
+			LDA address
+			SEC
+			SBC #OBJ_SIZE
+			STA address
+			
 			DEC character
 			LDA counter
-			CLC
-			ADC #9
-			STA counter
 			BNE .loop
 		LDA #0
 		STA screen_ptr
@@ -208,4 +270,35 @@
 			INY
 			BNE .loop_line
 	END
+	
+	FUNC ErrorMsg
+		ARGS
+			STRING msg
+		END
+		
+		LDA #ERROR_X
+		STA screen_ptr
+		LDA #ERROR_Y
+		STA screen_ptr+1
+		CALL LCD_print, "bbbbbbbbbbbb"
+		LDA #ERROR_X
+		STA screen_ptr
+		LDA #ERROR_Y+CHAR_HEIGHT
+		STA screen_ptr+1
+		MOV.B #$FF,font_inverted
+		CALL LCD_print, msg
+		LDA #ERROR_X
+		STA screen_ptr
+		LDA #ERROR_Y+CHAR_HEIGHT*2
+		STA screen_ptr+1
+		CALL LCD_print, "bbbbbbbbbbbb"
+		MOV.B #0,font_inverted
+		
+		.loop:
+			CALL ReadKey
+			CMP #KEY_ENTER
+			BNE .loop
+		RTS
+	END
+	
 	

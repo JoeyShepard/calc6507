@@ -13,6 +13,8 @@
 ;	5 inputs for keyboard
 ;***1 PIN SHORT!***
 
+;Compare to bc for rounding
+
 
 
 ;Constants
@@ -54,14 +56,14 @@ LOCALS_END set		$1F
 	;Output
 	WORD screen_ptr
 	
-	R0: DFS 9
-	R1: DFS 9
-	R2: DFS 9
-	R3: DFS 9
-	R4: DFS 9
-	R5: DFS 9
-	R6: DFS 9
-	R7: DFS 9
+	R0: DFS OBJ_SIZE
+	R1: DFS OBJ_SIZE
+	R2: DFS OBJ_SIZE
+	R3: DFS OBJ_SIZE
+	R4: DFS OBJ_SIZE
+	R5: DFS OBJ_SIZE
+	R6: DFS OBJ_SIZE
+	R7: DFS OBJ_SIZE
 	
 STACK_END:
 	
@@ -85,70 +87,25 @@ STACK_END:
 	;include calc6507.asm
 	include emu6507.asm
 	
+	include system.asm
 	include math.asm
 	include output.asm
 	include forth.asm
 	
-	
-;System functions
-;================
-	FUNC MemCopy
-		ARGS
-			WORD source, dest
-			BYTE count
-		END
 		
-		LDY #0
-		.loop:
-			LDA (source),Y
-			STA (dest),Y
-			INY
-			CPY count
-			BNE .loop
-	END
-		
-	FUNC ErrorMsg
-		ARGS
-			STRING msg
-		END
-		
-		LDA #ERROR_X
-		STA screen_ptr
-		LDA #ERROR_Y
-		STA screen_ptr+1
-		CALL LCD_print, "bbbbbbbbbbbb", #FONT_NORMAL
-		LDA #ERROR_X
-		STA screen_ptr
-		LDA #ERROR_Y+CHAR_HEIGHT
-		STA screen_ptr+1
-		CALL LCD_print, msg, #FONT_INVERTED
-		LDA #ERROR_X
-		STA screen_ptr
-		LDA #ERROR_Y+CHAR_HEIGHT*2
-		STA screen_ptr+1
-		CALL LCD_print, "bbbbbbbbbbbb", #FONT_INVERTED
-		
-		.loop:
-			CALL ReadKey
-			CMP #KEY_ENTER
-			BNE .loop
-		RTS
-	END
-
-	
 ;Main function
 ;=============
 	FUNC main, begin
 		VARS
-			BYTE counter
+			WORD dest
 		END
-	
+		
 		;Only use bottom 48 bytes of stack
 		;May need a lot more for R stack
 		;Must come before any JSR
 		LDX #$2F
 		TXS
-				
+		
 		CALL setup
 		
 		.input_loop:
@@ -164,8 +121,10 @@ STACK_END:
 				LDA ret_val
 				ORA ret_val+1
 				BEQ .not_found
+					
 					;Word found
-					JMP .process_loop
+					CALL Execute,ret_val
+					JMP .input_loop
 				.not_found:
 		
 				CALL CheckData
@@ -175,7 +134,19 @@ STACK_END:
 					CALL ErrorMsg,"INPUT ERROR "
 					JMP .input_loop
 				.input_good:
+				
 				;add new data to stack
+				TXA
+				SEC
+				SBC #OBJ_SIZE
+				TAX
+				INC stack_count
+				
+				STA dest
+				LDA #0
+				STA dest+1
+				CALL MemCopy, #new_stack_item, dest, #OBJ_SIZE
+				
 				JMP .process_loop
 				
 	END

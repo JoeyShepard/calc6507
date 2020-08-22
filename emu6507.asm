@@ -16,6 +16,10 @@
 		
 		;Stack grows down
 		LDX #0
+		STX stack_count
+		
+		LDA #0
+		STA font_inverted
 		
 		;Emulator only!
 		MOV #BANK_GFX_RAM1,RAM_BANK2		
@@ -49,7 +53,7 @@
 
 	FUNC LCD_char
 		ARGS
-			BYTE c_out, inverted
+			BYTE c_out
 		VARS
 			WORD pixel_ptr
 			BYTE pixel_index
@@ -98,7 +102,7 @@
 			LDY pixel_index
 			INC pixel_index
 			LDA (pixel_ptr),Y
-			EOR inverted
+			EOR font_inverted
 			STA pixel
 			LDY #0
 			.loop.inner:
@@ -141,7 +145,6 @@
 	FUNC LCD_print
 		ARGS
 			STRING source
-			BYTE inverted
 		VARS
 			BYTE index, arg
 		END
@@ -153,7 +156,7 @@
 			LDA (source),Y
 			BEQ .done
 			STA arg
-			CALL LCD_char, arg, inverted
+			CALL LCD_char, arg
 			INC index
 			JMP .loop
 		.done:
