@@ -464,7 +464,7 @@
 					LDA exp_found
 					BNE .exp_digit
 						LDA digit_count
-						CMP #12
+						CMP #MAX_DIGITS
 						BNE .digit_ok
 							;max digits exceeded!
 							PLA
@@ -503,6 +503,7 @@
 						ORA new_stack_item+7
 						STA new_stack_item+7
 						INC index
+						INC digit_count
 						JMP .float_next
 			.float_not_digit:
 			
@@ -561,11 +562,21 @@
 			RTS
 		.float_done:
 		
+		;shift bytes if necessary
+		
+		
+		;invert exponent bytes if necessary
+		LDA exp_negative
+		BEQ .exp_not_negative
+			CALL BCD_Reverse, #new_stack_item+7, #2
+		.exp_not_negative:
+		
 		;adjust exponent
+		LDA exp_count
+		;BMI .float_dec_exp
 		
 		
 		
-		;invert bytes
 		
 		LDA #OBJ_FLOAT
 		STA new_stack_item

@@ -101,6 +101,7 @@ OBJ_SIZE = 9
 
 BUFF_SIZE = 64
 WORD_MAX_SIZE = 19
+MAX_DIGITS = 12
 
 
 KEY_BACKSPACE = 8
@@ -1059,7 +1060,7 @@ STACK_END:
  SBC (source),Y
  STA (source),Y
  INY
- CPY count
+ DEC count
  BNE .loop
  CLD
  RTS
@@ -5126,7 +5127,7 @@ STACK_END:
  LDA exp_found
  BNE .exp_digit
  LDA digit_count
- CMP #12
+ CMP #MAX_DIGITS
  BNE .digit_ok
 
  PLA
@@ -5165,6 +5166,7 @@ STACK_END:
  ORA new_stack_item+7
  STA new_stack_item+7
  INC index
+ INC digit_count
  JMP .float_next
  .float_not_digit:
 
@@ -5224,6 +5226,211 @@ STACK_END:
  .float_done:
 
 
+ LDA exp_negative
+ BEQ .exp_not_negative
+
+%line 568+0 forth.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(new_stack_item+7) % 256
+ STA BCD_Reverse.a0
+ LDA #(new_stack_item+7) / 256
+ STA BCD_Reverse.a0+1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(2) % 256
+ STA BCD_Reverse.a1
+
+
+
+
+
+
+
+
+
+ JSR BCD_Reverse
+%line 569+1 forth.asm
+ .exp_not_negative:
+
+
+ LDA exp_count
 
 
 
@@ -5290,19 +5497,19 @@ STACK_END:
  ExecToken:
 
  token set ASSIGN_LOCAL_BYTE
-%line 630+0 forth.asm
+%line 638+0 forth.asm
  ExecToken.a0 set ExecToken.token
  flags set ASSIGN_LOCAL_BYTE
  ExecToken.a1 set ExecToken.flags
-%line 631+1 forth.asm
+%line 639+1 forth.asm
  temp set ASSIGN_LOCAL_BYTE
-%line 631+0 forth.asm
+%line 639+0 forth.asm
  ExecToken.a2 set ExecToken.temp
-%line 632+1 forth.asm
+%line 640+1 forth.asm
  address set ASSIGN_LOCAL_WORD
-%line 632+0 forth.asm
+%line 640+0 forth.asm
  ExecToken.a3 set ExecToken.address
-%line 633+1 forth.asm
+%line 641+1 forth.asm
 
 
 
@@ -5507,12 +5714,6 @@ STACK_END:
  FCB 14
  CODE_CLEAR:
  FCB 0
-
- BRK
-%line 838+0 forth.asm
- BRK
-%line 839+1 forth.asm
-
  LDX #0
  STX stack_count
  RTS

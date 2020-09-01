@@ -26,6 +26,7 @@ OBJ_SIZE =				9
 ;Input buffer
 BUFF_SIZE =				64
 WORD_MAX_SIZE =			19	;-1.23456789012e-999
+MAX_DIGITS =			12
 
 ;Key constants
 KEY_BACKSPACE = 		8

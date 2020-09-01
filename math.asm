@@ -15,7 +15,7 @@
 			SBC (source),Y
 			STA (source),Y
 			INY
-			CPY count
+			DEC count
 			BNE .loop
 		CLD
 	END

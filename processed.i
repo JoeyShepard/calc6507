@@ -228,16 +228,16 @@ LCD_char:
  RTS
 LCD_print:
  LDA #$0
- STA $9 ;index
+ STA $A ;index
  .loop:
- LDY $9 ;index
- LDA ($7),Y ;source
+ LDY $A ;index
+ LDA ($8),Y ;source
  BEQ .done
- STA $A ;arg
- LDA $A ;arg
+ STA $B ;arg
+ LDA $B ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
- INC $9 ;index
+ INC $A ;index
  JMP .loop
  .done:
  RTS
@@ -259,7 +259,7 @@ BCD_Reverse:
  SBC ($E),Y ;source
  STA ($E),Y ;source
  INY
- CPY $10 ;count
+ DEC $10 ;count
  BNE .loop
  CLD
  RTS
@@ -478,9 +478,9 @@ DrawStack:
  FCB "RAD",$0
  .._913.str_skip:
  LDA # (.._913.str_addr) # $100
- STA $7 ;LCD_print.source
- LDA # (.._913.str_addr)/$100
  STA $8 ;LCD_print.source
+ LDA # (.._913.str_addr)/$100
+ STA $9 ;LCD_print.source
  JSR LCD_print
  LDA #$35
  STA $3 ;character
@@ -588,9 +588,9 @@ ErrorMsg:
  FCB "bbbbbbbbbbbb",$0
  .._1088.str_skip:
  LDA # (.._1088.str_addr) # $100
- STA $7 ;LCD_print.source
- LDA # (.._1088.str_addr)/$100
  STA $8 ;LCD_print.source
+ LDA # (.._1088.str_addr)/$100
+ STA $9 ;LCD_print.source
  JSR LCD_print
  LDA #$20
  STA screen_ptr
@@ -599,9 +599,9 @@ ErrorMsg:
  LDA #$FF
  STA font_inverted
  LDA $4 ;msg
- STA $7 ;LCD_print.source
- LDA $5 ;msg
  STA $8 ;LCD_print.source
+ LDA $5 ;msg
+ STA $9 ;LCD_print.source
  JSR LCD_print
  LDA #$20
  STA screen_ptr
@@ -612,9 +612,9 @@ ErrorMsg:
  FCB "bbbbbbbbbbbb",$0
  .._1142.str_skip:
  LDA # (.._1142.str_addr) # $100
- STA $7 ;LCD_print.source
- LDA # (.._1142.str_addr)/$100
  STA $8 ;LCD_print.source
+ LDA # (.._1142.str_addr)/$100
+ STA $9 ;LCD_print.source
  JSR LCD_print
  LDA #$0
  STA font_inverted
@@ -645,9 +645,9 @@ ReadLine:
  FCB "a               ",$0
  .._1193.str_skip:
  LDA # (.._1193.str_addr) # $100
- STA $7 ;LCD_print.source
- LDA # (.._1193.str_addr)/$100
  STA $8 ;LCD_print.source
+ LDA # (.._1193.str_addr)/$100
+ STA $9 ;LCD_print.source
  JSR LCD_print
  LDA $FFE6
  STA $4 ;cursor_timer
@@ -755,17 +755,17 @@ ReadLine:
  TYA
  SEC
  SBC #$E
- STA $B ;str_index
+ STA $7 ;str_index
  .scroll_loop:
- LDY $B ;str_index
- INC $B ;str_index
+ LDY $7 ;str_index
+ INC $7 ;str_index
  LDA input_buff,Y
  STA $5 ;arg
  LDA $5 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDA $6 ;index
- CMP $B ;str_index
+ CMP $7 ;str_index
  BNE .scroll_loop
  LDA screen_ptr
  PHA
@@ -1056,6 +1056,7 @@ CheckData:
  ORA new_stack_item+$7
  STA new_stack_item+$7
  INC $5 ;index
+ INC $D ;digit_count
  JMP .float_next
  .float_not_digit:
  CMP #$2E
@@ -1102,6 +1103,17 @@ CheckData:
  .not_minus:
  RTS
  .float_done:
+ LDA $8 ;exp_negative
+ BEQ .exp_not_negative
+ LDA # (new_stack_item+$7) # $100
+ STA $E ;BCD_Reverse.source
+ LDA # (new_stack_item+$7)/$100
+ STA $F ;BCD_Reverse.source
+ LDA #$2
+ STA $10 ;BCD_Reverse.count
+ JSR BCD_Reverse
+ .exp_not_negative:
+ LDA $9 ;exp_count
  LDA #$1
  STA new_stack_item
  RTS
@@ -1326,8 +1338,6 @@ WORD_CLEAR:
  FCB $E
 CODE_CLEAR:
  FCB $0
- BRK
- BRK
  LDX #$0
  STX stack_count
  RTS
