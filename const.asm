@@ -44,9 +44,6 @@ ERROR_STACK_UNDERFLOW =		8
 ;Input not recognized
 ERROR_INPUT =				10
 
-;Message codes
-MSG_INPUT_ERROR =			0
-
 
 ;Forth
 ;=====

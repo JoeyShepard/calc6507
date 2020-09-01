@@ -187,9 +187,9 @@
 	END
 	
 	FUNC LineWord
-		
+
 		LDA #ERROR_NONE
-		STA global_error
+		STA ret_val
 		
 		LDA #0
 		STA new_word_len
@@ -220,7 +220,7 @@
 				BNE .word_size_good
 					;Word too big to fit into 18 byte buffer
 					LDA #ERROR_WORD_TOO_LONG
-					STA global_error
+					STA ret_val
 					RTS
 				.word_size_good:
 				
@@ -559,9 +559,12 @@
 			
 			;character not recognized - invalid input!
 			RTS
-		
 		.float_done:
+		
 		;adjust exponent
+		
+		
+		
 		;invert bytes
 		
 		LDA #OBJ_FLOAT
@@ -696,11 +699,11 @@
 		CODE_DUP:
 			FCB MIN_1|ADD_1	;Flags
 			
-			LDY #9
+			LDY #OBJ_SIZE
 			TXA
 			PHA
 			.dup_loop:
-				LDA 9,X
+				LDA OBJ_SIZE,X
 				STA 0,X
 				INX
 				DEY
@@ -715,7 +718,22 @@
 		FCB 4				;ID
 		CODE_SWAP:
 			FCB MIN_2		;Flags
-			LDA #6			;Test
+			
+			LDY #OBJ_SIZE
+			TXA
+			PHA
+			.swap_loop:
+				LDA OBJ_SIZE,X
+				PHA
+				LDA 0,X
+				STA OBJ_SIZE,X
+				PLA
+				STA 0,X
+				INX
+				DEY
+				BNE .swap_loop
+			PLA
+			TAX
 			RTS	
 	
 	WORD_DROP:
@@ -724,6 +742,7 @@
 		FCB 6				;ID
 		CODE_DROP:
 			FCB MIN_1		;Flags
+			
 			TXA
 			CLC
 			ADC #OBJ_SIZE
@@ -733,12 +752,92 @@
 	
 	WORD_OVER:
 		FCB 4, "OVER" 		;Name
-		FDB	0				;Next word
+		FDB	WORD_ROT		;Next word
 		FCB 8				;ID
 		CODE_OVER:
-			FCB MIN_2|ADD_1	;Flags		
-			LDA #8			;Test
+			FCB MIN_2|ADD_1	;Flags
+			
+			LDY #OBJ_SIZE
+			TXA
+			PHA
+			.over_loop:
+				LDA OBJ_SIZE*2,X
+				STA 0,X
+				INX
+				DEY
+				BNE .over_loop
+			PLA
+			TAX
 			RTS
+			
+	WORD_ROT:
+		FCB 3, "ROT" 		;Name
+		FDB	WORD_MIN_ROT	;Next word
+		FCB 10				;ID
+		CODE_ROT:
+			FCB MIN_3		;Flags
+			
+			LDY #OBJ_SIZE
+			TXA
+			PHA
+			.rot_loop:
+				LDA OBJ_SIZE*2,X
+				PHA
+				LDA OBJ_SIZE,X
+				PHA
+				LDA 0,X
+				STA OBJ_SIZE,X
+				PLA 
+				STA OBJ_SIZE*2,X
+				PLA 
+				STA 0,X
+				
+				INX
+				DEY
+				BNE .rot_loop
+			PLA
+			TAX
+			RTS
+	
+	WORD_MIN_ROT:
+		FCB 4, "-ROT" 		;Name
+		FDB	WORD_CLEAR		;Next word
+		FCB 12				;ID
+		CODE_MIN_ROT:
+			FCB MIN_3		;Flags
+			
+			LDY #OBJ_SIZE
+			TXA
+			PHA
+			.min_rot_loop:
+				LDA OBJ_SIZE*2,X
+				PHA
+				LDA OBJ_SIZE,X
+				PHA
+				LDA 0,X
+				STA OBJ_SIZE*2,X
+				PLA 
+				STA 0,X
+				PLA 
+				STA OBJ_SIZE,X
+				
+				INX
+				DEY
+				BNE .min_rot_loop
+			PLA
+			TAX
+			RTS
+	
+	WORD_CLEAR:
+		FCB 5,"CLEAR"
+		FDB 0
+		FCB 14
+		CODE_CLEAR:
+			FCB 0			;Flags
+			LDX #0
+			STX stack_count
+			RTS
+	
 	
 	JUMP_TABLE:
 		FDB 0				;0 - reserved
@@ -746,5 +845,8 @@
 		FDB CODE_SWAP		;4
 		FDB CODE_DROP		;6
 		FDB CODE_OVER		;8
+		FDB CODE_ROT		;10
+		FDB CODE_MIN_ROT	;12
+		FDB CODE_CLEAR		;14
 		
 		

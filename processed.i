@@ -381,7 +381,7 @@ DrawFloat:
  JSR DigitLow
  RTS
 HexHigh:
- LDA $A ;digit
+ LDA $7 ;digit
  LSR
  LSR
  LSR
@@ -390,32 +390,32 @@ HexHigh:
  BCC .print_digit
  CLC
  ADC #$37
- STA $B ;arg
+ STA $8 ;arg
  JMP .done
  .print_digit:
  CLC
  ADC #$30
- STA $B ;arg
+ STA $8 ;arg
  .done:
- LDA $B ;arg
+ LDA $8 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
 HexLow:
- LDA $A ;digit
+ LDA $7 ;digit
  AND #$F
  CMP #$A
  BCC .print_digit
  CLC
  ADC #$37
- STA $B ;arg
+ STA $8 ;arg
  JMP .done
  .print_digit:
  CLC
  ADC #$30
- STA $B ;arg
+ STA $8 ;arg
  .done:
- LDA $B ;arg
+ LDA $8 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
@@ -424,22 +424,22 @@ DrawHex:
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDY #$2
- LDA ($7),Y ;source
- STA $9 ;arg
- LDA $9 ;arg
- STA $A ;HexHigh.digit
+ LDA ($9),Y ;source
+ STA $B ;arg
+ LDA $B ;arg
+ STA $7 ;HexHigh.digit
  JSR HexHigh
- LDA $9 ;arg
- STA $A ;HexLow.digit
+ LDA $B ;arg
+ STA $7 ;HexLow.digit
  JSR HexLow
  LDY #$1
- LDA ($7),Y ;source
- STA $9 ;arg
- LDA $9 ;arg
- STA $A ;HexHigh.digit
+ LDA ($9),Y ;source
+ STA $B ;arg
+ LDA $B ;arg
+ STA $7 ;HexHigh.digit
  JSR HexHigh
- LDA $9 ;arg
- STA $A ;HexLow.digit
+ LDA $B ;arg
+ STA $7 ;HexLow.digit
  JSR HexLow
  RTS
 DrawString:
@@ -526,9 +526,9 @@ DrawStack:
  CMP #$3
  BNE .not_hex
  LDA $5 ;address
- STA $7 ;DrawHex.source
+ STA $9 ;DrawHex.source
  LDA $6 ;address
- STA $8 ;DrawHex.source
+ STA $A ;DrawHex.source
  JSR DrawHex
  JMP .item_done
  .not_hex:
@@ -806,7 +806,7 @@ ReadLine:
  RTS
 LineWord:
  LDA #$0
- STA global_error
+ STA ret_val
  LDA #$0
  STA new_word_len
  LDY input_buff_begin
@@ -831,7 +831,7 @@ LineWord:
  CPY #$13
  BNE .word_size_good
  LDA #$4
- STA global_error
+ STA ret_val
  RTS
  .word_size_good:
  .chars_left2:
@@ -1204,8 +1204,6 @@ WORD_DUP:
  FCB $2
 CODE_DUP:
  FCB $5
- BRK
- BRK
  LDY #$9
  TXA
  PHA
@@ -1224,7 +1222,21 @@ WORD_SWAP:
  FCB $4
 CODE_SWAP:
  FCB $2
- LDA #$6
+ LDY #$9
+ TXA
+ PHA
+ .swap_loop:
+ LDA $9,X
+ PHA
+ LDA $0,X
+ STA $9,X
+ PLA
+ STA $0,X
+ INX
+ DEY
+ BNE .swap_loop
+ PLA
+ TAX
  RTS
 WORD_DROP:
  FCB $4,"DROP"
@@ -1240,11 +1252,84 @@ CODE_DROP:
  RTS
 WORD_OVER:
  FCB $4,"OVER"
- FDB $0
+ FDB WORD_ROT
  FCB $8
 CODE_OVER:
  FCB $6
- LDA #$8
+ LDY #$9
+ TXA
+ PHA
+ .over_loop:
+ LDA $12,X
+ STA $0,X
+ INX
+ DEY
+ BNE .over_loop
+ PLA
+ TAX
+ RTS
+WORD_ROT:
+ FCB $3,"ROT"
+ FDB WORD_MIN_ROT
+ FCB $A
+CODE_ROT:
+ FCB $3
+ LDY #$9
+ TXA
+ PHA
+ .rot_loop:
+ LDA $12,X
+ PHA
+ LDA $9,X
+ PHA
+ LDA $0,X
+ STA $9,X
+ PLA
+ STA $12,X
+ PLA
+ STA $0,X
+ INX
+ DEY
+ BNE .rot_loop
+ PLA
+ TAX
+ RTS
+WORD_MIN_ROT:
+ FCB $4,"-ROT"
+ FDB WORD_CLEAR
+ FCB $C
+CODE_MIN_ROT:
+ FCB $3
+ LDY #$9
+ TXA
+ PHA
+ .min_rot_loop:
+ LDA $12,X
+ PHA
+ LDA $9,X
+ PHA
+ LDA $0,X
+ STA $12,X
+ PLA
+ STA $0,X
+ PLA
+ STA $9,X
+ INX
+ DEY
+ BNE .min_rot_loop
+ PLA
+ TAX
+ RTS
+WORD_CLEAR:
+ FCB $5,"CLEAR"
+ FDB $0
+ FCB $E
+CODE_CLEAR:
+ FCB $0
+ BRK
+ BRK
+ LDX #$0
+ STX stack_count
  RTS
 JUMP_TABLE:
  FDB $0
@@ -1252,6 +1337,9 @@ JUMP_TABLE:
  FDB CODE_SWAP
  FDB CODE_DROP
  FDB CODE_OVER
+ FDB CODE_ROT
+ FDB CODE_MIN_ROT
+ FDB CODE_CLEAR
 main:
  LDX #$2F
  TXS
@@ -1283,7 +1371,7 @@ main:
  LDA new_stack_item
  CMP #$4
  BNE .input_good
- LDA #$0
+ LDA #$2
  STA $3 ;ErrorMsg.error_code
  JSR ErrorMsg
  JMP .input_loop

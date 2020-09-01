@@ -137,7 +137,7 @@ STACK_END:
 				LDA new_stack_item
 				CMP #OBJ_ERROR
 				BNE .input_good
-					CALL ErrorMsg,#MSG_INPUT_ERROR
+					CALL ErrorMsg,#ERROR_INPUT
 					JMP .input_loop
 				.input_good:
 				

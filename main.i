@@ -120,9 +120,6 @@ ERROR_STACK_UNDERFLOW = 8
 ERROR_INPUT = 10
 
 
-MSG_INPUT_ERROR = 0
-
-
 
 
 
@@ -4830,7 +4827,7 @@ STACK_END:
  LineWord:
 
  LDA #ERROR_NONE
- STA global_error
+ STA ret_val
 
  LDA #0
  STA new_word_len
@@ -4861,7 +4858,7 @@ STACK_END:
  BNE .word_size_good
 
  LDA #ERROR_WORD_TOO_LONG
- STA global_error
+ STA ret_val
  RTS
  .word_size_good:
 
@@ -5224,8 +5221,11 @@ STACK_END:
 
 
  RTS
-
  .float_done:
+
+
+
+
 
 
 
@@ -5290,19 +5290,19 @@ STACK_END:
  ExecToken:
 
  token set ASSIGN_LOCAL_BYTE
-%line 627+0 forth.asm
+%line 630+0 forth.asm
  ExecToken.a0 set ExecToken.token
  flags set ASSIGN_LOCAL_BYTE
  ExecToken.a1 set ExecToken.flags
-%line 628+1 forth.asm
+%line 631+1 forth.asm
  temp set ASSIGN_LOCAL_BYTE
-%line 628+0 forth.asm
+%line 631+0 forth.asm
  ExecToken.a2 set ExecToken.temp
-%line 629+1 forth.asm
+%line 632+1 forth.asm
  address set ASSIGN_LOCAL_WORD
-%line 629+0 forth.asm
+%line 632+0 forth.asm
  ExecToken.a3 set ExecToken.address
-%line 630+1 forth.asm
+%line 633+1 forth.asm
 
 
 
@@ -5372,16 +5372,11 @@ STACK_END:
  CODE_DUP:
  FCB MIN_1|ADD_1
 
- BRK
-%line 699+0 forth.asm
- BRK
-%line 700+1 forth.asm
-
- LDY #9
+ LDY #OBJ_SIZE
  TXA
  PHA
  .dup_loop:
- LDA 9,X
+ LDA OBJ_SIZE,X
  STA 0,X
  INX
  DEY
@@ -5396,7 +5391,22 @@ STACK_END:
  FCB 4
  CODE_SWAP:
  FCB MIN_2
- LDA #6
+
+ LDY #OBJ_SIZE
+ TXA
+ PHA
+ .swap_loop:
+ LDA OBJ_SIZE,X
+ PHA
+ LDA 0,X
+ STA OBJ_SIZE,X
+ PLA
+ STA 0,X
+ INX
+ DEY
+ BNE .swap_loop
+ PLA
+ TAX
  RTS
 
  WORD_DROP:
@@ -5405,6 +5415,7 @@ STACK_END:
  FCB 6
  CODE_DROP:
  FCB MIN_1
+
  TXA
  CLC
  ADC #OBJ_SIZE
@@ -5414,12 +5425,98 @@ STACK_END:
 
  WORD_OVER:
  FCB 4, "OVER"
- FDB 0
+ FDB WORD_ROT
  FCB 8
  CODE_OVER:
  FCB MIN_2|ADD_1
- LDA #8
+
+ LDY #OBJ_SIZE
+ TXA
+ PHA
+ .over_loop:
+ LDA OBJ_SIZE*2,X
+ STA 0,X
+ INX
+ DEY
+ BNE .over_loop
+ PLA
+ TAX
  RTS
+
+ WORD_ROT:
+ FCB 3, "ROT"
+ FDB WORD_MIN_ROT
+ FCB 10
+ CODE_ROT:
+ FCB MIN_3
+
+ LDY #OBJ_SIZE
+ TXA
+ PHA
+ .rot_loop:
+ LDA OBJ_SIZE*2,X
+ PHA
+ LDA OBJ_SIZE,X
+ PHA
+ LDA 0,X
+ STA OBJ_SIZE,X
+ PLA
+ STA OBJ_SIZE*2,X
+ PLA
+ STA 0,X
+
+ INX
+ DEY
+ BNE .rot_loop
+ PLA
+ TAX
+ RTS
+
+ WORD_MIN_ROT:
+ FCB 4, "-ROT"
+ FDB WORD_CLEAR
+ FCB 12
+ CODE_MIN_ROT:
+ FCB MIN_3
+
+ LDY #OBJ_SIZE
+ TXA
+ PHA
+ .min_rot_loop:
+ LDA OBJ_SIZE*2,X
+ PHA
+ LDA OBJ_SIZE,X
+ PHA
+ LDA 0,X
+ STA OBJ_SIZE*2,X
+ PLA
+ STA 0,X
+ PLA
+ STA OBJ_SIZE,X
+
+ INX
+ DEY
+ BNE .min_rot_loop
+ PLA
+ TAX
+ RTS
+
+ WORD_CLEAR:
+ FCB 5,"CLEAR"
+ FDB 0
+ FCB 14
+ CODE_CLEAR:
+ FCB 0
+
+ BRK
+%line 838+0 forth.asm
+ BRK
+%line 839+1 forth.asm
+
+ LDX #0
+ STX stack_count
+ RTS
+
 
  JUMP_TABLE:
  FDB 0
@@ -5427,6 +5524,9 @@ STACK_END:
  FDB CODE_SWAP
  FDB CODE_DROP
  FDB CODE_OVER
+ FDB CODE_ROT
+ FDB CODE_MIN_ROT
+ FDB CODE_CLEAR
 
 
 %line 93+1 main.asm
@@ -5704,7 +5804,7 @@ STACK_END:
 
 
 
- LDA #(MSG_INPUT_ERROR) % 256
+ LDA #(ERROR_INPUT) % 256
  STA ErrorMsg.a0
 
 
