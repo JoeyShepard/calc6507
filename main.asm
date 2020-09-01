@@ -98,6 +98,7 @@ STACK_END:
 	FUNC main, begin
 		VARS
 			WORD dest
+			BYTE arg
 		END
 		
 		;Only use bottom 48 bytes of stack
@@ -119,30 +120,39 @@ STACK_END:
 			
 				CALL FindWord
 				LDA ret_val
-				ORA ret_val+1
 				BEQ .not_found
-					
+				
 					;Word found
-					CALL Execute,ret_val
-					JMP .input_loop
+					CALL ExecToken,ret_val
+					LDA ret_val
+					BEQ .no_exec_error
+						STA arg
+						CALL ErrorMsg,arg
+						JMP .input_loop
+					.no_exec_error:
+					JMP .process_loop
 				.not_found:
 		
 				CALL CheckData
 				LDA new_stack_item
 				CMP #OBJ_ERROR
 				BNE .input_good
-					CALL ErrorMsg,"INPUT ERROR "
+					CALL ErrorMsg,#MSG_INPUT_ERROR
 					JMP .input_loop
 				.input_good:
 				
-				;add new data to stack
-				TXA
-				SEC
-				SBC #OBJ_SIZE
-				TAX
-				INC stack_count
+				;Check stack size
+				LDA #STACK_SIZE-1
+				CMP stack_count
+				BCS .no_overflow
+					CALL ErrorMsg,#ERROR_STACK_OVERFLOW
+					JMP .input_loop
+				.no_overflow:
 				
-				STA dest
+				;add new data to stack
+				JSR StackAddItem
+				
+				STX dest
 				LDA #0
 				STA dest+1
 				CALL MemCopy, #new_stack_item, dest, #OBJ_SIZE

@@ -109,9 +109,18 @@ KEY_ESCAPE = 27
 
 
 ERROR_NONE = 0
-ERROR_WORD_TOO_LONG = 1
+ERROR_WORD_TOO_LONG = 2
 
-ERROR_STRING = 2
+ERROR_STRING = 4
+
+
+ERROR_STACK_OVERFLOW = 6
+ERROR_STACK_UNDERFLOW = 8
+
+ERROR_INPUT = 10
+
+
+MSG_INPUT_ERROR = 0
 
 
 
@@ -121,6 +130,8 @@ ERROR_STRING = 2
  MIN_2 = 2
  MIN_3 = 3
  ADD_1 = 4
+
+ STACK_SIZE = 8
 %line 23+1 main.asm
 
 
@@ -3650,20 +3661,60 @@ STACK_END:
  BNE .loop_line
  RTS
 
+
+
+ ERROR_NONE = 0
+ ERROR_INPUT = 2
+ ERROR_WORD_TOO_LONG = 4
+ ERROR_STRING = 6
+ ERROR_STACK_OVERFLOW = 8
+ ERROR_STACK_UNDERFLOW = 10
+
+
+
+ ERROR_MSG_INPUT:
+ FCB "INPUT ERROR ",0
+ ERROR_MSG_WORD_TOO_LONG:
+ FCB "INPUT SIZE  ",0
+ ERROR_MSG_STRING:
+ FCB "STRING ERROR",0
+ ERROR_MSG_STACK_OVERFLOW:
+ FCB "STACK OVERF ",0
+ ERROR_MSG_STACK_UNDERFLOW:
+ FCB "STACK UNDERF",0
+
+ ERROR_TABLE:
+ FDB ERROR_MSG_INPUT
+ FDB ERROR_MSG_WORD_TOO_LONG
+ FDB ERROR_MSG_STRING
+ FDB ERROR_MSG_STACK_OVERFLOW
+ FDB ERROR_MSG_STACK_UNDERFLOW
+
+
  ErrorMsg:
 
+ error_code set ASSIGN_LOCAL_BYTE
+%line 306+0 output.asm
+ ErrorMsg.a0 set ErrorMsg.error_code
+%line 307+1 output.asm
  msg set ASSIGN_LOCAL_WORD
-%line 276+0 output.asm
- ErrorMsg.a0 set ErrorMsg.msg
-%line 277+1 output.asm
+%line 307+0 output.asm
+ ErrorMsg.a1 set ErrorMsg.msg
+%line 308+1 output.asm
 
+
+ LDY error_code
+ LDA ERROR_TABLE-2,Y
+ STA msg
+ LDA ERROR_TABLE-1,Y
+ STA msg+1
 
  LDA #ERROR_X
  STA screen_ptr
  LDA #ERROR_Y
  STA screen_ptr+1
 
-%line 283+0 output.asm
+%line 320+0 output.asm
 
 
 
@@ -3679,10 +3730,10 @@ STACK_END:
 
 
 
- JMP ..@1087.str_skip
- ..@1087.str_addr:
+ JMP ..@1088.str_skip
+ ..@1088.str_addr:
  FCB "bbbbbbbbbbbb",0
- ..@1087.str_skip:
+ ..@1088.str_skip:
 
 
 
@@ -3707,9 +3758,15 @@ STACK_END:
 
 
 
- LDA #(..@1087.str_addr) % 256
+
+
+
+
+
+
+ LDA #(..@1088.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1087.str_addr) / 256
+ LDA #(..@1088.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -3722,13 +3779,19 @@ STACK_END:
 
 
  JSR LCD_print
-%line 284+1 output.asm
+%line 321+1 output.asm
  LDA #ERROR_X
  STA screen_ptr
  LDA #ERROR_Y+CHAR_HEIGHT
  STA screen_ptr+1
 
-%line 288+0 output.asm
+%line 325+0 output.asm
+
+
+
+
+
+
 
 
 
@@ -3751,9 +3814,21 @@ STACK_END:
  LDA #($FF) % 256
  STA font_inverted
 
-%line 289+1 output.asm
+%line 326+1 output.asm
 
-%line 289+0 output.asm
+%line 326+0 output.asm
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3800,13 +3875,13 @@ STACK_END:
 
 
  JSR LCD_print
-%line 290+1 output.asm
+%line 327+1 output.asm
  LDA #ERROR_X
  STA screen_ptr
  LDA #ERROR_Y+CHAR_HEIGHT*2
  STA screen_ptr+1
 
-%line 294+0 output.asm
+%line 331+0 output.asm
 
 
 
@@ -3822,10 +3897,10 @@ STACK_END:
 
 
 
- JMP ..@1137.str_skip
- ..@1137.str_addr:
+ JMP ..@1142.str_skip
+ ..@1142.str_addr:
  FCB "bbbbbbbbbbbb",0
- ..@1137.str_skip:
+ ..@1142.str_skip:
 
 
 
@@ -3850,9 +3925,15 @@ STACK_END:
 
 
 
- LDA #(..@1137.str_addr) % 256
+
+
+
+
+
+
+ LDA #(..@1142.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1137.str_addr) / 256
+ LDA #(..@1142.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -3865,9 +3946,15 @@ STACK_END:
 
 
  JSR LCD_print
-%line 295+1 output.asm
+%line 332+1 output.asm
 
-%line 295+0 output.asm
+%line 332+0 output.asm
+
+
+
+
+
+
 
 
 
@@ -3890,11 +3977,11 @@ STACK_END:
  LDA #(0) % 256
  STA font_inverted
 
-%line 296+1 output.asm
+%line 333+1 output.asm
 
  .loop:
 
-%line 298+0 output.asm
+%line 335+0 output.asm
 
 
 
@@ -3905,7 +3992,7 @@ STACK_END:
 
 
  JSR ReadKey
-%line 299+1 output.asm
+%line 336+1 output.asm
  CMP #KEY_ENTER
  BNE .loop
  RTS
@@ -3966,10 +4053,10 @@ STACK_END:
 
 
 
- JMP ..@1186.str_skip
- ..@1186.str_addr:
+ JMP ..@1193.str_skip
+ ..@1193.str_addr:
  FCB "a               ",0
- ..@1186.str_skip:
+ ..@1193.str_skip:
 
 
 
@@ -4018,9 +4105,9 @@ STACK_END:
 
 
 
- LDA #(..@1186.str_addr) % 256
+ LDA #(..@1193.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1186.str_addr) / 256
+ LDA #(..@1193.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -4845,21 +4932,16 @@ STACK_END:
  BNE .loop
 
  STA ret_val
- STA ret_val+1
+ RTS
  .word_found:
-
-
-
-
-
-
-
-
-
-
-
-
-
+ LDY #0
+ LDA (ret_val),Y
+ TAY
+ INY
+ INY
+ INY
+ LDA (ret_val),Y
+ STA ret_val
  RTS
 
  CheckData:
@@ -5205,29 +5287,78 @@ STACK_END:
 
  RTS
 
- Execute:
+ ExecToken:
 
+ token set ASSIGN_LOCAL_BYTE
+%line 627+0 forth.asm
+ ExecToken.a0 set ExecToken.token
+ flags set ASSIGN_LOCAL_BYTE
+ ExecToken.a1 set ExecToken.flags
+%line 628+1 forth.asm
+ temp set ASSIGN_LOCAL_BYTE
+%line 628+0 forth.asm
+ ExecToken.a2 set ExecToken.temp
+%line 629+1 forth.asm
  address set ASSIGN_LOCAL_WORD
-%line 632+0 forth.asm
- Execute.a0 set Execute.address
-%line 633+1 forth.asm
+%line 629+0 forth.asm
+ ExecToken.a3 set ExecToken.address
+%line 630+1 forth.asm
 
 
+
+ LDA #ERROR_NONE
+ STA ret_val
+
+ LDY token
+ LDA JUMP_TABLE,Y
+ STA address
+ LDA JUMP_TABLE+1,Y
+ STA address+1
  LDY #0
  LDA (address),Y
- CLC
- ADC #4
- ADC address
- TAY
- LDA #0
- ADC address+1
+ BEQ .no_flags
+ STA flags
+
+
+ AND #MIN_3
+ STA temp
+ LDA stack_count
+ CMP temp
+ BCS .no_underflow
+ LDA #ERROR_STACK_UNDERFLOW
+ STA ret_val
+ RTS
+ .no_underflow:
+
+
+ LDA flags
+ AND #ADD_1
+ BEQ .no_add_item
+ LDA #STACK_SIZE-1
+ CMP stack_count
+ BCS .no_overflow
+ LDA #ERROR_STACK_OVERFLOW
+ STA ret_val
+ RTS
+ .no_overflow:
+ JSR StackAddItem
+ .no_add_item:
+ .no_flags:
+
+
+ LDA address+1
  PHA
- TYA
+ LDA address
  PHA
+ RTS
+ RTS
 
-
-
-
+ StackAddItem:
+ TXA
+ SEC
+ SBC #OBJ_SIZE
+ TAX
+ INC stack_count
  RTS
 
 
@@ -5237,27 +5368,43 @@ STACK_END:
  WORD_DUP:
  FCB 3, "DUP"
  FDB WORD_SWAP
- FCB MIN_1|ADD_1
  FCB 2
  CODE_DUP:
- LDA #5
+ FCB MIN_1|ADD_1
+
+ BRK
+%line 699+0 forth.asm
+ BRK
+%line 700+1 forth.asm
+
+ LDY #9
+ TXA
+ PHA
+ .dup_loop:
+ LDA 9,X
+ STA 0,X
+ INX
+ DEY
+ BNE .dup_loop
+ PLA
+ TAX
  RTS
 
  WORD_SWAP:
  FCB 4, "SWAP"
  FDB WORD_DROP
- FCB MIN_2
  FCB 4
  CODE_SWAP:
+ FCB MIN_2
  LDA #6
  RTS
 
  WORD_DROP:
  FCB 4, "DROP"
  FDB WORD_OVER
- FCB MIN_1
  FCB 6
  CODE_DROP:
+ FCB MIN_1
  TXA
  CLC
  ADC #OBJ_SIZE
@@ -5268,11 +5415,19 @@ STACK_END:
  WORD_OVER:
  FCB 4, "OVER"
  FDB 0
- FCB MIN_2|ADD_1
  FCB 8
  CODE_OVER:
+ FCB MIN_2|ADD_1
  LDA #8
  RTS
+
+ JUMP_TABLE:
+ FDB 0
+ FDB CODE_DUP
+ FDB CODE_SWAP
+ FDB CODE_DROP
+ FDB CODE_OVER
+
 
 %line 93+1 main.asm
 
@@ -5285,6 +5440,7 @@ STACK_END:
  main:
 %line 100+1 main.asm
  dest set ASSIGN_LOCAL_WORD
+ arg set ASSIGN_LOCAL_BYTE
 
 
 
@@ -5294,7 +5450,7 @@ STACK_END:
  TXS
 
 
-%line 109+0 main.asm
+%line 110+0 main.asm
 
 
 
@@ -5305,22 +5461,9 @@ STACK_END:
 
 
  JSR setup
-%line 110+1 main.asm
+%line 111+1 main.asm
 
  .input_loop:
-
-%line 112+0 main.asm
-
-
-
-
-
-
-
-
-
- JSR DrawStack
-%line 113+1 main.asm
 
 %line 113+0 main.asm
 
@@ -5332,12 +5475,25 @@ STACK_END:
 
 
 
- JSR ReadLine
+ JSR DrawStack
 %line 114+1 main.asm
+
+%line 114+0 main.asm
+
+
+
+
+
+
+
+
+
+ JSR ReadLine
+%line 115+1 main.asm
 
  .process_loop:
 
-%line 116+0 main.asm
+%line 117+0 main.asm
 
 
 
@@ -5348,12 +5504,12 @@ STACK_END:
 
 
  JSR LineWord
-%line 117+1 main.asm
+%line 118+1 main.asm
  LDA new_word_len
  BEQ .input_loop
 
 
-%line 120+0 main.asm
+%line 121+0 main.asm
 
 
 
@@ -5364,9 +5520,8 @@ STACK_END:
 
 
  JSR FindWord
-%line 121+1 main.asm
+%line 122+1 main.asm
  LDA ret_val
- ORA ret_val+1
  BEQ .not_found
 
 
@@ -5407,10 +5562,19 @@ STACK_END:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
  LDA ret_val
- STA Execute.a0
- LDA ret_val+1
- STA Execute.a0+1
+ STA ExecToken.a0
 
 
 
@@ -5420,11 +5584,11 @@ STACK_END:
 
 
 
- JSR Execute
+ JSR ExecToken
 %line 127+1 main.asm
- JMP .input_loop
- .not_found:
-
+ LDA ret_val
+ BEQ .no_exec_error
+ STA arg
 
 %line 130+0 main.asm
 
@@ -5436,32 +5600,70 @@ STACK_END:
 
 
 
- JSR CheckData
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA arg
+ STA ErrorMsg.a0
+
+
+
+
+
+
+
+
+
+ JSR ErrorMsg
 %line 131+1 main.asm
+ JMP .input_loop
+ .no_exec_error:
+ JMP .process_loop
+ .not_found:
+
+
+%line 136+0 main.asm
+
+
+
+
+
+
+
+
+
+ JSR CheckData
+%line 137+1 main.asm
  LDA new_stack_item
  CMP #OBJ_ERROR
  BNE .input_good
 
-%line 134+0 main.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@1480.str_skip
- ..@1480.str_addr:
- FCB "INPUT ERROR ",0
- ..@1480.str_skip:
+%line 140+0 main.asm
 
 
 
@@ -5486,10 +5688,24 @@ STACK_END:
 
 
 
- LDA #(..@1480.str_addr) % 256
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(MSG_INPUT_ERROR) % 256
  STA ErrorMsg.a0
- LDA #(..@1480.str_addr) / 256
- STA ErrorMsg.a0+1
 
 
 
@@ -5501,22 +5717,87 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 135+1 main.asm
+%line 141+1 main.asm
  JMP .input_loop
  .input_good:
 
 
- TXA
- SEC
- SBC #OBJ_SIZE
- TAX
- INC stack_count
+ LDA #STACK_SIZE-1
+ CMP stack_count
+ BCS .no_overflow
 
- STA dest
+%line 148+0 main.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(ERROR_STACK_OVERFLOW) % 256
+ STA ErrorMsg.a0
+
+
+
+
+
+
+
+
+
+
+ JSR ErrorMsg
+%line 149+1 main.asm
+ JMP .input_loop
+ .no_overflow:
+
+
+ JSR StackAddItem
+
+ STX dest
  LDA #0
  STA dest+1
 
-%line 148+0 main.asm
+%line 158+0 main.asm
+
+
+
+
+
+
 
 
 
@@ -5579,10 +5860,28 @@ STACK_END:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
  LDA dest
  STA MemCopy.a1
  LDA dest+1
  STA MemCopy.a1+1
+
+
+
+
+
+
 
 
 
@@ -5615,7 +5914,7 @@ STACK_END:
 
 
  JSR MemCopy
-%line 149+1 main.asm
+%line 159+1 main.asm
 
  JMP .process_loop
 

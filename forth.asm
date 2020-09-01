@@ -267,21 +267,16 @@
 			BNE .loop
 			;Done searching - zero ret_val
 			STA ret_val
-			STA ret_val+1
+			RTS
 		.word_found:
-			;ret_val contains base address of word
-			
-			;Can't work backwards to get name from token if point to flags
-			;LDY #0
-			;LDA (ret_val),Y
-			;CLC
-			;ADC #3		;point past name and next word to flags
-			;ADC ret_val
-			;STA ret_val
-			;LDA ret_val+1
-			;ADC #0
-			;STA ret_val+1
-			;ret_val now points to flags
+		LDY #0
+		LDA (ret_val),Y
+		TAY
+		INY
+		INY
+		INY		;point past header
+		LDA (ret_val),Y
+		STA ret_val
 	END
 	
 	FUNC CheckData
@@ -627,46 +622,67 @@
 			
 	END
 	
-	FUNC GetToken
-		ARGS
-			WORD address
-		END
-	END
-	
 	FUNC ExecToken
 		ARGS
-			BYTE token
+			BYTE token, flags
+			BYTE temp
+			WORD address
 		END
 		
-		halt
+		;No error unless set below
+		LDA #ERROR_NONE
+		STA ret_val
 		
-		start here - cant rely on this address to execute
-		will be relying on token to execute, so look up token then do this
-		
-		;check flags before 
-		;LDY #0
-		;LDA (address),Y
-		;TAY
-		;INY
-		;INY
-		;LDA (address),Y
-		
-		;Needs to be modified for flag byte at beginning of code
+		LDY token
+		LDA JUMP_TABLE,Y
+		STA address
+		LDA JUMP_TABLE+1,Y
+		STA address+1
 		LDY #0
 		LDA (address),Y
-		CLC
-		ADC #4	;point past header		
-		ADC address
-		TAY
-		LDA #0
-		ADC address+1
-		PHA
-		TYA
-		PHA
-		;RTS
+		BEQ .no_flags
+			STA flags
+			
+			;Check min stack size
+			AND #MIN_3
+			STA temp
+			LDA stack_count
+			CMP temp
+			BCS .no_underflow
+				LDA #ERROR_STACK_UNDERFLOW
+				STA ret_val
+				RTS
+			.no_underflow:
+			
+			;Check max stack size
+			LDA flags
+			AND #ADD_1
+			BEQ .no_add_item
+				LDA #STACK_SIZE-1
+				CMP stack_count
+				BCS .no_overflow
+					LDA #ERROR_STACK_OVERFLOW
+					STA ret_val
+					RTS
+				.no_overflow:
+				JSR StackAddItem
+			.no_add_item:
+		.no_flags:
 		
-		;RTS here jumps to calculated address
-		;RTS there jumps back to caller of Execute
+		;INC.W address	;not necessary since RTS adds 1
+		LDA address+1
+		PHA
+		LDA address
+		PHA
+		RTS 			;calls calculated jump
+	END
+	
+	FUNC StackAddItem
+		TXA
+		SEC
+		SBC #OBJ_SIZE
+		TAX
+		INC stack_count
 	END
 	
 	
@@ -679,7 +695,18 @@
 		FCB 2				;ID
 		CODE_DUP:
 			FCB MIN_1|ADD_1	;Flags
-			LDA #5			;Test
+			
+			LDY #9
+			TXA
+			PHA
+			.dup_loop:
+				LDA 9,X
+				STA 0,X
+				INX
+				DEY
+				BNE .dup_loop
+			PLA
+			TAX
 			RTS
 	
 	WORD_SWAP:
@@ -709,7 +736,7 @@
 		FDB	0				;Next word
 		FCB 8				;ID
 		CODE_OVER:
-			FCB MIN_2|ADD_1	;Flags
+			FCB MIN_2|ADD_1	;Flags		
 			LDA #8			;Test
 			RTS
 	

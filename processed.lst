@@ -1,9 +1,9 @@
- AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 1 - 8/22/2020 1:11:10
+ AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 1 - 8/31/2020 23:9:45
 
 
        1/       0 :                      PAGE $0
        2/    1FFC :                      ORG $1FFC
-       3/    1FFC : 89 12                FDB main
+       3/    1FFC : 3F 13                FDB main
        4/       0 :                      ORG $0
        5/      20 :                      ORG $20
        6/      20 :                      
@@ -70,7 +70,7 @@
       67/     191 :                     stack_count:
       68/     191 :                      DFS $1
       69/     900 :                      ORG $900
-      70/     900 : 4C 89 12             JMP main
+      70/     900 : 4C 3F 13             JMP main
       71/     903 :                      
       72/     903 :                     font_table:
       73/     903 : 00 00 00 00 00 00    FCB $0,$0,$0,$0,$0,$0,$0,$0
@@ -237,7 +237,7 @@
      164/     B52 : A9 40                LDA #$40
      165/     B54 : 85 24                STA screen_ptr+$1
      166/     B56 : A9 80                LDA #$80
-     167/     B58 : 85 06                STA $6 ;counter
+     167/     B58 : 85 07                STA $7 ;counter
      168/     B5A : A9 2A                LDA #$2A
      169/     B5C : A0 00                LDY #$0
      170/     B5E :                      .loop:
@@ -245,7 +245,7 @@
      172/     B60 : C8                   INY
      173/     B61 : D0 FB                BNE .loop
      174/     B63 : E6 24                INC screen_ptr+$1
-     175/     B65 : C6 06                DEC $6 ;counter
+     175/     B65 : C6 07                DEC $7 ;counter
      176/     B67 : D0 F5                BNE .loop
      177/     B69 : A9 00                LDA #$0
      178/     B6B : 85 23                STA screen_ptr
@@ -254,7 +254,7 @@
      181/     B71 : 60                   RTS
      182/     B72 :                      
      183/     B72 :                     LCD_char:
-     184/     B72 : A5 0E                LDA $E ;c_out
+     184/     B72 : A5 0F                LDA $F ;c_out
      185/     B74 : C9 20                CMP #$20
      186/     B76 : 90 03                BCC .._98.skip
      187/     B78 : 4C 7C 0B             JMP .if0
@@ -269,35 +269,35 @@
      196/     B84 :                      .if1:
      197/     B84 : 38                   SEC
      198/     B85 : E9 20                SBC #$20
-     199/     B87 : 85 0F                STA $F ;pixel_ptr
+     199/     B87 : 85 10                STA $10 ;pixel_ptr
      200/     B89 : A9 00                LDA #$0
-     201/     B8B : 85 10                STA $10 ;pixel_ptr
-     202/     B8D : 06 0F                ASL $F ;pixel_ptr
-     203/     B8F : 06 0F                ASL $F ;pixel_ptr
-     204/     B91 : 26 10                ROL $10 ;pixel_ptr
-     205/     B93 : 06 0F                ASL $F ;pixel_ptr
-     206/     B95 : 26 10                ROL $10 ;pixel_ptr
+     201/     B8B : 85 11                STA $11 ;pixel_ptr
+     202/     B8D : 06 10                ASL $10 ;pixel_ptr
+     203/     B8F : 06 10                ASL $10 ;pixel_ptr
+     204/     B91 : 26 11                ROL $11 ;pixel_ptr
+     205/     B93 : 06 10                ASL $10 ;pixel_ptr
+     206/     B95 : 26 11                ROL $11 ;pixel_ptr
      207/     B97 : A9 03                LDA #font_table # $100
-     208/     B99 : 65 0F                ADC $F ;pixel_ptr
-     209/     B9B : 85 0F                STA $F ;pixel_ptr
+     208/     B99 : 65 10                ADC $10 ;pixel_ptr
+     209/     B9B : 85 10                STA $10 ;pixel_ptr
      210/     B9D : A9 09                LDA #font_table/$100
-     211/     B9F : 65 10                ADC $10 ;pixel_ptr
-     212/     BA1 : 85 10                STA $10 ;pixel_ptr
+     211/     B9F : 65 11                ADC $11 ;pixel_ptr
+     212/     BA1 : 85 11                STA $11 ;pixel_ptr
      213/     BA3 : A9 00                LDA #$0
-     214/     BA5 : 85 11                STA $11 ;pixel_index
+     214/     BA5 : 85 12                STA $12 ;pixel_index
      215/     BA7 : A9 08                LDA #$8
-     216/     BA9 : 85 13                STA $13 ;lc1
+     216/     BA9 : 85 14                STA $14 ;lc1
      217/     BAB :                      .loop:
      218/     BAB : A9 08                LDA #$8
-     219/     BAD : 85 14                STA $14 ;lc2
-     220/     BAF : A4 11                LDY $11 ;pixel_index
-     221/     BB1 : E6 11                INC $11 ;pixel_index
-     222/     BB3 : B1 0F                LDA ($F),Y ;pixel_ptr
+     219/     BAD : 85 15                STA $15 ;lc2
+     220/     BAF : A4 12                LDY $12 ;pixel_index
+     221/     BB1 : E6 12                INC $12 ;pixel_index
+     222/     BB3 : B1 10                LDA ($10),Y ;pixel_ptr
      223/     BB5 : 4D 90 01             EOR font_inverted
-     224/     BB8 : 85 12                STA $12 ;pixel
+     224/     BB8 : 85 13                STA $13 ;pixel
      225/     BBA : A0 00                LDY #$0
      226/     BBC :                      .loop.inner:
-     227/     BBC : 26 12                ROL $12 ;pixel
+     227/     BBC : 26 13                ROL $13 ;pixel
      228/     BBE : A9 00                LDA #$0
      229/     BC0 : B0 02                BCS .color
      230/     BC2 : A9 2A                LDA #$2A
@@ -310,11 +310,11 @@
      237/     BCD : C6 24                DEC screen_ptr+$1
      238/     BCF : 91 23                STA (screen_ptr),Y
      239/     BD1 : C8                   INY
-     240/     BD2 : C6 14                DEC $14 ;lc2
+     240/     BD2 : C6 15                DEC $15 ;lc2
      241/     BD4 : D0 E6                BNE .loop.inner
      242/     BD6 : E6 24                INC screen_ptr+$1
      243/     BD8 : E6 24                INC screen_ptr+$1
-     244/     BDA : C6 13                DEC $13 ;lc1
+     244/     BDA : C6 14                DEC $14 ;lc1
      245/     BDC : D0 CD                BNE .loop
      246/     BDE : 18                   CLC
      247/     BDF : A5 23                LDA screen_ptr
@@ -335,7 +335,7 @@
      262/     BF5 : F0 0E                BEQ .done
      263/     BF7 : 85 0A                STA $A ;arg
      264/     BF9 : A5 0A                LDA $A ;arg
-     265/     BFB : 85 0E                STA $E ;LCD_char.c_out
+     265/     BFB : 85 0F                STA $F ;LCD_char.c_out
      266/     BFD : 20 72 0B             JSR LCD_char
      267/     C00 : E6 09                INC $9 ;index
      268/     C02 : 4C F1 0B             JMP .loop
@@ -345,10 +345,10 @@
      272/     C06 :                     MemCopy:
      273/     C06 : A0 00                LDY #$0
      274/     C08 :                      .loop:
-     275/     C08 : B1 0D                LDA ($D),Y ;source
-     276/     C0A : 91 0F                STA ($F),Y ;dest
+     275/     C08 : B1 0E                LDA ($E),Y ;source
+     276/     C0A : 91 10                STA ($10),Y ;dest
      277/     C0C : C8                   INY
-     278/     C0D : C4 11                CPY $11 ;count
+     278/     C0D : C4 12                CPY $12 ;count
      279/     C0F : D0 F7                BNE .loop
      280/     C11 : 60                   RTS
      281/     C12 :                      
@@ -358,136 +358,136 @@
      285/     C15 : 38                   SEC
      286/     C16 :                      .loop:
      287/     C16 : A9 00                LDA #$0
-     288/     C18 : F1 0D                SBC ($D),Y ;source
-     289/     C1A : 91 0D                STA ($D),Y ;source
+     288/     C18 : F1 0E                SBC ($E),Y ;source
+     289/     C1A : 91 0E                STA ($E),Y ;source
      290/     C1C : C8                   INY
-     291/     C1D : C4 0F                CPY $F ;count
+     291/     C1D : C4 10                CPY $10 ;count
      292/     C1F : D0 F5                BNE .loop
      293/     C21 : D8                   CLD
      294/     C22 : 60                   RTS
      295/     C23 :                      
      296/     C23 :                     DigitHigh:
-     297/     C23 : A5 0D                LDA $D ;digit
+     297/     C23 : A5 0E                LDA $E ;digit
      298/     C25 : 4A                   LSR
      299/     C26 : 4A                   LSR
      300/     C27 : 4A                   LSR
      301/     C28 : 4A                   LSR
      302/     C29 : 18                   CLC
      303/     C2A : 69 30                ADC #$30
-     304/     C2C : 85 0D                STA $D ;digit
-     305/     C2E : A5 0D                LDA $D ;digit
-     306/     C30 : 85 0E                STA $E ;LCD_char.c_out
+     304/     C2C : 85 0E                STA $E ;digit
+     305/     C2E : A5 0E                LDA $E ;digit
+     306/     C30 : 85 0F                STA $F ;LCD_char.c_out
      307/     C32 : 20 72 0B             JSR LCD_char
      308/     C35 : 60                   RTS
      309/     C36 :                      
      310/     C36 :                     DigitLow:
-     311/     C36 : A5 0D                LDA $D ;digit
+     311/     C36 : A5 0E                LDA $E ;digit
      312/     C38 : 29 0F                AND #$F
      313/     C3A : 18                   CLC
      314/     C3B : 69 30                ADC #$30
-     315/     C3D : 85 0D                STA $D ;digit
-     316/     C3F : A5 0D                LDA $D ;digit
-     317/     C41 : 85 0E                STA $E ;LCD_char.c_out
+     315/     C3D : 85 0E                STA $E ;digit
+     316/     C3F : A5 0E                LDA $E ;digit
+     317/     C41 : 85 0F                STA $F ;LCD_char.c_out
      318/     C43 : 20 72 0B             JSR LCD_char
      319/     C46 : 60                   RTS
      320/     C47 :                      
      321/     C47 :                     DrawFloat:
-     322/     C47 : A5 06                LDA $6 ;source
-     323/     C49 : 85 0D                STA $D ;MemCopy.source
-     324/     C4B : A5 07                LDA $7 ;source
-     325/     C4D : 85 0E                STA $E ;MemCopy.source
+     322/     C47 : A5 07                LDA $7 ;source
+     323/     C49 : 85 0E                STA $E ;MemCopy.source
+     324/     C4B : A5 08                LDA $8 ;source
+     325/     C4D : 85 0F                STA $F ;MemCopy.source
      326/     C4F : A9 25                LDA # (R0) # $100
-     327/     C51 : 85 0F                STA $F ;MemCopy.dest
+     327/     C51 : 85 10                STA $10 ;MemCopy.dest
      328/     C53 : A9 00                LDA # (R0)/$100
-     329/     C55 : 85 10                STA $10 ;MemCopy.dest
+     329/     C55 : 85 11                STA $11 ;MemCopy.dest
      330/     C57 : A9 09                LDA #$9
-     331/     C59 : 85 11                STA $11 ;MemCopy.count
+     331/     C59 : 85 12                STA $12 ;MemCopy.count
      332/     C5B : 20 06 0C             JSR MemCopy
      333/     C5E : A9 20                LDA #$20
-     334/     C60 : 85 0A                STA $A ;sign
+     334/     C60 : 85 0B                STA $B ;sign
      335/     C62 : A0 06                LDY #$6
-     336/     C64 : B1 06                LDA ($6),Y ;source
+     336/     C64 : B1 07                LDA ($7),Y ;source
      337/     C66 : C9 50                CMP #$50
      338/     C68 : 90 13                BCC .positive
      339/     C6A : A9 2D                LDA #$2D
-     340/     C6C : 85 0A                STA $A ;sign
+     340/     C6C : 85 0B                STA $B ;sign
      341/     C6E : A9 26                LDA # (R0+$1) # $100
-     342/     C70 : 85 0D                STA $D ;BCD_Reverse.source
+     342/     C70 : 85 0E                STA $E ;BCD_Reverse.source
      343/     C72 : A9 00                LDA # (R0+$1)/$100
-     344/     C74 : 85 0E                STA $E ;BCD_Reverse.source
+     344/     C74 : 85 0F                STA $F ;BCD_Reverse.source
      345/     C76 : A9 06                LDA #$6
-     346/     C78 : 85 0F                STA $F ;BCD_Reverse.count
+     346/     C78 : 85 10                STA $10 ;BCD_Reverse.count
      347/     C7A : 20 12 0C             JSR BCD_Reverse
      348/     C7D :                      .positive:
-     349/     C7D : A5 0A                LDA $A ;sign
-     350/     C7F : 85 0E                STA $E ;LCD_char.c_out
+     349/     C7D : A5 0B                LDA $B ;sign
+     350/     C7F : 85 0F                STA $F ;LCD_char.c_out
      351/     C81 : 20 72 0B             JSR LCD_char
      352/     C84 : A0 06                LDY #$6
      353/     C86 : B9 25 00             LDA R0,Y
-     354/     C89 : 85 09                STA $9 ;arg
-     355/     C8B : A5 09                LDA $9 ;arg
-     356/     C8D : 85 0D                STA $D ;DigitHigh.digit
+     354/     C89 : 85 0A                STA $A ;arg
+     355/     C8B : A5 0A                LDA $A ;arg
+     356/     C8D : 85 0E                STA $E ;DigitHigh.digit
      357/     C8F : 20 23 0C             JSR DigitHigh
      358/     C92 : A9 2E                LDA #$2E
-     359/     C94 : 85 0E                STA $E ;LCD_char.c_out
+     359/     C94 : 85 0F                STA $F ;LCD_char.c_out
      360/     C96 : 20 72 0B             JSR LCD_char
-     361/     C99 : A5 09                LDA $9 ;arg
-     362/     C9B : 85 0D                STA $D ;DigitLow.digit
+     361/     C99 : A5 0A                LDA $A ;arg
+     362/     C9B : 85 0E                STA $E ;DigitLow.digit
      363/     C9D : 20 36 0C             JSR DigitLow
      364/     CA0 : A9 05                LDA #$5
-     365/     CA2 : 85 08                STA $8 ;index
+     365/     CA2 : 85 09                STA $9 ;index
      366/     CA4 :                      .loop:
-     367/     CA4 : A4 08                LDY $8 ;index
+     367/     CA4 : A4 09                LDY $9 ;index
      368/     CA6 : B9 25 00             LDA R0,Y
-     369/     CA9 : 85 09                STA $9 ;arg
-     370/     CAB : A5 09                LDA $9 ;arg
-     371/     CAD : 85 0D                STA $D ;DigitHigh.digit
+     369/     CA9 : 85 0A                STA $A ;arg
+     370/     CAB : A5 0A                LDA $A ;arg
+     371/     CAD : 85 0E                STA $E ;DigitHigh.digit
      372/     CAF : 20 23 0C             JSR DigitHigh
-     373/     CB2 : A5 09                LDA $9 ;arg
-     374/     CB4 : 85 0D                STA $D ;DigitLow.digit
+     373/     CB2 : A5 0A                LDA $A ;arg
+     374/     CB4 : 85 0E                STA $E ;DigitLow.digit
      375/     CB6 : 20 36 0C             JSR DigitLow
-     376/     CB9 : C6 08                DEC $8 ;index
-     377/     CBB : A5 08                LDA $8 ;index
+     376/     CB9 : C6 09                DEC $9 ;index
+     377/     CBB : A5 09                LDA $9 ;index
      378/     CBD : C9 02                CMP #$2
      379/     CBF : D0 E3                BNE .loop
      380/     CC1 : A9 2B                LDA #$2B
-     381/     CC3 : 85 0A                STA $A ;sign
+     381/     CC3 : 85 0B                STA $B ;sign
      382/     CC5 : A0 08                LDY #$8
-     383/     CC7 : B1 06                LDA ($6),Y ;source
+     383/     CC7 : B1 07                LDA ($7),Y ;source
      384/     CC9 : C9 50                CMP #$50
      385/     CCB : 90 13                BCC .positive_e
      386/     CCD : A9 2D                LDA #$2D
-     387/     CCF : 85 0A                STA $A ;sign
+     387/     CCF : 85 0B                STA $B ;sign
      388/     CD1 : A9 2C                LDA # (R0+$7) # $100
-     389/     CD3 : 85 0D                STA $D ;BCD_Reverse.source
+     389/     CD3 : 85 0E                STA $E ;BCD_Reverse.source
      390/     CD5 : A9 00                LDA # (R0+$7)/$100
-     391/     CD7 : 85 0E                STA $E ;BCD_Reverse.source
+     391/     CD7 : 85 0F                STA $F ;BCD_Reverse.source
      392/     CD9 : A9 02                LDA #$2
-     393/     CDB : 85 0F                STA $F ;BCD_Reverse.count
+     393/     CDB : 85 10                STA $10 ;BCD_Reverse.count
      394/     CDD : 20 12 0C             JSR BCD_Reverse
      395/     CE0 :                      .positive_e:
-     396/     CE0 : A5 0A                LDA $A ;sign
-     397/     CE2 : 85 0E                STA $E ;LCD_char.c_out
+     396/     CE0 : A5 0B                LDA $B ;sign
+     397/     CE2 : 85 0F                STA $F ;LCD_char.c_out
      398/     CE4 : 20 72 0B             JSR LCD_char
      399/     CE7 : A0 08                LDY #$8
      400/     CE9 : B9 25 00             LDA R0,Y
-     401/     CEC : 85 09                STA $9 ;arg
-     402/     CEE : A5 09                LDA $9 ;arg
-     403/     CF0 : 85 0D                STA $D ;DigitLow.digit
+     401/     CEC : 85 0A                STA $A ;arg
+     402/     CEE : A5 0A                LDA $A ;arg
+     403/     CF0 : 85 0E                STA $E ;DigitLow.digit
      404/     CF2 : 20 36 0C             JSR DigitLow
      405/     CF5 : A0 07                LDY #$7
      406/     CF7 : B9 25 00             LDA R0,Y
-     407/     CFA : 85 09                STA $9 ;arg
-     408/     CFC : A5 09                LDA $9 ;arg
-     409/     CFE : 85 0D                STA $D ;DigitHigh.digit
+     407/     CFA : 85 0A                STA $A ;arg
+     408/     CFC : A5 0A                LDA $A ;arg
+     409/     CFE : 85 0E                STA $E ;DigitHigh.digit
      410/     D00 : 20 23 0C             JSR DigitHigh
-     411/     D03 : A5 09                LDA $9 ;arg
-     412/     D05 : 85 0D                STA $D ;DigitLow.digit
+     411/     D03 : A5 0A                LDA $A ;arg
+     412/     D05 : 85 0E                STA $E ;DigitLow.digit
      413/     D07 : 20 36 0C             JSR DigitLow
      414/     D0A : 60                   RTS
      415/     D0B :                      
      416/     D0B :                     HexHigh:
-     417/     D0B : A5 06                LDA $6 ;digit
+     417/     D0B : A5 0A                LDA $A ;digit
      418/     D0D : 4A                   LSR
      419/     D0E : 4A                   LSR
      420/     D0F : 4A                   LSR
@@ -496,82 +496,82 @@
      423/     D13 : 90 08                BCC .print_digit
      424/     D15 : 18                   CLC
      425/     D16 : 69 37                ADC #$37
-     426/     D18 : 85 07                STA $7 ;arg
+     426/     D18 : 85 0B                STA $B ;arg
      427/     D1A : 4C 22 0D             JMP .done
      428/     D1D :                      .print_digit:
      429/     D1D : 18                   CLC
      430/     D1E : 69 30                ADC #$30
-     431/     D20 : 85 07                STA $7 ;arg
+     431/     D20 : 85 0B                STA $B ;arg
      432/     D22 :                      .done:
-     433/     D22 : A5 07                LDA $7 ;arg
-     434/     D24 : 85 0E                STA $E ;LCD_char.c_out
+     433/     D22 : A5 0B                LDA $B ;arg
+     434/     D24 : 85 0F                STA $F ;LCD_char.c_out
      435/     D26 : 20 72 0B             JSR LCD_char
      436/     D29 : 60                   RTS
      437/     D2A :                      
      438/     D2A :                     HexLow:
-     439/     D2A : A5 06                LDA $6 ;digit
+     439/     D2A : A5 0A                LDA $A ;digit
      440/     D2C : 29 0F                AND #$F
      441/     D2E : C9 0A                CMP #$A
      442/     D30 : 90 08                BCC .print_digit
      443/     D32 : 18                   CLC
      444/     D33 : 69 37                ADC #$37
-     445/     D35 : 85 07                STA $7 ;arg
+     445/     D35 : 85 0B                STA $B ;arg
      446/     D37 : 4C 3F 0D             JMP .done
      447/     D3A :                      .print_digit:
      448/     D3A : 18                   CLC
      449/     D3B : 69 30                ADC #$30
-     450/     D3D : 85 07                STA $7 ;arg
+     450/     D3D : 85 0B                STA $B ;arg
      451/     D3F :                      .done:
-     452/     D3F : A5 07                LDA $7 ;arg
-     453/     D41 : 85 0E                STA $E ;LCD_char.c_out
+     452/     D3F : A5 0B                LDA $B ;arg
+     453/     D41 : 85 0F                STA $F ;LCD_char.c_out
      454/     D43 : 20 72 0B             JSR LCD_char
      455/     D46 : 60                   RTS
      456/     D47 :                      
      457/     D47 :                     DrawHex:
      458/     D47 : A9 24                LDA #$24
-     459/     D49 : 85 0E                STA $E ;LCD_char.c_out
+     459/     D49 : 85 0F                STA $F ;LCD_char.c_out
      460/     D4B : 20 72 0B             JSR LCD_char
      461/     D4E : A0 02                LDY #$2
-     462/     D50 : B1 08                LDA ($8),Y ;source
-     463/     D52 : 85 0A                STA $A ;arg
-     464/     D54 : A5 0A                LDA $A ;arg
-     465/     D56 : 85 06                STA $6 ;HexHigh.digit
+     462/     D50 : B1 07                LDA ($7),Y ;source
+     463/     D52 : 85 09                STA $9 ;arg
+     464/     D54 : A5 09                LDA $9 ;arg
+     465/     D56 : 85 0A                STA $A ;HexHigh.digit
      466/     D58 : 20 0B 0D             JSR HexHigh
-     467/     D5B : A5 0A                LDA $A ;arg
-     468/     D5D : 85 06                STA $6 ;HexLow.digit
+     467/     D5B : A5 09                LDA $9 ;arg
+     468/     D5D : 85 0A                STA $A ;HexLow.digit
      469/     D5F : 20 2A 0D             JSR HexLow
      470/     D62 : A0 01                LDY #$1
-     471/     D64 : B1 08                LDA ($8),Y ;source
-     472/     D66 : 85 0A                STA $A ;arg
-     473/     D68 : A5 0A                LDA $A ;arg
-     474/     D6A : 85 06                STA $6 ;HexHigh.digit
+     471/     D64 : B1 07                LDA ($7),Y ;source
+     472/     D66 : 85 09                STA $9 ;arg
+     473/     D68 : A5 09                LDA $9 ;arg
+     474/     D6A : 85 0A                STA $A ;HexHigh.digit
      475/     D6C : 20 0B 0D             JSR HexHigh
-     476/     D6F : A5 0A                LDA $A ;arg
-     477/     D71 : 85 06                STA $6 ;HexLow.digit
+     476/     D6F : A5 09                LDA $9 ;arg
+     477/     D71 : 85 0A                STA $A ;HexLow.digit
      478/     D73 : 20 2A 0D             JSR HexLow
      479/     D76 : 60                   RTS
      480/     D77 :                      
      481/     D77 :                     DrawString:
      482/     D77 : A9 22                LDA #$22
-     483/     D79 : 85 0E                STA $E ;LCD_char.c_out
+     483/     D79 : 85 0F                STA $F ;LCD_char.c_out
      484/     D7B : 20 72 0B             JSR LCD_char
      485/     D7E : A9 01                LDA #$1
-     486/     D80 : 85 09                STA $9 ;index
+     486/     D80 : 85 0A                STA $A ;index
      487/     D82 :                      .loop:
-     488/     D82 : A4 09                LDY $9 ;index
-     489/     D84 : B1 06                LDA ($6),Y ;source
+     488/     D82 : A4 0A                LDY $A ;index
+     489/     D84 : B1 07                LDA ($7),Y ;source
      490/     D86 : F0 11                BEQ .done
-     491/     D88 : 85 08                STA $8 ;arg
-     492/     D8A : A5 08                LDA $8 ;arg
-     493/     D8C : 85 0E                STA $E ;LCD_char.c_out
+     491/     D88 : 85 09                STA $9 ;arg
+     492/     D8A : A5 09                LDA $9 ;arg
+     493/     D8C : 85 0F                STA $F ;LCD_char.c_out
      494/     D8E : 20 72 0B             JSR LCD_char
-     495/     D91 : E6 09                INC $9 ;index
-     496/     D93 : A5 09                LDA $9 ;index
+     495/     D91 : E6 0A                INC $A ;index
+     496/     D93 : A5 0A                LDA $A ;index
      497/     D95 : C9 09                CMP #$9
      498/     D97 : D0 E9                BNE .loop
      499/     D99 :                      .done:
      500/     D99 : A9 22                LDA #$22
-     501/     D9B : 85 0E                STA $E ;LCD_char.c_out
+     501/     D9B : 85 0F                STA $F ;LCD_char.c_out
      502/     D9D : 20 72 0B             JSR LCD_char
      503/     DA0 : 60                   RTS
      504/     DA1 :                      
@@ -579,9 +579,9 @@
      506/     DA1 : 8A                   TXA
      507/     DA2 : 18                   CLC
      508/     DA3 : 69 24                ADC #$24
-     509/     DA5 : 85 04                STA $4 ;address
+     509/     DA5 : 85 05                STA $5 ;address
      510/     DA7 : A9 00                LDA #$0
-     511/     DA9 : 85 05                STA $5 ;address
+     511/     DA9 : 85 06                STA $6 ;address
      512/     DAB : 20 4E 0B             JSR LCD_clrscr
      513/     DAE : 4C B5 0D             JMP .._913.str_skip
      514/     DB1 :                      .._913.str_addr:
@@ -593,9 +593,9 @@
      520/     DBB : 85 08                STA $8 ;LCD_print.source
      521/     DBD : 20 ED 0B             JSR LCD_print
      522/     DC0 : A9 35                LDA #$35
-     523/     DC2 : 85 02                STA $2 ;character
+     523/     DC2 : 85 03                STA $3 ;character
      524/     DC4 : A9 05                LDA #$5
-     525/     DC6 : 85 03                STA $3 ;counter
+     525/     DC6 : 85 04                STA $4 ;counter
      526/     DC8 :                      .loop:
      527/     DC8 : A9 00                LDA #$0
      528/     DCA : 85 23                STA screen_ptr
@@ -603,53 +603,53 @@
      530/     DCE : 18                   CLC
      531/     DCF : 69 10                ADC #$10
      532/     DD1 : 85 24                STA screen_ptr+$1
-     533/     DD3 : A5 02                LDA $2 ;character
-     534/     DD5 : 85 0E                STA $E ;LCD_char.c_out
+     533/     DD3 : A5 03                LDA $3 ;character
+     534/     DD5 : 85 0F                STA $F ;LCD_char.c_out
      535/     DD7 : 20 72 0B             JSR LCD_char
      536/     DDA : A9 3A                LDA #$3A
-     537/     DDC : 85 0E                STA $E ;LCD_char.c_out
+     537/     DDC : 85 0F                STA $F ;LCD_char.c_out
      538/     DDE : 20 72 0B             JSR LCD_char
-     539/     DE1 : C6 03                DEC $3 ;counter
-     540/     DE3 : A5 03                LDA $3 ;counter
+     539/     DE1 : C6 04                DEC $4 ;counter
+     540/     DE3 : A5 04                LDA $4 ;counter
      541/     DE5 : CD 91 01             CMP stack_count
      542/     DE8 : B0 3A                BCS .no_item
      543/     DEA : A0 00                LDY #$0
-     544/     DEC : B1 04                LDA ($4),Y ;address
+     544/     DEC : B1 05                LDA ($5),Y ;address
      545/     DEE : C9 01                CMP #$1
      546/     DF0 : D0 0E                BNE .not_float
-     547/     DF2 : A5 04                LDA $4 ;address
-     548/     DF4 : 85 06                STA $6 ;DrawFloat.source
-     549/     DF6 : A5 05                LDA $5 ;address
-     550/     DF8 : 85 07                STA $7 ;DrawFloat.source
+     547/     DF2 : A5 05                LDA $5 ;address
+     548/     DF4 : 85 07                STA $7 ;DrawFloat.source
+     549/     DF6 : A5 06                LDA $6 ;address
+     550/     DF8 : 85 08                STA $8 ;DrawFloat.source
      551/     DFA : 20 47 0C             JSR DrawFloat
      552/     DFD : 4C 24 0E             JMP .item_done
      553/     E00 :                      .not_float:
      554/     E00 : C9 02                CMP #$2
      555/     E02 : D0 0E                BNE .not_str
-     556/     E04 : A5 04                LDA $4 ;address
-     557/     E06 : 85 06                STA $6 ;DrawString.source
-     558/     E08 : A5 05                LDA $5 ;address
-     559/     E0A : 85 07                STA $7 ;DrawString.source
+     556/     E04 : A5 05                LDA $5 ;address
+     557/     E06 : 85 07                STA $7 ;DrawString.source
+     558/     E08 : A5 06                LDA $6 ;address
+     559/     E0A : 85 08                STA $8 ;DrawString.source
      560/     E0C : 20 77 0D             JSR DrawString
      561/     E0F : 4C 24 0E             JMP .item_done
      562/     E12 :                      .not_str:
      563/     E12 : C9 03                CMP #$3
      564/     E14 : D0 0E                BNE .not_hex
-     565/     E16 : A5 04                LDA $4 ;address
-     566/     E18 : 85 08                STA $8 ;DrawHex.source
-     567/     E1A : A5 05                LDA $5 ;address
-     568/     E1C : 85 09                STA $9 ;DrawHex.source
+     565/     E16 : A5 05                LDA $5 ;address
+     566/     E18 : 85 07                STA $7 ;DrawHex.source
+     567/     E1A : A5 06                LDA $6 ;address
+     568/     E1C : 85 08                STA $8 ;DrawHex.source
      569/     E1E : 20 47 0D             JSR DrawHex
      570/     E21 : 4C 24 0E             JMP .item_done
      571/     E24 :                      .not_hex:
      572/     E24 :                      .item_done:
      573/     E24 :                      .no_item:
-     574/     E24 : A5 04                LDA $4 ;address
+     574/     E24 : A5 05                LDA $5 ;address
      575/     E26 : 38                   SEC
      576/     E27 : E9 09                SBC #$9
-     577/     E29 : 85 04                STA $4 ;address
-     578/     E2B : C6 02                DEC $2 ;character
-     579/     E2D : A5 03                LDA $3 ;counter
+     577/     E29 : 85 05                STA $5 ;address
+     578/     E2B : C6 03                DEC $3 ;character
+     579/     E2D : A5 04                LDA $4 ;counter
      580/     E2F : D0 97                BNE .loop
      581/     E31 : A9 00                LDA #$0
      582/     E33 : 85 23                STA screen_ptr
@@ -668,742 +668,842 @@
      595/     E49 : D0 F5                BNE .loop_line
      596/     E4B : 60                   RTS
      597/     E4C :                      
-     598/     E4C :                     ErrorMsg:
-     599/     E4C : A9 20                LDA #$20
-     600/     E4E : 85 23                STA screen_ptr
-     601/     E50 : A9 60                LDA #$60
-     602/     E52 : 85 24                STA screen_ptr+$1
-     603/     E54 : 4C 64 0E             JMP .._1087.str_skip
-     604/     E57 :                      .._1087.str_addr:
-     605/     E57 : 62 62 62 62 62 62    FCB "bbbbbbbbbbbb",$0
-                    62 62 62 62 62 62 
-                    00                
-     606/     E64 :                      .._1087.str_skip:
-     607/     E64 : A9 57                LDA # (.._1087.str_addr) # $100
-     608/     E66 : 85 07                STA $7 ;LCD_print.source
-     609/     E68 : A9 0E                LDA # (.._1087.str_addr)/$100
-     610/     E6A : 85 08                STA $8 ;LCD_print.source
-     611/     E6C : 20 ED 0B             JSR LCD_print
-     612/     E6F : A9 20                LDA #$20
-     613/     E71 : 85 23                STA screen_ptr
-     614/     E73 : A9 70                LDA #$70
-     615/     E75 : 85 24                STA screen_ptr+$1
-     616/     E77 : A9 FF                LDA #$FF
-     617/     E79 : 8D 90 01             STA font_inverted
-     618/     E7C : A5 02                LDA $2 ;msg
-     619/     E7E : 85 07                STA $7 ;LCD_print.source
-     620/     E80 : A5 03                LDA $3 ;msg
-     621/     E82 : 85 08                STA $8 ;LCD_print.source
-     622/     E84 : 20 ED 0B             JSR LCD_print
-     623/     E87 : A9 20                LDA #$20
-     624/     E89 : 85 23                STA screen_ptr
-     625/     E8B : A9 80                LDA #$80
-     626/     E8D : 85 24                STA screen_ptr+$1
-     627/     E8F : 4C 9F 0E             JMP .._1137.str_skip
-     628/     E92 :                      .._1137.str_addr:
-     629/     E92 : 62 62 62 62 62 62    FCB "bbbbbbbbbbbb",$0
-                    62 62 62 62 62 62 
-                    00                
-     630/     E9F :                      .._1137.str_skip:
-     631/     E9F : A9 92                LDA # (.._1137.str_addr) # $100
-     632/     EA1 : 85 07                STA $7 ;LCD_print.source
-     633/     EA3 : A9 0E                LDA # (.._1137.str_addr)/$100
-     634/     EA5 : 85 08                STA $8 ;LCD_print.source
-     635/     EA7 : 20 ED 0B             JSR LCD_print
-     636/     EAA : A9 00                LDA #$0
-     637/     EAC : 8D 90 01             STA font_inverted
-     638/     EAF :                      .loop:
-     639/     EAF : 20 4A 0B             JSR ReadKey
-     640/     EB2 : C9 0D                CMP #$D
-     641/     EB4 : D0 F9                BNE .loop
-     642/     EB6 : 60                   RTS
-     643/     EB7 : 60                   RTS
-     644/     EB8 :                      
-     645/     EB8 :                     InitForth:
-     646/     EB8 : A9 00                LDA #$0
-     647/     EBA : 8D 31 01             STA input_buff_begin
-     648/     EBD : 8D 32 01             STA input_buff_end
-     649/     EC0 : 8D 73 01             STA new_word_len
-     650/     EC3 : 60                   RTS
-     651/     EC4 :                      
-     652/     EC4 :                     special_chars:
-     653/     EC4 : 65 22                FCB 'e',$22
-     654/     EC6 : 20 2E 24 2D          FCB " .$-"
-     655/     ECA :                      
-     656/     ECA :                     ReadLine:
-     657/     ECA : A9 00                LDA #$0
-     658/     ECC : 85 02                STA $2 ;cursor
-     659/     ECE : 85 05                STA $5 ;index
-     660/     ED0 : 85 23                STA screen_ptr
-     661/     ED2 : A9 AC                LDA #$AC
-     662/     ED4 : 85 24                STA screen_ptr+$1
-     663/     ED6 : 4C EA 0E             JMP .._1186.str_skip
-     664/     ED9 :                      .._1186.str_addr:
-     665/     ED9 : 61 20 20 20 20 20    FCB "a               ",$0
-                    20 20 20 20 20 20 
-                    20 20 20 20 00    
-     666/     EEA :                      .._1186.str_skip:
-     667/     EEA : A9 D9                LDA # (.._1186.str_addr) # $100
-     668/     EEC : 85 07                STA $7 ;LCD_print.source
-     669/     EEE : A9 0E                LDA # (.._1186.str_addr)/$100
-     670/     EF0 : 85 08                STA $8 ;LCD_print.source
-     671/     EF2 : 20 ED 0B             JSR LCD_print
-     672/     EF5 : AD E6 FF             LDA $FFE6
-     673/     EF8 : 85 03                STA $3 ;cursor_timer
-     674/     EFA :                      .loop:
-     675/     EFA : A9 00                LDA #$0
-     676/     EFC : 85 04                STA $4 ;arg
-     677/     EFE : 20 4A 0B             JSR ReadKey
-     678/     F01 : D0 03                BNE .key_read
-     679/     F03 : 4C DB 0F             JMP .no_key
-     680/     F06 :                      .key_read:
-     681/     F06 : C9 0D                CMP #$D
-     682/     F08 : D0 0F                BNE .not_enter
-     683/     F0A : A5 05                LDA $5 ;index
-     684/     F0C : F0 EC                BEQ .loop
-     685/     F0E : A9 00                LDA #$0
-     686/     F10 : 8D 31 01             STA input_buff_begin
-     687/     F13 : A5 05                LDA $5 ;index
-     688/     F15 : 8D 32 01             STA input_buff_end
-     689/     F18 : 60                   RTS
-     690/     F19 :                      .not_enter:
-     691/     F19 : C9 08                CMP #$8
-     692/     F1B : D0 2F                BNE .not_backspace
-     693/     F1D : A5 05                LDA $5 ;index
-     694/     F1F : F0 28                BEQ .backspace_done
-     695/     F21 : C6 05                DEC $5 ;index
-     696/     F23 : C9 10                CMP #$10
-     697/     F25 : B0 1C                BCS .backspace_scroll
-     698/     F27 : A9 20                LDA #$20
-     699/     F29 : 85 0E                STA $E ;LCD_char.c_out
-     700/     F2B : 20 72 0B             JSR LCD_char
-     701/     F2E : A5 23                LDA screen_ptr
-     702/     F30 : 38                   SEC
-     703/     F31 : E9 20                SBC #$20
-     704/     F33 : 85 23                STA screen_ptr
-     705/     F35 : 48                   PHA
-     706/     F36 : A9 61                LDA #$61
-     707/     F38 : 85 0E                STA $E ;LCD_char.c_out
-     708/     F3A : 20 72 0B             JSR LCD_char
-     709/     F3D : 68                   PLA
-     710/     F3E : 85 23                STA screen_ptr
-     711/     F40 : 4C DB 0F             JMP .draw_done
-     712/     F43 :                      .backspace_scroll:
-     713/     F43 : A4 05                LDY $5 ;index
-     714/     F45 : 88                   DEY
-     715/     F46 : 4C AE 0F             JMP .scroll_buffer
-     716/     F49 :                      .backspace_done:
-     717/     F49 : 4C DB 0F             JMP .no_key
-     718/     F4C :                      .not_backspace:
-     719/     F4C : A0 00                LDY #$0
-     720/     F4E :                      .special_loop:
-     721/     F4E : D9 C4 0E             CMP special_chars,Y
-     722/     F51 : D0 05                BNE .special_next
-     723/     F53 : 85 04                STA $4 ;arg
-     724/     F55 : 4C 84 0F             JMP .key_done
-     725/     F58 :                      .special_next:
-     726/     F58 : C8                   INY
-     727/     F59 : C0 06                CPY #$6
-     728/     F5B : D0 F1                BNE .special_loop
-     729/     F5D : C9 30                CMP #$30
-     730/     F5F : 90 09                BCC .not_num
-     731/     F61 : C9 3A                CMP #$3A
-     732/     F63 : B0 05                BCS .not_num
-     733/     F65 : 85 04                STA $4 ;arg
-     734/     F67 : 4C 84 0F             JMP .key_done
-     735/     F6A :                      .not_num:
-     736/     F6A : C9 41                CMP #$41
-     737/     F6C : 90 09                BCC .not_upper
-     738/     F6E : C9 5B                CMP #$5B
-     739/     F70 : B0 05                BCS .not_upper
-     740/     F72 : 85 04                STA $4 ;arg
-     741/     F74 : 4C 84 0F             JMP .key_done
-     742/     F77 :                      .not_upper:
-     743/     F77 : C9 61                CMP #$61
-     744/     F79 : 90 09                BCC .not_lower
-     745/     F7B : C9 7B                CMP #$7B
-     746/     F7D : B0 05                BCS .not_lower
-     747/     F7F : 38                   SEC
-     748/     F80 : E9 20                SBC #$20
-     749/     F82 : 85 04                STA $4 ;arg
-     750/     F84 :                      .not_lower:
-     751/     F84 :                      .key_done:
-     752/     F84 : A5 04                LDA $4 ;arg
-     753/     F86 : F0 53                BEQ .not_valid
-     754/     F88 : A4 05                LDY $5 ;index
-     755/     F8A : C0 40                CPY #$40
-     756/     F8C : B0 4D                BCS .buffer_full
-     757/     F8E : 99 33 01             STA input_buff,Y
-     758/     F91 : E6 05                INC $5 ;index
-     759/     F93 : C0 0F                CPY #$F
-     760/     F95 : B0 17                BCS .scroll_buffer
-     761/     F97 : A5 04                LDA $4 ;arg
-     762/     F99 : 85 0E                STA $E ;LCD_char.c_out
-     763/     F9B : 20 72 0B             JSR LCD_char
-     764/     F9E : A5 23                LDA screen_ptr
-     765/     FA0 : 48                   PHA
-     766/     FA1 : A9 61                LDA #$61
-     767/     FA3 : 85 0E                STA $E ;LCD_char.c_out
-     768/     FA5 : 20 72 0B             JSR LCD_char
-     769/     FA8 : 68                   PLA
-     770/     FA9 : 85 23                STA screen_ptr
-     771/     FAB : 4C DB 0F             JMP .draw_done
-     772/     FAE :                      .scroll_buffer:
-     773/     FAE : A9 00                LDA #$0
-     774/     FB0 : 85 23                STA screen_ptr
-     775/     FB2 : 98                   TYA
-     776/     FB3 : 38                   SEC
-     777/     FB4 : E9 0E                SBC #$E
-     778/     FB6 : 85 06                STA $6 ;str_index
-     779/     FB8 :                      .scroll_loop:
-     780/     FB8 : A4 06                LDY $6 ;str_index
-     781/     FBA : E6 06                INC $6 ;str_index
-     782/     FBC : B9 33 01             LDA input_buff,Y
-     783/     FBF : 85 04                STA $4 ;arg
-     784/     FC1 : A5 04                LDA $4 ;arg
-     785/     FC3 : 85 0E                STA $E ;LCD_char.c_out
-     786/     FC5 : 20 72 0B             JSR LCD_char
-     787/     FC8 : A5 05                LDA $5 ;index
-     788/     FCA : C5 06                CMP $6 ;str_index
-     789/     FCC : D0 EA                BNE .scroll_loop
-     790/     FCE : A5 23                LDA screen_ptr
-     791/     FD0 : 48                   PHA
-     792/     FD1 : A9 61                LDA #$61
-     793/     FD3 : 85 0E                STA $E ;LCD_char.c_out
-     794/     FD5 : 20 72 0B             JSR LCD_char
-     795/     FD8 : 68                   PLA
-     796/     FD9 : 85 23                STA screen_ptr
-     797/     FDB :                      .draw_done:
-     798/     FDB :                      .buffer_full:
-     799/     FDB :                      .not_valid:
-     800/     FDB :                      .no_key:
-     801/     FDB : AD E6 FF             LDA $FFE6
-     802/     FDE : C5 03                CMP $3 ;cursor_timer
-     803/     FE0 : F0 25                BEQ .cursor_done
-     804/     FE2 : 85 03                STA $3 ;cursor_timer
-     805/     FE4 : A5 02                LDA $2 ;cursor
-     806/     FE6 : F0 09                BEQ .draw_blank
-     807/     FE8 : A9 00                LDA #$0
-     808/     FEA : 85 02                STA $2 ;cursor
-     809/     FEC : A9 20                LDA #$20
-     810/     FEE : 4C F7 0F             JMP .draw
-     811/     FF1 :                      .draw_blank:
-     812/     FF1 : A9 FF                LDA #$FF
-     813/     FF3 : 85 02                STA $2 ;cursor
-     814/     FF5 : A9 61                LDA #$61
-     815/     FF7 :                      .draw:
-     816/     FF7 : 85 04                STA $4 ;arg
-     817/     FF9 : A5 04                LDA $4 ;arg
-     818/     FFB : 85 0E                STA $E ;LCD_char.c_out
-     819/     FFD : 20 72 0B             JSR LCD_char
-     820/    1000 : A5 23                LDA screen_ptr
-     821/    1002 : 38                   SEC
-     822/    1003 : E9 10                SBC #$10
-     823/    1005 : 85 23                STA screen_ptr
-     824/    1007 :                      .cursor_done:
-     825/    1007 : 4C FA 0E             JMP .loop
-     826/    100A : 60                   RTS
-     827/    100B :                      
-     828/    100B :                     LineWord:
-     829/    100B : A9 00                LDA #$0
-     830/    100D : 8D 30 01             STA global_error
-     831/    1010 : A9 00                LDA #$0
-     832/    1012 : 8D 73 01             STA new_word_len
-     833/    1015 : AC 31 01             LDY input_buff_begin
-     834/    1018 : CC 32 01             CPY input_buff_end
-     835/    101B : D0 01                BNE .chars_left
-     836/    101D : 60                   RTS
-     837/    101E :                      .chars_left:
-     838/    101E :                      .loop:
-     839/    101E : AC 31 01             LDY input_buff_begin
-     840/    1021 : B9 33 01             LDA input_buff,Y
-     841/    1024 : EE 31 01             INC input_buff_begin
-     842/    1027 : C9 20                CMP #$20
-     843/    1029 : D0 06                BNE .not_space
-     844/    102B : AD 73 01             LDA new_word_len
-     845/    102E : F0 15                BEQ .chars_left2
-     846/    1030 : 60                   RTS
-     847/    1031 :                      .not_space:
-     848/    1031 : AC 73 01             LDY new_word_len
-     849/    1034 : 99 74 01             STA new_word_buff,Y
-     850/    1037 : C8                   INY
-     851/    1038 : 8C 73 01             STY new_word_len
-     852/    103B : C0 13                CPY #$13
-     853/    103D : D0 06                BNE .word_size_good
-     854/    103F : A9 01                LDA #$1
-     855/    1041 : 8D 30 01             STA global_error
-     856/    1044 : 60                   RTS
-     857/    1045 :                      .word_size_good:
-     858/    1045 :                      .chars_left2:
-     859/    1045 : AD 31 01             LDA input_buff_begin
-     860/    1048 : CD 32 01             CMP input_buff_end
-     861/    104B : F0 03                BEQ .found
-     862/    104D : 4C 1E 10             JMP .loop
-     863/    1050 :                      .found:
-     864/    1050 : 60                   RTS
-     865/    1051 : 60                   RTS
-     866/    1052 :                      
-     867/    1052 :                     FindWord:
-     868/    1052 : A9 54                LDA # (FORTH_WORDS) # $100
-     869/    1054 : 85 21                STA ret_val
-     870/    1056 : A9 12                LDA # (FORTH_WORDS)/$100
-     871/    1058 : 85 22                STA ret_val+$1
-     872/    105A :                      .loop:
-     873/    105A : A0 00                LDY #$0
-     874/    105C : B1 21                LDA (ret_val),Y
-     875/    105E : CD 73 01             CMP new_word_len
-     876/    1061 : D0 11                BNE .loop_next
-     877/    1063 : C8                   INY
-     878/    1064 :                      .str_loop:
-     879/    1064 : B1 21                LDA (ret_val),Y
-     880/    1066 : D9 73 01             CMP new_word_buff-$1,Y
-     881/    1069 : D0 09                BNE .no_match
-     882/    106B : CC 73 01             CPY new_word_len
-     883/    106E : F0 1D                BEQ .word_found
-     884/    1070 : C8                   INY
-     885/    1071 : 4C 64 10             JMP .str_loop
-     886/    1074 :                      .no_match:
-     887/    1074 :                      .loop_next:
-     888/    1074 : A0 00                LDY #$0
-     889/    1076 : B1 21                LDA (ret_val),Y
-     890/    1078 : A8                   TAY
-     891/    1079 : C8                   INY
-     892/    107A : B1 21                LDA (ret_val),Y
-     893/    107C : 48                   PHA
-     894/    107D : C8                   INY
-     895/    107E : B1 21                LDA (ret_val),Y
-     896/    1080 : 85 22                STA ret_val+$1
-     897/    1082 : 68                   PLA
-     898/    1083 : 85 21                STA ret_val
-     899/    1085 : 05 22                ORA ret_val+$1
-     900/    1087 : D0 D1                BNE .loop
-     901/    1089 : 85 21                STA ret_val
-     902/    108B : 85 22                STA ret_val+$1
-     903/    108D :                      .word_found:
-     904/    108D : 60                   RTS
-     905/    108E :                      
-     906/    108E :                     CheckData:
-     907/    108E : A9 04                LDA #$4
-     908/    1090 : 8D 87 01             STA new_stack_item
-     909/    1093 : AD 73 01             LDA new_word_len
-     910/    1096 : D0 01                BNE .not_zero_len
-     911/    1098 : 60                   RTS
-     912/    1099 :                      .not_zero_len:
-     913/    1099 : A0 08                LDY #$8
-     914/    109B : A9 00                LDA #$0
-     915/    109D :                      .zero_loop:
-     916/    109D : 99 87 01             STA new_stack_item,Y
-     917/    10A0 : 88                   DEY
-     918/    10A1 : D0 FA                BNE .zero_loop
-     919/    10A3 : A0 00                LDY #$0
-     920/    10A5 : AD 74 01             LDA new_word_buff
-     921/    10A8 : C9 22                CMP #$22
-     922/    10AA : D0 2E                BNE .not_string
-     923/    10AC : AD 73 01             LDA new_word_len
-     924/    10AF : C9 01                CMP #$1
-     925/    10B1 : D0 01                BNE .not_single_quote
-     926/    10B3 : 60                   RTS
-     927/    10B4 :                      .not_single_quote:
-     928/    10B4 : CE 73 01             DEC new_word_len
-     929/    10B7 :                      .loop_str:
-     930/    10B7 : B9 75 01             LDA new_word_buff+$1,y
-     931/    10BA : C9 22                CMP #$22
-     932/    10BC : F0 10                BEQ .str_done
-     933/    10BE : C0 08                CPY #$8
-     934/    10C0 : F0 0B                BEQ .string_too_long
-     935/    10C2 : 99 88 01             STA new_stack_item+$1,Y
-     936/    10C5 : C8                   INY
-     937/    10C6 : CC 73 01             CPY new_word_len
-     938/    10C9 : F0 02                BEQ .string_unterminated
-     939/    10CB : D0 EA                BNE .loop_str
-     940/    10CD :                      .string_too_long:
-     941/    10CD :                      .string_unterminated:
-     942/    10CD : 60                   RTS
-     943/    10CE :                      .str_done:
-     944/    10CE : C8                   INY
-     945/    10CF : CC 73 01             CPY new_word_len
-     946/    10D2 : D0 05                BNE .str_return
-     947/    10D4 : A9 02                LDA #$2
-     948/    10D6 : 8D 87 01             STA new_stack_item
-     949/    10D9 :                      .str_return:
-     950/    10D9 : 60                   RTS
-     951/    10DA :                      .not_string:
-     952/    10DA : C9 24                CMP #$24
-     953/    10DC : D0 4F                BNE .not_hex
-     954/    10DE : AD 73 01             LDA new_word_len
-     955/    10E1 : C9 01                CMP #$1
-     956/    10E3 : F0 47                BEQ .hex_error
-     957/    10E5 : C9 06                CMP #$6
-     958/    10E7 : B0 43                BCS .hex_error
-     959/    10E9 : CE 73 01             DEC new_word_len
-     960/    10EC : A0 00                LDY #$0
-     961/    10EE :                      .loop_hex:
-     962/    10EE : B9 75 01             LDA new_word_buff+$1,Y
-     963/    10F1 : C9 30                CMP #$30
-     964/    10F3 : 90 37                BCC .hex_error
-     965/    10F5 : C9 3A                CMP #$3A
-     966/    10F7 : B0 0F                BCS .not_digit
-     967/    10F9 : 38                   SEC
-     968/    10FA : E9 30                SBC #$30
-     969/    10FC : 20 FE 11             JSR .hex_rotate
-     970/    10FF : 0D 88 01             ORA new_stack_item+$1
-     971/    1102 : 8D 88 01             STA new_stack_item+$1
-     972/    1105 : 4C 1C 11             JMP .hex_char_next
-     973/    1108 :                      .not_digit:
-     974/    1108 : C9 41                CMP #$41
-     975/    110A : 90 20                BCC .hex_error
-     976/    110C : C9 47                CMP #$47
-     977/    110E : B0 1C                BCS .hex_error
-     978/    1110 : 38                   SEC
-     979/    1111 : E9 37                SBC #$37
-     980/    1113 : 20 FE 11             JSR .hex_rotate
-     981/    1116 : 0D 88 01             ORA new_stack_item+$1
-     982/    1119 : 8D 88 01             STA new_stack_item+$1
-     983/    111C :                      .hex_char_next:
-     984/    111C : C8                   INY
-     985/    111D : CC 73 01             CPY new_word_len
-     986/    1120 : F0 04                BEQ .hex_done
-     987/    1122 : C0 04                CPY #$4
-     988/    1124 : D0 C8                BNE .loop_hex
-     989/    1126 :                      .hex_done:
-     990/    1126 : A9 03                LDA #$3
-     991/    1128 : 8D 87 01             STA new_stack_item
-     992/    112B : 60                   RTS
-     993/    112C :                      .hex_error:
-     994/    112C : 60                   RTS
-     995/    112D :                      .not_hex:
-     996/    112D : A9 06                LDA #$6
-     997/    112F : 85 04                STA $4 ;index
-     998/    1131 : A9 00                LDA #$0
-     999/    1133 : 85 05                STA $5 ;which_digit
-    1000/    1135 : 85 06                STA $6 ;negative
-    1001/    1137 : 85 07                STA $7 ;exp_negative
-    1002/    1139 : 85 08                STA $8 ;exp_count
-    1003/    113B : 85 0C                STA $C ;digit_count
-    1004/    113D : 85 0B                STA $B ;nonzero_found
-    1005/    113F : 85 0A                STA $A ;dec_found
-    1006/    1141 : 85 09                STA $9 ;exp_found
-    1007/    1143 : AD 74 01             LDA new_word_buff
-    1008/    1146 : C9 2D                CMP #$2D
-    1009/    1148 : D0 05                BNE .float_no_neg
-    1010/    114A : A9 FF                LDA #$FF
-    1011/    114C : 85 06                STA $6 ;negative
-    1012/    114E : C8                   INY
-    1013/    114F :                      .float_no_neg:
-    1014/    114F :                      .loop_float:
-    1015/    114F : B9 74 01             LDA new_word_buff,Y
-    1016/    1152 : 20 0E 12             JSR .digit
-    1017/    1155 : 90 5E                BCC .float_not_digit
-    1018/    1157 : 48                   PHA
-    1019/    1158 : A5 0B                LDA $B ;nonzero_found
-    1020/    115A : D0 17                BNE .digit_good
-    1021/    115C : 68                   PLA
-    1022/    115D : 48                   PHA
-    1023/    115E : F0 06                BEQ .digit_zero
-    1024/    1160 : A9 FF                LDA #$FF
-    1025/    1162 : 85 0B                STA $B ;nonzero_found
-    1026/    1164 : D0 0D                BNE .digit_good
-    1027/    1166 :                      .digit_zero:
-    1028/    1166 : 68                   PLA
-    1029/    1167 : A5 09                LDA $9 ;exp_found
-    1030/    1169 : D0 1E                BNE .float_next
-    1031/    116B : A5 0A                LDA $A ;dec_found
-    1032/    116D : F0 1A                BEQ .float_next
-    1033/    116F : C6 08                DEC $8 ;exp_count
-    1034/    1171 : D0 16                BNE .float_next
-    1035/    1173 :                      .digit_good:
-    1036/    1173 : A5 09                LDA $9 ;exp_found
-    1037/    1175 : D0 1B                BNE .exp_digit
-    1038/    1177 : A5 0C                LDA $C ;digit_count
-    1039/    1179 : C9 0C                CMP #$C
-    1040/    117B : D0 02                BNE .digit_ok
-    1041/    117D : 68                   PLA
-    1042/    117E : 60                   RTS
-    1043/    117F :                      .digit_ok:
-    1044/    117F : A5 0A                LDA $A ;dec_found
-    1045/    1181 : D0 02                BNE .no_dec_yet
-    1046/    1183 : E6 08                INC $8 ;exp_count
-    1047/    1185 :                      .no_dec_yet:
-    1048/    1185 : 68                   PLA
-    1049/    1186 : 20 1B 12             JSR .add_digit
-    1050/    1189 :                      .float_next:
-    1051/    1189 : C8                   INY
-    1052/    118A : CC 73 01             CPY new_word_len
-    1053/    118D : F0 69                BEQ .float_done
-    1054/    118F : 4C 4F 11             JMP .loop_float
-    1055/    1192 :                      .exp_digit:
-    1056/    1192 : A5 0C                LDA $C ;digit_count
-    1057/    1194 : C9 03                CMP #$3
-    1058/    1196 : D0 02                BNE .exp_digit_ok
-    1059/    1198 : 68                   PLA
-    1060/    1199 : 60                   RTS
-    1061/    119A :                      .exp_digit_ok:
-    1062/    119A : 68                   PLA
-    1063/    119B : 84 03                STY $3 ;y_buff
-    1064/    119D : A0 04                LDY #$4
-    1065/    119F :                      .exp_loop:
-    1066/    119F : 0E 8E 01             ASL new_stack_item+$7
-    1067/    11A2 : 2E 8F 01             ROL new_stack_item+$8
-    1068/    11A5 : 88                   DEY
-    1069/    11A6 : D0 F7                BNE .exp_loop
-    1070/    11A8 : A4 03                LDY $3 ;y_buff
-    1071/    11AA : 0D 8E 01             ORA new_stack_item+$7
-    1072/    11AD : 8D 8E 01             STA new_stack_item+$7
-    1073/    11B0 : E6 04                INC $4 ;index
-    1074/    11B2 : 4C 89 11             JMP .float_next
-    1075/    11B5 :                      .float_not_digit:
-    1076/    11B5 : C9 2E                CMP #$2E
-    1077/    11B7 : D0 10                BNE .not_decimal_point
-    1078/    11B9 : A5 0A                LDA $A ;dec_found
-    1079/    11BB : F0 01                BEQ .decimal_good
-    1080/    11BD : 60                   RTS
-    1081/    11BE :                      .decimal_good:
-    1082/    11BE : A5 09                LDA $9 ;exp_found
-    1083/    11C0 : F0 01                BEQ .exp_good
-    1084/    11C2 : 60                   RTS
-    1085/    11C3 :                      .exp_good:
-    1086/    11C3 : A9 FF                LDA #$FF
-    1087/    11C5 : 85 0A                STA $A ;dec_found
-    1088/    11C7 : D0 C0                BNE .float_next
-    1089/    11C9 :                      .not_decimal_point:
-    1090/    11C9 : C9 65                CMP #$65
-    1091/    11CB : D0 15                BNE .not_exp
-    1092/    11CD : A5 09                LDA $9 ;exp_found
-    1093/    11CF : F0 01                BEQ .first_exp
-    1094/    11D1 : 60                   RTS
-    1095/    11D2 :                      .first_exp:
-    1096/    11D2 : A9 00                LDA #$0
-    1097/    11D4 : 85 04                STA $4 ;index
-    1098/    11D6 : 85 05                STA $5 ;which_digit
-    1099/    11D8 : 85 0C                STA $C ;digit_count
-    1100/    11DA : 85 0B                STA $B ;nonzero_found
-    1101/    11DC : A9 FF                LDA #$FF
-    1102/    11DE : 85 09                STA $9 ;exp_found
-    1103/    11E0 : D0 A7                BNE .float_next
-    1104/    11E2 :                      .not_exp:
-    1105/    11E2 : C9 2D                CMP #$2D
-    1106/    11E4 : D0 11                BNE .not_minus
-    1107/    11E6 : A5 09                LDA $9 ;exp_found
-    1108/    11E8 : 49 FF                EOR #$FF
-    1109/    11EA : 05 04                ORA $4 ;index
-    1110/    11EC : 05 07                ORA $7 ;exp_negative
-    1111/    11EE : F0 01                BEQ .minus_good
-    1112/    11F0 : 60                   RTS
-    1113/    11F1 :                      .minus_good:
-    1114/    11F1 : A9 FF                LDA #$FF
-    1115/    11F3 : 85 07                STA $7 ;exp_negative
-    1116/    11F5 : D0 92                BNE .float_next
-    1117/    11F7 :                      .not_minus:
-    1118/    11F7 : 60                   RTS
-    1119/    11F8 :                      .float_done:
-    1120/    11F8 : A9 01                LDA #$1
-    1121/    11FA : 8D 87 01             STA new_stack_item
-    1122/    11FD : 60                   RTS
-    1123/    11FE :                      .hex_rotate:
-    1124/    11FE : 84 03                STY $3 ;y_buff
-    1125/    1200 : A0 04                LDY #$4
-    1126/    1202 :                      .hex_rot_loop:
-    1127/    1202 : 0E 88 01             ASL new_stack_item+$1
-    1128/    1205 : 2E 89 01             ROL new_stack_item+$2
-    1129/    1208 : 88                   DEY
-    1130/    1209 : D0 F7                BNE .hex_rot_loop
-    1131/    120B : A4 03                LDY $3 ;y_buff
-    1132/    120D : 60                   RTS
-    1133/    120E :                      .digit:
-    1134/    120E : C9 3A                CMP #$3A
-    1135/    1210 : B0 07                BCS .is_digit_no
-    1136/    1212 : C9 30                CMP #$30
-    1137/    1214 : 90 03                BCC .is_digit_no
-    1138/    1216 : E9 30                SBC #$30
-    1139/    1218 : 60                   RTS
-    1140/    1219 :                      .is_digit_no:
-    1141/    1219 : 18                   CLC
-    1142/    121A : 60                   RTS
-    1143/    121B :                      .add_digit:
-    1144/    121B : 48                   PHA
-    1145/    121C : 84 03                STY $3 ;y_buff
-    1146/    121E : A4 04                LDY $4 ;index
-    1147/    1220 : E6 0C                INC $C ;digit_count
-    1148/    1222 : A5 05                LDA $5 ;which_digit
-    1149/    1224 : 49 FF                EOR #$FF
-    1150/    1226 : 85 05                STA $5 ;which_digit
-    1151/    1228 : F0 0B                BEQ .second_digit
-    1152/    122A : 68                   PLA
-    1153/    122B : 0A                   ASL
-    1154/    122C : 0A                   ASL
-    1155/    122D : 0A                   ASL
-    1156/    122E : 0A                   ASL
-    1157/    122F : 99 87 01             STA new_stack_item,Y
-    1158/    1232 : A4 03                LDY $3 ;y_buff
-    1159/    1234 : 60                   RTS
-    1160/    1235 :                      .second_digit:
-    1161/    1235 : 68                   PLA
-    1162/    1236 : 19 87 01             ORA new_stack_item,Y
-    1163/    1239 : 99 87 01             STA new_stack_item,Y
-    1164/    123C : C6 04                DEC $4 ;index
-    1165/    123E : A4 03                LDY $3 ;y_buff
-    1166/    1240 : 60                   RTS
-    1167/    1241 : 60                   RTS
-    1168/    1242 :                      
-    1169/    1242 :                     Execute:
-    1170/    1242 : A0 00                LDY #$0
-    1171/    1244 : B1 02                LDA ($2),Y ;address
-    1172/    1246 : 18                   CLC
-    1173/    1247 : 69 04                ADC #$4
-    1174/    1249 : 65 02                ADC $2 ;address
-    1175/    124B : A8                   TAY
-    1176/    124C : A9 00                LDA #$0
-    1177/    124E : 65 03                ADC $3 ;address
-    1178/    1250 : 48                   PHA
-    1179/    1251 : 98                   TYA
-    1180/    1252 : 48                   PHA
-    1181/    1253 : 60                   RTS
-    1182/    1254 :                      
-    1183/    1254 :                     FORTH_WORDS:
-    1184/    1254 :                      
-    1185/    1254 :                     WORD_DUP:
-    1186/    1254 : 03 44 55 50          FCB $3,"DUP"
-    1187/    1258 : 5F 12                FDB WORD_SWAP
-    1188/    125A : 05                   FCB $5
-    1189/    125B : 02                   FCB $2
-    1190/    125C :                      
-    1191/    125C :                     CODE_DUP:
-    1192/    125C : A9 05                LDA #$5
-    1193/    125E : 60                   RTS
-    1194/    125F :                      
-    1195/    125F :                     WORD_SWAP:
-    1196/    125F : 04 53 57 41 50       FCB $4,"SWAP"
-    1197/    1264 : 6B 12                FDB WORD_DROP
-    1198/    1266 : 02                   FCB $2
-    1199/    1267 : 04                   FCB $4
-    1200/    1268 :                      
-    1201/    1268 :                     CODE_SWAP:
-    1202/    1268 : A9 06                LDA #$6
-    1203/    126A : 60                   RTS
-    1204/    126B :                      
-    1205/    126B :                     WORD_DROP:
-    1206/    126B : 04 44 52 4F 50       FCB $4,"DROP"
-    1207/    1270 : 7D 12                FDB WORD_OVER
-    1208/    1272 : 01                   FCB $1
-    1209/    1273 : 06                   FCB $6
-    1210/    1274 :                      
-    1211/    1274 :                     CODE_DROP:
-    1212/    1274 : 8A                   TXA
-    1213/    1275 : 18                   CLC
-    1214/    1276 : 69 09                ADC #$9
-    1215/    1278 : AA                   TAX
-    1216/    1279 : CE 91 01             DEC stack_count
-    1217/    127C : 60                   RTS
-    1218/    127D :                      
-    1219/    127D :                     WORD_OVER:
-    1220/    127D : 04 4F 56 45 52       FCB $4,"OVER"
-    1221/    1282 : 00 00                FDB $0
-    1222/    1284 : 06                   FCB $6
-    1223/    1285 : 08                   FCB $8
-    1224/    1286 :                      
-    1225/    1286 :                     CODE_OVER:
-    1226/    1286 : A9 08                LDA #$8
-    1227/    1288 : 60                   RTS
-    1228/    1289 :                      
-    1229/    1289 :                     main:
-    1230/    1289 : A2 2F                LDX #$2F
-    1231/    128B : 9A                   TXS
-    1232/    128C : 20 33 0B             JSR setup
-    1233/    128F :                      .input_loop:
-    1234/    128F : 20 A1 0D             JSR DrawStack
-    1235/    1292 : 20 CA 0E             JSR ReadLine
-    1236/    1295 :                      .process_loop:
-    1237/    1295 : 20 0B 10             JSR LineWord
-    1238/    1298 : AD 73 01             LDA new_word_len
-    1239/    129B : F0 F2                BEQ .input_loop
-    1240/    129D : 20 52 10             JSR FindWord
-    1241/    12A0 : A5 21                LDA ret_val
-    1242/    12A2 : 05 22                ORA ret_val+$1
-    1243/    12A4 : F0 0E                BEQ .not_found
-    1244/    12A6 : A5 21                LDA ret_val
-    1245/    12A8 : 85 02                STA $2 ;Execute.address
-    1246/    12AA : A5 22                LDA ret_val+$1
-    1247/    12AC : 85 03                STA $3 ;Execute.address
-    1248/    12AE : 20 42 12             JSR Execute
-    1249/    12B1 : 4C 8F 12             JMP .input_loop
-    1250/    12B4 :                      .not_found:
-    1251/    12B4 : 20 8E 10             JSR CheckData
-    1252/    12B7 : AD 87 01             LDA new_stack_item
-    1253/    12BA : C9 04                CMP #$4
-    1254/    12BC : D0 1E                BNE .input_good
-    1255/    12BE : 4C CE 12             JMP .._1480.str_skip
-    1256/    12C1 :                      .._1480.str_addr:
-    1257/    12C1 : 49 4E 50 55 54 20    FCB "INPUT ERROR ",$0
+     598/     E4C :                     ERROR_MSG_INPUT:
+     599/     E4C : 49 4E 50 55 54 20    FCB "INPUT ERROR ",$0
                     45 52 52 4F 52 20 
                     00                
-    1258/    12CE :                      .._1480.str_skip:
-    1259/    12CE : A9 C1                LDA # (.._1480.str_addr) # $100
-    1260/    12D0 : 85 02                STA $2 ;ErrorMsg.msg
-    1261/    12D2 : A9 12                LDA # (.._1480.str_addr)/$100
-    1262/    12D4 : 85 03                STA $3 ;ErrorMsg.msg
-    1263/    12D6 : 20 4C 0E             JSR ErrorMsg
-    1264/    12D9 : 4C 8F 12             JMP .input_loop
-    1265/    12DC :                      .input_good:
-    1266/    12DC : 8A                   TXA
-    1267/    12DD : 38                   SEC
-    1268/    12DE : E9 09                SBC #$9
-    1269/    12E0 : AA                   TAX
-    1270/    12E1 : EE 91 01             INC stack_count
-    1271/    12E4 : 85 00                STA $0 ;dest
-    1272/    12E6 : A9 00                LDA #$0
-    1273/    12E8 : 85 01                STA $1 ;dest
-    1274/    12EA : A9 87                LDA # (new_stack_item) # $100
-    1275/    12EC : 85 0D                STA $D ;MemCopy.source
-    1276/    12EE : A9 01                LDA # (new_stack_item)/$100
-    1277/    12F0 : 85 0E                STA $E ;MemCopy.source
-    1278/    12F2 : A5 00                LDA $0 ;dest
-    1279/    12F4 : 85 0F                STA $F ;MemCopy.dest
-    1280/    12F6 : A5 01                LDA $1 ;dest
-    1281/    12F8 : 85 10                STA $10 ;MemCopy.dest
-    1282/    12FA : A9 09                LDA #$9
-    1283/    12FC : 85 11                STA $11 ;MemCopy.count
-    1284/    12FE : 20 06 0C             JSR MemCopy
-    1285/    1301 : 4C 95 12             JMP .process_loop
-    1286/    1304 : 60                   RTS
-    1287/    1305 :                     
-    1288/    1305 :                     
-    1289/    1305 : =$1305              EEPROM set *
-    1290/    1305 :                     
-    1291/    1305 :                     	OUTRADIX 10
-    1292/    1305 :                     
-    1293/    1305 :                     AddCommas MACRO num
-    1294/    1305 :                     comma_ret set "\{num}"
-    1295/    1305 :                     	IF num<1000
-    1296/    1305 :                     		EXITM
-    1297/    1305 :                     	ELSE
-    1298/    1305 :                     comma_ret set "\{substr(comma_ret,0,strlen(comma_ret)-3)},\{substr(comma_ret,strlen(comma_ret)-3,strlen(comma_ret))}"
-    1299/    1305 :                     	ENDIF
-    1300/    1305 :                     	ENDM
-    1301/    1305 :                     
-    1302/    1305 :                     ;Display memory usage in console
-    1303/    1305 :                     ;===============================
+     600/     E59 :                      
+     601/     E59 :                     ERROR_MSG_WORD_TOO_LONG:
+     602/     E59 : 49 4E 50 55 54 20    FCB "INPUT SIZE  ",$0
+                    53 49 5A 45 20 20 
+                    00                
+     603/     E66 :                      
+     604/     E66 :                     ERROR_MSG_STRING:
+     605/     E66 : 53 54 52 49 4E 47    FCB "STRING ERROR",$0
+                    20 45 52 52 4F 52 
+                    00                
+     606/     E73 :                      
+     607/     E73 :                     ERROR_MSG_STACK_OVERFLOW:
+     608/     E73 : 53 54 41 43 4B 20    FCB "STACK OVERF ",$0
+                    4F 56 45 52 46 20 
+                    00                
+     609/     E80 :                      
+     610/     E80 :                     ERROR_MSG_STACK_UNDERFLOW:
+     611/     E80 : 53 54 41 43 4B 20    FCB "STACK UNDERF",$0
+                    55 4E 44 45 52 46 
+                    00                
+     612/     E8D :                      
+     613/     E8D :                     ERROR_TABLE:
+     614/     E8D : 4C 0E                FDB ERROR_MSG_INPUT
+     615/     E8F : 59 0E                FDB ERROR_MSG_WORD_TOO_LONG
+     616/     E91 : 66 0E                FDB ERROR_MSG_STRING
+     617/     E93 : 73 0E                FDB ERROR_MSG_STACK_OVERFLOW
+     618/     E95 : 80 0E                FDB ERROR_MSG_STACK_UNDERFLOW
+     619/     E97 :                      
+     620/     E97 :                     ErrorMsg:
+     621/     E97 : A4 03                LDY $3 ;error_code
+     622/     E99 : B9 8B 0E             LDA ERROR_TABLE-$2,Y
+     623/     E9C : 85 04                STA $4 ;msg
+     624/     E9E : B9 8C 0E             LDA ERROR_TABLE-$1,Y
+     625/     EA1 : 85 05                STA $5 ;msg
+     626/     EA3 : A9 20                LDA #$20
+     627/     EA5 : 85 23                STA screen_ptr
+     628/     EA7 : A9 60                LDA #$60
+     629/     EA9 : 85 24                STA screen_ptr+$1
+     630/     EAB : 4C BB 0E             JMP .._1088.str_skip
+     631/     EAE :                      .._1088.str_addr:
+     632/     EAE : 62 62 62 62 62 62    FCB "bbbbbbbbbbbb",$0
+                    62 62 62 62 62 62 
+                    00                
+     633/     EBB :                      .._1088.str_skip:
+     634/     EBB : A9 AE                LDA # (.._1088.str_addr) # $100
+     635/     EBD : 85 07                STA $7 ;LCD_print.source
+     636/     EBF : A9 0E                LDA # (.._1088.str_addr)/$100
+     637/     EC1 : 85 08                STA $8 ;LCD_print.source
+     638/     EC3 : 20 ED 0B             JSR LCD_print
+     639/     EC6 : A9 20                LDA #$20
+     640/     EC8 : 85 23                STA screen_ptr
+     641/     ECA : A9 70                LDA #$70
+     642/     ECC : 85 24                STA screen_ptr+$1
+     643/     ECE : A9 FF                LDA #$FF
+     644/     ED0 : 8D 90 01             STA font_inverted
+     645/     ED3 : A5 04                LDA $4 ;msg
+     646/     ED5 : 85 07                STA $7 ;LCD_print.source
+     647/     ED7 : A5 05                LDA $5 ;msg
+     648/     ED9 : 85 08                STA $8 ;LCD_print.source
+     649/     EDB : 20 ED 0B             JSR LCD_print
+     650/     EDE : A9 20                LDA #$20
+     651/     EE0 : 85 23                STA screen_ptr
+     652/     EE2 : A9 80                LDA #$80
+     653/     EE4 : 85 24                STA screen_ptr+$1
+     654/     EE6 : 4C F6 0E             JMP .._1142.str_skip
+     655/     EE9 :                      .._1142.str_addr:
+     656/     EE9 : 62 62 62 62 62 62    FCB "bbbbbbbbbbbb",$0
+                    62 62 62 62 62 62 
+                    00                
+     657/     EF6 :                      .._1142.str_skip:
+     658/     EF6 : A9 E9                LDA # (.._1142.str_addr) # $100
+     659/     EF8 : 85 07                STA $7 ;LCD_print.source
+     660/     EFA : A9 0E                LDA # (.._1142.str_addr)/$100
+     661/     EFC : 85 08                STA $8 ;LCD_print.source
+     662/     EFE : 20 ED 0B             JSR LCD_print
+     663/     F01 : A9 00                LDA #$0
+     664/     F03 : 8D 90 01             STA font_inverted
+     665/     F06 :                      .loop:
+     666/     F06 : 20 4A 0B             JSR ReadKey
+     667/     F09 : C9 0D                CMP #$D
+     668/     F0B : D0 F9                BNE .loop
+     669/     F0D : 60                   RTS
+     670/     F0E : 60                   RTS
+     671/     F0F :                      
+     672/     F0F :                     InitForth:
+     673/     F0F : A9 00                LDA #$0
+     674/     F11 : 8D 31 01             STA input_buff_begin
+     675/     F14 : 8D 32 01             STA input_buff_end
+     676/     F17 : 8D 73 01             STA new_word_len
+     677/     F1A : 60                   RTS
+     678/     F1B :                      
+     679/     F1B :                     special_chars:
+     680/     F1B : 65 22                FCB 'e',$22
+     681/     F1D : 20 2E 24 2D          FCB " .$-"
+     682/     F21 :                      
+     683/     F21 :                     ReadLine:
+     684/     F21 : A9 00                LDA #$0
+     685/     F23 : 85 03                STA $3 ;cursor
+     686/     F25 : 85 06                STA $6 ;index
+     687/     F27 : 85 23                STA screen_ptr
+     688/     F29 : A9 AC                LDA #$AC
+     689/     F2B : 85 24                STA screen_ptr+$1
+     690/     F2D : 4C 41 0F             JMP .._1193.str_skip
+     691/     F30 :                      .._1193.str_addr:
+     692/     F30 : 61 20 20 20 20 20    FCB "a               ",$0
+                    20 20 20 20 20 20 
+                    20 20 20 20 00    
+     693/     F41 :                      .._1193.str_skip:
+     694/     F41 : A9 30                LDA # (.._1193.str_addr) # $100
+     695/     F43 : 85 07                STA $7 ;LCD_print.source
+     696/     F45 : A9 0F                LDA # (.._1193.str_addr)/$100
+     697/     F47 : 85 08                STA $8 ;LCD_print.source
+     698/     F49 : 20 ED 0B             JSR LCD_print
+     699/     F4C : AD E6 FF             LDA $FFE6
+     700/     F4F : 85 04                STA $4 ;cursor_timer
+     701/     F51 :                      .loop:
+     702/     F51 : A9 00                LDA #$0
+     703/     F53 : 85 05                STA $5 ;arg
+     704/     F55 : 20 4A 0B             JSR ReadKey
+     705/     F58 : D0 03                BNE .key_read
+     706/     F5A : 4C 32 10             JMP .no_key
+     707/     F5D :                      .key_read:
+     708/     F5D : C9 0D                CMP #$D
+     709/     F5F : D0 0F                BNE .not_enter
+     710/     F61 : A5 06                LDA $6 ;index
+     711/     F63 : F0 EC                BEQ .loop
+     712/     F65 : A9 00                LDA #$0
+     713/     F67 : 8D 31 01             STA input_buff_begin
+     714/     F6A : A5 06                LDA $6 ;index
+     715/     F6C : 8D 32 01             STA input_buff_end
+     716/     F6F : 60                   RTS
+     717/     F70 :                      .not_enter:
+     718/     F70 : C9 08                CMP #$8
+     719/     F72 : D0 2F                BNE .not_backspace
+     720/     F74 : A5 06                LDA $6 ;index
+     721/     F76 : F0 28                BEQ .backspace_done
+     722/     F78 : C6 06                DEC $6 ;index
+     723/     F7A : C9 10                CMP #$10
+     724/     F7C : B0 1C                BCS .backspace_scroll
+     725/     F7E : A9 20                LDA #$20
+     726/     F80 : 85 0F                STA $F ;LCD_char.c_out
+     727/     F82 : 20 72 0B             JSR LCD_char
+     728/     F85 : A5 23                LDA screen_ptr
+     729/     F87 : 38                   SEC
+     730/     F88 : E9 20                SBC #$20
+     731/     F8A : 85 23                STA screen_ptr
+     732/     F8C : 48                   PHA
+     733/     F8D : A9 61                LDA #$61
+     734/     F8F : 85 0F                STA $F ;LCD_char.c_out
+     735/     F91 : 20 72 0B             JSR LCD_char
+     736/     F94 : 68                   PLA
+     737/     F95 : 85 23                STA screen_ptr
+     738/     F97 : 4C 32 10             JMP .draw_done
+     739/     F9A :                      .backspace_scroll:
+     740/     F9A : A4 06                LDY $6 ;index
+     741/     F9C : 88                   DEY
+     742/     F9D : 4C 05 10             JMP .scroll_buffer
+     743/     FA0 :                      .backspace_done:
+     744/     FA0 : 4C 32 10             JMP .no_key
+     745/     FA3 :                      .not_backspace:
+     746/     FA3 : A0 00                LDY #$0
+     747/     FA5 :                      .special_loop:
+     748/     FA5 : D9 1B 0F             CMP special_chars,Y
+     749/     FA8 : D0 05                BNE .special_next
+     750/     FAA : 85 05                STA $5 ;arg
+     751/     FAC : 4C DB 0F             JMP .key_done
+     752/     FAF :                      .special_next:
+     753/     FAF : C8                   INY
+     754/     FB0 : C0 06                CPY #$6
+     755/     FB2 : D0 F1                BNE .special_loop
+     756/     FB4 : C9 30                CMP #$30
+     757/     FB6 : 90 09                BCC .not_num
+     758/     FB8 : C9 3A                CMP #$3A
+     759/     FBA : B0 05                BCS .not_num
+     760/     FBC : 85 05                STA $5 ;arg
+     761/     FBE : 4C DB 0F             JMP .key_done
+     762/     FC1 :                      .not_num:
+     763/     FC1 : C9 41                CMP #$41
+     764/     FC3 : 90 09                BCC .not_upper
+     765/     FC5 : C9 5B                CMP #$5B
+     766/     FC7 : B0 05                BCS .not_upper
+     767/     FC9 : 85 05                STA $5 ;arg
+     768/     FCB : 4C DB 0F             JMP .key_done
+     769/     FCE :                      .not_upper:
+     770/     FCE : C9 61                CMP #$61
+     771/     FD0 : 90 09                BCC .not_lower
+     772/     FD2 : C9 7B                CMP #$7B
+     773/     FD4 : B0 05                BCS .not_lower
+     774/     FD6 : 38                   SEC
+     775/     FD7 : E9 20                SBC #$20
+     776/     FD9 : 85 05                STA $5 ;arg
+     777/     FDB :                      .not_lower:
+     778/     FDB :                      .key_done:
+     779/     FDB : A5 05                LDA $5 ;arg
+     780/     FDD : F0 53                BEQ .not_valid
+     781/     FDF : A4 06                LDY $6 ;index
+     782/     FE1 : C0 40                CPY #$40
+     783/     FE3 : B0 4D                BCS .buffer_full
+     784/     FE5 : 99 33 01             STA input_buff,Y
+     785/     FE8 : E6 06                INC $6 ;index
+     786/     FEA : C0 0F                CPY #$F
+     787/     FEC : B0 17                BCS .scroll_buffer
+     788/     FEE : A5 05                LDA $5 ;arg
+     789/     FF0 : 85 0F                STA $F ;LCD_char.c_out
+     790/     FF2 : 20 72 0B             JSR LCD_char
+     791/     FF5 : A5 23                LDA screen_ptr
+     792/     FF7 : 48                   PHA
+     793/     FF8 : A9 61                LDA #$61
+     794/     FFA : 85 0F                STA $F ;LCD_char.c_out
+     795/     FFC : 20 72 0B             JSR LCD_char
+     796/     FFF : 68                   PLA
+     797/    1000 : 85 23                STA screen_ptr
+     798/    1002 : 4C 32 10             JMP .draw_done
+     799/    1005 :                      .scroll_buffer:
+     800/    1005 : A9 00                LDA #$0
+     801/    1007 : 85 23                STA screen_ptr
+     802/    1009 : 98                   TYA
+     803/    100A : 38                   SEC
+     804/    100B : E9 0E                SBC #$E
+     805/    100D : 85 0B                STA $B ;str_index
+     806/    100F :                      .scroll_loop:
+     807/    100F : A4 0B                LDY $B ;str_index
+     808/    1011 : E6 0B                INC $B ;str_index
+     809/    1013 : B9 33 01             LDA input_buff,Y
+     810/    1016 : 85 05                STA $5 ;arg
+     811/    1018 : A5 05                LDA $5 ;arg
+     812/    101A : 85 0F                STA $F ;LCD_char.c_out
+     813/    101C : 20 72 0B             JSR LCD_char
+     814/    101F : A5 06                LDA $6 ;index
+     815/    1021 : C5 0B                CMP $B ;str_index
+     816/    1023 : D0 EA                BNE .scroll_loop
+     817/    1025 : A5 23                LDA screen_ptr
+     818/    1027 : 48                   PHA
+     819/    1028 : A9 61                LDA #$61
+     820/    102A : 85 0F                STA $F ;LCD_char.c_out
+     821/    102C : 20 72 0B             JSR LCD_char
+     822/    102F : 68                   PLA
+     823/    1030 : 85 23                STA screen_ptr
+     824/    1032 :                      .draw_done:
+     825/    1032 :                      .buffer_full:
+     826/    1032 :                      .not_valid:
+     827/    1032 :                      .no_key:
+     828/    1032 : AD E6 FF             LDA $FFE6
+     829/    1035 : C5 04                CMP $4 ;cursor_timer
+     830/    1037 : F0 25                BEQ .cursor_done
+     831/    1039 : 85 04                STA $4 ;cursor_timer
+     832/    103B : A5 03                LDA $3 ;cursor
+     833/    103D : F0 09                BEQ .draw_blank
+     834/    103F : A9 00                LDA #$0
+     835/    1041 : 85 03                STA $3 ;cursor
+     836/    1043 : A9 20                LDA #$20
+     837/    1045 : 4C 4E 10             JMP .draw
+     838/    1048 :                      .draw_blank:
+     839/    1048 : A9 FF                LDA #$FF
+     840/    104A : 85 03                STA $3 ;cursor
+     841/    104C : A9 61                LDA #$61
+     842/    104E :                      .draw:
+     843/    104E : 85 05                STA $5 ;arg
+     844/    1050 : A5 05                LDA $5 ;arg
+     845/    1052 : 85 0F                STA $F ;LCD_char.c_out
+     846/    1054 : 20 72 0B             JSR LCD_char
+     847/    1057 : A5 23                LDA screen_ptr
+     848/    1059 : 38                   SEC
+     849/    105A : E9 10                SBC #$10
+     850/    105C : 85 23                STA screen_ptr
+     851/    105E :                      .cursor_done:
+     852/    105E : 4C 51 0F             JMP .loop
+     853/    1061 : 60                   RTS
+     854/    1062 :                      
+     855/    1062 :                     LineWord:
+     856/    1062 : A9 00                LDA #$0
+     857/    1064 : 8D 30 01             STA global_error
+     858/    1067 : A9 00                LDA #$0
+     859/    1069 : 8D 73 01             STA new_word_len
+     860/    106C : AC 31 01             LDY input_buff_begin
+     861/    106F : CC 32 01             CPY input_buff_end
+     862/    1072 : D0 01                BNE .chars_left
+     863/    1074 : 60                   RTS
+     864/    1075 :                      .chars_left:
+     865/    1075 :                      .loop:
+     866/    1075 : AC 31 01             LDY input_buff_begin
+     867/    1078 : B9 33 01             LDA input_buff,Y
+     868/    107B : EE 31 01             INC input_buff_begin
+     869/    107E : C9 20                CMP #$20
+     870/    1080 : D0 06                BNE .not_space
+     871/    1082 : AD 73 01             LDA new_word_len
+     872/    1085 : F0 15                BEQ .chars_left2
+     873/    1087 : 60                   RTS
+     874/    1088 :                      .not_space:
+     875/    1088 : AC 73 01             LDY new_word_len
+     876/    108B : 99 74 01             STA new_word_buff,Y
+     877/    108E : C8                   INY
+     878/    108F : 8C 73 01             STY new_word_len
+     879/    1092 : C0 13                CPY #$13
+     880/    1094 : D0 06                BNE .word_size_good
+     881/    1096 : A9 04                LDA #$4
+     882/    1098 : 8D 30 01             STA global_error
+     883/    109B : 60                   RTS
+     884/    109C :                      .word_size_good:
+     885/    109C :                      .chars_left2:
+     886/    109C : AD 31 01             LDA input_buff_begin
+     887/    109F : CD 32 01             CMP input_buff_end
+     888/    10A2 : F0 03                BEQ .found
+     889/    10A4 : 4C 75 10             JMP .loop
+     890/    10A7 :                      .found:
+     891/    10A7 : 60                   RTS
+     892/    10A8 : 60                   RTS
+     893/    10A9 :                      
+     894/    10A9 :                     FindWord:
+     895/    10A9 : A9 F2                LDA # (FORTH_WORDS) # $100
+     896/    10AB : 85 21                STA ret_val
+     897/    10AD : A9 12                LDA # (FORTH_WORDS)/$100
+     898/    10AF : 85 22                STA ret_val+$1
+     899/    10B1 :                      .loop:
+     900/    10B1 : A0 00                LDY #$0
+     901/    10B3 : B1 21                LDA (ret_val),Y
+     902/    10B5 : CD 73 01             CMP new_word_len
+     903/    10B8 : D0 11                BNE .loop_next
+     904/    10BA : C8                   INY
+     905/    10BB :                      .str_loop:
+     906/    10BB : B1 21                LDA (ret_val),Y
+     907/    10BD : D9 73 01             CMP new_word_buff-$1,Y
+     908/    10C0 : D0 09                BNE .no_match
+     909/    10C2 : CC 73 01             CPY new_word_len
+     910/    10C5 : F0 1C                BEQ .word_found
+     911/    10C7 : C8                   INY
+     912/    10C8 : 4C BB 10             JMP .str_loop
+     913/    10CB :                      .no_match:
+     914/    10CB :                      .loop_next:
+     915/    10CB : A0 00                LDY #$0
+     916/    10CD : B1 21                LDA (ret_val),Y
+     917/    10CF : A8                   TAY
+     918/    10D0 : C8                   INY
+     919/    10D1 : B1 21                LDA (ret_val),Y
+     920/    10D3 : 48                   PHA
+     921/    10D4 : C8                   INY
+     922/    10D5 : B1 21                LDA (ret_val),Y
+     923/    10D7 : 85 22                STA ret_val+$1
+     924/    10D9 : 68                   PLA
+     925/    10DA : 85 21                STA ret_val
+     926/    10DC : 05 22                ORA ret_val+$1
+     927/    10DE : D0 D1                BNE .loop
+     928/    10E0 : 85 21                STA ret_val
+     929/    10E2 : 60                   RTS
+     930/    10E3 :                      .word_found:
+     931/    10E3 : A0 00                LDY #$0
+     932/    10E5 : B1 21                LDA (ret_val),Y
+     933/    10E7 : A8                   TAY
+     934/    10E8 : C8                   INY
+     935/    10E9 : C8                   INY
+     936/    10EA : C8                   INY
+     937/    10EB : B1 21                LDA (ret_val),Y
+     938/    10ED : 85 21                STA ret_val
+     939/    10EF : 60                   RTS
+     940/    10F0 :                      
+     941/    10F0 :                     CheckData:
+     942/    10F0 : A9 04                LDA #$4
+     943/    10F2 : 8D 87 01             STA new_stack_item
+     944/    10F5 : AD 73 01             LDA new_word_len
+     945/    10F8 : D0 01                BNE .not_zero_len
+     946/    10FA : 60                   RTS
+     947/    10FB :                      .not_zero_len:
+     948/    10FB : A0 08                LDY #$8
+     949/    10FD : A9 00                LDA #$0
+     950/    10FF :                      .zero_loop:
+     951/    10FF : 99 87 01             STA new_stack_item,Y
+     952/    1102 : 88                   DEY
+     953/    1103 : D0 FA                BNE .zero_loop
+     954/    1105 : A0 00                LDY #$0
+     955/    1107 : AD 74 01             LDA new_word_buff
+     956/    110A : C9 22                CMP #$22
+     957/    110C : D0 2E                BNE .not_string
+     958/    110E : AD 73 01             LDA new_word_len
+     959/    1111 : C9 01                CMP #$1
+     960/    1113 : D0 01                BNE .not_single_quote
+     961/    1115 : 60                   RTS
+     962/    1116 :                      .not_single_quote:
+     963/    1116 : CE 73 01             DEC new_word_len
+     964/    1119 :                      .loop_str:
+     965/    1119 : B9 75 01             LDA new_word_buff+$1,y
+     966/    111C : C9 22                CMP #$22
+     967/    111E : F0 10                BEQ .str_done
+     968/    1120 : C0 08                CPY #$8
+     969/    1122 : F0 0B                BEQ .string_too_long
+     970/    1124 : 99 88 01             STA new_stack_item+$1,Y
+     971/    1127 : C8                   INY
+     972/    1128 : CC 73 01             CPY new_word_len
+     973/    112B : F0 02                BEQ .string_unterminated
+     974/    112D : D0 EA                BNE .loop_str
+     975/    112F :                      .string_too_long:
+     976/    112F :                      .string_unterminated:
+     977/    112F : 60                   RTS
+     978/    1130 :                      .str_done:
+     979/    1130 : C8                   INY
+     980/    1131 : CC 73 01             CPY new_word_len
+     981/    1134 : D0 05                BNE .str_return
+     982/    1136 : A9 02                LDA #$2
+     983/    1138 : 8D 87 01             STA new_stack_item
+     984/    113B :                      .str_return:
+     985/    113B : 60                   RTS
+     986/    113C :                      .not_string:
+     987/    113C : C9 24                CMP #$24
+     988/    113E : D0 4F                BNE .not_hex
+     989/    1140 : AD 73 01             LDA new_word_len
+     990/    1143 : C9 01                CMP #$1
+     991/    1145 : F0 47                BEQ .hex_error
+     992/    1147 : C9 06                CMP #$6
+     993/    1149 : B0 43                BCS .hex_error
+     994/    114B : CE 73 01             DEC new_word_len
+     995/    114E : A0 00                LDY #$0
+     996/    1150 :                      .loop_hex:
+     997/    1150 : B9 75 01             LDA new_word_buff+$1,Y
+     998/    1153 : C9 30                CMP #$30
+     999/    1155 : 90 37                BCC .hex_error
+    1000/    1157 : C9 3A                CMP #$3A
+    1001/    1159 : B0 0F                BCS .not_digit
+    1002/    115B : 38                   SEC
+    1003/    115C : E9 30                SBC #$30
+    1004/    115E : 20 60 12             JSR .hex_rotate
+    1005/    1161 : 0D 88 01             ORA new_stack_item+$1
+    1006/    1164 : 8D 88 01             STA new_stack_item+$1
+    1007/    1167 : 4C 7E 11             JMP .hex_char_next
+    1008/    116A :                      .not_digit:
+    1009/    116A : C9 41                CMP #$41
+    1010/    116C : 90 20                BCC .hex_error
+    1011/    116E : C9 47                CMP #$47
+    1012/    1170 : B0 1C                BCS .hex_error
+    1013/    1172 : 38                   SEC
+    1014/    1173 : E9 37                SBC #$37
+    1015/    1175 : 20 60 12             JSR .hex_rotate
+    1016/    1178 : 0D 88 01             ORA new_stack_item+$1
+    1017/    117B : 8D 88 01             STA new_stack_item+$1
+    1018/    117E :                      .hex_char_next:
+    1019/    117E : C8                   INY
+    1020/    117F : CC 73 01             CPY new_word_len
+    1021/    1182 : F0 04                BEQ .hex_done
+    1022/    1184 : C0 04                CPY #$4
+    1023/    1186 : D0 C8                BNE .loop_hex
+    1024/    1188 :                      .hex_done:
+    1025/    1188 : A9 03                LDA #$3
+    1026/    118A : 8D 87 01             STA new_stack_item
+    1027/    118D : 60                   RTS
+    1028/    118E :                      .hex_error:
+    1029/    118E : 60                   RTS
+    1030/    118F :                      .not_hex:
+    1031/    118F : A9 06                LDA #$6
+    1032/    1191 : 85 05                STA $5 ;index
+    1033/    1193 : A9 00                LDA #$0
+    1034/    1195 : 85 06                STA $6 ;which_digit
+    1035/    1197 : 85 07                STA $7 ;negative
+    1036/    1199 : 85 08                STA $8 ;exp_negative
+    1037/    119B : 85 09                STA $9 ;exp_count
+    1038/    119D : 85 0D                STA $D ;digit_count
+    1039/    119F : 85 0C                STA $C ;nonzero_found
+    1040/    11A1 : 85 0B                STA $B ;dec_found
+    1041/    11A3 : 85 0A                STA $A ;exp_found
+    1042/    11A5 : AD 74 01             LDA new_word_buff
+    1043/    11A8 : C9 2D                CMP #$2D
+    1044/    11AA : D0 05                BNE .float_no_neg
+    1045/    11AC : A9 FF                LDA #$FF
+    1046/    11AE : 85 07                STA $7 ;negative
+    1047/    11B0 : C8                   INY
+    1048/    11B1 :                      .float_no_neg:
+    1049/    11B1 :                      .loop_float:
+    1050/    11B1 : B9 74 01             LDA new_word_buff,Y
+    1051/    11B4 : 20 70 12             JSR .digit
+    1052/    11B7 : 90 5E                BCC .float_not_digit
+    1053/    11B9 : 48                   PHA
+    1054/    11BA : A5 0C                LDA $C ;nonzero_found
+    1055/    11BC : D0 17                BNE .digit_good
+    1056/    11BE : 68                   PLA
+    1057/    11BF : 48                   PHA
+    1058/    11C0 : F0 06                BEQ .digit_zero
+    1059/    11C2 : A9 FF                LDA #$FF
+    1060/    11C4 : 85 0C                STA $C ;nonzero_found
+    1061/    11C6 : D0 0D                BNE .digit_good
+    1062/    11C8 :                      .digit_zero:
+    1063/    11C8 : 68                   PLA
+    1064/    11C9 : A5 0A                LDA $A ;exp_found
+    1065/    11CB : D0 1E                BNE .float_next
+    1066/    11CD : A5 0B                LDA $B ;dec_found
+    1067/    11CF : F0 1A                BEQ .float_next
+    1068/    11D1 : C6 09                DEC $9 ;exp_count
+    1069/    11D3 : D0 16                BNE .float_next
+    1070/    11D5 :                      .digit_good:
+    1071/    11D5 : A5 0A                LDA $A ;exp_found
+    1072/    11D7 : D0 1B                BNE .exp_digit
+    1073/    11D9 : A5 0D                LDA $D ;digit_count
+    1074/    11DB : C9 0C                CMP #$C
+    1075/    11DD : D0 02                BNE .digit_ok
+    1076/    11DF : 68                   PLA
+    1077/    11E0 : 60                   RTS
+    1078/    11E1 :                      .digit_ok:
+    1079/    11E1 : A5 0B                LDA $B ;dec_found
+    1080/    11E3 : D0 02                BNE .no_dec_yet
+    1081/    11E5 : E6 09                INC $9 ;exp_count
+    1082/    11E7 :                      .no_dec_yet:
+    1083/    11E7 : 68                   PLA
+    1084/    11E8 : 20 7D 12             JSR .add_digit
+    1085/    11EB :                      .float_next:
+    1086/    11EB : C8                   INY
+    1087/    11EC : CC 73 01             CPY new_word_len
+    1088/    11EF : F0 69                BEQ .float_done
+    1089/    11F1 : 4C B1 11             JMP .loop_float
+    1090/    11F4 :                      .exp_digit:
+    1091/    11F4 : A5 0D                LDA $D ;digit_count
+    1092/    11F6 : C9 03                CMP #$3
+    1093/    11F8 : D0 02                BNE .exp_digit_ok
+    1094/    11FA : 68                   PLA
+    1095/    11FB : 60                   RTS
+    1096/    11FC :                      .exp_digit_ok:
+    1097/    11FC : 68                   PLA
+    1098/    11FD : 84 04                STY $4 ;y_buff
+    1099/    11FF : A0 04                LDY #$4
+    1100/    1201 :                      .exp_loop:
+    1101/    1201 : 0E 8E 01             ASL new_stack_item+$7
+    1102/    1204 : 2E 8F 01             ROL new_stack_item+$8
+    1103/    1207 : 88                   DEY
+    1104/    1208 : D0 F7                BNE .exp_loop
+    1105/    120A : A4 04                LDY $4 ;y_buff
+    1106/    120C : 0D 8E 01             ORA new_stack_item+$7
+    1107/    120F : 8D 8E 01             STA new_stack_item+$7
+    1108/    1212 : E6 05                INC $5 ;index
+    1109/    1214 : 4C EB 11             JMP .float_next
+    1110/    1217 :                      .float_not_digit:
+    1111/    1217 : C9 2E                CMP #$2E
+    1112/    1219 : D0 10                BNE .not_decimal_point
+    1113/    121B : A5 0B                LDA $B ;dec_found
+    1114/    121D : F0 01                BEQ .decimal_good
+    1115/    121F : 60                   RTS
+    1116/    1220 :                      .decimal_good:
+    1117/    1220 : A5 0A                LDA $A ;exp_found
+    1118/    1222 : F0 01                BEQ .exp_good
+    1119/    1224 : 60                   RTS
+    1120/    1225 :                      .exp_good:
+    1121/    1225 : A9 FF                LDA #$FF
+    1122/    1227 : 85 0B                STA $B ;dec_found
+    1123/    1229 : D0 C0                BNE .float_next
+    1124/    122B :                      .not_decimal_point:
+    1125/    122B : C9 65                CMP #$65
+    1126/    122D : D0 15                BNE .not_exp
+    1127/    122F : A5 0A                LDA $A ;exp_found
+    1128/    1231 : F0 01                BEQ .first_exp
+    1129/    1233 : 60                   RTS
+    1130/    1234 :                      .first_exp:
+    1131/    1234 : A9 00                LDA #$0
+    1132/    1236 : 85 05                STA $5 ;index
+    1133/    1238 : 85 06                STA $6 ;which_digit
+    1134/    123A : 85 0D                STA $D ;digit_count
+    1135/    123C : 85 0C                STA $C ;nonzero_found
+    1136/    123E : A9 FF                LDA #$FF
+    1137/    1240 : 85 0A                STA $A ;exp_found
+    1138/    1242 : D0 A7                BNE .float_next
+    1139/    1244 :                      .not_exp:
+    1140/    1244 : C9 2D                CMP #$2D
+    1141/    1246 : D0 11                BNE .not_minus
+    1142/    1248 : A5 0A                LDA $A ;exp_found
+    1143/    124A : 49 FF                EOR #$FF
+    1144/    124C : 05 05                ORA $5 ;index
+    1145/    124E : 05 08                ORA $8 ;exp_negative
+    1146/    1250 : F0 01                BEQ .minus_good
+    1147/    1252 : 60                   RTS
+    1148/    1253 :                      .minus_good:
+    1149/    1253 : A9 FF                LDA #$FF
+    1150/    1255 : 85 08                STA $8 ;exp_negative
+    1151/    1257 : D0 92                BNE .float_next
+    1152/    1259 :                      .not_minus:
+    1153/    1259 : 60                   RTS
+    1154/    125A :                      .float_done:
+    1155/    125A : A9 01                LDA #$1
+    1156/    125C : 8D 87 01             STA new_stack_item
+    1157/    125F : 60                   RTS
+    1158/    1260 :                      .hex_rotate:
+    1159/    1260 : 84 04                STY $4 ;y_buff
+    1160/    1262 : A0 04                LDY #$4
+    1161/    1264 :                      .hex_rot_loop:
+    1162/    1264 : 0E 88 01             ASL new_stack_item+$1
+    1163/    1267 : 2E 89 01             ROL new_stack_item+$2
+    1164/    126A : 88                   DEY
+    1165/    126B : D0 F7                BNE .hex_rot_loop
+    1166/    126D : A4 04                LDY $4 ;y_buff
+    1167/    126F : 60                   RTS
+    1168/    1270 :                      .digit:
+    1169/    1270 : C9 3A                CMP #$3A
+    1170/    1272 : B0 07                BCS .is_digit_no
+    1171/    1274 : C9 30                CMP #$30
+    1172/    1276 : 90 03                BCC .is_digit_no
+    1173/    1278 : E9 30                SBC #$30
+    1174/    127A : 60                   RTS
+    1175/    127B :                      .is_digit_no:
+    1176/    127B : 18                   CLC
+    1177/    127C : 60                   RTS
+    1178/    127D :                      .add_digit:
+    1179/    127D : 48                   PHA
+    1180/    127E : 84 04                STY $4 ;y_buff
+    1181/    1280 : A4 05                LDY $5 ;index
+    1182/    1282 : E6 0D                INC $D ;digit_count
+    1183/    1284 : A5 06                LDA $6 ;which_digit
+    1184/    1286 : 49 FF                EOR #$FF
+    1185/    1288 : 85 06                STA $6 ;which_digit
+    1186/    128A : F0 0B                BEQ .second_digit
+    1187/    128C : 68                   PLA
+    1188/    128D : 0A                   ASL
+    1189/    128E : 0A                   ASL
+    1190/    128F : 0A                   ASL
+    1191/    1290 : 0A                   ASL
+    1192/    1291 : 99 87 01             STA new_stack_item,Y
+    1193/    1294 : A4 04                LDY $4 ;y_buff
+    1194/    1296 : 60                   RTS
+    1195/    1297 :                      .second_digit:
+    1196/    1297 : 68                   PLA
+    1197/    1298 : 19 87 01             ORA new_stack_item,Y
+    1198/    129B : 99 87 01             STA new_stack_item,Y
+    1199/    129E : C6 05                DEC $5 ;index
+    1200/    12A0 : A4 04                LDY $4 ;y_buff
+    1201/    12A2 : 60                   RTS
+    1202/    12A3 : 60                   RTS
+    1203/    12A4 :                      
+    1204/    12A4 :                     ExecToken:
+    1205/    12A4 : A9 00                LDA #$0
+    1206/    12A6 : 85 21                STA ret_val
+    1207/    12A8 : A4 03                LDY $3 ;token
+    1208/    12AA : B9 35 13             LDA JUMP_TABLE,Y
+    1209/    12AD : 85 06                STA $6 ;address
+    1210/    12AF : B9 36 13             LDA JUMP_TABLE+$1,Y
+    1211/    12B2 : 85 07                STA $7 ;address
+    1212/    12B4 : A0 00                LDY #$0
+    1213/    12B6 : B1 06                LDA ($6),Y ;address
+    1214/    12B8 : F0 27                BEQ .no_flags
+    1215/    12BA : 85 04                STA $4 ;flags
+    1216/    12BC : 29 03                AND #$3
+    1217/    12BE : 85 05                STA $5 ;temp
+    1218/    12C0 : AD 91 01             LDA stack_count
+    1219/    12C3 : C5 05                CMP $5 ;temp
+    1220/    12C5 : B0 05                BCS .no_underflow
+    1221/    12C7 : A9 0A                LDA #$A
+    1222/    12C9 : 85 21                STA ret_val
+    1223/    12CB : 60                   RTS
+    1224/    12CC :                      .no_underflow:
+    1225/    12CC : A5 04                LDA $4 ;flags
+    1226/    12CE : 29 04                AND #$4
+    1227/    12D0 : F0 0F                BEQ .no_add_item
+    1228/    12D2 : A9 07                LDA #$7
+    1229/    12D4 : CD 91 01             CMP stack_count
+    1230/    12D7 : B0 05                BCS .no_overflow
+    1231/    12D9 : A9 08                LDA #$8
+    1232/    12DB : 85 21                STA ret_val
+    1233/    12DD : 60                   RTS
+    1234/    12DE :                      .no_overflow:
+    1235/    12DE : 20 E9 12             JSR StackAddItem
+    1236/    12E1 :                      .no_add_item:
+    1237/    12E1 :                      .no_flags:
+    1238/    12E1 : A5 07                LDA $7 ;address
+    1239/    12E3 : 48                   PHA
+    1240/    12E4 : A5 06                LDA $6 ;address
+    1241/    12E6 : 48                   PHA
+    1242/    12E7 : 60                   RTS
+    1243/    12E8 : 60                   RTS
+    1244/    12E9 :                      
+    1245/    12E9 :                     StackAddItem:
+    1246/    12E9 : 8A                   TXA
+    1247/    12EA : 38                   SEC
+    1248/    12EB : E9 09                SBC #$9
+    1249/    12ED : AA                   TAX
+    1250/    12EE : EE 91 01             INC stack_count
+    1251/    12F1 : 60                   RTS
+    1252/    12F2 :                      
+    1253/    12F2 :                     FORTH_WORDS:
+    1254/    12F2 :                      
+    1255/    12F2 :                     WORD_DUP:
+    1256/    12F2 : 03 44 55 50          FCB $3,"DUP"
+    1257/    12F6 : 0B 13                FDB WORD_SWAP
+    1258/    12F8 : 02                   FCB $2
+    1259/    12F9 :                      
+    1260/    12F9 :                     CODE_DUP:
+    1261/    12F9 : 05                   FCB $5
+    1262/    12FA : 00                   BRK
+    1263/    12FB : 00                   BRK
+    1264/    12FC : A0 09                LDY #$9
+    1265/    12FE : 8A                   TXA
+    1266/    12FF : 48                   PHA
+    1267/    1300 :                      .dup_loop:
+    1268/    1300 : B5 09                LDA $9,X
+    1269/    1302 : 95 00                STA $0,X
+    1270/    1304 : E8                   INX
+    1271/    1305 : 88                   DEY
+    1272/    1306 : D0 F8                BNE .dup_loop
+    1273/    1308 : 68                   PLA
+    1274/    1309 : AA                   TAX
+    1275/    130A : 60                   RTS
+    1276/    130B :                      
+    1277/    130B :                     WORD_SWAP:
+    1278/    130B : 04 53 57 41 50       FCB $4,"SWAP"
+    1279/    1310 : 17 13                FDB WORD_DROP
+    1280/    1312 : 04                   FCB $4
+    1281/    1313 :                      
+    1282/    1313 :                     CODE_SWAP:
+    1283/    1313 : 02                   FCB $2
+    1284/    1314 : A9 06                LDA #$6
+    1285/    1316 : 60                   RTS
+    1286/    1317 :                      
+    1287/    1317 :                     WORD_DROP:
+    1288/    1317 : 04 44 52 4F 50       FCB $4,"DROP"
+    1289/    131C : 29 13                FDB WORD_OVER
+    1290/    131E : 06                   FCB $6
+    1291/    131F :                      
+    1292/    131F :                     CODE_DROP:
+    1293/    131F : 01                   FCB $1
+    1294/    1320 : 8A                   TXA
+    1295/    1321 : 18                   CLC
+    1296/    1322 : 69 09                ADC #$9
+    1297/    1324 : AA                   TAX
+    1298/    1325 : CE 91 01             DEC stack_count
+    1299/    1328 : 60                   RTS
+    1300/    1329 :                      
+    1301/    1329 :                     WORD_OVER:
+    1302/    1329 : 04 4F 56 45 52       FCB $4,"OVER"
+    1303/    132E : 00 00                FDB $0
+    1304/    1330 : 08                   FCB $8
+    1305/    1331 :                      
+    1306/    1331 :                     CODE_OVER:
+    1307/    1331 : 06                   FCB $6
+    1308/    1332 : A9 08                LDA #$8
+    1309/    1334 : 60                   RTS
+    1310/    1335 :                      
+    1311/    1335 :                     JUMP_TABLE:
+    1312/    1335 : 00 00                FDB $0
+    1313/    1337 : F9 12                FDB CODE_DUP
+    1314/    1339 : 13 13                FDB CODE_SWAP
+    1315/    133B : 1F 13                FDB CODE_DROP
+    1316/    133D : 31 13                FDB CODE_OVER
+    1317/    133F :                      
+    1318/    133F :                     main:
+    1319/    133F : A2 2F                LDX #$2F
+    1320/    1341 : 9A                   TXS
+    1321/    1342 : 20 33 0B             JSR setup
+    1322/    1345 :                      .input_loop:
+    1323/    1345 : 20 A1 0D             JSR DrawStack
+    1324/    1348 : 20 21 0F             JSR ReadLine
+    1325/    134B :                      .process_loop:
+    1326/    134B : 20 62 10             JSR LineWord
+    1327/    134E : AD 73 01             LDA new_word_len
+    1328/    1351 : F0 F2                BEQ .input_loop
+    1329/    1353 : 20 A9 10             JSR FindWord
+    1330/    1356 : A5 21                LDA ret_val
+    1331/    1358 : F0 1A                BEQ .not_found
+    1332/    135A : A5 21                LDA ret_val
+    1333/    135C : 85 03                STA $3 ;ExecToken.token
+    1334/    135E : 20 A4 12             JSR ExecToken
+    1335/    1361 : A5 21                LDA ret_val
+    1336/    1363 : F0 0C                BEQ .no_exec_error
+    1337/    1365 : 85 02                STA $2 ;arg
+    1338/    1367 : A5 02                LDA $2 ;arg
+    1339/    1369 : 85 03                STA $3 ;ErrorMsg.error_code
+    1340/    136B : 20 97 0E             JSR ErrorMsg
+    1341/    136E : 4C 45 13             JMP .input_loop
+    1342/    1371 :                      .no_exec_error:
+    1343/    1371 : 4C 4B 13             JMP .process_loop
+    1344/    1374 :                      .not_found:
+    1345/    1374 : 20 F0 10             JSR CheckData
+    1346/    1377 : AD 87 01             LDA new_stack_item
+    1347/    137A : C9 04                CMP #$4
+    1348/    137C : D0 0A                BNE .input_good
+    1349/    137E : A9 00                LDA #$0
+    1350/    1380 : 85 03                STA $3 ;ErrorMsg.error_code
+    1351/    1382 : 20 97 0E             JSR ErrorMsg
+    1352/    1385 : 4C 45 13             JMP .input_loop
+    1353/    1388 :                      .input_good:
+    1354/    1388 : A9 07                LDA #$7
+    1355/    138A : CD 91 01             CMP stack_count
+    1356/    138D : B0 0A                BCS .no_overflow
+    1357/    138F : A9 08                LDA #$8
+    1358/    1391 : 85 03                STA $3 ;ErrorMsg.error_code
+    1359/    1393 : 20 97 0E             JSR ErrorMsg
+    1360/    1396 : 4C 45 13             JMP .input_loop
+    1361/    1399 :                      .no_overflow:
+    1362/    1399 : 20 E9 12             JSR StackAddItem
+    1363/    139C : 86 00                STX $0 ;dest
+    1364/    139E : A9 00                LDA #$0
+    1365/    13A0 : 85 01                STA $1 ;dest
+    1366/    13A2 : A9 87                LDA # (new_stack_item) # $100
+    1367/    13A4 : 85 0E                STA $E ;MemCopy.source
+    1368/    13A6 : A9 01                LDA # (new_stack_item)/$100
+    1369/    13A8 : 85 0F                STA $F ;MemCopy.source
+    1370/    13AA : A5 00                LDA $0 ;dest
+    1371/    13AC : 85 10                STA $10 ;MemCopy.dest
+    1372/    13AE : A5 01                LDA $1 ;dest
+    1373/    13B0 : 85 11                STA $11 ;MemCopy.dest
+    1374/    13B2 : A9 09                LDA #$9
+    1375/    13B4 : 85 12                STA $12 ;MemCopy.count
+    1376/    13B6 : 20 06 0C             JSR MemCopy
+    1377/    13B9 : 4C 4B 13             JMP .process_loop
+    1378/    13BC : 60                   RTS
+    1379/    13BD :                     
+    1380/    13BD :                     
+    1381/    13BD : =$13BD              EEPROM set *
+    1382/    13BD :                     
+    1383/    13BD :                     	OUTRADIX 10
+    1384/    13BD :                     
+    1385/    13BD :                     AddCommas MACRO num
+    1386/    13BD :                     comma_ret set "\{num}"
+    1387/    13BD :                     	IF num<1000
+    1388/    13BD :                     		EXITM
+    1389/    13BD :                     	ELSE
+    1390/    13BD :                     comma_ret set "\{substr(comma_ret,0,strlen(comma_ret)-3)},\{substr(comma_ret,strlen(comma_ret)-3,strlen(comma_ret))}"
+    1391/    13BD :                     	ENDIF
+    1392/    13BD :                     	ENDM
+    1393/    13BD :                     
+    1394/    13BD :                     ;Display memory usage in console
+    1395/    13BD :                     ;===============================
  
-    1304/    1305 :                     	MESSAGE " "
+    1396/    13BD :                     	MESSAGE " "
 Memory usage
-    1305/    1305 :                     	MESSAGE "Memory usage"
+    1397/    13BD :                     	MESSAGE "Memory usage"
 ============
-    1306/    1305 :                     	MESSAGE "============"
-    1307/    1305 : (MACRO)             	AddCommas EEPROM-$900
-    1307/    1305 : =2565               comma_ret set "\{EEPROM-$900}"
-    1307/    1305 : =>FALSE                     IF EEPROM-$900<1000
-    1307/    1305 :                                     EXITM
-    1307/    1305 : =>TRUE                      ELSE
-    1307/    1305 : =2,565              comma_ret set "\{substr(comma_ret,0,strlen(comma_ret)-3)},\{substr(comma_ret,strlen(comma_ret)-3,strlen(comma_ret))}"
-    1307/    1305 : [1307]                      ENDIF
-ROM size:	2,565 bytes (43%) of 5.75k bank
-    1308/    1305 :                     	MESSAGE "ROM size:	\{comma_ret} bytes (\{100*(EEPROM-$900)/$1700}%) of 5.75k bank"
-    1309/    1305 :                     	;AddCommas GENRAM-$200
-    1310/    1305 :                     	;MESSAGE "RAM size:	\{comma_ret} bytes (\{100*(GENRAM-$200)/($4000-$200)}%) of 15.8k bank"
-    1311/    1305 :                     	;Tell script that prints assembler output to stop outputting
-    1312/    1305 :                     	;Eliminates double output (because of multiple passes???)
+    1398/    13BD :                     	MESSAGE "============"
+    1399/    13BD : (MACRO)             	AddCommas EEPROM-$900
+    1399/    13BD : =2749               comma_ret set "\{EEPROM-$900}"
+    1399/    13BD : =>FALSE                     IF EEPROM-$900<1000
+    1399/    13BD :                                     EXITM
+    1399/    13BD : =>TRUE                      ELSE
+    1399/    13BD : =2,749              comma_ret set "\{substr(comma_ret,0,strlen(comma_ret)-3)},\{substr(comma_ret,strlen(comma_ret)-3,strlen(comma_ret))}"
+    1399/    13BD : [1399]                      ENDIF
+ROM size:	2,749 bytes (46%) of 5.75k bank
+    1400/    13BD :                     	MESSAGE "ROM size:	\{comma_ret} bytes (\{100*(EEPROM-$900)/$1700}%) of 5.75k bank"
+    1401/    13BD :                     	;AddCommas GENRAM-$200
+    1402/    13BD :                     	;MESSAGE "RAM size:	\{comma_ret} bytes (\{100*(GENRAM-$200)/($4000-$200)}%) of 15.8k bank"
+    1403/    13BD :                     	;Tell script that prints assembler output to stop outputting
+    1404/    13BD :                     	;Eliminates double output (because of multiple passes???)
 END
-    1313/    1305 :                     	MESSAGE "END"
- AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 2 - 8/22/2020 1:11:10
+    1405/    13BD :                     	MESSAGE "END"
+ AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 2 - 8/31/2020 23:9:45
 
 
   Symbol Table (* = unused):
@@ -1412,30 +1512,31 @@ END
 *ARCHITECTURE :  i386-unknown-win32 - |  BCD_Reverse :                  C12 C |
  BCD_Reverse.loop :             C16 C | *BIGENDIAN :                      0 - |
 *BRANCHEXT :                      0 - | *CASESENSITIVE :                  1 - |
-*CODE_DROP :                   1274 C | *CODE_DUP :                    125C C |
-*CODE_OVER :                   1286 C | *CODE_SWAP :                   1268 C |
-*CONSTPI :        3.141592653589793 - |  CheckData :                   108E C |
- CheckData.add_digit :         121B C |  CheckData.decimal_good :      11BE C |
- CheckData.digit :             120E C |  CheckData.digit_good :        1173 C |
- CheckData.digit_ok :          117F C |  CheckData.digit_zero :        1166 C |
- CheckData.exp_digit :         1192 C |  CheckData.exp_digit_ok :      119A C |
- CheckData.exp_good :          11C3 C |  CheckData.exp_loop :          119F C |
- CheckData.first_exp :         11D2 C |  CheckData.float_done :        11F8 C |
- CheckData.float_next :        1189 C |  CheckData.float_no_neg :      114F C |
- CheckData.float_not_digit :   11B5 C |  CheckData.hex_char_next :     111C C |
- CheckData.hex_done :          1126 C |  CheckData.hex_error :         112C C |
- CheckData.hex_rot_loop :      1202 C |  CheckData.hex_rotate :        11FE C |
- CheckData.is_digit_no :       1219 C |  CheckData.loop_float :        114F C |
- CheckData.loop_hex :          10EE C |  CheckData.loop_str :          10B7 C |
- CheckData.minus_good :        11F1 C |  CheckData.no_dec_yet :        1185 C |
- CheckData.not_decimal_point : 11C9 C |  CheckData.not_digit :         1108 C |
- CheckData.not_exp :           11E2 C |  CheckData.not_hex :           112D C |
- CheckData.not_minus :         11F7 C |  CheckData.not_single_quote :  10B4 C |
- CheckData.not_string :        10DA C |  CheckData.not_zero_len :      1099 C |
- CheckData.second_digit :      1235 C |  CheckData.str_done :          10CE C |
- CheckData.str_return :        10D9 C |  CheckData.string_too_long :   10CD C |
- CheckData.string_unterminated :                                       10CD C |
- CheckData.zero_loop :         109D C | *DATE :                   8/22/2020 - |
+ CODE_DROP :                   131F C |  CODE_DUP :                    12F9 C |
+ CODE_DUP.dup_loop :           1300 C |  CODE_OVER :                   1331 C |
+ CODE_SWAP :                   1313 C | *CONSTPI :        3.141592653589793 - |
+ CheckData :                   10F0 C |  CheckData.add_digit :         127D C |
+ CheckData.decimal_good :      1220 C |  CheckData.digit :             1270 C |
+ CheckData.digit_good :        11D5 C |  CheckData.digit_ok :          11E1 C |
+ CheckData.digit_zero :        11C8 C |  CheckData.exp_digit :         11F4 C |
+ CheckData.exp_digit_ok :      11FC C |  CheckData.exp_good :          1225 C |
+ CheckData.exp_loop :          1201 C |  CheckData.first_exp :         1234 C |
+ CheckData.float_done :        125A C |  CheckData.float_next :        11EB C |
+ CheckData.float_no_neg :      11B1 C |  CheckData.float_not_digit :   1217 C |
+ CheckData.hex_char_next :     117E C |  CheckData.hex_done :          1188 C |
+ CheckData.hex_error :         118E C |  CheckData.hex_rot_loop :      1264 C |
+ CheckData.hex_rotate :        1260 C |  CheckData.is_digit_no :       127B C |
+ CheckData.loop_float :        11B1 C |  CheckData.loop_hex :          1150 C |
+ CheckData.loop_str :          1119 C |  CheckData.minus_good :        1253 C |
+ CheckData.no_dec_yet :        11E7 C |  CheckData.not_decimal_point : 122B C |
+ CheckData.not_digit :         116A C |  CheckData.not_exp :           1244 C |
+ CheckData.not_hex :           118F C |  CheckData.not_minus :         1259 C |
+ CheckData.not_single_quote :  1116 C |  CheckData.not_string :        113C C |
+ CheckData.not_zero_len :      10FB C |  CheckData.second_digit :      1297 C |
+ CheckData.str_done :          1130 C |  CheckData.str_return :        113B C |
+ CheckData.string_too_long :   112F C |
+ CheckData.string_unterminated :                                       112F C |
+ CheckData.zero_loop :         10FF C | *DATE :                   8/31/2020 - |
  DigitHigh :                    C23 C |  DigitLow :                     C36 C |
  DrawFloat :                    C47 C |  DrawFloat.loop :               CA4 C |
  DrawFloat.positive :           C7D C |  DrawFloat.positive_e :         CE0 C |
@@ -1446,15 +1547,20 @@ END
  DrawStack.not_float :          E00 C |  DrawStack.not_hex :            E24 C |
  DrawStack.not_str :            E12 C |  DrawString :                   D77 C |
  DrawString.done :              D99 C |  DrawString.loop :              D82 C |
- EEPROM :                      1305 - |  ErrorMsg :                     E4C C |
- ErrorMsg.._1087.str_addr :     E57 C |  ErrorMsg.._1087.str_skip :     E64 C |
- ErrorMsg.._1137.str_addr :     E92 C |  ErrorMsg.._1137.str_skip :     E9F C |
- ErrorMsg.loop :                EAF C |  Execute :                     1242 C |
-*FALSE :                          0 - |  FORTH_WORDS :                 1254 C |
-*FULLPMMU :                       1 - |  FindWord :                    1052 C |
- FindWord.loop :               105A C |  FindWord.loop_next :          1074 C |
- FindWord.no_match :           1074 C |  FindWord.str_loop :           1064 C |
- FindWord.word_found :         108D C | *HAS64 :                          1 - |
+ EEPROM :                      13BD - |  ERROR_MSG_INPUT :              E4C C |
+ ERROR_MSG_STACK_OVERFLOW :     E73 C |  ERROR_MSG_STACK_UNDERFLOW :    E80 C |
+ ERROR_MSG_STRING :             E66 C |  ERROR_MSG_WORD_TOO_LONG :      E59 C |
+ ERROR_TABLE :                  E8D C |  ErrorMsg :                     E97 C |
+ ErrorMsg.._1088.str_addr :     EAE C |  ErrorMsg.._1088.str_skip :     EBB C |
+ ErrorMsg.._1142.str_addr :     EE9 C |  ErrorMsg.._1142.str_skip :     EF6 C |
+ ErrorMsg.loop :                F06 C |  ExecToken :                   12A4 C |
+ ExecToken.no_add_item :       12E1 C |  ExecToken.no_flags :          12E1 C |
+ ExecToken.no_overflow :       12DE C |  ExecToken.no_underflow :      12CC C |
+*FALSE :                          0 - |  FORTH_WORDS :                 12F2 C |
+*FULLPMMU :                       1 - |  FindWord :                    10A9 C |
+ FindWord.loop :               10B1 C |  FindWord.loop_next :          10CB C |
+ FindWord.no_match :           10CB C |  FindWord.str_loop :           10BB C |
+ FindWord.word_found :         10E3 C | *HAS64 :                          1 - |
 *HASDSP :                         0 - | *HASFPU :                         0 - |
 *HASPMMU :                        0 - |  HexHigh :                      D0B C |
  HexHigh.done :                 D22 C |  HexHigh.print_digit :          D1D C |
@@ -1462,59 +1568,60 @@ END
  HexLow.print_digit :           D3A C | *INEXTMODE :                      0 - |
 *INLWORDMODE :                    0 - | *INMAXMODE :                      0 - |
 *INSRCMODE :                      0 - | *INSUPMODE :                      0 - |
-*InitForth :                    EB8 C |  LCD_char :                     B72 C |
- LCD_char.._103.skip :          B83 C |  LCD_char.._98.skip :           B7B C |
- LCD_char.color :               BC4 C |  LCD_char.if0 :                 B7C C |
- LCD_char.if1 :                 B84 C |  LCD_char.loop :                BAB C |
- LCD_char.loop.inner :          BBC C |  LCD_clrscr :                   B4E C |
- LCD_clrscr.loop :              B5E C |  LCD_print :                    BED C |
- LCD_print.done :               C05 C |  LCD_print.loop :               BF1 C |
-*LISTON :                         1 - |  LineWord :                    100B C |
- LineWord.chars_left :         101E C |  LineWord.chars_left2 :        1045 C |
- LineWord.found :              1050 C |  LineWord.loop :               101E C |
- LineWord.not_space :          1031 C |  LineWord.word_size_good :     1045 C |
-*MACEXP :                         7 - | *MOMCPU :                      6502 - |
-*MOMCPUNAME :                  6502 - |  MemCopy :                      C06 C |
- MemCopy.loop :                 C08 C | *NESTMAX :                      100 - |
-*PACKING :                        0 - | *PADDING :                        1 - |
- R0 :                            25 C | *R1 :                            2E C |
-*R2 :                            37 C | *R3 :                            40 C |
-*R4 :                            49 C | *R5 :                            52 C |
-*R6 :                            5B C | *R7 :                            64 C |
-*RELAXED :                        0 - |  ReadKey :                      B4A C |
- ReadLine :                     ECA C |  ReadLine.._1186.str_addr :     ED9 C |
- ReadLine.._1186.str_skip :     EEA C |  ReadLine.backspace_done :      F49 C |
- ReadLine.backspace_scroll :    F43 C |  ReadLine.buffer_full :         FDB C |
- ReadLine.cursor_done :        1007 C |  ReadLine.draw :                FF7 C |
- ReadLine.draw_blank :          FF1 C |  ReadLine.draw_done :           FDB C |
- ReadLine.key_done :            F84 C |  ReadLine.key_read :            F06 C |
- ReadLine.loop :                EFA C |  ReadLine.no_key :              FDB C |
- ReadLine.not_backspace :       F4C C |  ReadLine.not_enter :           F19 C |
- ReadLine.not_lower :           F84 C |  ReadLine.not_num :             F6A C |
- ReadLine.not_upper :           F77 C |  ReadLine.not_valid :           FDB C |
- ReadLine.scroll_buffer :       FAE C |  ReadLine.scroll_loop :         FB8 C |
- ReadLine.special_loop :        F4E C |  ReadLine.special_next :        F58 C |
-*STACK_END :                     6D C | *TIME :                     1:11:10 - |
+*InitForth :                    F0F C |  JUMP_TABLE :                  1335 C |
+ LCD_char :                     B72 C |  LCD_char.._103.skip :          B83 C |
+ LCD_char.._98.skip :           B7B C |  LCD_char.color :               BC4 C |
+ LCD_char.if0 :                 B7C C |  LCD_char.if1 :                 B84 C |
+ LCD_char.loop :                BAB C |  LCD_char.loop.inner :          BBC C |
+ LCD_clrscr :                   B4E C |  LCD_clrscr.loop :              B5E C |
+ LCD_print :                    BED C |  LCD_print.done :               C05 C |
+ LCD_print.loop :               BF1 C | *LISTON :                         1 - |
+ LineWord :                    1062 C |  LineWord.chars_left :         1075 C |
+ LineWord.chars_left2 :        109C C |  LineWord.found :              10A7 C |
+ LineWord.loop :               1075 C |  LineWord.not_space :          1088 C |
+ LineWord.word_size_good :     109C C | *MACEXP :                         7 - |
+*MOMCPU :                      6502 - | *MOMCPUNAME :                  6502 - |
+ MemCopy :                      C06 C |  MemCopy.loop :                 C08 C |
+*NESTMAX :                      100 - | *PACKING :                        0 - |
+*PADDING :                        1 - |  R0 :                            25 C |
+*R1 :                            2E C | *R2 :                            37 C |
+*R3 :                            40 C | *R4 :                            49 C |
+*R5 :                            52 C | *R6 :                            5B C |
+*R7 :                            64 C | *RELAXED :                        0 - |
+ ReadKey :                      B4A C |  ReadLine :                     F21 C |
+ ReadLine.._1193.str_addr :     F30 C |  ReadLine.._1193.str_skip :     F41 C |
+ ReadLine.backspace_done :      FA0 C |  ReadLine.backspace_scroll :    F9A C |
+ ReadLine.buffer_full :        1032 C |  ReadLine.cursor_done :        105E C |
+ ReadLine.draw :               104E C |  ReadLine.draw_blank :         1048 C |
+ ReadLine.draw_done :          1032 C |  ReadLine.key_done :            FDB C |
+ ReadLine.key_read :            F5D C |  ReadLine.loop :                F51 C |
+ ReadLine.no_key :             1032 C |  ReadLine.not_backspace :       FA3 C |
+ ReadLine.not_enter :           F70 C |  ReadLine.not_lower :           FDB C |
+ ReadLine.not_num :             FC1 C |  ReadLine.not_upper :           FCE C |
+ ReadLine.not_valid :          1032 C |  ReadLine.scroll_buffer :      1005 C |
+ ReadLine.scroll_loop :        100F C |  ReadLine.special_loop :        FA5 C |
+ ReadLine.special_next :        FAF C | *STACK_END :                     6D C |
+ StackAddItem :                12E9 C | *TIME :                     23:9:45 - |
 *TRUE :                           1 - | *VERSION :                     142F - |
- WORD_DROP :                   126B C | *WORD_DUP :                    1254 C |
- WORD_OVER :                   127D C |  WORD_SWAP :                   125F C |
- comma_ret :                  2,565 - | *dummy :                         20 C |
+ WORD_DROP :                   1317 C | *WORD_DUP :                    12F2 C |
+ WORD_OVER :                   1329 C |  WORD_SWAP :                   130B C |
+ comma_ret :                  2,749 - | *dummy :                         20 C |
  font_inverted :                190 C |  font_table :                   903 C |
  global_error :                 130 C |  input_buff :                   133 C |
  input_buff_begin :             131 C |  input_buff_end :               132 C |
- main :                        1289 C |  main.._1480.str_addr :        12C1 C |
- main.._1480.str_skip :        12CE C |  main.input_good :             12DC C |
- main.input_loop :             128F C |  main.not_found :              12B4 C |
- main.process_loop :           1295 C |  new_stack_item :               187 C |
+ main :                        133F C |  main.input_good :             1388 C |
+ main.input_loop :             1345 C |  main.no_exec_error :          1371 C |
+ main.no_overflow :            1399 C |  main.not_found :              1374 C |
+ main.process_loop :           134B C |  new_stack_item :               187 C |
  new_word_buff :                174 C |  new_word_len :                 173 C |
  ret_val :                       21 C |  screen_ptr :                    23 C |
- setup :                        B33 C |  special_chars :                EC4 C |
+ setup :                        B33 C |  special_chars :                F1B C |
  stack_count :                  191 C |
 
-    200 symbols
-     43 unused symbols
+    213 symbols
+     39 unused symbols
 
- AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 3 - 8/22/2020 1:11:10
+ AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 3 - 8/31/2020 23:9:45
 
 
   Defined Macros:
@@ -1524,7 +1631,7 @@ AddCommas                             |
 
       1 macro
 
- AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 4 - 8/22/2020 1:11:10
+ AS V1.42 Beta [Bld 157] - Source File processed.asm - Page 4 - 8/31/2020 23:9:45
 
 
   Code Pages:
@@ -1534,10 +1641,10 @@ STANDARD (0 changed characters)
 
 1 code page
 
-0.02 seconds assembly time
+0.03 seconds assembly time
 
-   1313 lines source file
-   1319 lines incl. macro expansions
+   1405 lines source file
+   1411 lines incl. macro expansions
       2 passes
       0 errors
       0 warnings

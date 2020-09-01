@@ -33,16 +33,27 @@ KEY_ENTER = 			13
 KEY_ESCAPE =			27
 
 ;Error codes
-ERROR_NONE =			0
-ERROR_WORD_TOO_LONG =	1
+ERROR_NONE =				0
+ERROR_WORD_TOO_LONG =		2
 ;Generic string error. Save room on error messages
-ERROR_STRING =			2
-;ERROR_STRING_TOO_LONG
-;ERROR_STRING_UNTERMINATED
+ERROR_STRING =				4
+;ERROR_STRING_TOO_LONG =		3
+;ERROR_STRING_UNTERMINATED =	4
+ERROR_STACK_OVERFLOW =		6
+ERROR_STACK_UNDERFLOW =		8
+;Input not recognized
+ERROR_INPUT =				10
+
+;Message codes
+MSG_INPUT_ERROR =			0
+
 
 ;Forth
+;=====
 	;Word flags
 	MIN_1 =				1
 	MIN_2 =				2
 	MIN_3 =				3
 	ADD_1 =				4
+	
+	STACK_SIZE =		8
