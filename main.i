@@ -87,6 +87,7 @@ CHAR_SCREEN_HEIGHT = 16
 
 CHAR_ARROW = 'a'
 CHAR_BOX = 'b'
+CHAR_MINUS = 'c'
 CHAR_EXP = 'e'
 CHAR_QUOTE = 34
 
@@ -631,7 +632,8 @@ STACK_END:
 
  FCB $00, $00, $00, $00, $FF, $FF, $FF, $FF
 
- FCB $FF, $FF, $FF, $FF, $00, $00, $00, $00
+
+ FCB $00, $1E, $00, $00, $00, $00, $00, $00
 
  FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
@@ -4012,7 +4014,7 @@ STACK_END:
  SPECIAL_CHARS_LEN = 6
  special_chars:
  FCB CHAR_EXP, CHAR_QUOTE
- FCB " .$-"
+ FCB " .$m"
 
 
  ReadLine:
@@ -4333,6 +4335,11 @@ STACK_END:
  CMP special_chars,Y
  BNE .special_next
  STA arg
+
+ CMP #'m'
+ BNE .key_done
+ LDA #CHAR_MINUS
+ STA arg
  JMP .key_done
  .special_next:
  INY
@@ -4379,7 +4386,7 @@ STACK_END:
  CPY #CHAR_SCREEN_WIDTH-1
  BCS .scroll_buffer
 
-%line 131+0 forth.asm
+%line 136+0 forth.asm
 
 
 
@@ -4459,11 +4466,11 @@ STACK_END:
 
 
  JSR LCD_char
-%line 132+1 forth.asm
+%line 137+1 forth.asm
  LDA screen_ptr
  PHA
 
-%line 134+0 forth.asm
+%line 139+0 forth.asm
 
 
 
@@ -4535,7 +4542,7 @@ STACK_END:
 
 
  JSR LCD_char
-%line 135+1 forth.asm
+%line 140+1 forth.asm
  PLA
  STA screen_ptr
  JMP .draw_done
@@ -4552,7 +4559,7 @@ STACK_END:
  LDA input_buff,Y
  STA arg
 
-%line 150+0 forth.asm
+%line 155+0 forth.asm
 
 
 
@@ -4632,14 +4639,14 @@ STACK_END:
 
 
  JSR LCD_char
-%line 151+1 forth.asm
+%line 156+1 forth.asm
  LDA index
  CMP str_index
  BNE .scroll_loop
  LDA screen_ptr
  PHA
 
-%line 156+0 forth.asm
+%line 161+0 forth.asm
 
 
 
@@ -4711,7 +4718,7 @@ STACK_END:
 
 
  JSR LCD_char
-%line 157+1 forth.asm
+%line 162+1 forth.asm
  PLA
  STA screen_ptr
  .draw_done:
@@ -4736,7 +4743,7 @@ STACK_END:
  .draw:
  STA arg
 
-%line 180+0 forth.asm
+%line 185+0 forth.asm
 
 
 
@@ -4816,7 +4823,7 @@ STACK_END:
 
 
  JSR LCD_char
-%line 181+1 forth.asm
+%line 186+1 forth.asm
  LDA screen_ptr
  SEC
  SBC #CHAR_WIDTH
@@ -4875,7 +4882,7 @@ STACK_END:
  FindWord:
 
 
-%line 238+0 forth.asm
+%line 243+0 forth.asm
 
 
 
@@ -4898,7 +4905,7 @@ STACK_END:
  LDA #(FORTH_WORDS) / 256
  STA ret_val+1
 
-%line 239+1 forth.asm
+%line 244+1 forth.asm
  .loop:
  LDY #0
  LDA (ret_val),Y
@@ -5089,7 +5096,7 @@ STACK_END:
 
 
  LDA new_word_buff
- CMP #'-'
+ CMP #CHAR_MINUS
  BNE .float_no_neg
 
  LDA #$FF
@@ -5205,7 +5212,7 @@ STACK_END:
  BNE .float_next
  .not_exp:
 
- CMP #'-'
+ CMP #CHAR_MINUS
  BNE .not_minus
 
  LDA exp_found
@@ -5226,10 +5233,13 @@ STACK_END:
  .float_done:
 
 
+
+
+
  LDA exp_negative
  BEQ .exp_not_negative
 
-%line 568+0 forth.asm
+%line 576+0 forth.asm
 
 
 
@@ -5426,7 +5436,7 @@ STACK_END:
 
 
  JSR BCD_Reverse
-%line 569+1 forth.asm
+%line 577+1 forth.asm
  .exp_not_negative:
 
 
@@ -5497,19 +5507,19 @@ STACK_END:
  ExecToken:
 
  token set ASSIGN_LOCAL_BYTE
-%line 638+0 forth.asm
+%line 646+0 forth.asm
  ExecToken.a0 set ExecToken.token
  flags set ASSIGN_LOCAL_BYTE
  ExecToken.a1 set ExecToken.flags
-%line 639+1 forth.asm
+%line 647+1 forth.asm
  temp set ASSIGN_LOCAL_BYTE
-%line 639+0 forth.asm
+%line 647+0 forth.asm
  ExecToken.a2 set ExecToken.temp
-%line 640+1 forth.asm
+%line 648+1 forth.asm
  address set ASSIGN_LOCAL_WORD
-%line 640+0 forth.asm
+%line 648+0 forth.asm
  ExecToken.a3 set ExecToken.address
-%line 641+1 forth.asm
+%line 649+1 forth.asm
 
 
 

@@ -9,8 +9,8 @@
 	
 	SPECIAL_CHARS_LEN = 6
 	special_chars:
-	FCB CHAR_EXP, CHAR_QUOTE		;2
-	FCB " .$-"						;4
+	FCB CHAR_EXP, CHAR_QUOTE				;2
+	FCB " .$m"								;4
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -83,6 +83,11 @@
 					CMP special_chars,Y
 					BNE .special_next
 						STA arg
+						;recode m for minus as c since c assigned to minus sign
+						CMP #'m'
+						BNE .key_done
+							LDA #CHAR_MINUS
+							STA arg
 						JMP .key_done
 					.special_next:
 					INY
@@ -426,7 +431,7 @@
 		
 		;first character is negative or digit?
 		LDA new_word_buff
-		CMP #'-'
+		CMP #CHAR_MINUS
 		BNE .float_no_neg
 			;neg sign
 			LDA #$FF
@@ -542,7 +547,7 @@
 				BNE .float_next		
 			.not_exp:
 			
-			CMP #'-'
+			CMP #CHAR_MINUS
 			BNE .not_minus
 				;only allowed if exp_found and at first character:
 				LDA exp_found
@@ -577,7 +582,7 @@
 		
 		
 		
-		
+		;success - mark object type as float
 		LDA #OBJ_FLOAT
 		STA new_stack_item
 		

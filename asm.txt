@@ -4,7 +4,7 @@ Memory usage
 
 ============
 
-ROM size:	2,891 bytes (49%) of 5.75k bank
+ROM size:	2,899 bytes (49%) of 5.75k bank
 
 END
 
@@ -14,7 +14,7 @@ Memory usage
 
 ============
 
-ROM size:	2,891 bytes (49%) of 5.75k bank
+ROM size:	2,899 bytes (49%) of 5.75k bank
 
 END
 

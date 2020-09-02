@@ -205,7 +205,8 @@
 ;b - dark square bottom
   FCB $00, $00, $00, $00, $FF, $FF, $FF, $FF
 
-  FCB $FF, $FF, $FF, $FF, $00, $00, $00, $00
+;c - minus sign
+  FCB $00, $1E, $00, $00, $00, $00, $00, $00
   
   FCB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
   

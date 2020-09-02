@@ -12,6 +12,7 @@ CHAR_SCREEN_HEIGHT = 	16
 ;Special characters
 CHAR_ARROW =			'a'
 CHAR_BOX =				'b'
+CHAR_MINUS =			'c'
 CHAR_EXP =				'e'
 CHAR_QUOTE = 			34	;double quote
 

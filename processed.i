@@ -115,7 +115,7 @@ font_table:
  FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  FCB $8,$18,$38,$78,$38,$18,$8,$0
  FCB $0,$0,$0,$0,$FF,$FF,$FF,$FF
- FCB $FF,$FF,$FF,$FF,$0,$0,$0,$0
+ FCB $0,$1E,$0,$0,$0,$0,$0,$0
  FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  FCB $0,$0,$EE,$88,$EE,$88,$EE,$0
 setup:
@@ -228,16 +228,16 @@ LCD_char:
  RTS
 LCD_print:
  LDA #$0
- STA $A ;index
+ STA $9 ;index
  .loop:
- LDY $A ;index
- LDA ($8),Y ;source
+ LDY $9 ;index
+ LDA ($7),Y ;source
  BEQ .done
- STA $B ;arg
- LDA $B ;arg
+ STA $A ;arg
+ LDA $A ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
- INC $A ;index
+ INC $9 ;index
  JMP .loop
  .done:
  RTS
@@ -381,7 +381,7 @@ DrawFloat:
  JSR DigitLow
  RTS
 HexHigh:
- LDA $7 ;digit
+ LDA $A ;digit
  LSR
  LSR
  LSR
@@ -390,32 +390,32 @@ HexHigh:
  BCC .print_digit
  CLC
  ADC #$37
- STA $8 ;arg
+ STA $B ;arg
  JMP .done
  .print_digit:
  CLC
  ADC #$30
- STA $8 ;arg
+ STA $B ;arg
  .done:
- LDA $8 ;arg
+ LDA $B ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
 HexLow:
- LDA $7 ;digit
+ LDA $A ;digit
  AND #$F
  CMP #$A
  BCC .print_digit
  CLC
  ADC #$37
- STA $8 ;arg
+ STA $B ;arg
  JMP .done
  .print_digit:
  CLC
  ADC #$30
- STA $8 ;arg
+ STA $B ;arg
  .done:
- LDA $8 ;arg
+ LDA $B ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
@@ -424,22 +424,22 @@ DrawHex:
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDY #$2
- LDA ($9),Y ;source
- STA $B ;arg
- LDA $B ;arg
- STA $7 ;HexHigh.digit
+ LDA ($7),Y ;source
+ STA $9 ;arg
+ LDA $9 ;arg
+ STA $A ;HexHigh.digit
  JSR HexHigh
- LDA $B ;arg
- STA $7 ;HexLow.digit
+ LDA $9 ;arg
+ STA $A ;HexLow.digit
  JSR HexLow
  LDY #$1
- LDA ($9),Y ;source
- STA $B ;arg
- LDA $B ;arg
- STA $7 ;HexHigh.digit
+ LDA ($7),Y ;source
+ STA $9 ;arg
+ LDA $9 ;arg
+ STA $A ;HexHigh.digit
  JSR HexHigh
- LDA $B ;arg
- STA $7 ;HexLow.digit
+ LDA $9 ;arg
+ STA $A ;HexLow.digit
  JSR HexLow
  RTS
 DrawString:
@@ -478,9 +478,9 @@ DrawStack:
  FCB "RAD",$0
  .._913.str_skip:
  LDA # (.._913.str_addr) # $100
- STA $8 ;LCD_print.source
+ STA $7 ;LCD_print.source
  LDA # (.._913.str_addr)/$100
- STA $9 ;LCD_print.source
+ STA $8 ;LCD_print.source
  JSR LCD_print
  LDA #$35
  STA $3 ;character
@@ -526,9 +526,9 @@ DrawStack:
  CMP #$3
  BNE .not_hex
  LDA $5 ;address
- STA $9 ;DrawHex.source
+ STA $7 ;DrawHex.source
  LDA $6 ;address
- STA $A ;DrawHex.source
+ STA $8 ;DrawHex.source
  JSR DrawHex
  JMP .item_done
  .not_hex:
@@ -588,9 +588,9 @@ ErrorMsg:
  FCB "bbbbbbbbbbbb",$0
  .._1088.str_skip:
  LDA # (.._1088.str_addr) # $100
- STA $8 ;LCD_print.source
+ STA $7 ;LCD_print.source
  LDA # (.._1088.str_addr)/$100
- STA $9 ;LCD_print.source
+ STA $8 ;LCD_print.source
  JSR LCD_print
  LDA #$20
  STA screen_ptr
@@ -599,9 +599,9 @@ ErrorMsg:
  LDA #$FF
  STA font_inverted
  LDA $4 ;msg
- STA $8 ;LCD_print.source
+ STA $7 ;LCD_print.source
  LDA $5 ;msg
- STA $9 ;LCD_print.source
+ STA $8 ;LCD_print.source
  JSR LCD_print
  LDA #$20
  STA screen_ptr
@@ -612,9 +612,9 @@ ErrorMsg:
  FCB "bbbbbbbbbbbb",$0
  .._1142.str_skip:
  LDA # (.._1142.str_addr) # $100
- STA $8 ;LCD_print.source
+ STA $7 ;LCD_print.source
  LDA # (.._1142.str_addr)/$100
- STA $9 ;LCD_print.source
+ STA $8 ;LCD_print.source
  JSR LCD_print
  LDA #$0
  STA font_inverted
@@ -632,7 +632,7 @@ InitForth:
  RTS
 special_chars:
  FCB 'e',$22
- FCB " .$-"
+ FCB " .$m"
 ReadLine:
  LDA #$0
  STA $3 ;cursor
@@ -645,9 +645,9 @@ ReadLine:
  FCB "a               ",$0
  .._1193.str_skip:
  LDA # (.._1193.str_addr) # $100
- STA $8 ;LCD_print.source
+ STA $7 ;LCD_print.source
  LDA # (.._1193.str_addr)/$100
- STA $9 ;LCD_print.source
+ STA $8 ;LCD_print.source
  JSR LCD_print
  LDA $FFE6
  STA $4 ;cursor_timer
@@ -700,6 +700,10 @@ ReadLine:
  .special_loop:
  CMP special_chars,Y
  BNE .special_next
+ STA $5 ;arg
+ CMP #$6D
+ BNE .key_done
+ LDA #$63
  STA $5 ;arg
  JMP .key_done
  .special_next:
@@ -755,17 +759,17 @@ ReadLine:
  TYA
  SEC
  SBC #$E
- STA $7 ;str_index
+ STA $B ;str_index
  .scroll_loop:
- LDY $7 ;str_index
- INC $7 ;str_index
+ LDY $B ;str_index
+ INC $B ;str_index
  LDA input_buff,Y
  STA $5 ;arg
  LDA $5 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDA $6 ;index
- CMP $7 ;str_index
+ CMP $B ;str_index
  BNE .scroll_loop
  LDA screen_ptr
  PHA
@@ -990,7 +994,7 @@ CheckData:
  STA $B ;dec_found
  STA $A ;exp_found
  LDA new_word_buff
- CMP #$2D
+ CMP #$63
  BNE .float_no_neg
  LDA #$FF
  STA $7 ;negative
@@ -1088,7 +1092,7 @@ CheckData:
  STA $A ;exp_found
  BNE .float_next
  .not_exp:
- CMP #$2D
+ CMP #$63
  BNE .not_minus
  LDA $A ;exp_found
  EOR #$FF
