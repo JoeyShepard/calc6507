@@ -17,6 +17,9 @@
 	
 	;Forth
 	BYTE stack_count
+	
+	;Tests
+	BYTE test_count
 
 	
 	

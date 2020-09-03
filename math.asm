@@ -8,6 +8,7 @@
 		END
 		
 		LDY #0
+		PHP
 		SED
 		SEC
 		.loop:
@@ -17,7 +18,7 @@
 			INY
 			DEC count
 			BNE .loop
-		CLD
+		PLP
 	END
 	
 	

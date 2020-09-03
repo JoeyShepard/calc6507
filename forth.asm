@@ -297,6 +297,7 @@
 			BYTE dec_found		;whether decimal point encountered yet in float
 			BYTE nonzero_found	;whether non-zero encountered yet in float
 			BYTE digit_count	;count of digits during float input
+			BYTE shift1,shift2	;temporary shifted digit
 		END
 		LDA #OBJ_ERROR
 		STA new_stack_item
@@ -437,7 +438,16 @@
 			LDA #$FF
 			STA negative
 			INY
+			JMP .float_first_done
 		.float_no_neg:
+		
+		CMP #CHAR_EXP
+		BNE .float_not_exp
+			;First character cannot be exponent sign
+			RTS
+		.float_not_exp:
+		
+		.float_first_done:
 		
 		.loop_float:
 			LDA new_word_buff,Y
@@ -457,13 +467,17 @@
 						
 					.digit_zero:
 					;only zeroes so far, so just count exponent
+					
 					PLA
 					LDA exp_found
 					BNE .float_next
 						LDA dec_found
-						BEQ .float_next
-							DEC exp_count
-							BNE .float_next
+						BNE .dec_exp_count
+							LDA #0
+							STA exp_count
+						.dec_exp_count:
+						DEC exp_count
+						JMP .float_next
 	
 					.digit_good:
 					LDA exp_found
@@ -530,7 +544,7 @@
 				BNE .float_next
 			.not_decimal_point:
 		
-			CMP #'e'
+			CMP #CHAR_EXP
 			BNE .not_exp
 				LDA exp_found
 				BEQ .first_exp
@@ -566,23 +580,85 @@
 			;character not recognized - invalid input!
 			RTS
 		.float_done:
-		
-		;shift bytes if necessary
-		
-		
-		;invert exponent bytes if necessary
+							
+		;Adjust exponent
 		LDA exp_negative
-		BEQ .exp_not_negative
+		BEQ .exp_positive
 			CALL BCD_Reverse, #new_stack_item+7, #2
-		.exp_not_negative:
+		.exp_positive:
 		
-		;adjust exponent
-		LDA exp_count
-		;BMI .float_dec_exp
+		SED
+		;Looping here is slower but smaller
+		LDA #0
+		LDY exp_count
+		BMI .exp_count_neg
+			DEY				;count of digits, so -1 since 5 is e0 not e1
+			BEQ .exp_count_done
+			.exp_pos_loop:
+				CLC
+				ADC #1
+				DEY
+				BNE .exp_pos_loop
+				JMP .exp_count_done
+		.exp_count_neg:
+			.exp_min_loop:
+				SEC
+				SBC #1
+				INY
+				BNE .exp_min_loop
+		.exp_count_done:
+		STA exp_count
 		
+		CMP #$50
+		BCS .exp_count_neg2
+			CLC
+			ADC new_stack_item+7
+			STA new_stack_item+7
+			LDA #0
+			ADC new_stack_item+8
+			JMP .exp_count_done2
+		.exp_count_neg2:
+			CLC
+			ADC new_stack_item+7
+			STA new_stack_item+7
+			LDA #0
+			SBC new_stack_item+8
+		.exp_count_done2:
+		STA new_stack_item+8
+		CLD
 		
+		LDA #0
+		LDY new_stack_item+8
+		CPY #$50
+		BCC .exp_positive2
+			CALL BCD_Reverse, #new_stack_item+7, #2
+			LDA #$FF 
+		.exp_positive2:
+		STA exp_negative
 		
-		;success - mark object type as float
+		LDA new_stack_item+8
+		CMP #$10
+		BNE .no_exp_overflow
+			;Exponent overflowed or overflowed!
+			RTS
+		.no_exp_overflow:
+		
+		LDA exp_negative
+		BEQ .exp_no_neg_bit
+			LDA new_stack_item+8
+			ORA #E_SIGN_BIT
+			STA new_stack_item+8
+		.exp_no_neg_bit:
+		
+		;Mark negative bit
+		LDA negative
+		BEQ .positive
+			LDA new_stack_item+8
+			ORA #SIGN_BIT
+			STA new_stack_item+8
+		.positive:
+		
+		;success - mark object type as float and return
 		LDA #OBJ_FLOAT
 		STA new_stack_item
 		
@@ -845,9 +921,9 @@
 			RTS
 	
 	WORD_CLEAR:
-		FCB 5,"CLEAR"
-		FDB 0
-		FCB 14
+		FCB 5,"CLEAR"		;Name
+		FDB 0				;Next word
+		FCB 14				;ID
 		CODE_CLEAR:
 			FCB 0			;Flags
 			LDX #0

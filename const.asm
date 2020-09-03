@@ -34,6 +34,10 @@ KEY_BACKSPACE = 		8
 KEY_ENTER = 			13
 KEY_ESCAPE =			27
 
+;Floats
+SIGN_BIT =				$80
+E_SIGN_BIT =			$40
+
 ;Error codes
 ERROR_NONE =				0
 ERROR_WORD_TOO_LONG =		2
@@ -54,5 +58,12 @@ ERROR_INPUT =				10
 	MIN_2 =				2
 	MIN_3 =				3
 	ADD_1 =				4
+	FLOAT1 =			8
+	STRING1 =			16
+	HEX1 =				24
+	FLOAT2 =			32
+	STRING2 =			64
+	HEX2 =				96
+	COMPILE_ONLY =		128
 	
 	STACK_SIZE =		8

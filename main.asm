@@ -83,7 +83,9 @@ STACK_END:
 	;504 bytes 0_0
 	font_table:
 	include font_8x8.asm
-
+	
+	include tests.asm
+	
 	;include calc6507.asm
 	include emu6507.asm
 	
@@ -92,7 +94,6 @@ STACK_END:
 	include output.asm
 	include forth.asm
 	
-		
 ;Main function
 ;=============
 	FUNC main, begin
@@ -108,6 +109,8 @@ STACK_END:
 		TXS
 		
 		CALL setup
+		
+		CALL tests
 		
 		.input_loop:
 			CALL DrawStack

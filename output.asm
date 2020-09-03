@@ -42,13 +42,12 @@
 		
 		LDA #' '
 		STA sign
-		LDY #6
+		LDY #8
 		LDA (source),Y
-		CMP #$50
-		BCC .positive
-			LDA #'-'
+		AND #SIGN_BIT
+		BEQ .positive
+			LDA #CHAR_MINUS
 			STA sign
-			CALL BCD_Reverse, #R0+1, #6
 		.positive:
 		
 		CALL LCD_char, sign
@@ -76,11 +75,10 @@
 		STA sign
 		LDY #8
 		LDA (source),Y
-		CMP #$50
-		BCC .positive_e
-			LDA #'-'
+		AND #E_SIGN_BIT
+		BEQ .positive_e
+			LDA #CHAR_MINUS
 			STA sign
-			CALL BCD_Reverse, #R0+7, #2
 		.positive_e:
 		CALL LCD_char,sign
 		LDY #8
@@ -234,11 +232,17 @@
 				.not_float:
 				CMP #OBJ_STR
 				BNE .not_str
+					;one space after colon
+					;LDA #CHAR_WIDTH*3
+					;STA screen_ptr
 					CALL DrawString, address
 					JMP .item_done
 				.not_str:
 				CMP #OBJ_HEX
 				BNE .not_hex
+					;one space after colon
+					;LDA #CHAR_WIDTH*3
+					;STA screen_ptr
 					CALL DrawHex, address
 					JMP .item_done
 				.not_hex:

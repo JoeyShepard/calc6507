@@ -110,6 +110,10 @@ KEY_ENTER = 13
 KEY_ESCAPE = 27
 
 
+SIGN_BIT = $80
+E_SIGN_BIT = $40
+
+
 ERROR_NONE = 0
 ERROR_WORD_TOO_LONG = 2
 
@@ -129,6 +133,13 @@ ERROR_INPUT = 10
  MIN_2 = 2
  MIN_3 = 3
  ADD_1 = 4
+ FLOAT1 = 8
+ STRING1 = 16
+ HEX1 = 24
+ FLOAT2 = 32
+ STRING2 = 64
+ HEX2 = 96
+ COMPILE_ONLY = 128
 
  STACK_SIZE = 8
 %line 23+1 main.asm
@@ -412,6 +423,12 @@ STACK_END:
 %line 20+1 globals.asm
 
 
+ test_count:
+%line 22+0 globals.asm
+ DFS 1
+%line 23+1 globals.asm
+
+
 
 %line 75+1 main.asm
 
@@ -647,6 +664,2030 @@ STACK_END:
 %line 85+1 main.asm
 
 
+%line 1+1 tests.asm
+
+
+
+
+
+ tests_begin:
+
+ DebugText:
+
+ msg set ASSIGN_LOCAL_WORD
+%line 10+0 tests.asm
+ DebugText.a0 set DebugText.msg
+%line 11+1 tests.asm
+
+ LDY #0
+ .loop:
+ LDA (msg),Y
+ BEQ .done
+ STA DEBUG
+ INY
+ JMP .loop
+ .done:
+ RTS
+
+ halt_test:
+
+ test set ASSIGN_LOCAL_BYTE
+%line 24+0 tests.asm
+ halt_test.a0 set halt_test.test
+%line 25+1 tests.asm
+
+
+ LDA test
+ CMP test_count
+ BNE .done
+ BRK
+%line 30+0 tests.asm
+ BRK
+%line 31+1 tests.asm
+ .done:
+ RTS
+
+ InputTest:
+
+ input set ASSIGN_LOCAL_WORD
+%line 36+0 tests.asm
+ InputTest.a0 set InputTest.input
+ output set ASSIGN_LOCAL_WORD
+ InputTest.a1 set InputTest.output
+%line 37+1 tests.asm
+
+ output_index set ASSIGN_LOCAL_BYTE
+%line 38+0 tests.asm
+ calculated_index set ASSIGN_LOCAL_BYTE
+ value set ASSIGN_LOCAL_BYTE
+%line 39+1 tests.asm
+
+
+ LDY #0
+ .loop:
+ LDA (input),Y
+ BEQ .loop_done
+ CMP #'-'
+ BNE .not_minus
+ LDA #CHAR_MINUS
+ .not_minus:
+ STA new_word_buff,Y
+ INY
+ JMP .loop
+ .loop_done:
+ STY new_word_len
+
+%line 54+0 tests.asm
+
+
+
+
+
+
+
+
+
+ JSR CheckData
+%line 55+1 tests.asm
+
+ LDY #0
+ STY calculated_index
+ STY output_index
+ .check_loop:
+ LDY output_index
+ LDA (output),Y
+ CMP #'A'
+ BCS .letter
+ SEC
+ SBC #'0'
+ JMP .letter_done
+ .letter:
+ SEC
+ SBC #'A'-10
+ .letter_done:
+ ASL
+ ASL
+ ASL
+ ASL
+ STA value
+
+ INY
+ LDA (output),Y
+ CMP #'A'
+ BCS .letter2
+ SEC
+ SBC #'0'
+ JMP .letter_done2
+ .letter2:
+ SEC
+ SBC #'A'-10
+ .letter_done2:
+ ORA value
+ STA value
+
+ INY
+ STY output_index
+
+ LDY calculated_index
+ LDA new_stack_item,Y
+ CMP value
+ BNE .failed
+ INY
+ STY calculated_index
+
+ LDY output_index
+ LDA (output),Y
+ BNE .continue
+ JMP .done
+ .continue:
+ INY
+ STY output_index
+ JMP .check_loop
+
+ .failed:
+
+%line 111+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@54.str_skip
+ ..@54.str_addr:
+ FCB "\\rTest ",0
+ ..@54.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@54.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@54.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 112+1 tests.asm
+ LDX test_count+1
+ LDA test_count
+ STA DEBUG_DEC16
+
+%line 115+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@78.str_skip
+ ..@78.str_addr:
+ FCB ": FAILED!\\n",0
+ ..@78.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@78.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@78.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 116+1 tests.asm
+
+%line 116+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@102.str_skip
+ ..@102.str_addr:
+ FCB "   Expected: ",0
+ ..@102.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@102.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@102.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 117+1 tests.asm
+
+%line 117+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA output
+ STA DebugText.a0
+ LDA output+1
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 118+1 tests.asm
+
+%line 118+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@154.str_skip
+ ..@154.str_addr:
+ FCB "\\n   Found:    ",0
+ ..@154.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@154.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@154.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 119+1 tests.asm
+ LDY #0
+ STY calculated_index
+ LDY #2
+ STY output_index
+ .fail_loop:
+ LDY calculated_index
+ LDA new_stack_item,Y
+ STA DEBUG_HEX
+ LDA #' '
+ STA DEBUG
+ INY
+ STY calculated_index
+ LDY output_index
+ LDA (output),Y
+ BEQ .fail_done
+ INY
+ INY
+ INY
+ STY output_index
+
+ JMP .fail_loop
+ .fail_done:
+ BRK
+%line 141+0 tests.asm
+ BRK
+%line 142+1 tests.asm
+ LDA new_stack_item
+ JMP .failed
+
+ .done:
+
+%line 146+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@179.str_skip
+ ..@179.str_addr:
+ FCB "\\gTest ",0
+ ..@179.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@179.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@179.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 147+1 tests.asm
+ LDX test_count+1
+ LDA test_count
+ STA DEBUG_DEC16
+
+%line 150+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@203.str_skip
+ ..@203.str_addr:
+ FCB ": passed\\n",0
+ ..@203.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@203.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@203.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 151+1 tests.asm
+ INC test_count
+%line 151+0 tests.asm
+ BNE ..@224.no_carry
+ INC test_count+1
+ ..@224.no_carry:
+%line 152+1 tests.asm
+ RTS
+
+ tests:
+
+ LDA #1
+ STA test_count
+
+
+
+
+
+%line 162+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@233.str_skip
+ ..@233.str_addr:
+ FCB "5",0
+ ..@233.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@233.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@233.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@242.str_skip
+ ..@242.str_addr:
+ FCB "01 00 00 00 00 00 50 00 00",0
+ ..@242.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@242.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@242.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 163+1 tests.asm
+
+
+
+%line 165+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@260.str_skip
+ ..@260.str_addr:
+ FCB "500",0
+ ..@260.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@260.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@260.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@269.str_skip
+ ..@269.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@269.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@269.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@269.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 166+1 tests.asm
+
+
+
+%line 168+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@287.str_skip
+ ..@287.str_addr:
+ FCB "500",0
+ ..@287.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@287.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@287.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@296.str_skip
+ ..@296.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@296.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@296.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@296.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 169+1 tests.asm
+
+
+
+%line 171+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@314.str_skip
+ ..@314.str_addr:
+ FCB "500.0",0
+ ..@314.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@314.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@314.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@323.str_skip
+ ..@323.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@323.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@323.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@323.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 172+1 tests.asm
+
+
+
+%line 174+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@341.str_skip
+ ..@341.str_addr:
+ FCB "500.00",0
+ ..@341.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@341.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@341.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@350.str_skip
+ ..@350.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@350.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@350.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@350.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 175+1 tests.asm
+
+
+
+%line 177+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@368.str_skip
+ ..@368.str_addr:
+ FCB "5e0",0
+ ..@368.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@368.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@368.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@377.str_skip
+ ..@377.str_addr:
+ FCB "01 00 00 00 00 00 50 00 00",0
+ ..@377.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@377.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@377.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 178+1 tests.asm
+
+
+
+%line 180+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@395.str_skip
+ ..@395.str_addr:
+ FCB "500e0",0
+ ..@395.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@395.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@395.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@404.str_skip
+ ..@404.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@404.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@404.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@404.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 181+1 tests.asm
+
+
+
+%line 183+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@422.str_skip
+ ..@422.str_addr:
+ FCB "500e2",0
+ ..@422.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@422.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@422.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@431.str_skip
+ ..@431.str_addr:
+ FCB "01 00 00 00 00 00 50 04 00",0
+ ..@431.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@431.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@431.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 184+1 tests.asm
+
+
+
+%line 186+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@449.str_skip
+ ..@449.str_addr:
+ FCB "500e997",0
+ ..@449.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@449.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@449.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@458.str_skip
+ ..@458.str_addr:
+ FCB "01 00 00 00 00 00 50 99 09",0
+ ..@458.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@458.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@458.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 187+1 tests.asm
+
+
+
+%line 189+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@476.str_skip
+ ..@476.str_addr:
+ FCB "500e998",0
+ ..@476.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@476.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@476.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@485.str_skip
+ ..@485.str_addr:
+ FCB "04",0
+ ..@485.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@485.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@485.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 190+1 tests.asm
+
+
+
+%line 192+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@503.str_skip
+ ..@503.str_addr:
+ FCB "-5",0
+ ..@503.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@503.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@503.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@512.str_skip
+ ..@512.str_addr:
+ FCB "01 00 00 00 00 00 50 00 80",0
+ ..@512.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@512.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@512.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 193+1 tests.asm
+
+
+
+%line 195+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@530.str_skip
+ ..@530.str_addr:
+ FCB "-500",0
+ ..@530.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@530.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@530.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@539.str_skip
+ ..@539.str_addr:
+ FCB "01 00 00 00 00 00 50 02 80",0
+ ..@539.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@539.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@539.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 196+1 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%line 234+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@557.str_skip
+ ..@557.str_addr:
+ FCB "\\n\\gAll tests passed",0
+ ..@557.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@557.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@557.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 235+1 tests.asm
+
+%line 235+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@576.str_skip
+ ..@576.str_addr:
+ FCB "\\n\\lSize of tests: ",0
+ ..@576.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@576.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@576.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 236+1 tests.asm
+ LDX #(tests_end-tests_begin)/256
+ LDA #(tests_end-tests_begin) # 256
+ STA DEBUG_DEC16
+
+%line 239+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@595.str_skip
+ ..@595.str_addr:
+ FCB " bytes",0
+ ..@595.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@595.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@595.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 240+1 tests.asm
+ RTS
+
+ tests_end:
+%line 87+1 main.asm
+
+
 
 %line 1+1 emu6507.asm
 
@@ -837,19 +2878,19 @@ STACK_END:
 
  LDA c_out
  CMP #' '
- BCC ..@98.skip
+ BCC ..@695.skip
 %line 66+0 emu6507.asm
  JMP .if0
- ..@98.skip:
+ ..@695.skip:
 %line 67+1 emu6507.asm
  RTS
  .if0:
 
  CMP #'e'+1
- BCS ..@103.skip
+ BCS ..@700.skip
 %line 71+0 emu6507.asm
  JMP .if1
- ..@103.skip:
+ ..@700.skip:
 %line 72+1 emu6507.asm
  RTS
  .if1:
@@ -1007,7 +3048,7 @@ STACK_END:
  .done:
  RTS
 
-%line 88+1 main.asm
+%line 90+1 main.asm
 
 
 %line 1+1 system.asm
@@ -1036,7 +3077,7 @@ STACK_END:
  BNE .loop
  RTS
 
-%line 90+1 main.asm
+%line 92+1 main.asm
 
 %line 1+1 math.asm
 
@@ -1055,6 +3096,7 @@ STACK_END:
 
 
  LDY #0
+ PHP
  SED
  SEC
  .loop:
@@ -1064,11 +3106,11 @@ STACK_END:
  INY
  DEC count
  BNE .loop
- CLD
+ PLP
  RTS
 
 
-%line 91+1 main.asm
+%line 93+1 main.asm
 
 %line 1+1 output.asm
 
@@ -1414,143 +3456,16 @@ STACK_END:
 
  LDA #' '
  STA sign
- LDY #6
+ LDY #8
  LDA (source),Y
- CMP #$50
- BCC .positive
- LDA #'-'
+ AND #SIGN_BIT
+ BEQ .positive
+ LDA #CHAR_MINUS
  STA sign
-
-%line 51+0 output.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(R0+1) % 256
- STA BCD_Reverse.a0
- LDA #(R0+1) / 256
- STA BCD_Reverse.a0+1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(6) % 256
- STA BCD_Reverse.a1
-
-
-
-
-
-
-
-
-
- JSR BCD_Reverse
-%line 52+1 output.asm
  .positive:
 
 
-%line 54+0 output.asm
+%line 53+0 output.asm
 
 
 
@@ -1618,13 +3533,13 @@ STACK_END:
 
 
  JSR LCD_char
-%line 55+1 output.asm
+%line 54+1 output.asm
 
  LDY #6
  LDA R0,Y
  STA arg
 
-%line 59+0 output.asm
+%line 58+0 output.asm
 
 
 
@@ -1698,10 +3613,10 @@ STACK_END:
 
 
  JSR DigitHigh
-%line 60+1 output.asm
+%line 59+1 output.asm
 
 
-%line 61+0 output.asm
+%line 60+0 output.asm
 
 
 
@@ -1773,9 +3688,9 @@ STACK_END:
 
 
  JSR LCD_char
-%line 62+1 output.asm
+%line 61+1 output.asm
 
-%line 62+0 output.asm
+%line 61+0 output.asm
 
 
 
@@ -1849,7 +3764,7 @@ STACK_END:
 
 
  JSR DigitLow
-%line 63+1 output.asm
+%line 62+1 output.asm
  LDA #5
  STA index
  .loop:
@@ -1857,7 +3772,7 @@ STACK_END:
  LDA R0,Y
  STA arg
 
-%line 69+0 output.asm
+%line 68+0 output.asm
 
 
 
@@ -1931,9 +3846,9 @@ STACK_END:
 
 
  JSR DigitHigh
-%line 70+1 output.asm
+%line 69+1 output.asm
 
-%line 70+0 output.asm
+%line 69+0 output.asm
 
 
 
@@ -2007,7 +3922,7 @@ STACK_END:
 
 
  JSR DigitLow
-%line 71+1 output.asm
+%line 70+1 output.asm
  DEC index
  LDA index
  CMP #2
@@ -2016,140 +3931,13 @@ STACK_END:
  STA sign
  LDY #8
  LDA (source),Y
- CMP #$50
- BCC .positive_e
- LDA #'-'
+ AND #E_SIGN_BIT
+ BEQ .positive_e
+ LDA #CHAR_MINUS
  STA sign
-
-%line 83+0 output.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(R0+7) % 256
- STA BCD_Reverse.a0
- LDA #(R0+7) / 256
- STA BCD_Reverse.a0+1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(2) % 256
- STA BCD_Reverse.a1
-
-
-
-
-
-
-
-
-
- JSR BCD_Reverse
-%line 84+1 output.asm
  .positive_e:
 
-%line 85+0 output.asm
+%line 83+0 output.asm
 
 
 
@@ -2217,12 +4005,12 @@ STACK_END:
 
 
  JSR LCD_char
-%line 86+1 output.asm
+%line 84+1 output.asm
  LDY #8
  LDA R0,Y
  STA arg
 
-%line 89+0 output.asm
+%line 87+0 output.asm
 
 
 
@@ -2296,12 +4084,12 @@ STACK_END:
 
 
  JSR DigitLow
-%line 90+1 output.asm
+%line 88+1 output.asm
  LDY #7
  LDA R0,Y
  STA arg
 
-%line 93+0 output.asm
+%line 91+0 output.asm
 
 
 
@@ -2375,9 +4163,9 @@ STACK_END:
 
 
  JSR DigitHigh
-%line 94+1 output.asm
+%line 92+1 output.asm
 
-%line 94+0 output.asm
+%line 92+0 output.asm
 
 
 
@@ -2451,16 +4239,16 @@ STACK_END:
 
 
  JSR DigitLow
-%line 95+1 output.asm
+%line 93+1 output.asm
 
  RTS
 
  HexHigh:
 
  digit set ASSIGN_LOCAL_BYTE
-%line 100+0 output.asm
+%line 98+0 output.asm
  HexHigh.a0 set HexHigh.digit
-%line 101+1 output.asm
+%line 99+1 output.asm
 
  arg set ASSIGN_LOCAL_BYTE
 
@@ -2482,7 +4270,7 @@ STACK_END:
  STA arg
  .done:
 
-%line 121+0 output.asm
+%line 119+0 output.asm
 
 
 
@@ -2532,15 +4320,15 @@ STACK_END:
 
 
  JSR LCD_char
-%line 122+1 output.asm
+%line 120+1 output.asm
  RTS
 
  HexLow:
 
  digit set ASSIGN_LOCAL_BYTE
-%line 126+0 output.asm
+%line 124+0 output.asm
  HexLow.a0 set HexLow.digit
-%line 127+1 output.asm
+%line 125+1 output.asm
 
  arg set ASSIGN_LOCAL_BYTE
 
@@ -2559,7 +4347,7 @@ STACK_END:
  STA arg
  .done:
 
-%line 144+0 output.asm
+%line 142+0 output.asm
 
 
 
@@ -2609,21 +4397,21 @@ STACK_END:
 
 
  JSR LCD_char
-%line 145+1 output.asm
+%line 143+1 output.asm
  RTS
 
  DrawHex:
 
  source set ASSIGN_LOCAL_WORD
-%line 149+0 output.asm
+%line 147+0 output.asm
  DrawHex.a0 set DrawHex.source
-%line 150+1 output.asm
+%line 148+1 output.asm
 
  arg set ASSIGN_LOCAL_BYTE
 
 
 
-%line 154+0 output.asm
+%line 152+0 output.asm
 
 
 
@@ -2677,13 +4465,13 @@ STACK_END:
 
 
  JSR LCD_char
-%line 155+1 output.asm
+%line 153+1 output.asm
 
  LDY #2
  LDA (source),Y
  STA arg
 
-%line 159+0 output.asm
+%line 157+0 output.asm
 
 
 
@@ -2733,9 +4521,9 @@ STACK_END:
 
 
  JSR HexHigh
-%line 160+1 output.asm
+%line 158+1 output.asm
 
-%line 160+0 output.asm
+%line 158+0 output.asm
 
 
 
@@ -2785,12 +4573,12 @@ STACK_END:
 
 
  JSR HexLow
-%line 161+1 output.asm
+%line 159+1 output.asm
  LDY #1
  LDA (source),Y
  STA arg
 
-%line 164+0 output.asm
+%line 162+0 output.asm
 
 
 
@@ -2840,9 +4628,9 @@ STACK_END:
 
 
  JSR HexHigh
-%line 165+1 output.asm
+%line 163+1 output.asm
 
-%line 165+0 output.asm
+%line 163+0 output.asm
 
 
 
@@ -2892,22 +4680,22 @@ STACK_END:
 
 
  JSR HexLow
-%line 166+1 output.asm
+%line 164+1 output.asm
  RTS
 
  DrawString:
 
  source set ASSIGN_LOCAL_WORD
-%line 170+0 output.asm
+%line 168+0 output.asm
  DrawString.a0 set DrawString.source
-%line 171+1 output.asm
+%line 169+1 output.asm
 
  arg set ASSIGN_LOCAL_BYTE
  index set ASSIGN_LOCAL_BYTE
 
 
 
-%line 176+0 output.asm
+%line 174+0 output.asm
 
 
 
@@ -2967,7 +4755,7 @@ STACK_END:
 
 
  JSR LCD_char
-%line 177+1 output.asm
+%line 175+1 output.asm
 
  LDA #1
  STA index
@@ -2977,7 +4765,7 @@ STACK_END:
  BEQ .done
  STA arg
 
-%line 185+0 output.asm
+%line 183+0 output.asm
 
 
 
@@ -3039,14 +4827,14 @@ STACK_END:
 
 
  JSR LCD_char
-%line 186+1 output.asm
+%line 184+1 output.asm
  INC index
  LDA index
  CMP #9
  BNE .loop
  .done:
 
-%line 191+0 output.asm
+%line 189+0 output.asm
 
 
 
@@ -3106,7 +4894,7 @@ STACK_END:
 
 
  JSR LCD_char
-%line 192+1 output.asm
+%line 190+1 output.asm
  RTS
 
  DrawStack:
@@ -3124,7 +4912,7 @@ STACK_END:
  STA address+1
 
 
-%line 208+0 output.asm
+%line 206+0 output.asm
 
 
 
@@ -3135,11 +4923,9 @@ STACK_END:
 
 
  JSR LCD_clrscr
-%line 209+1 output.asm
+%line 207+1 output.asm
 
-%line 209+0 output.asm
-
-
+%line 207+0 output.asm
 
 
 
@@ -3153,10 +4939,12 @@ STACK_END:
 
 
 
- JMP ..@913.str_skip
- ..@913.str_addr:
+
+
+ JMP ..@1436.str_skip
+ ..@1436.str_addr:
  FCB "RAD",0
- ..@913.str_skip:
+ ..@1436.str_skip:
 
 
 
@@ -3193,9 +4981,9 @@ STACK_END:
 
 
 
- LDA #(..@913.str_addr) % 256
+ LDA #(..@1436.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@913.str_addr) / 256
+ LDA #(..@1436.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -3208,10 +4996,10 @@ STACK_END:
 
 
  JSR LCD_print
-%line 210+1 output.asm
+%line 208+1 output.asm
 
 
-%line 211+0 output.asm
+%line 209+0 output.asm
 
 
 
@@ -3237,9 +5025,9 @@ STACK_END:
  LDA #('5') % 256
  STA character
 
-%line 212+1 output.asm
+%line 210+1 output.asm
 
-%line 212+0 output.asm
+%line 210+0 output.asm
 
 
 
@@ -3259,7 +5047,7 @@ STACK_END:
  LDA #(5) % 256
  STA counter
 
-%line 213+1 output.asm
+%line 211+1 output.asm
 
  .loop:
  LDA #0
@@ -3269,7 +5057,7 @@ STACK_END:
  ADC #CHAR_HEIGHT
  STA screen_ptr+1
 
-%line 221+0 output.asm
+%line 219+0 output.asm
 
 
 
@@ -3331,9 +5119,9 @@ STACK_END:
 
 
  JSR LCD_char
-%line 222+1 output.asm
+%line 220+1 output.asm
 
-%line 222+0 output.asm
+%line 220+0 output.asm
 
 
 
@@ -3393,7 +5181,7 @@ STACK_END:
 
 
  JSR LCD_char
-%line 223+1 output.asm
+%line 221+1 output.asm
 
  DEC counter
  LDA counter
@@ -3404,7 +5192,7 @@ STACK_END:
  CMP #OBJ_FLOAT
  BNE .not_float
 
-%line 232+0 output.asm
+%line 230+0 output.asm
 
 
 
@@ -3475,13 +5263,16 @@ STACK_END:
 
 
  JSR DrawFloat
-%line 233+1 output.asm
+%line 231+1 output.asm
  JMP .item_done
  .not_float:
  CMP #OBJ_STR
  BNE .not_str
 
-%line 237+0 output.asm
+
+
+
+%line 238+0 output.asm
 
 
 
@@ -3552,13 +5343,16 @@ STACK_END:
 
 
  JSR DrawString
-%line 238+1 output.asm
+%line 239+1 output.asm
  JMP .item_done
  .not_str:
  CMP #OBJ_HEX
  BNE .not_hex
 
-%line 242+0 output.asm
+
+
+
+%line 246+0 output.asm
 
 
 
@@ -3629,7 +5423,7 @@ STACK_END:
 
 
  JSR DrawHex
-%line 243+1 output.asm
+%line 247+1 output.asm
  JMP .item_done
  .not_hex:
  .item_done:
@@ -3694,13 +5488,13 @@ STACK_END:
  ErrorMsg:
 
  error_code set ASSIGN_LOCAL_BYTE
-%line 306+0 output.asm
+%line 310+0 output.asm
  ErrorMsg.a0 set ErrorMsg.error_code
-%line 307+1 output.asm
+%line 311+1 output.asm
  msg set ASSIGN_LOCAL_WORD
-%line 307+0 output.asm
+%line 311+0 output.asm
  ErrorMsg.a1 set ErrorMsg.msg
-%line 308+1 output.asm
+%line 312+1 output.asm
 
 
  LDY error_code
@@ -3714,7 +5508,7 @@ STACK_END:
  LDA #ERROR_Y
  STA screen_ptr+1
 
-%line 320+0 output.asm
+%line 324+0 output.asm
 
 
 
@@ -3730,10 +5524,10 @@ STACK_END:
 
 
 
- JMP ..@1088.str_skip
- ..@1088.str_addr:
+ JMP ..@1611.str_skip
+ ..@1611.str_addr:
  FCB "bbbbbbbbbbbb",0
- ..@1088.str_skip:
+ ..@1611.str_skip:
 
 
 
@@ -3764,9 +5558,9 @@ STACK_END:
 
 
 
- LDA #(..@1088.str_addr) % 256
+ LDA #(..@1611.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1088.str_addr) / 256
+ LDA #(..@1611.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -3779,13 +5573,13 @@ STACK_END:
 
 
  JSR LCD_print
-%line 321+1 output.asm
+%line 325+1 output.asm
  LDA #ERROR_X
  STA screen_ptr
  LDA #ERROR_Y+CHAR_HEIGHT
  STA screen_ptr+1
 
-%line 325+0 output.asm
+%line 329+0 output.asm
 
 
 
@@ -3814,9 +5608,9 @@ STACK_END:
  LDA #($FF) % 256
  STA font_inverted
 
-%line 326+1 output.asm
+%line 330+1 output.asm
 
-%line 326+0 output.asm
+%line 330+0 output.asm
 
 
 
@@ -3875,13 +5669,13 @@ STACK_END:
 
 
  JSR LCD_print
-%line 327+1 output.asm
+%line 331+1 output.asm
  LDA #ERROR_X
  STA screen_ptr
  LDA #ERROR_Y+CHAR_HEIGHT*2
  STA screen_ptr+1
 
-%line 331+0 output.asm
+%line 335+0 output.asm
 
 
 
@@ -3897,10 +5691,10 @@ STACK_END:
 
 
 
- JMP ..@1142.str_skip
- ..@1142.str_addr:
+ JMP ..@1665.str_skip
+ ..@1665.str_addr:
  FCB "bbbbbbbbbbbb",0
- ..@1142.str_skip:
+ ..@1665.str_skip:
 
 
 
@@ -3931,9 +5725,9 @@ STACK_END:
 
 
 
- LDA #(..@1142.str_addr) % 256
+ LDA #(..@1665.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1142.str_addr) / 256
+ LDA #(..@1665.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -3946,9 +5740,9 @@ STACK_END:
 
 
  JSR LCD_print
-%line 332+1 output.asm
+%line 336+1 output.asm
 
-%line 332+0 output.asm
+%line 336+0 output.asm
 
 
 
@@ -3977,11 +5771,11 @@ STACK_END:
  LDA #(0) % 256
  STA font_inverted
 
-%line 333+1 output.asm
+%line 337+1 output.asm
 
  .loop:
 
-%line 335+0 output.asm
+%line 339+0 output.asm
 
 
 
@@ -3992,14 +5786,14 @@ STACK_END:
 
 
  JSR ReadKey
-%line 336+1 output.asm
+%line 340+1 output.asm
  CMP #KEY_ENTER
  BNE .loop
  RTS
  RTS
 
 
-%line 92+1 main.asm
+%line 94+1 main.asm
 
 %line 1+1 forth.asm
 
@@ -4053,10 +5847,10 @@ STACK_END:
 
 
 
- JMP ..@1193.str_skip
- ..@1193.str_addr:
+ JMP ..@1716.str_skip
+ ..@1716.str_addr:
  FCB "a               ",0
- ..@1193.str_skip:
+ ..@1716.str_skip:
 
 
 
@@ -4105,9 +5899,9 @@ STACK_END:
 
 
 
- LDA #(..@1193.str_addr) % 256
+ LDA #(..@1716.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1193.str_addr) / 256
+ LDA #(..@1716.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -4962,6 +6756,10 @@ STACK_END:
  dec_found set ASSIGN_LOCAL_BYTE
  nonzero_found set ASSIGN_LOCAL_BYTE
  digit_count set ASSIGN_LOCAL_BYTE
+ shift1 set ASSIGN_LOCAL_BYTE
+%line 300+0 forth.asm
+ shift2 set ASSIGN_LOCAL_BYTE
+%line 301+1 forth.asm
 
  LDA #OBJ_ERROR
  STA new_stack_item
@@ -5102,7 +6900,16 @@ STACK_END:
  LDA #$FF
  STA negative
  INY
+ JMP .float_first_done
  .float_no_neg:
+
+ CMP #CHAR_EXP
+ BNE .float_not_exp
+
+ RTS
+ .float_not_exp:
+
+ .float_first_done:
 
  .loop_float:
  LDA new_word_buff,Y
@@ -5122,13 +6929,17 @@ STACK_END:
 
  .digit_zero:
 
+
  PLA
  LDA exp_found
  BNE .float_next
  LDA dec_found
- BEQ .float_next
+ BNE .dec_exp_count
+ LDA #0
+ STA exp_count
+ .dec_exp_count:
  DEC exp_count
- BNE .float_next
+ JMP .float_next
 
  .digit_good:
  LDA exp_found
@@ -5195,7 +7006,7 @@ STACK_END:
  BNE .float_next
  .not_decimal_point:
 
- CMP #'e'
+ CMP #CHAR_EXP
  BNE .not_exp
  LDA exp_found
  BEQ .first_exp
@@ -5233,13 +7044,22 @@ STACK_END:
  .float_done:
 
 
-
-
-
  LDA exp_negative
- BEQ .exp_not_negative
+ BEQ .exp_positive
 
-%line 576+0 forth.asm
+%line 587+0 forth.asm
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -5424,6 +7244,18 @@ STACK_END:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
  LDA #(2) % 256
  STA BCD_Reverse.a1
 
@@ -5436,14 +7268,301 @@ STACK_END:
 
 
  JSR BCD_Reverse
-%line 577+1 forth.asm
- .exp_not_negative:
+%line 588+1 forth.asm
+ .exp_positive:
+
+ SED
+
+ LDA #0
+ LDY exp_count
+ BMI .exp_count_neg
+ DEY
+ BEQ .exp_count_done
+ .exp_pos_loop:
+ CLC
+ ADC #1
+ DEY
+ BNE .exp_pos_loop
+ JMP .exp_count_done
+ .exp_count_neg:
+ .exp_min_loop:
+ SEC
+ SBC #1
+ INY
+ BNE .exp_min_loop
+ .exp_count_done:
+ STA exp_count
+
+ CMP #$50
+ BCS .exp_count_neg2
+ CLC
+ ADC new_stack_item+7
+ STA new_stack_item+7
+ LDA #0
+ ADC new_stack_item+8
+ JMP .exp_count_done2
+ .exp_count_neg2:
+ CLC
+ ADC new_stack_item+7
+ STA new_stack_item+7
+ LDA #0
+ SBC new_stack_item+8
+ .exp_count_done2:
+ STA new_stack_item+8
+ CLD
+
+ LDA #0
+ LDY new_stack_item+8
+ CPY #$50
+ BCC .exp_positive2
+
+%line 634+0 forth.asm
 
 
- LDA exp_count
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(new_stack_item+7) % 256
+ STA BCD_Reverse.a0
+ LDA #(new_stack_item+7) / 256
+ STA BCD_Reverse.a0+1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(2) % 256
+ STA BCD_Reverse.a1
+
+
+
+
+
+
+
+
+
+ JSR BCD_Reverse
+%line 635+1 forth.asm
+ LDA #$FF
+ .exp_positive2:
+ STA exp_negative
+
+ LDA new_stack_item+8
+ CMP #$10
+ BNE .no_exp_overflow
+
+ RTS
+ .no_exp_overflow:
+
+ LDA exp_negative
+ BEQ .exp_no_neg_bit
+ LDA new_stack_item+8
+ ORA #E_SIGN_BIT
+ STA new_stack_item+8
+ .exp_no_neg_bit:
+
+
+ LDA negative
+ BEQ .positive
+ LDA new_stack_item+8
+ ORA #SIGN_BIT
+ STA new_stack_item+8
+ .positive:
 
 
  LDA #OBJ_FLOAT
@@ -5507,19 +7626,19 @@ STACK_END:
  ExecToken:
 
  token set ASSIGN_LOCAL_BYTE
-%line 646+0 forth.asm
+%line 722+0 forth.asm
  ExecToken.a0 set ExecToken.token
  flags set ASSIGN_LOCAL_BYTE
  ExecToken.a1 set ExecToken.flags
-%line 647+1 forth.asm
+%line 723+1 forth.asm
  temp set ASSIGN_LOCAL_BYTE
-%line 647+0 forth.asm
+%line 723+0 forth.asm
  ExecToken.a2 set ExecToken.temp
-%line 648+1 forth.asm
+%line 724+1 forth.asm
  address set ASSIGN_LOCAL_WORD
-%line 648+0 forth.asm
+%line 724+0 forth.asm
  ExecToken.a3 set ExecToken.address
-%line 649+1 forth.asm
+%line 725+1 forth.asm
 
 
 
@@ -5740,16 +7859,15 @@ STACK_END:
  FDB CODE_CLEAR
 
 
-%line 93+1 main.asm
-
+%line 95+1 main.asm
 
 
 
 
  BEGIN_FUNC set main
-%line 98+0 main.asm
+%line 99+0 main.asm
  main:
-%line 100+1 main.asm
+%line 101+1 main.asm
  dest set ASSIGN_LOCAL_WORD
  arg set ASSIGN_LOCAL_BYTE
 
@@ -5761,7 +7879,7 @@ STACK_END:
  TXS
 
 
-%line 110+0 main.asm
+%line 111+0 main.asm
 
 
 
@@ -5772,9 +7890,8 @@ STACK_END:
 
 
  JSR setup
-%line 111+1 main.asm
+%line 112+1 main.asm
 
- .input_loop:
 
 %line 113+0 main.asm
 
@@ -5786,10 +7903,12 @@ STACK_END:
 
 
 
- JSR DrawStack
+ JSR tests
 %line 114+1 main.asm
 
-%line 114+0 main.asm
+ .input_loop:
+
+%line 116+0 main.asm
 
 
 
@@ -5799,10 +7918,8 @@ STACK_END:
 
 
 
- JSR ReadLine
-%line 115+1 main.asm
-
- .process_loop:
+ JSR DrawStack
+%line 117+1 main.asm
 
 %line 117+0 main.asm
 
@@ -5814,13 +7931,28 @@ STACK_END:
 
 
 
- JSR LineWord
+ JSR ReadLine
 %line 118+1 main.asm
+
+ .process_loop:
+
+%line 120+0 main.asm
+
+
+
+
+
+
+
+
+
+ JSR LineWord
+%line 121+1 main.asm
  LDA new_word_len
  BEQ .input_loop
 
 
-%line 121+0 main.asm
+%line 124+0 main.asm
 
 
 
@@ -5831,13 +7963,13 @@ STACK_END:
 
 
  JSR FindWord
-%line 122+1 main.asm
+%line 125+1 main.asm
  LDA ret_val
  BEQ .not_found
 
 
 
-%line 126+0 main.asm
+%line 129+0 main.asm
 
 
 
@@ -5896,12 +8028,12 @@ STACK_END:
 
 
  JSR ExecToken
-%line 127+1 main.asm
+%line 130+1 main.asm
  LDA ret_val
  BEQ .no_exec_error
  STA arg
 
-%line 130+0 main.asm
+%line 133+0 main.asm
 
 
 
@@ -5951,14 +8083,14 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 131+1 main.asm
+%line 134+1 main.asm
  JMP .input_loop
  .no_exec_error:
  JMP .process_loop
  .not_found:
 
 
-%line 136+0 main.asm
+%line 139+0 main.asm
 
 
 
@@ -5969,12 +8101,12 @@ STACK_END:
 
 
  JSR CheckData
-%line 137+1 main.asm
+%line 140+1 main.asm
  LDA new_stack_item
  CMP #OBJ_ERROR
  BNE .input_good
 
-%line 140+0 main.asm
+%line 143+0 main.asm
 
 
 
@@ -6028,7 +8160,7 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 141+1 main.asm
+%line 144+1 main.asm
  JMP .input_loop
  .input_good:
 
@@ -6037,7 +8169,7 @@ STACK_END:
  CMP stack_count
  BCS .no_overflow
 
-%line 148+0 main.asm
+%line 151+0 main.asm
 
 
 
@@ -6091,7 +8223,7 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 149+1 main.asm
+%line 152+1 main.asm
  JMP .input_loop
  .no_overflow:
 
@@ -6102,7 +8234,7 @@ STACK_END:
  LDA #0
  STA dest+1
 
-%line 158+0 main.asm
+%line 161+0 main.asm
 
 
 
@@ -6225,7 +8357,7 @@ STACK_END:
 
 
  JSR MemCopy
-%line 159+1 main.asm
+%line 162+1 main.asm
 
  JMP .process_loop
 
