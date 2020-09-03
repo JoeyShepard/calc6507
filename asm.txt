@@ -4,7 +4,7 @@ Memory usage
 
 ============
 
-ROM size:	3,006 bytes (36%) of 8k ROM
+ROM size:	2,997 bytes (36%) of 8k ROM
 
 END
 
@@ -14,7 +14,7 @@ Memory usage
 
 ============
 
-ROM size:	3,006 bytes (36%) of 8k ROM
+ROM size:	2,997 bytes (36%) of 8k ROM
 
 END
 

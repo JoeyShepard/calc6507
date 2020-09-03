@@ -297,7 +297,6 @@
 			BYTE dec_found		;whether decimal point encountered yet in float
 			BYTE nonzero_found	;whether non-zero encountered yet in float
 			BYTE digit_count	;count of digits during float input
-			BYTE shift1,shift2	;temporary shifted digit
 		END
 		LDA #OBJ_ERROR
 		STA new_stack_item
@@ -580,7 +579,10 @@
 			;character not recognized - invalid input!
 			RTS
 		.float_done:
-							
+		
+		start here: check at least one digit
+		
+		
 		;Adjust exponent
 		LDA exp_negative
 		BEQ .exp_positive
@@ -588,6 +590,7 @@
 		.exp_positive:
 		
 		SED
+		;Convert exp offset to BCD
 		;Looping here is slower but smaller
 		LDA #0
 		LDY exp_count
@@ -609,24 +612,22 @@
 		.exp_count_done:
 		STA exp_count
 		
+		;Add decimal place offset to exponent
+		LDY #$99
 		CMP #$50
 		BCS .exp_count_neg2
-			CLC
-			ADC new_stack_item+7
-			STA new_stack_item+7
-			LDA #0
-			ADC new_stack_item+8
-			JMP .exp_count_done2
+			LDY #0
 		.exp_count_neg2:
-			CLC
-			ADC new_stack_item+7
-			STA new_stack_item+7
-			LDA #0
-			SBC new_stack_item+8
-		.exp_count_done2:
+		STY index
+		CLC
+		ADC new_stack_item+7
+		STA new_stack_item+7
+		LDA index
+		ADC new_stack_item+8
 		STA new_stack_item+8
 		CLD
 		
+		;Reverse exponent bytes
 		LDA #0
 		LDY new_stack_item+8
 		CPY #$50
@@ -636,13 +637,15 @@
 		.exp_positive2:
 		STA exp_negative
 		
+		;Check for overflow or underflow
 		LDA new_stack_item+8
 		CMP #$10
 		BNE .no_exp_overflow
-			;Exponent overflowed or overflowed!
+			;Exponent underflowed or overflowed!
 			RTS
 		.no_exp_overflow:
 		
+		;Mark negative sign bit
 		LDA exp_negative
 		BEQ .exp_no_neg_bit
 			LDA new_stack_item+8
