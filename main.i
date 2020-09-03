@@ -436,7 +436,2030 @@ STACK_END:
 
 
 
+ ORG $C000
+%line 1+1 tests.asm
+
+
+
+
+
+ DebugText:
+
+ msg set ASSIGN_LOCAL_WORD
+%line 8+0 tests.asm
+ DebugText.a0 set DebugText.msg
+%line 9+1 tests.asm
+
+ LDY #0
+ .loop:
+ LDA (msg),Y
+ BEQ .done
+ STA DEBUG
+ INY
+ JMP .loop
+ .done:
+ RTS
+
+ halt_test:
+
+ test set ASSIGN_LOCAL_BYTE
+%line 22+0 tests.asm
+ halt_test.a0 set halt_test.test
+%line 23+1 tests.asm
+
+
+ LDA test
+ CMP test_count
+ BNE .done
+ BRK
+%line 28+0 tests.asm
+ BRK
+%line 29+1 tests.asm
+ .done:
+ RTS
+
+ InputTest:
+
+ input set ASSIGN_LOCAL_WORD
+%line 34+0 tests.asm
+ InputTest.a0 set InputTest.input
+ output set ASSIGN_LOCAL_WORD
+ InputTest.a1 set InputTest.output
+%line 35+1 tests.asm
+
+ output_index set ASSIGN_LOCAL_BYTE
+%line 36+0 tests.asm
+ calculated_index set ASSIGN_LOCAL_BYTE
+ value set ASSIGN_LOCAL_BYTE
+%line 37+1 tests.asm
+
+
+ LDY #0
+ .loop:
+ LDA (input),Y
+ BEQ .loop_done
+ CMP #'-'
+ BNE .not_minus
+ LDA #CHAR_MINUS
+ .not_minus:
+ STA new_word_buff,Y
+ INY
+ JMP .loop
+ .loop_done:
+ STY new_word_len
+
+%line 52+0 tests.asm
+
+
+
+
+
+
+
+
+
+ JSR CheckData
+%line 53+1 tests.asm
+
+ LDY #0
+ STY calculated_index
+ STY output_index
+ .check_loop:
+ LDY output_index
+ LDA (output),Y
+ CMP #'A'
+ BCS .letter
+ SEC
+ SBC #'0'
+ JMP .letter_done
+ .letter:
+ SEC
+ SBC #'A'-10
+ .letter_done:
+ ASL
+ ASL
+ ASL
+ ASL
+ STA value
+
+ INY
+ LDA (output),Y
+ CMP #'A'
+ BCS .letter2
+ SEC
+ SBC #'0'
+ JMP .letter_done2
+ .letter2:
+ SEC
+ SBC #'A'-10
+ .letter_done2:
+ ORA value
+ STA value
+
+ INY
+ STY output_index
+
+ LDY calculated_index
+ LDA new_stack_item,Y
+ CMP value
+ BNE .failed
+ INY
+ STY calculated_index
+
+ LDY output_index
+ LDA (output),Y
+ BNE .continue
+ JMP .done
+ .continue:
+ INY
+ STY output_index
+ JMP .check_loop
+
+ .failed:
+
+%line 109+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@53.str_skip
+ ..@53.str_addr:
+ FCB "\\rTest ",0
+ ..@53.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@53.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@53.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 110+1 tests.asm
+ LDX test_count+1
+ LDA test_count
+ STA DEBUG_DEC16
+
+%line 113+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@77.str_skip
+ ..@77.str_addr:
+ FCB ": FAILED!\\n",0
+ ..@77.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@77.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@77.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 114+1 tests.asm
+
+%line 114+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@101.str_skip
+ ..@101.str_addr:
+ FCB "   Expected: ",0
+ ..@101.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@101.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@101.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 115+1 tests.asm
+
+%line 115+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA output
+ STA DebugText.a0
+ LDA output+1
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 116+1 tests.asm
+
+%line 116+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@153.str_skip
+ ..@153.str_addr:
+ FCB "\\n   Found:    ",0
+ ..@153.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@153.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@153.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 117+1 tests.asm
+ LDY #0
+ STY calculated_index
+ LDY #2
+ STY output_index
+ .fail_loop:
+ LDY calculated_index
+ LDA new_stack_item,Y
+ STA DEBUG_HEX
+ LDA #' '
+ STA DEBUG
+ INY
+ STY calculated_index
+ LDY output_index
+ LDA (output),Y
+ BEQ .fail_done
+ INY
+ INY
+ INY
+ STY output_index
+
+ JMP .fail_loop
+ .fail_done:
+ BRK
+%line 139+0 tests.asm
+ BRK
+%line 140+1 tests.asm
+ LDA new_stack_item
+ JMP .failed
+
+ .done:
+
+%line 144+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@178.str_skip
+ ..@178.str_addr:
+ FCB "\\gTest ",0
+ ..@178.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@178.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@178.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 145+1 tests.asm
+ LDX test_count+1
+ LDA test_count
+ STA DEBUG_DEC16
+
+%line 148+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@202.str_skip
+ ..@202.str_addr:
+ FCB ": passed\\n",0
+ ..@202.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@202.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@202.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 149+1 tests.asm
+ INC test_count
+%line 149+0 tests.asm
+ BNE ..@223.no_carry
+ INC test_count+1
+ ..@223.no_carry:
+%line 150+1 tests.asm
+ RTS
+
+ tests:
+
+ LDA #1
+ STA test_count
+
+
+
+
+
+%line 160+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@232.str_skip
+ ..@232.str_addr:
+ FCB "5",0
+ ..@232.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@232.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@232.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@241.str_skip
+ ..@241.str_addr:
+ FCB "01 00 00 00 00 00 50 00 00",0
+ ..@241.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@241.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@241.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 161+1 tests.asm
+
+
+
+%line 163+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@259.str_skip
+ ..@259.str_addr:
+ FCB "500",0
+ ..@259.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@259.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@259.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@268.str_skip
+ ..@268.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@268.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@268.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@268.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 164+1 tests.asm
+
+
+
+%line 166+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@286.str_skip
+ ..@286.str_addr:
+ FCB "500",0
+ ..@286.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@286.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@286.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@295.str_skip
+ ..@295.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@295.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@295.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@295.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 167+1 tests.asm
+
+
+
+%line 169+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@313.str_skip
+ ..@313.str_addr:
+ FCB "500.0",0
+ ..@313.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@313.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@313.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@322.str_skip
+ ..@322.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@322.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@322.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@322.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 170+1 tests.asm
+
+
+
+%line 172+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@340.str_skip
+ ..@340.str_addr:
+ FCB "500.00",0
+ ..@340.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@340.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@340.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@349.str_skip
+ ..@349.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@349.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@349.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@349.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 173+1 tests.asm
+
+
+
+%line 175+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@367.str_skip
+ ..@367.str_addr:
+ FCB "5e0",0
+ ..@367.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@367.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@367.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@376.str_skip
+ ..@376.str_addr:
+ FCB "01 00 00 00 00 00 50 00 00",0
+ ..@376.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@376.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@376.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 176+1 tests.asm
+
+
+
+%line 178+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@394.str_skip
+ ..@394.str_addr:
+ FCB "500e0",0
+ ..@394.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@394.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@394.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@403.str_skip
+ ..@403.str_addr:
+ FCB "01 00 00 00 00 00 50 02 00",0
+ ..@403.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@403.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@403.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 179+1 tests.asm
+
+
+
+%line 181+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@421.str_skip
+ ..@421.str_addr:
+ FCB "500e2",0
+ ..@421.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@421.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@421.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@430.str_skip
+ ..@430.str_addr:
+ FCB "01 00 00 00 00 00 50 04 00",0
+ ..@430.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@430.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@430.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 182+1 tests.asm
+
+
+
+%line 184+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@448.str_skip
+ ..@448.str_addr:
+ FCB "500e997",0
+ ..@448.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@448.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@448.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@457.str_skip
+ ..@457.str_addr:
+ FCB "01 00 00 00 00 00 50 99 09",0
+ ..@457.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@457.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@457.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 185+1 tests.asm
+
+
+
+%line 187+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@475.str_skip
+ ..@475.str_addr:
+ FCB "500e998",0
+ ..@475.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@475.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@475.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@484.str_skip
+ ..@484.str_addr:
+ FCB "04",0
+ ..@484.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@484.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@484.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 188+1 tests.asm
+
+
+
+%line 190+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@502.str_skip
+ ..@502.str_addr:
+ FCB "-5",0
+ ..@502.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@502.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@502.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@511.str_skip
+ ..@511.str_addr:
+ FCB "01 00 00 00 00 00 50 00 80",0
+ ..@511.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@511.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@511.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 191+1 tests.asm
+
+
+
+%line 193+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@529.str_skip
+ ..@529.str_addr:
+ FCB "-500",0
+ ..@529.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@529.str_addr) % 256
+ STA InputTest.a0
+ LDA #(..@529.str_addr) / 256
+ STA InputTest.a0+1
+
+
+
+ JMP ..@538.str_skip
+ ..@538.str_addr:
+ FCB "01 00 00 00 00 00 50 02 80",0
+ ..@538.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@538.str_addr) % 256
+ STA InputTest.a1
+ LDA #(..@538.str_addr) / 256
+ STA InputTest.a1+1
+
+
+
+
+
+
+
+
+
+ JSR InputTest
+%line 194+1 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%line 232+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@556.str_skip
+ ..@556.str_addr:
+ FCB "\\n\\gAll tests passed",0
+ ..@556.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@556.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@556.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 233+1 tests.asm
+
+%line 233+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@575.str_skip
+ ..@575.str_addr:
+ FCB "\\n\\lSize of code: ",0
+ ..@575.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@575.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@575.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 234+1 tests.asm
+ LDX #(code_end-code_begin)/256
+ LDA #(code_end-code_begin) # 256
+ STA DEBUG_DEC16
+
+%line 237+0 tests.asm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ JMP ..@594.str_skip
+ ..@594.str_addr:
+ FCB " bytes",0
+ ..@594.str_skip:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LDA #(..@594.str_addr) % 256
+ STA DebugText.a0
+ LDA #(..@594.str_addr) / 256
+ STA DebugText.a0+1
+
+
+
+
+
+
+
+
+
+
+ JSR DebugText
+%line 238+1 tests.asm
+ RTS
+
+%line 81+1 main.asm
+
+
  ORG $900
+ code_begin:
  JMP main
 
 
@@ -661,2031 +2684,7 @@ STACK_END:
 
 
 
-%line 85+1 main.asm
-
-
-%line 1+1 tests.asm
-
-
-
-
-
- tests_begin:
-
- DebugText:
-
- msg set ASSIGN_LOCAL_WORD
-%line 10+0 tests.asm
- DebugText.a0 set DebugText.msg
-%line 11+1 tests.asm
-
- LDY #0
- .loop:
- LDA (msg),Y
- BEQ .done
- STA DEBUG
- INY
- JMP .loop
- .done:
- RTS
-
- halt_test:
-
- test set ASSIGN_LOCAL_BYTE
-%line 24+0 tests.asm
- halt_test.a0 set halt_test.test
-%line 25+1 tests.asm
-
-
- LDA test
- CMP test_count
- BNE .done
- BRK
-%line 30+0 tests.asm
- BRK
-%line 31+1 tests.asm
- .done:
- RTS
-
- InputTest:
-
- input set ASSIGN_LOCAL_WORD
-%line 36+0 tests.asm
- InputTest.a0 set InputTest.input
- output set ASSIGN_LOCAL_WORD
- InputTest.a1 set InputTest.output
-%line 37+1 tests.asm
-
- output_index set ASSIGN_LOCAL_BYTE
-%line 38+0 tests.asm
- calculated_index set ASSIGN_LOCAL_BYTE
- value set ASSIGN_LOCAL_BYTE
-%line 39+1 tests.asm
-
-
- LDY #0
- .loop:
- LDA (input),Y
- BEQ .loop_done
- CMP #'-'
- BNE .not_minus
- LDA #CHAR_MINUS
- .not_minus:
- STA new_word_buff,Y
- INY
- JMP .loop
- .loop_done:
- STY new_word_len
-
-%line 54+0 tests.asm
-
-
-
-
-
-
-
-
-
- JSR CheckData
-%line 55+1 tests.asm
-
- LDY #0
- STY calculated_index
- STY output_index
- .check_loop:
- LDY output_index
- LDA (output),Y
- CMP #'A'
- BCS .letter
- SEC
- SBC #'0'
- JMP .letter_done
- .letter:
- SEC
- SBC #'A'-10
- .letter_done:
- ASL
- ASL
- ASL
- ASL
- STA value
-
- INY
- LDA (output),Y
- CMP #'A'
- BCS .letter2
- SEC
- SBC #'0'
- JMP .letter_done2
- .letter2:
- SEC
- SBC #'A'-10
- .letter_done2:
- ORA value
- STA value
-
- INY
- STY output_index
-
- LDY calculated_index
- LDA new_stack_item,Y
- CMP value
- BNE .failed
- INY
- STY calculated_index
-
- LDY output_index
- LDA (output),Y
- BNE .continue
- JMP .done
- .continue:
- INY
- STY output_index
- JMP .check_loop
-
- .failed:
-
-%line 111+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@54.str_skip
- ..@54.str_addr:
- FCB "\\rTest ",0
- ..@54.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@54.str_addr) % 256
- STA DebugText.a0
- LDA #(..@54.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 112+1 tests.asm
- LDX test_count+1
- LDA test_count
- STA DEBUG_DEC16
-
-%line 115+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@78.str_skip
- ..@78.str_addr:
- FCB ": FAILED!\\n",0
- ..@78.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@78.str_addr) % 256
- STA DebugText.a0
- LDA #(..@78.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 116+1 tests.asm
-
-%line 116+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@102.str_skip
- ..@102.str_addr:
- FCB "   Expected: ",0
- ..@102.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@102.str_addr) % 256
- STA DebugText.a0
- LDA #(..@102.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 117+1 tests.asm
-
-%line 117+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA output
- STA DebugText.a0
- LDA output+1
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 118+1 tests.asm
-
-%line 118+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@154.str_skip
- ..@154.str_addr:
- FCB "\\n   Found:    ",0
- ..@154.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@154.str_addr) % 256
- STA DebugText.a0
- LDA #(..@154.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 119+1 tests.asm
- LDY #0
- STY calculated_index
- LDY #2
- STY output_index
- .fail_loop:
- LDY calculated_index
- LDA new_stack_item,Y
- STA DEBUG_HEX
- LDA #' '
- STA DEBUG
- INY
- STY calculated_index
- LDY output_index
- LDA (output),Y
- BEQ .fail_done
- INY
- INY
- INY
- STY output_index
-
- JMP .fail_loop
- .fail_done:
- BRK
-%line 141+0 tests.asm
- BRK
-%line 142+1 tests.asm
- LDA new_stack_item
- JMP .failed
-
- .done:
-
-%line 146+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@179.str_skip
- ..@179.str_addr:
- FCB "\\gTest ",0
- ..@179.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@179.str_addr) % 256
- STA DebugText.a0
- LDA #(..@179.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 147+1 tests.asm
- LDX test_count+1
- LDA test_count
- STA DEBUG_DEC16
-
-%line 150+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@203.str_skip
- ..@203.str_addr:
- FCB ": passed\\n",0
- ..@203.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@203.str_addr) % 256
- STA DebugText.a0
- LDA #(..@203.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 151+1 tests.asm
- INC test_count
-%line 151+0 tests.asm
- BNE ..@224.no_carry
- INC test_count+1
- ..@224.no_carry:
-%line 152+1 tests.asm
- RTS
-
- tests:
-
- LDA #1
- STA test_count
-
-
-
-
-
-%line 162+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@233.str_skip
- ..@233.str_addr:
- FCB "5",0
- ..@233.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@233.str_addr) % 256
- STA InputTest.a0
- LDA #(..@233.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@242.str_skip
- ..@242.str_addr:
- FCB "01 00 00 00 00 00 50 00 00",0
- ..@242.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@242.str_addr) % 256
- STA InputTest.a1
- LDA #(..@242.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 163+1 tests.asm
-
-
-
-%line 165+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@260.str_skip
- ..@260.str_addr:
- FCB "500",0
- ..@260.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@260.str_addr) % 256
- STA InputTest.a0
- LDA #(..@260.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@269.str_skip
- ..@269.str_addr:
- FCB "01 00 00 00 00 00 50 02 00",0
- ..@269.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@269.str_addr) % 256
- STA InputTest.a1
- LDA #(..@269.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 166+1 tests.asm
-
-
-
-%line 168+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@287.str_skip
- ..@287.str_addr:
- FCB "500",0
- ..@287.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@287.str_addr) % 256
- STA InputTest.a0
- LDA #(..@287.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@296.str_skip
- ..@296.str_addr:
- FCB "01 00 00 00 00 00 50 02 00",0
- ..@296.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@296.str_addr) % 256
- STA InputTest.a1
- LDA #(..@296.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 169+1 tests.asm
-
-
-
-%line 171+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@314.str_skip
- ..@314.str_addr:
- FCB "500.0",0
- ..@314.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@314.str_addr) % 256
- STA InputTest.a0
- LDA #(..@314.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@323.str_skip
- ..@323.str_addr:
- FCB "01 00 00 00 00 00 50 02 00",0
- ..@323.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@323.str_addr) % 256
- STA InputTest.a1
- LDA #(..@323.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 172+1 tests.asm
-
-
-
-%line 174+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@341.str_skip
- ..@341.str_addr:
- FCB "500.00",0
- ..@341.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@341.str_addr) % 256
- STA InputTest.a0
- LDA #(..@341.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@350.str_skip
- ..@350.str_addr:
- FCB "01 00 00 00 00 00 50 02 00",0
- ..@350.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@350.str_addr) % 256
- STA InputTest.a1
- LDA #(..@350.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 175+1 tests.asm
-
-
-
-%line 177+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@368.str_skip
- ..@368.str_addr:
- FCB "5e0",0
- ..@368.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@368.str_addr) % 256
- STA InputTest.a0
- LDA #(..@368.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@377.str_skip
- ..@377.str_addr:
- FCB "01 00 00 00 00 00 50 00 00",0
- ..@377.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@377.str_addr) % 256
- STA InputTest.a1
- LDA #(..@377.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 178+1 tests.asm
-
-
-
-%line 180+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@395.str_skip
- ..@395.str_addr:
- FCB "500e0",0
- ..@395.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@395.str_addr) % 256
- STA InputTest.a0
- LDA #(..@395.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@404.str_skip
- ..@404.str_addr:
- FCB "01 00 00 00 00 00 50 02 00",0
- ..@404.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@404.str_addr) % 256
- STA InputTest.a1
- LDA #(..@404.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 181+1 tests.asm
-
-
-
-%line 183+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@422.str_skip
- ..@422.str_addr:
- FCB "500e2",0
- ..@422.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@422.str_addr) % 256
- STA InputTest.a0
- LDA #(..@422.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@431.str_skip
- ..@431.str_addr:
- FCB "01 00 00 00 00 00 50 04 00",0
- ..@431.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@431.str_addr) % 256
- STA InputTest.a1
- LDA #(..@431.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 184+1 tests.asm
-
-
-
-%line 186+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@449.str_skip
- ..@449.str_addr:
- FCB "500e997",0
- ..@449.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@449.str_addr) % 256
- STA InputTest.a0
- LDA #(..@449.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@458.str_skip
- ..@458.str_addr:
- FCB "01 00 00 00 00 00 50 99 09",0
- ..@458.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@458.str_addr) % 256
- STA InputTest.a1
- LDA #(..@458.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 187+1 tests.asm
-
-
-
-%line 189+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@476.str_skip
- ..@476.str_addr:
- FCB "500e998",0
- ..@476.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@476.str_addr) % 256
- STA InputTest.a0
- LDA #(..@476.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@485.str_skip
- ..@485.str_addr:
- FCB "04",0
- ..@485.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@485.str_addr) % 256
- STA InputTest.a1
- LDA #(..@485.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 190+1 tests.asm
-
-
-
-%line 192+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@503.str_skip
- ..@503.str_addr:
- FCB "-5",0
- ..@503.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@503.str_addr) % 256
- STA InputTest.a0
- LDA #(..@503.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@512.str_skip
- ..@512.str_addr:
- FCB "01 00 00 00 00 00 50 00 80",0
- ..@512.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@512.str_addr) % 256
- STA InputTest.a1
- LDA #(..@512.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 193+1 tests.asm
-
-
-
-%line 195+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@530.str_skip
- ..@530.str_addr:
- FCB "-500",0
- ..@530.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@530.str_addr) % 256
- STA InputTest.a0
- LDA #(..@530.str_addr) / 256
- STA InputTest.a0+1
-
-
-
- JMP ..@539.str_skip
- ..@539.str_addr:
- FCB "01 00 00 00 00 00 50 02 80",0
- ..@539.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@539.str_addr) % 256
- STA InputTest.a1
- LDA #(..@539.str_addr) / 256
- STA InputTest.a1+1
-
-
-
-
-
-
-
-
-
- JSR InputTest
-%line 196+1 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%line 234+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@557.str_skip
- ..@557.str_addr:
- FCB "\\n\\gAll tests passed",0
- ..@557.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@557.str_addr) % 256
- STA DebugText.a0
- LDA #(..@557.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 235+1 tests.asm
-
-%line 235+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@576.str_skip
- ..@576.str_addr:
- FCB "\\n\\lSize of tests: ",0
- ..@576.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@576.str_addr) % 256
- STA DebugText.a0
- LDA #(..@576.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 236+1 tests.asm
- LDX #(tests_end-tests_begin)/256
- LDA #(tests_end-tests_begin) # 256
- STA DEBUG_DEC16
-
-%line 239+0 tests.asm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- JMP ..@595.str_skip
- ..@595.str_addr:
- FCB " bytes",0
- ..@595.str_skip:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- LDA #(..@595.str_addr) % 256
- STA DebugText.a0
- LDA #(..@595.str_addr) / 256
- STA DebugText.a0+1
-
-
-
-
-
-
-
-
-
-
- JSR DebugText
-%line 240+1 tests.asm
- RTS
-
- tests_end:
-%line 87+1 main.asm
+%line 89+1 main.asm
 
 
 
@@ -2878,19 +2877,19 @@ STACK_END:
 
  LDA c_out
  CMP #' '
- BCC ..@695.skip
+ BCC ..@696.skip
 %line 66+0 emu6507.asm
  JMP .if0
- ..@695.skip:
+ ..@696.skip:
 %line 67+1 emu6507.asm
  RTS
  .if0:
 
  CMP #'e'+1
- BCS ..@700.skip
+ BCS ..@701.skip
 %line 71+0 emu6507.asm
  JMP .if1
- ..@700.skip:
+ ..@701.skip:
 %line 72+1 emu6507.asm
  RTS
  .if1:
@@ -3048,7 +3047,7 @@ STACK_END:
  .done:
  RTS
 
-%line 90+1 main.asm
+%line 92+1 main.asm
 
 
 %line 1+1 system.asm
@@ -3077,7 +3076,7 @@ STACK_END:
  BNE .loop
  RTS
 
-%line 92+1 main.asm
+%line 94+1 main.asm
 
 %line 1+1 math.asm
 
@@ -3110,7 +3109,7 @@ STACK_END:
  RTS
 
 
-%line 93+1 main.asm
+%line 95+1 main.asm
 
 %line 1+1 output.asm
 
@@ -4941,10 +4940,10 @@ STACK_END:
 
 
 
- JMP ..@1436.str_skip
- ..@1436.str_addr:
+ JMP ..@1437.str_skip
+ ..@1437.str_addr:
  FCB "RAD",0
- ..@1436.str_skip:
+ ..@1437.str_skip:
 
 
 
@@ -4981,9 +4980,9 @@ STACK_END:
 
 
 
- LDA #(..@1436.str_addr) % 256
+ LDA #(..@1437.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1436.str_addr) / 256
+ LDA #(..@1437.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -5524,10 +5523,10 @@ STACK_END:
 
 
 
- JMP ..@1611.str_skip
- ..@1611.str_addr:
+ JMP ..@1612.str_skip
+ ..@1612.str_addr:
  FCB "bbbbbbbbbbbb",0
- ..@1611.str_skip:
+ ..@1612.str_skip:
 
 
 
@@ -5558,9 +5557,9 @@ STACK_END:
 
 
 
- LDA #(..@1611.str_addr) % 256
+ LDA #(..@1612.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1611.str_addr) / 256
+ LDA #(..@1612.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -5691,10 +5690,10 @@ STACK_END:
 
 
 
- JMP ..@1665.str_skip
- ..@1665.str_addr:
+ JMP ..@1666.str_skip
+ ..@1666.str_addr:
  FCB "bbbbbbbbbbbb",0
- ..@1665.str_skip:
+ ..@1666.str_skip:
 
 
 
@@ -5725,9 +5724,9 @@ STACK_END:
 
 
 
- LDA #(..@1665.str_addr) % 256
+ LDA #(..@1666.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1665.str_addr) / 256
+ LDA #(..@1666.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -5793,7 +5792,7 @@ STACK_END:
  RTS
 
 
-%line 94+1 main.asm
+%line 96+1 main.asm
 
 %line 1+1 forth.asm
 
@@ -5847,10 +5846,10 @@ STACK_END:
 
 
 
- JMP ..@1716.str_skip
- ..@1716.str_addr:
+ JMP ..@1717.str_skip
+ ..@1717.str_addr:
  FCB "a               ",0
- ..@1716.str_skip:
+ ..@1717.str_skip:
 
 
 
@@ -5899,9 +5898,9 @@ STACK_END:
 
 
 
- LDA #(..@1716.str_addr) % 256
+ LDA #(..@1717.str_addr) % 256
  STA LCD_print.a0
- LDA #(..@1716.str_addr) / 256
+ LDA #(..@1717.str_addr) / 256
  STA LCD_print.a0+1
 
 
@@ -7859,15 +7858,15 @@ STACK_END:
  FDB CODE_CLEAR
 
 
-%line 95+1 main.asm
+%line 97+1 main.asm
 
 
 
 
  BEGIN_FUNC set main
-%line 99+0 main.asm
+%line 101+0 main.asm
  main:
-%line 101+1 main.asm
+%line 103+1 main.asm
  dest set ASSIGN_LOCAL_WORD
  arg set ASSIGN_LOCAL_BYTE
 
@@ -7877,20 +7876,6 @@ STACK_END:
 
  LDX #$2F
  TXS
-
-
-%line 111+0 main.asm
-
-
-
-
-
-
-
-
-
- JSR setup
-%line 112+1 main.asm
 
 
 %line 113+0 main.asm
@@ -7903,12 +7888,26 @@ STACK_END:
 
 
 
- JSR tests
+ JSR setup
 %line 114+1 main.asm
+
+
+%line 115+0 main.asm
+
+
+
+
+
+
+
+
+
+ JSR tests
+%line 116+1 main.asm
 
  .input_loop:
 
-%line 116+0 main.asm
+%line 118+0 main.asm
 
 
 
@@ -7919,9 +7918,9 @@ STACK_END:
 
 
  JSR DrawStack
-%line 117+1 main.asm
+%line 119+1 main.asm
 
-%line 117+0 main.asm
+%line 119+0 main.asm
 
 
 
@@ -7932,11 +7931,11 @@ STACK_END:
 
 
  JSR ReadLine
-%line 118+1 main.asm
+%line 120+1 main.asm
 
  .process_loop:
 
-%line 120+0 main.asm
+%line 122+0 main.asm
 
 
 
@@ -7947,12 +7946,12 @@ STACK_END:
 
 
  JSR LineWord
-%line 121+1 main.asm
+%line 123+1 main.asm
  LDA new_word_len
  BEQ .input_loop
 
 
-%line 124+0 main.asm
+%line 126+0 main.asm
 
 
 
@@ -7963,13 +7962,13 @@ STACK_END:
 
 
  JSR FindWord
-%line 125+1 main.asm
+%line 127+1 main.asm
  LDA ret_val
  BEQ .not_found
 
 
 
-%line 129+0 main.asm
+%line 131+0 main.asm
 
 
 
@@ -8028,12 +8027,12 @@ STACK_END:
 
 
  JSR ExecToken
-%line 130+1 main.asm
+%line 132+1 main.asm
  LDA ret_val
  BEQ .no_exec_error
  STA arg
 
-%line 133+0 main.asm
+%line 135+0 main.asm
 
 
 
@@ -8083,14 +8082,14 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 134+1 main.asm
+%line 136+1 main.asm
  JMP .input_loop
  .no_exec_error:
  JMP .process_loop
  .not_found:
 
 
-%line 139+0 main.asm
+%line 141+0 main.asm
 
 
 
@@ -8101,12 +8100,12 @@ STACK_END:
 
 
  JSR CheckData
-%line 140+1 main.asm
+%line 142+1 main.asm
  LDA new_stack_item
  CMP #OBJ_ERROR
  BNE .input_good
 
-%line 143+0 main.asm
+%line 145+0 main.asm
 
 
 
@@ -8160,7 +8159,7 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 144+1 main.asm
+%line 146+1 main.asm
  JMP .input_loop
  .input_good:
 
@@ -8169,7 +8168,7 @@ STACK_END:
  CMP stack_count
  BCS .no_overflow
 
-%line 151+0 main.asm
+%line 153+0 main.asm
 
 
 
@@ -8223,7 +8222,7 @@ STACK_END:
 
 
  JSR ErrorMsg
-%line 152+1 main.asm
+%line 154+1 main.asm
  JMP .input_loop
  .no_overflow:
 
@@ -8234,7 +8233,7 @@ STACK_END:
  LDA #0
  STA dest+1
 
-%line 161+0 main.asm
+%line 163+0 main.asm
 
 
 
@@ -8357,12 +8356,12 @@ STACK_END:
 
 
  JSR MemCopy
-%line 162+1 main.asm
+%line 164+1 main.asm
 
  JMP .process_loop
 
  RTS
-
+ code_end:
 
 %line 110+1 nasm.asm
 

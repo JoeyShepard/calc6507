@@ -3,8 +3,6 @@
 
 ;Frameworks
 
-	tests_begin:
-
 	FUNC DebugText
 		ARGS
 			STRING msg
@@ -232,11 +230,10 @@
 		;48 - 5e- = 5e0
 		
 		CALL DebugText, "\\n\\gAll tests passed"
-		CALL DebugText, "\\n\\lSize of tests: "
-		LDX #(tests_end-tests_begin)/256
-		LDA #(tests_end-tests_begin) # 256
+		CALL DebugText, "\\n\\lSize of code: "
+		LDX #(code_end-code_begin)/256
+		LDA #(code_end-code_begin) # 256
 		STA DEBUG_DEC16
 		CALL DebugText, " bytes"
 	END 
 	
-	tests_end:

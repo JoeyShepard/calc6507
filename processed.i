@@ -47,80 +47,7 @@ stack_count:
  DFS $1
 test_count:
  DFS $1
- ORG $900
- JMP main
-font_table:
- FCB $0,$0,$0,$0,$0,$0,$0,$0
- FCB $30,$78,$78,$30,$30,$0,$30,$0
- FCB $6C,$6C,$6C,$0,$0,$0,$0,$0
- FCB $6C,$6C,$FE,$6C,$FE,$6C,$6C,$0
- FCB $30,$7C,$C0,$78,$C,$F8,$30,$0
- FCB $0,$C6,$CC,$18,$30,$66,$C6,$0
- FCB $38,$6C,$38,$76,$DC,$CC,$76,$0
- FCB $60,$60,$C0,$0,$0,$0,$0,$0
- FCB $18,$30,$60,$60,$60,$30,$18,$0
- FCB $60,$30,$18,$18,$18,$30,$60,$0
- FCB $0,$66,$3C,$FF,$3C,$66,$0,$0
- FCB $0,$30,$30,$FC,$30,$30,$0,$0
- FCB $0,$0,$0,$0,$0,$30,$30,$60
- FCB $0,$0,$0,$FC,$0,$0,$0,$0
- FCB $0,$0,$0,$0,$0,$30,$30,$0
- FCB $6,$C,$18,$30,$60,$C0,$80,$0
- FCB $7C,$C6,$CE,$DE,$F6,$E6,$7C,$0
- FCB $30,$70,$30,$30,$30,$30,$FC,$0
- FCB $78,$CC,$C,$38,$60,$CC,$FC,$0
- FCB $78,$CC,$C,$38,$C,$CC,$78,$0
- FCB $1C,$3C,$6C,$CC,$FE,$C,$1E,$0
- FCB $FC,$C0,$F8,$C,$C,$CC,$78,$0
- FCB $38,$60,$C0,$F8,$CC,$CC,$78,$0
- FCB $FC,$CC,$C,$18,$30,$30,$30,$0
- FCB $78,$CC,$CC,$78,$CC,$CC,$78,$0
- FCB $78,$CC,$CC,$7C,$C,$18,$70,$0
- FCB $0,$30,$30,$0,$0,$30,$30,$0
- FCB $0,$30,$30,$0,$0,$30,$30,$60
- FCB $18,$30,$60,$C0,$60,$30,$18,$0
- FCB $0,$0,$FC,$0,$0,$FC,$0,$0
- FCB $60,$30,$18,$C,$18,$30,$60,$0
- FCB $78,$CC,$C,$18,$30,$0,$30,$0
- FCB $7C,$C6,$DE,$DE,$DE,$C0,$78,$0
- FCB $30,$78,$CC,$CC,$FC,$CC,$CC,$0
- FCB $FC,$66,$66,$7C,$66,$66,$FC,$0
- FCB $3C,$66,$C0,$C0,$C0,$66,$3C,$0
- FCB $F8,$6C,$66,$66,$66,$6C,$F8,$0
- FCB $FE,$62,$68,$78,$68,$62,$FE,$0
- FCB $FE,$62,$68,$78,$68,$60,$F0,$0
- FCB $3C,$66,$C0,$C0,$CE,$66,$3E,$0
- FCB $CC,$CC,$CC,$FC,$CC,$CC,$CC,$0
- FCB $78,$30,$30,$30,$30,$30,$78,$0
- FCB $1E,$C,$C,$C,$CC,$CC,$78,$0
- FCB $E6,$66,$6C,$78,$6C,$66,$E6,$0
- FCB $F0,$60,$60,$60,$62,$66,$FE,$0
- FCB $C6,$EE,$FE,$FE,$D6,$C6,$C6,$0
- FCB $C6,$E6,$F6,$DE,$CE,$C6,$C6,$0
- FCB $38,$6C,$C6,$C6,$C6,$6C,$38,$0
- FCB $FC,$66,$66,$7C,$60,$60,$F0,$0
- FCB $78,$CC,$CC,$CC,$DC,$78,$1C,$0
- FCB $FC,$66,$66,$7C,$6C,$66,$E6,$0
- FCB $78,$CC,$E0,$70,$1C,$CC,$78,$0
- FCB $FC,$B4,$30,$30,$30,$30,$78,$0
- FCB $CC,$CC,$CC,$CC,$CC,$CC,$FC,$0
- FCB $CC,$CC,$CC,$CC,$CC,$78,$30,$0
- FCB $C6,$C6,$C6,$D6,$FE,$EE,$C6,$0
- FCB $C6,$C6,$6C,$38,$38,$6C,$C6,$0
- FCB $CC,$CC,$CC,$78,$30,$30,$78,$0
- FCB $FE,$C6,$8C,$18,$32,$66,$FE,$0
- FCB $78,$60,$60,$60,$60,$60,$78,$0
- FCB $C0,$60,$30,$18,$C,$6,$2,$0
- FCB $78,$18,$18,$18,$18,$18,$78,$0
- FCB $10,$38,$6C,$C6,$0,$0,$0,$0
- FCB $0,$0,$0,$0,$0,$0,$0,$FF
- FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
- FCB $8,$18,$38,$78,$38,$18,$8,$0
- FCB $0,$0,$0,$0,$FF,$FF,$FF,$FF
- FCB $0,$1E,$0,$0,$0,$0,$0,$0
- FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
- FCB $0,$0,$EE,$88,$EE,$88,$EE,$0
-tests_begin:
+ ORG $C000
 DebugText:
  LDY #$0
  .loop:
@@ -204,34 +131,34 @@ InputTest:
  STY $7 ;output_index
  JMP .check_loop
  .failed:
- JMP .._54.str_skip
- .._54.str_addr:
+ JMP .._53.str_skip
+ .._53.str_addr:
  FCB "\\rTest ",$0
- .._54.str_skip:
- LDA # (.._54.str_addr) # $100
+ .._53.str_skip:
+ LDA # (.._53.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._54.str_addr)/$100
+ LDA # (.._53.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
  LDX test_count+$1
  LDA test_count
  STA $FFEA
- JMP .._78.str_skip
- .._78.str_addr:
+ JMP .._77.str_skip
+ .._77.str_addr:
  FCB ": FAILED!\\n",$0
- .._78.str_skip:
- LDA # (.._78.str_addr) # $100
+ .._77.str_skip:
+ LDA # (.._77.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._78.str_addr)/$100
+ LDA # (.._77.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
- JMP .._102.str_skip
- .._102.str_addr:
+ JMP .._101.str_skip
+ .._101.str_addr:
  FCB "   Expected: ",$0
- .._102.str_skip:
- LDA # (.._102.str_addr) # $100
+ .._101.str_skip:
+ LDA # (.._101.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._102.str_addr)/$100
+ LDA # (.._101.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
  LDA $5 ;output
@@ -239,13 +166,13 @@ InputTest:
  LDA $6 ;output
  STA $B ;DebugText.msg
  JSR DebugText
- JMP .._154.str_skip
- .._154.str_addr:
+ JMP .._153.str_skip
+ .._153.str_addr:
  FCB "\\n   Found:    ",$0
- .._154.str_skip:
- LDA # (.._154.str_addr) # $100
+ .._153.str_skip:
+ LDA # (.._153.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._154.str_addr)/$100
+ LDA # (.._153.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
  LDY #$0
@@ -274,271 +201,344 @@ InputTest:
  LDA new_stack_item
  JMP .failed
  .done:
- JMP .._179.str_skip
- .._179.str_addr:
+ JMP .._178.str_skip
+ .._178.str_addr:
  FCB "\\gTest ",$0
- .._179.str_skip:
- LDA # (.._179.str_addr) # $100
+ .._178.str_skip:
+ LDA # (.._178.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._179.str_addr)/$100
+ LDA # (.._178.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
  LDX test_count+$1
  LDA test_count
  STA $FFEA
- JMP .._203.str_skip
- .._203.str_addr:
+ JMP .._202.str_skip
+ .._202.str_addr:
  FCB ": passed\\n",$0
- .._203.str_skip:
- LDA # (.._203.str_addr) # $100
+ .._202.str_skip:
+ LDA # (.._202.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._203.str_addr)/$100
+ LDA # (.._202.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
  INC test_count
- BNE .._224.no_carry
+ BNE .._223.no_carry
  INC test_count+$1
- .._224.no_carry:
+ .._223.no_carry:
  RTS
 tests:
  LDA #$1
  STA test_count
- JMP .._233.str_skip
- .._233.str_addr:
+ JMP .._232.str_skip
+ .._232.str_addr:
  FCB "5",$0
- .._233.str_skip:
- LDA # (.._233.str_addr) # $100
+ .._232.str_skip:
+ LDA # (.._232.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._233.str_addr)/$100
+ LDA # (.._232.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._242.str_skip
- .._242.str_addr:
+ JMP .._241.str_skip
+ .._241.str_addr:
  FCB "01 00 00 00 00 00 50 00 00",$0
- .._242.str_skip:
- LDA # (.._242.str_addr) # $100
+ .._241.str_skip:
+ LDA # (.._241.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._242.str_addr)/$100
+ LDA # (.._241.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._260.str_skip
- .._260.str_addr:
+ JMP .._259.str_skip
+ .._259.str_addr:
  FCB "500",$0
- .._260.str_skip:
- LDA # (.._260.str_addr) # $100
+ .._259.str_skip:
+ LDA # (.._259.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._260.str_addr)/$100
+ LDA # (.._259.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._269.str_skip
- .._269.str_addr:
+ JMP .._268.str_skip
+ .._268.str_addr:
  FCB "01 00 00 00 00 00 50 02 00",$0
- .._269.str_skip:
- LDA # (.._269.str_addr) # $100
+ .._268.str_skip:
+ LDA # (.._268.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._269.str_addr)/$100
+ LDA # (.._268.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._287.str_skip
- .._287.str_addr:
+ JMP .._286.str_skip
+ .._286.str_addr:
  FCB "500",$0
- .._287.str_skip:
- LDA # (.._287.str_addr) # $100
+ .._286.str_skip:
+ LDA # (.._286.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._287.str_addr)/$100
+ LDA # (.._286.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._296.str_skip
- .._296.str_addr:
+ JMP .._295.str_skip
+ .._295.str_addr:
  FCB "01 00 00 00 00 00 50 02 00",$0
- .._296.str_skip:
- LDA # (.._296.str_addr) # $100
+ .._295.str_skip:
+ LDA # (.._295.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._296.str_addr)/$100
+ LDA # (.._295.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._314.str_skip
- .._314.str_addr:
+ JMP .._313.str_skip
+ .._313.str_addr:
  FCB "500.0",$0
- .._314.str_skip:
- LDA # (.._314.str_addr) # $100
+ .._313.str_skip:
+ LDA # (.._313.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._314.str_addr)/$100
+ LDA # (.._313.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._323.str_skip
- .._323.str_addr:
+ JMP .._322.str_skip
+ .._322.str_addr:
  FCB "01 00 00 00 00 00 50 02 00",$0
- .._323.str_skip:
- LDA # (.._323.str_addr) # $100
+ .._322.str_skip:
+ LDA # (.._322.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._323.str_addr)/$100
+ LDA # (.._322.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._341.str_skip
- .._341.str_addr:
+ JMP .._340.str_skip
+ .._340.str_addr:
  FCB "500.00",$0
- .._341.str_skip:
- LDA # (.._341.str_addr) # $100
+ .._340.str_skip:
+ LDA # (.._340.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._341.str_addr)/$100
+ LDA # (.._340.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._350.str_skip
- .._350.str_addr:
+ JMP .._349.str_skip
+ .._349.str_addr:
  FCB "01 00 00 00 00 00 50 02 00",$0
- .._350.str_skip:
- LDA # (.._350.str_addr) # $100
+ .._349.str_skip:
+ LDA # (.._349.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._350.str_addr)/$100
+ LDA # (.._349.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._368.str_skip
- .._368.str_addr:
+ JMP .._367.str_skip
+ .._367.str_addr:
  FCB "5e0",$0
- .._368.str_skip:
- LDA # (.._368.str_addr) # $100
+ .._367.str_skip:
+ LDA # (.._367.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._368.str_addr)/$100
+ LDA # (.._367.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._377.str_skip
- .._377.str_addr:
+ JMP .._376.str_skip
+ .._376.str_addr:
  FCB "01 00 00 00 00 00 50 00 00",$0
- .._377.str_skip:
- LDA # (.._377.str_addr) # $100
+ .._376.str_skip:
+ LDA # (.._376.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._377.str_addr)/$100
+ LDA # (.._376.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._395.str_skip
- .._395.str_addr:
+ JMP .._394.str_skip
+ .._394.str_addr:
  FCB "500e0",$0
- .._395.str_skip:
- LDA # (.._395.str_addr) # $100
+ .._394.str_skip:
+ LDA # (.._394.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._395.str_addr)/$100
+ LDA # (.._394.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._404.str_skip
- .._404.str_addr:
+ JMP .._403.str_skip
+ .._403.str_addr:
  FCB "01 00 00 00 00 00 50 02 00",$0
- .._404.str_skip:
- LDA # (.._404.str_addr) # $100
+ .._403.str_skip:
+ LDA # (.._403.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._404.str_addr)/$100
+ LDA # (.._403.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._422.str_skip
- .._422.str_addr:
+ JMP .._421.str_skip
+ .._421.str_addr:
  FCB "500e2",$0
- .._422.str_skip:
- LDA # (.._422.str_addr) # $100
+ .._421.str_skip:
+ LDA # (.._421.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._422.str_addr)/$100
+ LDA # (.._421.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._431.str_skip
- .._431.str_addr:
+ JMP .._430.str_skip
+ .._430.str_addr:
  FCB "01 00 00 00 00 00 50 04 00",$0
- .._431.str_skip:
- LDA # (.._431.str_addr) # $100
+ .._430.str_skip:
+ LDA # (.._430.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._431.str_addr)/$100
+ LDA # (.._430.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._449.str_skip
- .._449.str_addr:
+ JMP .._448.str_skip
+ .._448.str_addr:
  FCB "500e997",$0
- .._449.str_skip:
- LDA # (.._449.str_addr) # $100
+ .._448.str_skip:
+ LDA # (.._448.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._449.str_addr)/$100
+ LDA # (.._448.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._458.str_skip
- .._458.str_addr:
+ JMP .._457.str_skip
+ .._457.str_addr:
  FCB "01 00 00 00 00 00 50 99 09",$0
- .._458.str_skip:
- LDA # (.._458.str_addr) # $100
+ .._457.str_skip:
+ LDA # (.._457.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._458.str_addr)/$100
+ LDA # (.._457.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._476.str_skip
- .._476.str_addr:
+ JMP .._475.str_skip
+ .._475.str_addr:
  FCB "500e998",$0
- .._476.str_skip:
- LDA # (.._476.str_addr) # $100
+ .._475.str_skip:
+ LDA # (.._475.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._476.str_addr)/$100
+ LDA # (.._475.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._485.str_skip
- .._485.str_addr:
+ JMP .._484.str_skip
+ .._484.str_addr:
  FCB "04",$0
- .._485.str_skip:
- LDA # (.._485.str_addr) # $100
+ .._484.str_skip:
+ LDA # (.._484.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._485.str_addr)/$100
+ LDA # (.._484.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._503.str_skip
- .._503.str_addr:
+ JMP .._502.str_skip
+ .._502.str_addr:
  FCB "-5",$0
- .._503.str_skip:
- LDA # (.._503.str_addr) # $100
+ .._502.str_skip:
+ LDA # (.._502.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._503.str_addr)/$100
+ LDA # (.._502.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._512.str_skip
- .._512.str_addr:
+ JMP .._511.str_skip
+ .._511.str_addr:
  FCB "01 00 00 00 00 00 50 00 80",$0
- .._512.str_skip:
- LDA # (.._512.str_addr) # $100
+ .._511.str_skip:
+ LDA # (.._511.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._512.str_addr)/$100
+ LDA # (.._511.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._530.str_skip
- .._530.str_addr:
+ JMP .._529.str_skip
+ .._529.str_addr:
  FCB "-500",$0
- .._530.str_skip:
- LDA # (.._530.str_addr) # $100
+ .._529.str_skip:
+ LDA # (.._529.str_addr) # $100
  STA $3 ;InputTest.input
- LDA # (.._530.str_addr)/$100
+ LDA # (.._529.str_addr)/$100
  STA $4 ;InputTest.input
- JMP .._539.str_skip
- .._539.str_addr:
+ JMP .._538.str_skip
+ .._538.str_addr:
  FCB "01 00 00 00 00 00 50 02 80",$0
- .._539.str_skip:
- LDA # (.._539.str_addr) # $100
+ .._538.str_skip:
+ LDA # (.._538.str_addr) # $100
  STA $5 ;InputTest.output
- LDA # (.._539.str_addr)/$100
+ LDA # (.._538.str_addr)/$100
  STA $6 ;InputTest.output
  JSR InputTest
- JMP .._557.str_skip
- .._557.str_addr:
+ JMP .._556.str_skip
+ .._556.str_addr:
  FCB "\\n\\gAll tests passed",$0
- .._557.str_skip:
- LDA # (.._557.str_addr) # $100
+ .._556.str_skip:
+ LDA # (.._556.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._557.str_addr)/$100
+ LDA # (.._556.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
- JMP .._576.str_skip
- .._576.str_addr:
- FCB "\\n\\lSize of tests: ",$0
- .._576.str_skip:
- LDA # (.._576.str_addr) # $100
+ JMP .._575.str_skip
+ .._575.str_addr:
+ FCB "\\n\\lSize of code: ",$0
+ .._575.str_skip:
+ LDA # (.._575.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._576.str_addr)/$100
+ LDA # (.._575.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
- LDX # (tests_end-tests_begin)/$100
- LDA # (tests_end-tests_begin)#$100
+ LDX # (code_end-code_begin)/$100
+ LDA # (code_end-code_begin)#$100
  STA $FFEA
- JMP .._595.str_skip
- .._595.str_addr:
+ JMP .._594.str_skip
+ .._594.str_addr:
  FCB " bytes",$0
- .._595.str_skip:
- LDA # (.._595.str_addr) # $100
+ .._594.str_skip:
+ LDA # (.._594.str_addr) # $100
  STA $A ;DebugText.msg
- LDA # (.._595.str_addr)/$100
+ LDA # (.._594.str_addr)/$100
  STA $B ;DebugText.msg
  JSR DebugText
  RTS
-tests_end:
+ ORG $900
+code_begin:
+ JMP main
+font_table:
+ FCB $0,$0,$0,$0,$0,$0,$0,$0
+ FCB $30,$78,$78,$30,$30,$0,$30,$0
+ FCB $6C,$6C,$6C,$0,$0,$0,$0,$0
+ FCB $6C,$6C,$FE,$6C,$FE,$6C,$6C,$0
+ FCB $30,$7C,$C0,$78,$C,$F8,$30,$0
+ FCB $0,$C6,$CC,$18,$30,$66,$C6,$0
+ FCB $38,$6C,$38,$76,$DC,$CC,$76,$0
+ FCB $60,$60,$C0,$0,$0,$0,$0,$0
+ FCB $18,$30,$60,$60,$60,$30,$18,$0
+ FCB $60,$30,$18,$18,$18,$30,$60,$0
+ FCB $0,$66,$3C,$FF,$3C,$66,$0,$0
+ FCB $0,$30,$30,$FC,$30,$30,$0,$0
+ FCB $0,$0,$0,$0,$0,$30,$30,$60
+ FCB $0,$0,$0,$FC,$0,$0,$0,$0
+ FCB $0,$0,$0,$0,$0,$30,$30,$0
+ FCB $6,$C,$18,$30,$60,$C0,$80,$0
+ FCB $7C,$C6,$CE,$DE,$F6,$E6,$7C,$0
+ FCB $30,$70,$30,$30,$30,$30,$FC,$0
+ FCB $78,$CC,$C,$38,$60,$CC,$FC,$0
+ FCB $78,$CC,$C,$38,$C,$CC,$78,$0
+ FCB $1C,$3C,$6C,$CC,$FE,$C,$1E,$0
+ FCB $FC,$C0,$F8,$C,$C,$CC,$78,$0
+ FCB $38,$60,$C0,$F8,$CC,$CC,$78,$0
+ FCB $FC,$CC,$C,$18,$30,$30,$30,$0
+ FCB $78,$CC,$CC,$78,$CC,$CC,$78,$0
+ FCB $78,$CC,$CC,$7C,$C,$18,$70,$0
+ FCB $0,$30,$30,$0,$0,$30,$30,$0
+ FCB $0,$30,$30,$0,$0,$30,$30,$60
+ FCB $18,$30,$60,$C0,$60,$30,$18,$0
+ FCB $0,$0,$FC,$0,$0,$FC,$0,$0
+ FCB $60,$30,$18,$C,$18,$30,$60,$0
+ FCB $78,$CC,$C,$18,$30,$0,$30,$0
+ FCB $7C,$C6,$DE,$DE,$DE,$C0,$78,$0
+ FCB $30,$78,$CC,$CC,$FC,$CC,$CC,$0
+ FCB $FC,$66,$66,$7C,$66,$66,$FC,$0
+ FCB $3C,$66,$C0,$C0,$C0,$66,$3C,$0
+ FCB $F8,$6C,$66,$66,$66,$6C,$F8,$0
+ FCB $FE,$62,$68,$78,$68,$62,$FE,$0
+ FCB $FE,$62,$68,$78,$68,$60,$F0,$0
+ FCB $3C,$66,$C0,$C0,$CE,$66,$3E,$0
+ FCB $CC,$CC,$CC,$FC,$CC,$CC,$CC,$0
+ FCB $78,$30,$30,$30,$30,$30,$78,$0
+ FCB $1E,$C,$C,$C,$CC,$CC,$78,$0
+ FCB $E6,$66,$6C,$78,$6C,$66,$E6,$0
+ FCB $F0,$60,$60,$60,$62,$66,$FE,$0
+ FCB $C6,$EE,$FE,$FE,$D6,$C6,$C6,$0
+ FCB $C6,$E6,$F6,$DE,$CE,$C6,$C6,$0
+ FCB $38,$6C,$C6,$C6,$C6,$6C,$38,$0
+ FCB $FC,$66,$66,$7C,$60,$60,$F0,$0
+ FCB $78,$CC,$CC,$CC,$DC,$78,$1C,$0
+ FCB $FC,$66,$66,$7C,$6C,$66,$E6,$0
+ FCB $78,$CC,$E0,$70,$1C,$CC,$78,$0
+ FCB $FC,$B4,$30,$30,$30,$30,$78,$0
+ FCB $CC,$CC,$CC,$CC,$CC,$CC,$FC,$0
+ FCB $CC,$CC,$CC,$CC,$CC,$78,$30,$0
+ FCB $C6,$C6,$C6,$D6,$FE,$EE,$C6,$0
+ FCB $C6,$C6,$6C,$38,$38,$6C,$C6,$0
+ FCB $CC,$CC,$CC,$78,$30,$30,$78,$0
+ FCB $FE,$C6,$8C,$18,$32,$66,$FE,$0
+ FCB $78,$60,$60,$60,$60,$60,$78,$0
+ FCB $C0,$60,$30,$18,$C,$6,$2,$0
+ FCB $78,$18,$18,$18,$18,$18,$78,$0
+ FCB $10,$38,$6C,$C6,$0,$0,$0,$0
+ FCB $0,$0,$0,$0,$0,$0,$0,$FF
+ FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ FCB $8,$18,$38,$78,$38,$18,$8,$0
+ FCB $0,$0,$0,$0,$FF,$FF,$FF,$FF
+ FCB $0,$1E,$0,$0,$0,$0,$0,$0
+ FCB $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ FCB $0,$0,$EE,$88,$EE,$88,$EE,$0
 setup:
  SEI
  CLD
@@ -578,15 +578,15 @@ LCD_clrscr:
 LCD_char:
  LDA $F ;c_out
  CMP #$20
- BCC .._695.skip
+ BCC .._696.skip
  JMP .if0
- .._695.skip:
+ .._696.skip:
  RTS
  .if0:
  CMP #$66
- BCS .._700.skip
+ BCS .._701.skip
  JMP .if1
- .._700.skip:
+ .._701.skip:
  RTS
  .if1:
  SEC
@@ -649,26 +649,26 @@ LCD_char:
  RTS
 LCD_print:
  LDA #$0
- STA $5 ;index
+ STA $8 ;index
  .loop:
- LDY $5 ;index
- LDA ($3),Y ;source
+ LDY $8 ;index
+ LDA ($6),Y ;source
  BEQ .done
- STA $6 ;arg
- LDA $6 ;arg
+ STA $9 ;arg
+ LDA $9 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
- INC $5 ;index
+ INC $8 ;index
  JMP .loop
  .done:
  RTS
 MemCopy:
  LDY #$0
  .loop:
- LDA ($E),Y ;source
- STA ($10),Y ;dest
+ LDA ($F),Y ;source
+ STA ($11),Y ;dest
  INY
- CPY $12 ;count
+ CPY $A ;count
  BNE .loop
  RTS
 BCD_Reverse:
@@ -686,39 +686,39 @@ BCD_Reverse:
  PLP
  RTS
 DigitHigh:
- LDA $E ;digit
+ LDA $A ;digit
  LSR
  LSR
  LSR
  LSR
  CLC
  ADC #$30
- STA $E ;digit
- LDA $E ;digit
+ STA $A ;digit
+ LDA $A ;digit
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
 DigitLow:
- LDA $E ;digit
+ LDA $A ;digit
  AND #$F
  CLC
  ADC #$30
- STA $E ;digit
- LDA $E ;digit
+ STA $A ;digit
+ LDA $A ;digit
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
 DrawFloat:
  LDA $3 ;source
- STA $E ;MemCopy.source
- LDA $4 ;source
  STA $F ;MemCopy.source
+ LDA $4 ;source
+ STA $10 ;MemCopy.source
  LDA # (R0) # $100
- STA $10 ;MemCopy.dest
- LDA # (R0)/$100
  STA $11 ;MemCopy.dest
+ LDA # (R0)/$100
+ STA $12 ;MemCopy.dest
  LDA #$9
- STA $12 ;MemCopy.count
+ STA $A ;MemCopy.count
  JSR MemCopy
  LDA #$20
  STA $7 ;sign
@@ -736,13 +736,13 @@ DrawFloat:
  LDA R0,Y
  STA $6 ;arg
  LDA $6 ;arg
- STA $E ;DigitHigh.digit
+ STA $A ;DigitHigh.digit
  JSR DigitHigh
  LDA #$2E
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDA $6 ;arg
- STA $E ;DigitLow.digit
+ STA $A ;DigitLow.digit
  JSR DigitLow
  LDA #$5
  STA $5 ;index
@@ -751,10 +751,10 @@ DrawFloat:
  LDA R0,Y
  STA $6 ;arg
  LDA $6 ;arg
- STA $E ;DigitHigh.digit
+ STA $A ;DigitHigh.digit
  JSR DigitHigh
  LDA $6 ;arg
- STA $E ;DigitLow.digit
+ STA $A ;DigitLow.digit
  JSR DigitLow
  DEC $5 ;index
  LDA $5 ;index
@@ -776,20 +776,20 @@ DrawFloat:
  LDA R0,Y
  STA $6 ;arg
  LDA $6 ;arg
- STA $E ;DigitLow.digit
+ STA $A ;DigitLow.digit
  JSR DigitLow
  LDY #$7
  LDA R0,Y
  STA $6 ;arg
  LDA $6 ;arg
- STA $E ;DigitHigh.digit
+ STA $A ;DigitHigh.digit
  JSR DigitHigh
  LDA $6 ;arg
- STA $E ;DigitLow.digit
+ STA $A ;DigitLow.digit
  JSR DigitLow
  RTS
 HexHigh:
- LDA $3 ;digit
+ LDA $6 ;digit
  LSR
  LSR
  LSR
@@ -798,32 +798,32 @@ HexHigh:
  BCC .print_digit
  CLC
  ADC #$37
- STA $4 ;arg
+ STA $7 ;arg
  JMP .done
  .print_digit:
  CLC
  ADC #$30
- STA $4 ;arg
+ STA $7 ;arg
  .done:
- LDA $4 ;arg
+ LDA $7 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
 HexLow:
- LDA $3 ;digit
+ LDA $6 ;digit
  AND #$F
  CMP #$A
  BCC .print_digit
  CLC
  ADC #$37
- STA $4 ;arg
+ STA $7 ;arg
  JMP .done
  .print_digit:
  CLC
  ADC #$30
- STA $4 ;arg
+ STA $7 ;arg
  .done:
- LDA $4 ;arg
+ LDA $7 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  RTS
@@ -832,22 +832,22 @@ DrawHex:
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDY #$2
- LDA ($5),Y ;source
- STA $7 ;arg
- LDA $7 ;arg
- STA $3 ;HexHigh.digit
+ LDA ($3),Y ;source
+ STA $5 ;arg
+ LDA $5 ;arg
+ STA $6 ;HexHigh.digit
  JSR HexHigh
- LDA $7 ;arg
- STA $3 ;HexLow.digit
+ LDA $5 ;arg
+ STA $6 ;HexLow.digit
  JSR HexLow
  LDY #$1
- LDA ($5),Y ;source
- STA $7 ;arg
- LDA $7 ;arg
- STA $3 ;HexHigh.digit
+ LDA ($3),Y ;source
+ STA $5 ;arg
+ LDA $5 ;arg
+ STA $6 ;HexHigh.digit
  JSR HexHigh
- LDA $7 ;arg
- STA $3 ;HexLow.digit
+ LDA $5 ;arg
+ STA $6 ;HexLow.digit
  JSR HexLow
  RTS
 DrawString:
@@ -877,23 +877,23 @@ DrawStack:
  TXA
  CLC
  ADC #$24
- STA $C ;address
- LDA #$0
  STA $D ;address
+ LDA #$0
+ STA $E ;address
  JSR LCD_clrscr
- JMP .._1436.str_skip
- .._1436.str_addr:
+ JMP .._1437.str_skip
+ .._1437.str_addr:
  FCB "RAD",$0
- .._1436.str_skip:
- LDA # (.._1436.str_addr) # $100
- STA $3 ;LCD_print.source
- LDA # (.._1436.str_addr)/$100
- STA $4 ;LCD_print.source
+ .._1437.str_skip:
+ LDA # (.._1437.str_addr) # $100
+ STA $6 ;LCD_print.source
+ LDA # (.._1437.str_addr)/$100
+ STA $7 ;LCD_print.source
  JSR LCD_print
  LDA #$35
- STA $A ;character
+ STA $B ;character
  LDA #$5
- STA $B ;counter
+ STA $C ;counter
  .loop:
  LDA #$0
  STA screen_ptr
@@ -901,53 +901,53 @@ DrawStack:
  CLC
  ADC #$10
  STA screen_ptr+$1
- LDA $A ;character
+ LDA $B ;character
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDA #$3A
  STA $F ;LCD_char.c_out
  JSR LCD_char
- DEC $B ;counter
- LDA $B ;counter
+ DEC $C ;counter
+ LDA $C ;counter
  CMP stack_count
  BCS .no_item
  LDY #$0
- LDA ($C),Y ;address
+ LDA ($D),Y ;address
  CMP #$1
  BNE .not_float
- LDA $C ;address
- STA $3 ;DrawFloat.source
  LDA $D ;address
+ STA $3 ;DrawFloat.source
+ LDA $E ;address
  STA $4 ;DrawFloat.source
  JSR DrawFloat
  JMP .item_done
  .not_float:
  CMP #$2
  BNE .not_str
- LDA $C ;address
- STA $3 ;DrawString.source
  LDA $D ;address
+ STA $3 ;DrawString.source
+ LDA $E ;address
  STA $4 ;DrawString.source
  JSR DrawString
  JMP .item_done
  .not_str:
  CMP #$3
  BNE .not_hex
- LDA $C ;address
- STA $5 ;DrawHex.source
  LDA $D ;address
- STA $6 ;DrawHex.source
+ STA $3 ;DrawHex.source
+ LDA $E ;address
+ STA $4 ;DrawHex.source
  JSR DrawHex
  JMP .item_done
  .not_hex:
  .item_done:
  .no_item:
- LDA $C ;address
+ LDA $D ;address
  SEC
  SBC #$9
- STA $C ;address
- DEC $A ;character
- LDA $B ;counter
+ STA $D ;address
+ DEC $B ;character
+ LDA $C ;counter
  BNE .loop
  LDA #$0
  STA screen_ptr
@@ -982,23 +982,23 @@ ERROR_TABLE:
  FDB ERROR_MSG_STACK_OVERFLOW
  FDB ERROR_MSG_STACK_UNDERFLOW
 ErrorMsg:
- LDY $7 ;error_code
+ LDY $3 ;error_code
  LDA ERROR_TABLE-$2,Y
- STA $8 ;msg
+ STA $4 ;msg
  LDA ERROR_TABLE-$1,Y
- STA $9 ;msg
+ STA $5 ;msg
  LDA #$20
  STA screen_ptr
  LDA #$60
  STA screen_ptr+$1
- JMP .._1611.str_skip
- .._1611.str_addr:
+ JMP .._1612.str_skip
+ .._1612.str_addr:
  FCB "bbbbbbbbbbbb",$0
- .._1611.str_skip:
- LDA # (.._1611.str_addr) # $100
- STA $3 ;LCD_print.source
- LDA # (.._1611.str_addr)/$100
- STA $4 ;LCD_print.source
+ .._1612.str_skip:
+ LDA # (.._1612.str_addr) # $100
+ STA $6 ;LCD_print.source
+ LDA # (.._1612.str_addr)/$100
+ STA $7 ;LCD_print.source
  JSR LCD_print
  LDA #$20
  STA screen_ptr
@@ -1006,23 +1006,23 @@ ErrorMsg:
  STA screen_ptr+$1
  LDA #$FF
  STA font_inverted
- LDA $8 ;msg
- STA $3 ;LCD_print.source
- LDA $9 ;msg
- STA $4 ;LCD_print.source
+ LDA $4 ;msg
+ STA $6 ;LCD_print.source
+ LDA $5 ;msg
+ STA $7 ;LCD_print.source
  JSR LCD_print
  LDA #$20
  STA screen_ptr
  LDA #$80
  STA screen_ptr+$1
- JMP .._1665.str_skip
- .._1665.str_addr:
+ JMP .._1666.str_skip
+ .._1666.str_addr:
  FCB "bbbbbbbbbbbb",$0
- .._1665.str_skip:
- LDA # (.._1665.str_addr) # $100
- STA $3 ;LCD_print.source
- LDA # (.._1665.str_addr)/$100
- STA $4 ;LCD_print.source
+ .._1666.str_skip:
+ LDA # (.._1666.str_addr) # $100
+ STA $6 ;LCD_print.source
+ LDA # (.._1666.str_addr)/$100
+ STA $7 ;LCD_print.source
  JSR LCD_print
  LDA #$0
  STA font_inverted
@@ -1043,25 +1043,25 @@ special_chars:
  FCB " .$m"
 ReadLine:
  LDA #$0
- STA $7 ;cursor
+ STA $3 ;cursor
  STA $A ;index
  STA screen_ptr
  LDA #$AC
  STA screen_ptr+$1
- JMP .._1716.str_skip
- .._1716.str_addr:
+ JMP .._1717.str_skip
+ .._1717.str_addr:
  FCB "a               ",$0
- .._1716.str_skip:
- LDA # (.._1716.str_addr) # $100
- STA $3 ;LCD_print.source
- LDA # (.._1716.str_addr)/$100
- STA $4 ;LCD_print.source
+ .._1717.str_skip:
+ LDA # (.._1717.str_addr) # $100
+ STA $6 ;LCD_print.source
+ LDA # (.._1717.str_addr)/$100
+ STA $7 ;LCD_print.source
  JSR LCD_print
  LDA $FFE6
- STA $8 ;cursor_timer
+ STA $4 ;cursor_timer
  .loop:
  LDA #$0
- STA $9 ;arg
+ STA $5 ;arg
  JSR ReadKey
  BNE .key_read
  JMP .no_key
@@ -1108,11 +1108,11 @@ ReadLine:
  .special_loop:
  CMP special_chars,Y
  BNE .special_next
- STA $9 ;arg
+ STA $5 ;arg
  CMP #$6D
  BNE .key_done
  LDA #$63
- STA $9 ;arg
+ STA $5 ;arg
  JMP .key_done
  .special_next:
  INY
@@ -1122,14 +1122,14 @@ ReadLine:
  BCC .not_num
  CMP #$3A
  BCS .not_num
- STA $9 ;arg
+ STA $5 ;arg
  JMP .key_done
  .not_num:
  CMP #$41
  BCC .not_upper
  CMP #$5B
  BCS .not_upper
- STA $9 ;arg
+ STA $5 ;arg
  JMP .key_done
  .not_upper:
  CMP #$61
@@ -1138,10 +1138,10 @@ ReadLine:
  BCS .not_lower
  SEC
  SBC #$20
- STA $9 ;arg
+ STA $5 ;arg
  .not_lower:
  .key_done:
- LDA $9 ;arg
+ LDA $5 ;arg
  BEQ .not_valid
  LDY $A ;index
  CPY #$40
@@ -1150,7 +1150,7 @@ ReadLine:
  INC $A ;index
  CPY #$F
  BCS .scroll_buffer
- LDA $9 ;arg
+ LDA $5 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDA screen_ptr
@@ -1172,8 +1172,8 @@ ReadLine:
  LDY $B ;str_index
  INC $B ;str_index
  LDA input_buff,Y
- STA $9 ;arg
- LDA $9 ;arg
+ STA $5 ;arg
+ LDA $5 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDA $A ;index
@@ -1191,22 +1191,22 @@ ReadLine:
  .not_valid:
  .no_key:
  LDA $FFE6
- CMP $8 ;cursor_timer
+ CMP $4 ;cursor_timer
  BEQ .cursor_done
- STA $8 ;cursor_timer
- LDA $7 ;cursor
+ STA $4 ;cursor_timer
+ LDA $3 ;cursor
  BEQ .draw_blank
  LDA #$0
- STA $7 ;cursor
+ STA $3 ;cursor
  LDA #$20
  JMP .draw
  .draw_blank:
  LDA #$FF
- STA $7 ;cursor
+ STA $3 ;cursor
  LDA #$61
  .draw:
- STA $9 ;arg
- LDA $9 ;arg
+ STA $5 ;arg
+ LDA $5 ;arg
  STA $F ;LCD_char.c_out
  JSR LCD_char
  LDA screen_ptr
@@ -1860,7 +1860,7 @@ main:
  BEQ .no_exec_error
  STA $2 ;arg
  LDA $2 ;arg
- STA $7 ;ErrorMsg.error_code
+ STA $3 ;ErrorMsg.error_code
  JSR ErrorMsg
  JMP .input_loop
  .no_exec_error:
@@ -1871,7 +1871,7 @@ main:
  CMP #$4
  BNE .input_good
  LDA #$2
- STA $7 ;ErrorMsg.error_code
+ STA $3 ;ErrorMsg.error_code
  JSR ErrorMsg
  JMP .input_loop
  .input_good:
@@ -1879,7 +1879,7 @@ main:
  CMP stack_count
  BCS .no_overflow
  LDA #$8
- STA $7 ;ErrorMsg.error_code
+ STA $3 ;ErrorMsg.error_code
  JSR ErrorMsg
  JMP .input_loop
  .no_overflow:
@@ -1888,18 +1888,19 @@ main:
  LDA #$0
  STA $1 ;dest
  LDA # (new_stack_item) # $100
- STA $E ;MemCopy.source
- LDA # (new_stack_item)/$100
  STA $F ;MemCopy.source
+ LDA # (new_stack_item)/$100
+ STA $10 ;MemCopy.source
  LDA $0 ;dest
- STA $10 ;MemCopy.dest
- LDA $1 ;dest
  STA $11 ;MemCopy.dest
+ LDA $1 ;dest
+ STA $12 ;MemCopy.dest
  LDA #$9
- STA $12 ;MemCopy.count
+ STA $A ;MemCopy.count
  JSR MemCopy
  JMP .process_loop
  RTS
+code_end:
 EEPROM set *
 	OUTRADIX 10
 ;Display memory usage in console
@@ -1909,7 +1910,7 @@ EEPROM set *
 	MESSAGE "============"
 comma_ret set "\{EEPROM-$900}"
 comma_ret set "\{substr(comma_ret,0,strlen(comma_ret)-3)},\{substr(comma_ret,strlen(comma_ret)-3,strlen(comma_ret))}"
-	MESSAGE "ROM size:	\{comma_ret} bytes (\{100*(EEPROM-$900)/$1700}%) of 5.75k bank"
+	MESSAGE "ROM size:	\{comma_ret} bytes (\{100*(EEPROM-$900)/$2000}%) of 8k ROM"
 	;AddCommas GENRAM-$200
 	;MESSAGE "RAM size:	\{comma_ret} bytes (\{100*(GENRAM-$200)/($4000-$200)}%) of 15.8k bank"
 	;Tell script that prints assembler output to stop outputting

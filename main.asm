@@ -77,14 +77,16 @@ STACK_END:
 
 ;Functions in ROM
 ;================
+	ORG $C000
+	include tests.asm
+	
 	ORG $900
+	code_begin:
 	JMP main	;static entry address for emulator
 	
 	;504 bytes 0_0
 	font_table:
 	include font_8x8.asm
-	
-	include tests.asm
 	
 	;include calc6507.asm
 	include emu6507.asm
@@ -163,5 +165,5 @@ STACK_END:
 				JMP .process_loop
 				
 	END
-	
+	code_end:
 	
