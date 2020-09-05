@@ -580,7 +580,6 @@
 			RTS
 		.float_done:
 		
-		start here: check at least one digit
 		
 		
 		;Adjust exponent

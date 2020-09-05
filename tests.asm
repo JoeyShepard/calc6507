@@ -115,27 +115,14 @@
 				CALL DebugText,output
 				CALL DebugText,"\\n   Found:    "
 				LDY #0
-				STY calculated_index
-				LDY #2
-				STY output_index
 				.fail_loop:
-					LDY calculated_index
 					LDA new_stack_item,Y
 					STA DEBUG_HEX
 					LDA #' '
 					STA DEBUG
 					INY
-					STY calculated_index
-					LDY output_index
-					LDA (output),Y
-					BEQ .fail_done
-					INY
-					INY
-					INY
-					STY output_index
-					
-					JMP .fail_loop
-				.fail_done:
+					CPY #9
+					BNE .fail_loop
 				halt
 				LDA new_stack_item
 				JMP .failed
