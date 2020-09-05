@@ -286,17 +286,19 @@
 	
 	FUNC CheckData
 		VARS
-			BYTE input_mode		;input mode for float - pre decimal, post decimal, or exponent
-			BYTE y_buff			;temporary storage for y
-			BYTE index			;generic index
-			BYTE which_digit	;whether first or second digit of BCD byte
-			BYTE negative		;whether float is negative number
-			BYTE exp_negative	;whether exp is negative number
-			BYTE exp_count		;offset from decimal place in float
-			BYTE exp_found		;whether e encountered yet in float
-			BYTE dec_found		;whether decimal point encountered yet in float
-			BYTE nonzero_found	;whether non-zero encountered yet in float
-			BYTE digit_count	;count of digits during float input
+			BYTE input_mode			;input mode for float - pre decimal, post decimal, or exponent
+			BYTE y_buff				;temporary storage for y
+			BYTE index				;generic index
+			BYTE which_digit		;whether first or second digit of BCD byte
+			BYTE negative			;whether float is negative number
+			BYTE exp_negative		;whether exp is negative number
+			BYTE exp_count			;offset from decimal place in float
+			BYTE exp_found			;whether e encountered yet in float
+			BYTE dec_found			;whether decimal point encountered yet in float
+			BYTE nonzero_found		;whether non-zero encountered yet in float
+			BYTE digit_count		;count of digits during float input
+			BYTE exp_digit_count	;count of digits during float input
+			BYTE zero_found			;whether leading zero found
 		END
 		LDA #OBJ_ERROR
 		STA new_stack_item
@@ -425,9 +427,11 @@
 		STA exp_negative
 		STA exp_count
 		STA digit_count
+		STA exp_digit_count
 		STA nonzero_found
 		STA dec_found
 		STA exp_found
+		STA zero_found
 		
 		;first character is negative or digit?
 		LDA new_word_buff
@@ -456,6 +460,8 @@
 				LDA nonzero_found
 				BNE .digit_good
 					;no nonzero yet
+					LDA #$FF
+					STA zero_found
 					PLA
 					PHA
 					BEQ .digit_zero
@@ -501,7 +507,7 @@
 						BEQ .float_done
 						JMP .loop_float
 					.exp_digit:
-						LDA digit_count
+						LDA exp_digit_count
 						CMP #3
 						BNE .exp_digit_ok
 							;max exp digits exceeded!
@@ -521,7 +527,7 @@
 						ORA new_stack_item+7
 						STA new_stack_item+7
 						INC index
-						INC digit_count
+						INC exp_digit_count
 						JMP .float_next
 			.float_not_digit:
 			
@@ -553,7 +559,6 @@
 				LDA #0
 				STA index
 				STA which_digit
-				STA digit_count
 				STA nonzero_found
 				LDA #$FF
 				STA exp_found
@@ -580,7 +585,21 @@
 			RTS
 		.float_done:
 		
+		;CALL halt_test, #37
 		
+		;Error if no digits, even if exponent given ie e500
+		LDA digit_count
+		BNE .exp_count_good
+			LDA zero_found
+			BNE .zero_ret
+				RTS
+			.zero_ret:
+				;if input is zero, clear exponent
+				LDA #0
+				STA new_stack_item+7
+				STA new_stack_item+8
+				JMP .float_success
+		.exp_count_good:
 		
 		;Adjust exponent
 		LDA exp_negative
@@ -596,6 +615,8 @@
 		BMI .exp_count_neg
 			DEY				;count of digits, so -1 since 5 is e0 not e1
 			BEQ .exp_count_done
+			CPY #$FF
+			BEQ .exp_count_neg
 			.exp_pos_loop:
 				CLC
 				ADC #1
@@ -661,6 +682,7 @@
 		.positive:
 		
 		;success - mark object type as float and return
+		.float_success:
 		LDA #OBJ_FLOAT
 		STA new_stack_item
 		

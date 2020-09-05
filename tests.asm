@@ -246,52 +246,70 @@
 		CALL InputTest, ".e", "04"
 		
 		;35 - 1.5. = Error
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "1.5.", "04"
 		
 		;36 - .5 = 5e-1
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, ".5", "01 00 00 00 00 00 50 01 40"
 		
 		;37 - 0 = 0
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "0", "01 00 00 00 00 00 00 00 00"
 		
 		;38 - 00 = 0
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "00", "01 00 00 00 00 00 00 00 00"
 		
 		;39 - 00.0 = 0
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "00.0", "01 00 00 00 00 00 00 00 00"
 		
 		;40 - 1e2e = Error!
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "1e2e", "04"
 		
 		;41 - 1e2e3 = Error!
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "1e2e3", "04"
 		
 		;42 - .5. = Error!
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, ".5.", "04"
 		
 		;43 - 1234567890123 = Error! too long
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "1234567890123", "04"
 		
 		;44 - 5e9999 = Error! exp too long
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "5e9999", "04"
 		
-		;45 - 0.000123456789012 = ???
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		;45 - 0.000123456789012 = 1.23456789012e-4
+		CALL InputTest, "0.000123456789012", "01 12 90 78 56 34 12 04 40"
 		
 		;46 - -5- = Error!
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "-5-", "04"
 		
 		;47 - 5-e = Error!
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		CALL InputTest, "-5-e", "04"
 		
-		;48 - 5e- = 5e0
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
+		;48 - 5e- = 5
+		CALL InputTest, "5e", "01 00 00 00 00 00 50 00 00"
+		
+		;49 - 0e500 = 0e0
+		CALL InputTest, "0e500", "01 00 00 00 00 00 00 00 00"
+		
+		;50 - 0e-500 = 0e0
+		CALL InputTest, "0e-500", "01 00 00 00 00 00 00 00 00"
+		
+		;51 - 0.00000123456789012 = 1.23456789012e-6 (max size)
+		CALL InputTest, "0.00000123456789012", "01 12 90 78 56 34 12 06 40"
+		
+		;51 - 0.000000123456789012 = Error! too large
+		CALL InputTest, "0.000000123456789012", "04"
+		
+		;52 - 5e = 5
+		CALL InputTest, "5e", "01 00 00 00 00 00 50 00 00"
+		
 		
 		CALL DebugText, "\\n\\gAll tests passed"
-		CALL DebugText, "\\n\\lSize of code: "
-		LDX #(code_end-code_begin)/256
-		LDA #(code_end-code_begin) # 256
-		STA DEBUG_DEC16
-		CALL DebugText, " bytes"
+		
+		;Not necessary with tests moved outside of 8k range of 6507
+		;CALL DebugText, "\\n\\lSize of code: "
+		;LDX #(code_end-code_begin)/256
+		;LDA #(code_end-code_begin) # 256
+		;STA DEBUG_DEC16
+		;CALL DebugText, " bytes"
 	END 
 	
