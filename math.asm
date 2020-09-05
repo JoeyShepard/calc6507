@@ -21,4 +21,8 @@
 		PLP
 	END
 	
+	FUNC BCD_Add
+		
+	END
+	
 	

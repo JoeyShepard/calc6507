@@ -305,11 +305,5 @@
 		
 		CALL DebugText, "\\n\\gAll tests passed"
 		
-		;Not necessary with tests moved outside of 8k range of 6507
-		;CALL DebugText, "\\n\\lSize of code: "
-		;LDX #(code_end-code_begin)/256
-		;LDA #(code_end-code_begin) # 256
-		;STA DEBUG_DEC16
-		;CALL DebugText, " bytes"
 	END 
 	

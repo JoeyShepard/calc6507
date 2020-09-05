@@ -49,21 +49,32 @@ ERROR_STACK_OVERFLOW =		6
 ERROR_STACK_UNDERFLOW =		8
 ;Input not recognized
 ERROR_INPUT =				10
+ERROR_WRONG_TYPE =			12
 
 
 ;Forth
 ;=====
 	;Word flags
-	MIN_1 =				1
-	MIN_2 =				2
-	MIN_3 =				3
-	ADD_1 =				4
-	FLOAT1 =			8
-	STRING1 =			16
-	HEX1 =				24
-	FLOAT2 =			32
-	STRING2 =			64
-	HEX2 =				96
+	MIN1 =				1
+	MIN2 =				2
+	MIN3 =				3
+	ADD1 =				4
+	;FLOAT1 =			8
+	;STRING1 =			16
+	;HEX1 =				24
+	;FLOAT2 =			32
+	;STRING2 =			64
+	;HEX2 =				96
+	FLOATS =			8
+	STRINGS =			16
+	HEX =				24
+	SAME =				32
 	COMPILE_ONLY =		128
+	
+	;Flag masks
+	FLAG_MIN =			3
+	FLAG_TYPES =		$38
+	
+	
 	
 	STACK_SIZE =		8

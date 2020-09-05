@@ -95,6 +95,7 @@ STACK_END:
 	include math.asm
 	include output.asm
 	include forth.asm
+	include words.asm
 	
 ;Main function
 ;=============
