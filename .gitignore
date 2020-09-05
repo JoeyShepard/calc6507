@@ -1,0 +1,17 @@
+# html output from optimizer
+/output/
+
+# hex files for loading into emulator or ROM
+*.hex
+
+# various output and intermediate files
+asm.txt
+hex.txt
+main.err
+main.i
+output.txt
+processed.asm
+processed.i
+processed.lst
+processed.map
+processed.p
