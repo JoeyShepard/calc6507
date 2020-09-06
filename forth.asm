@@ -7,10 +7,10 @@
 		STA new_word_len
 	END
 	
-	SPECIAL_CHARS_LEN = 7
+	SPECIAL_CHARS_LEN = 8
 	special_chars:
-	FCB CHAR_EXP, CHAR_QUOTE				;2
-	FCB " .$m+"								;5
+	FCB CHAR_EXP, CHAR_QUOTE			;2
+	FCB " .$m+-"						;6
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -846,8 +846,5 @@
 		TAX
 		INC stack_count
 	END
-	
-	
-	
 	
 		

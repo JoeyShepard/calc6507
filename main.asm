@@ -56,6 +56,7 @@ LOCALS_END set		$1F
 	;Output
 	WORD screen_ptr
 	
+	TODO: change size to 8
 	R0: DFS OBJ_SIZE
 	R1: DFS OBJ_SIZE
 	R2: DFS OBJ_SIZE

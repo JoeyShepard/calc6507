@@ -1,1 +1,1 @@
-python todo.py main.asm
+@python todo.py main.asm

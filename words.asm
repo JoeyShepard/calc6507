@@ -152,12 +152,14 @@
 			
 	WORD_ADD:
 		FCB 1,"+"			;Name
-		FDB 0				;Next word
+		FDB WORD_SUB		;Next word
 		FCB 16				;ID
 		CODE_ADD:
-			FCB MIN2|SAME
+			FCB MIN2|SAME	;Flags
 			
 			LDA 0,X
+			
+			TODO: add flag for checking these types (room for 3 more flags)
 			
 			;Adding floats
 			CMP #OBJ_FLOAT
@@ -204,11 +206,150 @@
 				JMP .mixed_add
 			.no_swap:
 			
-			;Both are smart pointers - can't add
+			;Both are smart hex - can't add
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
 			
+	WORD_SUB:
+		FCB 1,"-"			;Name
+		FDB WORD_MULT		;Next word
+		FCB 18				;ID
+		CODE_SUB:
+			FCB MIN2|SAME	;Flags
+			
+			LDA 0,X
+			
+			;Subtracting floats
+			CMP #OBJ_FLOAT
+			BNE sub_not_float
+				SUB_FLOAT:
+					TODO: subtracting floats
+					RTS
+			sub_not_float:
+			
+			;Subtracting hex objects
+			LDA HEX_TYPE,X
+			ASL
+			ORA HEX_TYPE+OBJ_SIZE,X
+			BNE .not_raw_hex
+				;Both raw hex
+				SEC
+				LDA OBJ_SIZE+HEX_SUM,X
+				SBC HEX_SUM,X
+				STA OBJ_SIZE+HEX_SUM,X
+				LDA OBJ_SIZE+HEX_SUM+1,X
+				SBC HEX_SUM+1,X
+				STA OBJ_SIZE+HEX_SUM+1,X
+				JMP CODE_DROP+1
+			.not_raw_hex:
+			
+			;Either strings or at least one smart hex
+			LDA #ERROR_WRONG_TYPE
+			STA ret_val
+			RTS
+	
+	WORD_MULT:
+		FCB 1,"*"			;Name
+		FDB WORD_DIV		;Next word
+		FCB 20				;ID
+		CODE_MULT:
+			FCB MIN2|SAME	;Flags
+	
+			LDA 0,X
+			
+			;Multiplying floats
+			CMP #OBJ_FLOAT
+			BNE mult_not_float
+				MULT_FLOAT:
+					TODO: multiplying floats
+					RTS
+			mult_not_float:
+			
+			;Multiplying hex objects
+			LDA HEX_TYPE,X
+			ASL
+			ORA HEX_TYPE+OBJ_SIZE,X
+			BNE .not_raw_hex
+				;Both raw hex
+				TODO: multiplying hex objects
+				
+				LDA HEX_SUM,X
+				STA R0
+				LDA HEX_SUM+1,X
+				STA R0+1
+				
+				;BCDtoDec
+				
+				
+				;LDA OBJ_SIZE+HEX_SUM,X
+				;SBC HEX_SUM,X
+				;STA OBJ_SIZE+HEX_SUM,X
+				;LDA OBJ_SIZE+HEX_SUM+1,X
+				;SBC HEX_SUM+1,X
+				;STA OBJ_SIZE+HEX_SUM+1,X
+				;JMP CODE_DROP+1
+			.not_raw_hex:
+			
+			;Either strings or at least one smart hex
+			LDA #ERROR_WRONG_TYPE
+			STA ret_val
+			RTS
+			
+			.
+	
+	WORD_DIV:
+		FCB 1,"/"			;Name
+		FDB WORD_TICK		;Next word
+		FCB 22				;ID
+		CODE_DIV:
+			FCB MIN2|SAME	;Flags
+	
+			LDA 0,X
+			
+			;Dividing floats
+			CMP #OBJ_FLOAT
+			BNE div_not_float
+				DIV_FLOAT:
+					TODO: dividing floats
+					RTS
+			div_not_float:
+			
+			;Dividing hex objects
+			LDA HEX_TYPE,X
+			ASL
+			ORA HEX_TYPE+OBJ_SIZE,X
+			BNE .not_raw_hex
+				;Both raw hex
+				TODO: dividing hex objects
+				;SEC
+				;LDA OBJ_SIZE+HEX_SUM,X
+				;SBC HEX_SUM,X
+				;STA OBJ_SIZE+HEX_SUM,X
+				;LDA OBJ_SIZE+HEX_SUM+1,X
+				;SBC HEX_SUM+1,X
+				;STA OBJ_SIZE+HEX_SUM+1,X
+				;JMP CODE_DROP+1
+			.not_raw_hex:
+			
+			;Either strings or at least one smart hex
+			LDA #ERROR_WRONG_TYPE
+			STA ret_val
+			RTS
+	
+	
+	
+	WORD_TICK:
+		FCB 1,"'"			;Name
+		FDB 0				;Next word
+		FCB 24				;ID
+		CODE_TICK:
+			FCB ADD1		;Flags
+			
+			RTS
+	
+	
+	
 	
 	JUMP_TABLE:
 		FDB 0				;0 - reserved
@@ -220,4 +361,8 @@
 		FDB CODE_MIN_ROT	;12
 		FDB CODE_CLEAR		;14
 		FDB CODE_ADD		;16
+		FDB CODE_SUB		;18
+		FDB CODE_TICK		;20
+		
+		
 		

@@ -25,4 +25,26 @@
 		
 	END
 	
+	;Number in A
+	FUNC BCDtoDec
+		VARS
+			BYTE total
+		END
+		
+		PHA
+		AND #$F
+		STA total
+		PLA
+		AND #$F0
+		LSR
+		PHA
+		CLC
+		ADC total
+		STA total
+		PLA
+		LSR
+		LSR
+		ADC total
+	END
+	
 	
