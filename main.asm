@@ -138,7 +138,8 @@ STACK_END:
 					.no_exec_error:
 					JMP .process_loop
 				.not_found:
-		
+				
+				;Word not found, so check if data
 				CALL CheckData
 				LDA new_stack_item
 				CMP #OBJ_ERROR

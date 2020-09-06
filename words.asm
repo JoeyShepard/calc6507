@@ -155,7 +155,25 @@
 		FDB 0				;Next word
 		FCB 16				;ID
 		CODE_ADD:
-			FCB MIN2|FLOATS
+			FCB MIN2|SAME
+			
+			LDA 0,X
+			CMP #OBJ_FLOAT
+			BNE add_not_float
+				ADD_FLOAT:
+				
+					RTS
+			add_not_float:
+			
+			CMP #OBJ_STR
+			BNE add_not_string
+				ADD_STRING:
+					
+					RTS
+			add_not_string:
+			
+			;CMP #OBJ_HEX
+			RTS
 			
 			RTS
 	

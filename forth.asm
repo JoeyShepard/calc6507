@@ -412,6 +412,8 @@
 				.hex_done:
 				LDA #OBJ_HEX
 				STA new_stack_item
+				LDA #0
+				STA new_stack_item+HEX_SMART
 				RTS
 			.hex_error:
 			RTS
@@ -796,14 +798,18 @@
 				
 				CMP #SAME
 				BNE .not_same
-				
+					LDA 0,x
+					STA temp
+					;Adjusting X here would eliminate 1 redundant check below
+					JMP .type_check
 				.not_same:
+					;Rotate type info into low bits so matches object type constants
+					LSR
+					LSR
+					LSR
+					STA temp
+				.type_check:
 				
-				;Rotate type info into low bits so matches object type constants
-				LSR
-				LSR
-				LSR
-				STA temp
 				TXA
 				PHA
 				.type_loop:
@@ -842,5 +848,8 @@
 		TAX
 		INC stack_count
 	END
+	
+	
+	
 	
 		

@@ -38,6 +38,13 @@ KEY_ESCAPE =			27
 SIGN_BIT =				$80
 E_SIGN_BIT =			$40
 
+;Hex fields
+HEX_SUM = 				1
+HEX_BASE =				3
+HEX_OFFSET =			5
+HEX_SMART =				7
+
+
 ;Error codes
 ERROR_NONE =				0
 ERROR_WORD_TOO_LONG =		2
