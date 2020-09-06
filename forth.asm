@@ -412,8 +412,6 @@
 				.hex_done:
 				LDA #OBJ_HEX
 				STA new_stack_item
-				LDA #0
-				STA new_stack_item+HEX_SMART
 				RTS
 			.hex_error:
 			RTS

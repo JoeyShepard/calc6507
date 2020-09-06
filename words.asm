@@ -158,25 +158,57 @@
 			FCB MIN2|SAME
 			
 			LDA 0,X
+			
+			;Adding floats
 			CMP #OBJ_FLOAT
 			BNE add_not_float
 				ADD_FLOAT:
-				
+					TODO: adding floats
 					RTS
 			add_not_float:
 			
+			;Adding strings
 			CMP #OBJ_STR
 			BNE add_not_string
 				ADD_STRING:
-					
+					TODO: adding strings
 					RTS
 			add_not_string:
 			
-			;CMP #OBJ_HEX
+			;Adding hex objects
+			LDA HEX_TYPE,X
+			ASL
+			ORA HEX_TYPE+OBJ_SIZE,X
+			BNE .not_raw_hex
+				;Both raw hex
+				CLC
+				LDA HEX_SUM,X
+				ADC OBJ_SIZE+HEX_SUM,X
+				STA OBJ_SIZE+HEX_SUM,X
+				LDA HEX_SUM+1,X
+				ADC OBJ_SIZE+HEX_SUM+1,X
+				STA OBJ_SIZE+HEX_SUM+1,X
+				JMP CODE_DROP+1
+			.not_raw_hex:
+			CMP #1
+			BNE .not_mixed1
+				;Top most is raw so ready to add
+				.mixed_add:
+					TODO: adding mixed hex types
+				JMP CODE_DROP+1
+			.not_mixed1:
+			CMP #2
+			BNE .no_swap
+				;Top most is smart hex so need to swap
+				JSR CODE_SWAP+1
+				JMP .mixed_add
+			.no_swap:
+			
+			;Both are smart pointers - can't add
+			LDA #ERROR_WRONG_TYPE
+			STA ret_val
 			RTS
 			
-			RTS
-	
 	
 	JUMP_TABLE:
 		FDB 0				;0 - reserved

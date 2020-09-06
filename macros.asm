@@ -32,3 +32,7 @@ true set $FF
 		BRK
 		BRK
 	%endmacro
+	
+	%macro TODO 1+
+		
+	%endmacro

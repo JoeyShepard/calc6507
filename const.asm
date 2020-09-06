@@ -42,8 +42,10 @@ E_SIGN_BIT =			$40
 HEX_SUM = 				1
 HEX_BASE =				3
 HEX_OFFSET =			5
-HEX_SMART =				7
+HEX_TYPE =				7
 
+;Hex constants
+HEX_SMART =				1
 
 ;Error codes
 ERROR_NONE =				0
