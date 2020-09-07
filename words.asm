@@ -272,23 +272,66 @@
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex
 				;Both raw hex
-				TODO: multiplying hex objects
 				
+				TODO: smaller in loop? calculated high bytes wasted?
+				
+				LDA #0
+				STA R0+2	;Low byte of sum
+				STA R0+3	;High byte of sum
+				
+				;bb*dd of aabb*ccdd
 				LDA HEX_SUM,X
 				STA R0
+				LDA OBJ_SIZE+HEX_SUM,X
+				JSR .mult_sub
+				LDA R0+2	;Low byte of sum
+				STA R0+5	;Save
+				LDA R0+3	;High byte of sum
+				STA R0+2	;To low byte of sum
+				LDA #0
+				STA R0+3	;High byte of sum
+				
+				;aa*dd of aabb*ccdd
+				LDA HEX_SUM,X
+				STA R0
+				LDA OBJ_SIZE+HEX_SUM+1,X
+				JSR .mult_sub
+				
+				;cc*bb of aabb*ccdd
 				LDA HEX_SUM+1,X
-				STA R0+1
+				STA R0
+				LDA OBJ_SIZE+HEX_SUM,X
+				JSR .mult_sub
 				
-				;BCDtoDec
+				;Write to destination
+				LDA R0+5
+				STA OBJ_SIZE+HEX_SUM,X
+				LDA R0+2
+				STA OBJ_SIZE+HEX_SUM+1,X
+				JMP CODE_DROP+1
 				
+				.mult_sub:
+					STA R0+4	;Halved value
+					LDA #0
+					STA R0+1	;High byte of doubled value
+					LDY #8
+					.loop:
+						LSR R0+4
+						BCC .loop_next
+							CLC
+							LDA R0+2	;Low byte of sum
+							ADC R0		;Low byte of doubled value
+							STA R0+2
+							LDA R0+3	;High byte of sum
+							ADC R0+1	;High byte of doubled value
+							STA R0+3
+						.loop_next:
+						ASL R0
+						ROL R0+1
+						DEY
+						BNE .loop
+					RTS
 				
-				;LDA OBJ_SIZE+HEX_SUM,X
-				;SBC HEX_SUM,X
-				;STA OBJ_SIZE+HEX_SUM,X
-				;LDA OBJ_SIZE+HEX_SUM+1,X
-				;SBC HEX_SUM+1,X
-				;STA OBJ_SIZE+HEX_SUM+1,X
-				;JMP CODE_DROP+1
 			.not_raw_hex:
 			
 			;Either strings or at least one smart hex
@@ -296,7 +339,6 @@
 			STA ret_val
 			RTS
 			
-			.
 	
 	WORD_DIV:
 		FCB 1,"/"			;Name
@@ -321,15 +363,62 @@
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex
 				;Both raw hex
-				TODO: dividing hex objects
-				;SEC
-				;LDA OBJ_SIZE+HEX_SUM,X
-				;SBC HEX_SUM,X
-				;STA OBJ_SIZE+HEX_SUM,X
-				;LDA OBJ_SIZE+HEX_SUM+1,X
-				;SBC HEX_SUM+1,X
-				;STA OBJ_SIZE+HEX_SUM+1,X
-				;JMP CODE_DROP+1
+				
+				LDA HEX_SUM,X
+				STA R0
+				LDA HEX_SUM+1,X
+				STA R0+1
+				
+				ORA R0
+				BNE .div_zero_check
+					LDA #ERROR_DIV_ZERO
+					STA ret_val
+					RTS
+				.div_zero_check:
+				
+				LDA OBJ_SIZE+HEX_SUM,X
+				STA R0+2
+				LDA OBJ_SIZE+HEX_SUM+1,X
+				STA R0+3
+				
+				LDA #0
+				STA R0+4
+				STA R0+5
+				
+				LDY #16
+				.loop:
+					ASL R0+2
+					ROL R0+3
+					ROL R0+4
+					ROL R0+5
+					
+					SEC
+					LDA R0+4
+					SBC R0
+					PHA
+					LDA R0+5
+					SBC R0+1
+					PHA
+					BCC .div_underflow
+						LDA R0+2
+						ORA #1
+						STA R0+2
+						PLA
+						STA R0+5
+						PLA
+						STA R0+4
+						JMP .loop_next
+					.div_underflow:
+					PLA
+					PLA
+					.loop_next:
+					DEY
+					BNE .loop
+				LDA R0+2
+				STA OBJ_SIZE+HEX_SUM,X
+				LDA R0+3
+				STA OBJ_SIZE+HEX_SUM+1,X
+				JMP CODE_DROP+1
 			.not_raw_hex:
 			
 			;Either strings or at least one smart hex
@@ -362,7 +451,8 @@
 		FDB CODE_CLEAR		;14
 		FDB CODE_ADD		;16
 		FDB CODE_SUB		;18
-		FDB CODE_TICK		;20
-		
+		FDB CODE_MULT		;20
+		FDB CODE_DIV		;22
+		FDB CODE_TICK		;24
 		
 		

@@ -6,7 +6,7 @@
 	
 	;Layout
 	INPUT_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*6+12
-	ERROR_X =				2*8*2
+	ERROR_X =				2*8*1
 	ERROR_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
 	
 	

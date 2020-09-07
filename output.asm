@@ -287,17 +287,19 @@
 	
 	
 	ERROR_MSG_INPUT:
-	FCB "INPUT ERROR ",0		;2
+	FCB " INPUT ERROR  ",0		;2
 	ERROR_MSG_WORD_TOO_LONG:
-	FCB " INPUT SIZE ",0		;4
+	FCB "  INPUT SIZE  ",0		;4
 	ERROR_MSG_STRING:
-	FCB "STRING ERROR",0		;6
+	FCB " STRING ERROR ",0		;6
 	ERROR_MSG_STACK_OVERFLOW:
-	FCB "STACK OVERF ",0		;8
+	FCB "STACK OVERFLOW",0		;8
 	ERROR_MSG_STACK_UNDERFLOW:
-	FCB "STACK UNDERF",0		;10
+	FCB "STACK UNDERFL ",0		;10
 	ERROR_MSG_WRONG_TYPE:
-	FCB " WRONG TYPE ",0		;12
+	FCB "  WRONG TYPE  ",0		;12
+	ERROR_MSG_DIV_ZERO:
+	FCB " ZERO DIVIDE  ",0		;14
 	
 	ERROR_TABLE:
 		FDB	ERROR_MSG_INPUT
@@ -306,8 +308,9 @@
 		FDB ERROR_MSG_STACK_OVERFLOW
 		FDB ERROR_MSG_STACK_UNDERFLOW
 		FDB ERROR_MSG_WRONG_TYPE
+		FDB ERROR_MSG_DIV_ZERO
 		
-	
+		
 	FUNC ErrorMsg
 		ARGS
 			BYTE error_code
@@ -324,7 +327,7 @@
 		STA screen_ptr
 		LDA #ERROR_Y
 		STA screen_ptr+1
-		CALL LCD_print, "bbbbbbbbbbbb"
+		CALL LCD_print, "bbbbbbbbbbbbbb"
 		LDA #ERROR_X
 		STA screen_ptr
 		LDA #ERROR_Y+CHAR_HEIGHT
@@ -335,7 +338,7 @@
 		STA screen_ptr
 		LDA #ERROR_Y+CHAR_HEIGHT*2
 		STA screen_ptr+1
-		CALL LCD_print, "bbbbbbbbbbbb"
+		CALL LCD_print, "bbbbbbbbbbbbbb"
 		MOV.B #0,font_inverted
 		
 		.loop:

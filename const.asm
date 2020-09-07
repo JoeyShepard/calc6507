@@ -59,6 +59,7 @@ ERROR_STACK_UNDERFLOW =		8
 ;Input not recognized
 ERROR_INPUT =				10
 ERROR_WRONG_TYPE =			12
+ERROR_DIV_ZERO =			14
 
 
 ;Forth
@@ -83,7 +84,5 @@ ERROR_WRONG_TYPE =			12
 	;Flag masks
 	FLAG_MIN =			3
 	FLAG_TYPES =		$38
-	
-	
 	
 	STACK_SIZE =		8

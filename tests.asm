@@ -302,6 +302,8 @@
 		;52 - 5e = 5
 		CALL InputTest, "5e", "01 00 00 00 00 00 50 00 00"
 		
+		TODO: tests for hex arithmetic
+		
 		
 		CALL DebugText, "\\n\\gAll tests passed"
 		
