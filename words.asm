@@ -7,6 +7,7 @@
 		FCB 3, "DUP" 		;Name
 		FDB	WORD_SWAP		;Next word
 		FCB 2				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_DUP:
 			FCB MIN1|ADD1	;Flags
 			
@@ -27,6 +28,7 @@
 		FCB 4, "SWAP" 		;Name
 		FDB	WORD_DROP		;Next word
 		FCB 4				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_SWAP:
 			FCB MIN2		;Flags
 			
@@ -51,6 +53,7 @@
 		FCB 4, "DROP" 		;Name
 		FDB	WORD_OVER		;Next word
 		FCB 6				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_DROP:
 			FCB MIN1		;Flags
 			
@@ -65,6 +68,7 @@
 		FCB 4, "OVER" 		;Name
 		FDB	WORD_ROT		;Next word
 		FCB 8				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_OVER:
 			FCB MIN2|ADD1	;Flags
 			
@@ -85,6 +89,7 @@
 		FCB 3, "ROT" 		;Name
 		FDB	WORD_MIN_ROT	;Next word
 		FCB 10				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_ROT:
 			FCB MIN3		;Flags
 			
@@ -114,6 +119,7 @@
 		FCB 4, "-ROT" 		;Name
 		FDB	WORD_CLEAR		;Next word
 		FCB 12				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_MIN_ROT:
 			FCB MIN3		;Flags
 			
@@ -143,6 +149,7 @@
 		FCB 5,"CLEAR"		;Name
 		FDB WORD_ADD		;Next word
 		FCB 14				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_CLEAR:
 			FCB 0			;Flags
 			
@@ -154,6 +161,7 @@
 		FCB 1,"+"			;Name
 		FDB WORD_SUB		;Next word
 		FCB 16				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_ADD:
 			FCB MIN2|SAME	;Flags
 			
@@ -215,6 +223,7 @@
 		FCB 1,"-"			;Name
 		FDB WORD_MULT		;Next word
 		FCB 18				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_SUB:
 			FCB MIN2|SAME	;Flags
 			
@@ -253,6 +262,7 @@
 		FCB 1,"*"			;Name
 		FDB WORD_DIV		;Next word
 		FCB 20				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_MULT:
 			FCB MIN2|SAME	;Flags
 	
@@ -344,6 +354,7 @@
 		FCB 1,"/"			;Name
 		FDB WORD_TICK		;Next word
 		FCB 22				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_DIV:
 			FCB MIN2|SAME	;Flags
 	
@@ -432,8 +443,11 @@
 		FCB 1,"'"			;Name
 		FDB 0				;Next word
 		FCB 24				;ID
+		FCB OBJ_PRIMITIVE	;Type
 		CODE_TICK:
 			FCB ADD1		;Flags
+			
+			
 			
 			RTS
 	

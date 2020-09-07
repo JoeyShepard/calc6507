@@ -21,6 +21,9 @@ OBJ_FLOAT = 			1
 OBJ_STR = 				2
 OBJ_HEX = 				3
 OBJ_ERROR =				4
+OBJ_PRIMITIVE =			5
+OBJ_WORD =				6
+OBJ_ARRAY =				7
 
 OBJ_SIZE =				9
 
@@ -86,3 +89,4 @@ ERROR_DIV_ZERO =			14
 	FLAG_TYPES =		$38
 	
 	STACK_SIZE =		8
+	SYS_STACK_SIZE =	3

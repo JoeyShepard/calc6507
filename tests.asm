@@ -304,8 +304,9 @@
 		
 		TODO: tests for hex arithmetic
 		
-		
 		CALL DebugText, "\\n\\gAll tests passed"
 		
+		;Reset stack pointer
+		LDX #0
 	END 
 	

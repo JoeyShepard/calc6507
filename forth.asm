@@ -239,15 +239,15 @@
 	END
 	
 	FUNC FindWord
-		MOV.W #FORTH_WORDS,ret_val
+		MOV.W #FORTH_WORDS,ret_address
 		.loop:
 			LDY #0
-			LDA (ret_val),Y
+			LDA (ret_address),Y
 			CMP new_word_len
 			BNE .loop_next
 				INY
 				.str_loop:
-					LDA (ret_val),Y
+					LDA (ret_address),Y
 					CMP new_word_buff-1,Y	;offset by 1 since string starts one byte in
 					BNE .no_match
 						CPY new_word_len
@@ -257,30 +257,33 @@
 					.no_match:
 			.loop_next:
 			LDY #0
-			LDA (ret_val),Y
+			LDA (ret_address),Y
 			TAY
 			INY
-			LDA (ret_val),Y
+			LDA (ret_address),Y
 			PHA
 			INY 
-			LDA (ret_val),Y
-			STA ret_val+1
+			LDA (ret_address),Y
+			STA ret_address+1
 			PLA
-			STA ret_val			
-			ORA ret_val+1
+			STA ret_address			
+			ORA ret_address+1
 			BNE .loop
 			;Done searching - zero ret_val
 			STA ret_val
 			RTS
 		.word_found:
 		LDY #0
-		LDA (ret_val),Y
+		LDA (ret_address),Y
 		TAY
 		INY
 		INY
 		INY		;point past header
-		LDA (ret_val),Y
+		LDA (ret_address),Y
 		STA ret_val
+		
+		
+		
 	END
 	
 	FUNC CheckData
@@ -836,8 +839,7 @@
 		PHA
 		LDA address
 		PHA
-		RTS 			;calls calculated jump
-	END
+	END					;calls calculated jump!
 	
 	FUNC StackAddItem
 		TXA

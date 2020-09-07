@@ -38,7 +38,8 @@
 			WORD buff
 		END
 		
-		CALL MemCopy,source,#R0,#9
+		INC.W source
+		CALL MemCopy,source,#R0,#8
 		
 		LDA #' '
 		STA sign
@@ -52,14 +53,14 @@
 		
 		CALL LCD_char, sign
 				
-		LDY #6
+		LDY #5
 		LDA R0,Y
 		STA arg
 		CALL DigitHigh, arg
 		
 		CALL LCD_char, #'.'
 		CALL DigitLow, arg
-		LDA #5
+		LDA #4
 		STA index
 		.loop:
 			LDY index
@@ -69,7 +70,7 @@
 			CALL DigitLow, arg
 			DEC index
 			LDA index
-			CMP #2
+			CMP #1
 			BNE .loop
 		LDA #'+'
 		STA sign
@@ -81,11 +82,11 @@
 			STA sign
 		.positive_e:
 		CALL LCD_char,sign
-		LDY #8
+		LDY #7
 		LDA R0,Y
 		STA arg
 		CALL DigitLow, arg
-		LDY #7
+		LDY #6
 		LDA R0,Y
 		STA arg
 		CALL DigitHigh, arg
@@ -310,14 +311,15 @@
 		FDB ERROR_MSG_WRONG_TYPE
 		FDB ERROR_MSG_DIV_ZERO
 		
-		
+	;error code in A
 	FUNC ErrorMsg
 		ARGS
-			BYTE error_code
+			;BYTE error_code
 			WORD msg
 		END
 		
-		LDY error_code
+		;LDY error_code
+		TAY
 		LDA ERROR_TABLE-2,Y
 		STA msg
 		LDA ERROR_TABLE-1,Y

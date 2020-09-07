@@ -53,18 +53,22 @@ LOCALS_END set		$1F
 	BYTE dummy
 	WORD ret_val
 	
+	;Temp address for variables
+	WORD ret_address
+	
 	;Output
 	WORD screen_ptr
 	
-	TODO: change size to 8
-	R0: DFS OBJ_SIZE
-	R1: DFS OBJ_SIZE
-	R2: DFS OBJ_SIZE
-	R3: DFS OBJ_SIZE
-	R4: DFS OBJ_SIZE
-	R5: DFS OBJ_SIZE
-	R6: DFS OBJ_SIZE
-	R7: DFS OBJ_SIZE
+	;Don't need header byte
+	R0: DFS OBJ_SIZE-1
+	R1: DFS OBJ_SIZE-1
+	R2: DFS OBJ_SIZE-1
+	R3: DFS OBJ_SIZE-1
+	R4: DFS OBJ_SIZE-1
+	R5: DFS OBJ_SIZE-1
+	R6: DFS OBJ_SIZE-1
+	R7: DFS OBJ_SIZE-1
+	Regs_end:
 	
 STACK_END:
 	
@@ -80,6 +84,7 @@ STACK_END:
 ;================
 	ORG $C000
 	include tests.asm
+	include stats.asm
 	
 	ORG $900
 	code_begin:
@@ -114,8 +119,8 @@ STACK_END:
 		TXS
 		
 		CALL setup
-		
 		CALL tests
+		CALL stats
 		
 		.input_loop:
 			CALL DrawStack
@@ -128,18 +133,19 @@ STACK_END:
 			
 				CALL FindWord
 				LDA ret_val
-				BEQ .not_found
+				BEQ .word_not_found
 				
 					;Word found
 					CALL ExecToken,ret_val
 					LDA ret_val
 					BEQ .no_exec_error
-						STA arg
-						CALL ErrorMsg,arg
+						CALL ErrorMsg
 						JMP .input_loop
 					.no_exec_error:
 					JMP .process_loop
-				.not_found:
+				.word_not_found:
+				
+				
 				
 				;Word not found, so check if data
 				CALL CheckData
