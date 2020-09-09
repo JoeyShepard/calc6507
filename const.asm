@@ -40,6 +40,8 @@ KEY_ESCAPE =			27
 ;Floats
 SIGN_BIT =				$80
 E_SIGN_BIT =			$40
+EXP_LO =				7
+EXP_HI =				8
 
 ;Hex fields
 HEX_SUM = 				1
@@ -52,18 +54,16 @@ HEX_SMART =				1
 
 ;Error codes
 ERROR_NONE =				0
-ERROR_WORD_TOO_LONG =		2
+ERROR_INPUT =				2
+ERROR_WORD_TOO_LONG =		4
 ;Generic string error. Save room on error messages
-ERROR_STRING =				4
+ERROR_STRING =				6
 ;ERROR_STRING_TOO_LONG =		3
 ;ERROR_STRING_UNTERMINATED =	4
-ERROR_STACK_OVERFLOW =		6
-ERROR_STACK_UNDERFLOW =		8
-;Input not recognized
-ERROR_INPUT =				10
+ERROR_STACK_OVERFLOW =		8
+ERROR_STACK_UNDERFLOW =		10
 ERROR_WRONG_TYPE =			12
 ERROR_DIV_ZERO =			14
-
 
 ;Forth
 ;=====
@@ -84,9 +84,32 @@ ERROR_DIV_ZERO =			14
 	SAME =				32
 	COMPILE_ONLY =		128
 	
+	;Word tokens
+	;				0 - reserved
+	TOKEN_DUP =		2
+	TOKEN_SWAP =	4
+	TOKEN_DROP =	6
+	TOKEN_OVER =	8
+	TOKEN_ROT =		10
+	TOKEN_MIN_ROT =	12
+	TOKEN_CLEAR =	14
+	TOKEN_ADD =		16
+	TOKEN_SUB =		18
+	TOKEN_MULT =	20
+	TOKEN_DIV =		22
+	TOKEN_TICK =	24
+	TOKEN_EXEC =	26
+	TOKEN_WORD =	28
+	
 	;Flag masks
 	FLAG_MIN =			3
 	FLAG_TYPES =		$38
 	
+	;Stack
 	STACK_SIZE =		8
 	SYS_STACK_SIZE =	3
+	
+	;Two byte header of each word
+	EXEC_HEADER =		2
+	
+	

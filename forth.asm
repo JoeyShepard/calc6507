@@ -7,10 +7,10 @@
 		STA new_word_len
 	END
 	
-	SPECIAL_CHARS_LEN = 10
+	SPECIAL_CHARS_LEN = 11
 	special_chars:
 	FCB CHAR_EXP, CHAR_QUOTE			;2
-	FCB " .$m+-*/"						;8
+	FCB " .$m+-*/'"						;9
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -235,10 +235,11 @@
 				BEQ .found
 				JMP .loop
 		.found:
-		RTS
 	END
 	
 	FUNC FindWord
+		LDA new_word_len
+		BEQ .not_found
 		MOV.W #FORTH_WORDS,ret_address
 		.loop:
 			LDY #0
@@ -270,6 +271,7 @@
 			ORA ret_address+1
 			BNE .loop
 			;Done searching - zero ret_val
+			.not_found:
 			STA ret_val
 			RTS
 		.word_found:
@@ -280,10 +282,17 @@
 		INY
 		INY		;point past header
 		LDA (ret_address),Y
+		;Token
 		STA ret_val
-		
-		
-		
+		;Address for tick and user defined words
+		INY
+		CLC
+		TYA
+		ADC ret_address
+		STA ret_address
+		LDA ret_address+1
+		ADC #0
+		STA ret_address+1
 	END
 	
 	FUNC CheckData
@@ -521,13 +530,13 @@
 						STY y_buff
 						LDY #4
 						.exp_loop:
-							ASL new_stack_item+7
-							ROL new_stack_item+8
+							ASL new_stack_item+EXP_LO
+							ROL new_stack_item+EXP_HI
 							DEY
 							BNE .exp_loop
 						LDY y_buff
-						ORA new_stack_item+7
-						STA new_stack_item+7
+						ORA new_stack_item+EXP_LO
+						STA new_stack_item+EXP_LO
 						INC index
 						INC exp_digit_count
 						JMP .float_next
@@ -596,15 +605,15 @@
 			.zero_ret:
 				;if input is zero, clear exponent
 				LDA #0
-				STA new_stack_item+7
-				STA new_stack_item+8
+				STA new_stack_item+EXP_LO
+				STA new_stack_item+EXP_HI
 				JMP .float_success
 		.exp_count_good:
 		
 		;Adjust exponent
 		LDA exp_negative
 		BEQ .exp_positive
-			CALL BCD_Reverse, #new_stack_item+7, #2
+			CALL BCD_Reverse, #new_stack_item+EXP_LO, #2
 		.exp_positive:
 		
 		SED
@@ -640,11 +649,11 @@
 		.exp_count_neg2:
 		STY index
 		CLC
-		ADC new_stack_item+7
-		STA new_stack_item+7
+		ADC new_stack_item+EXP_LO
+		STA new_stack_item+EXP_LO
 		LDA index
-		ADC new_stack_item+8
-		STA new_stack_item+8
+		ADC new_stack_item+EXP_HI
+		STA new_stack_item+EXP_HI
 		CLD
 		
 		;Reverse exponent bytes
@@ -652,13 +661,13 @@
 		LDY new_stack_item+8
 		CPY #$50
 		BCC .exp_positive2
-			CALL BCD_Reverse, #new_stack_item+7, #2
+			CALL BCD_Reverse, #new_stack_item+EXP_LO, #2
 			LDA #$FF 
 		.exp_positive2:
 		STA exp_negative
 		
 		;Check for overflow or underflow
-		LDA new_stack_item+8
+		LDA new_stack_item+EXP_HI
 		CMP #$10
 		BNE .no_exp_overflow
 			;Exponent underflowed or overflowed!
@@ -668,17 +677,17 @@
 		;Mark negative sign bit
 		LDA exp_negative
 		BEQ .exp_no_neg_bit
-			LDA new_stack_item+8
+			LDA new_stack_item+EXP_HI
 			ORA #E_SIGN_BIT
-			STA new_stack_item+8
+			STA new_stack_item+EXP_HI
 		.exp_no_neg_bit:
 		
 		;Mark negative bit
 		LDA negative
 		BEQ .positive
-			LDA new_stack_item+8
+			LDA new_stack_item+EXP_HI
 			ORA #SIGN_BIT
-			STA new_stack_item+8
+			STA new_stack_item+EXP_HI
 		.positive:
 		
 		;success - mark object type as float and return
@@ -741,24 +750,43 @@
 			
 	END
 	
+	;Token in A
 	FUNC ExecToken
-		ARGS
-			BYTE token, flags
+		VARS
+			BYTE flags
 			BYTE temp
-			WORD address
+			WORD ret_address
 		END
 		
 		;No error unless set below
-		LDA #ERROR_NONE
-		STA ret_val
+		LDY #ERROR_NONE
+		STY ret_val
 		
-		LDY token
-		LDA JUMP_TABLE,Y
-		STA address
-		LDA JUMP_TABLE+1,Y
-		STA address+1
+		CMP #TOKEN_WORD
+		BEQ .not_word
+			TAY
+			LDA JUMP_TABLE,Y
+			STA ret_address
+			LDA JUMP_TABLE+1,Y
+			STA ret_address+1
+		.not_word:
+		
 		LDY #0
-		LDA (address),Y
+		LDA (ret_address),Y
+		
+		;Check type
+		CMP #OBJ_PRIMITIVE
+		BEQ .exec_good
+		CMP #OBJ_WORD
+		BEQ .exec_good
+			LDA #ERROR_WRONG_TYPE
+			STA ret_val
+			RTS
+		.exec_good:
+		
+		;Check flags
+		INY
+		LDA (ret_address),Y
 		BEQ .no_flags
 			STA flags
 			
@@ -834,10 +862,14 @@
 			.type_check_done:
 		.no_flags:
 		
-		;INC.W address	;not necessary since RTS adds 1
-		LDA address+1
+		CLC
+		LDA ret_address
+		ADC #1
+		TAY
+		LDA ret_address+1
+		ADC #0
 		PHA
-		LDA address
+		TYA
 		PHA
 	END					;calls calculated jump!
 	

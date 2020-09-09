@@ -13,14 +13,21 @@
 ;	5 inputs for keyboard
 ;***1 PIN SHORT!***
 
-;Compare to bc for rounding
-
-
 
 ;Constants
 ;=========
 	include emu.asm
 	include const.asm
+
+;Macros
+;======
+	include macros.asm
+	include optimizer_nmos.asm
+
+;Notes
+;=====
+TODO: compare to bc for rounding
+TODO: checking - p110 in Handbook of Floating Point Arithmetic
 
 
 ;Main code
@@ -29,11 +36,7 @@
 	PAGE 0
 	
 DEBUG_MODE set "off"
-	
-	;Macros at very beginning
-	include macros.asm
-	include optimizer_nmos.asm
-	
+		
 	;Reset vector
 	;ORG $FFFC
 	ORG $1FFC
@@ -59,15 +62,15 @@ LOCALS_END set		$1F
 	;Output
 	WORD screen_ptr
 	
-	;Don't need header byte
-	R0: DFS OBJ_SIZE-1
-	R1: DFS OBJ_SIZE-1
-	R2: DFS OBJ_SIZE-1
-	R3: DFS OBJ_SIZE-1
-	R4: DFS OBJ_SIZE-1
-	R5: DFS OBJ_SIZE-1
-	R6: DFS OBJ_SIZE-1
-	R7: DFS OBJ_SIZE-1
+	;Don't need header byte, +3 for guard, round, sticky
+	R0: DFS OBJ_SIZE-1+3
+	R1: DFS OBJ_SIZE-1+3
+	R2: DFS OBJ_SIZE-1+3
+	R3: DFS OBJ_SIZE-1+3
+	R4: DFS OBJ_SIZE-1+3
+	R5: DFS OBJ_SIZE-1+3
+	R6: DFS OBJ_SIZE-1+3
+	R7: DFS OBJ_SIZE-1+3
 	Regs_end:
 	
 STACK_END:
@@ -136,7 +139,8 @@ STACK_END:
 				BEQ .word_not_found
 				
 					;Word found
-					CALL ExecToken,ret_val
+					LDA ret_val
+					CALL ExecToken
 					LDA ret_val
 					BEQ .no_exec_error
 						CALL ErrorMsg
@@ -145,14 +149,13 @@ STACK_END:
 					JMP .process_loop
 				.word_not_found:
 				
-				
-				
 				;Word not found, so check if data
 				CALL CheckData
 				LDA new_stack_item
 				CMP #OBJ_ERROR
 				BNE .input_good
-					CALL ErrorMsg,#ERROR_INPUT
+					LDA #ERROR_INPUT
+					CALL ErrorMsg
 					JMP .input_loop
 				.input_good:
 				
@@ -160,7 +163,8 @@ STACK_END:
 				LDA #STACK_SIZE-1
 				CMP stack_count
 				BCS .no_overflow
-					CALL ErrorMsg,#ERROR_STACK_OVERFLOW
+					LDA #ERROR_STACK_OVERFLOW
+					CALL ErrorMsg
 					JMP .input_loop
 				.no_overflow:
 				

@@ -4,12 +4,12 @@
 	FORTH_WORDS:
 	
 	WORD_DUP:
-		FCB 3, "DUP" 		;Name
-		FDB	WORD_SWAP		;Next word
-		FCB 2				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 3, "DUP" 			;Name
+		FDB	WORD_SWAP			;Next word
+		FCB TOKEN_DUP			;ID - 2
 		CODE_DUP:
-			FCB MIN1|ADD1	;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN1|ADD1		;Flags
 			
 			LDY #OBJ_SIZE
 			TXA
@@ -25,12 +25,12 @@
 			RTS
 	
 	WORD_SWAP:
-		FCB 4, "SWAP" 		;Name
-		FDB	WORD_DROP		;Next word
-		FCB 4				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 4, "SWAP" 			;Name
+		FDB	WORD_DROP			;Next word
+		FCB TOKEN_SWAP			;ID - 4
 		CODE_SWAP:
-			FCB MIN2		;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2			;Flags
 			
 			LDY #OBJ_SIZE
 			TXA
@@ -50,12 +50,12 @@
 			RTS	
 	
 	WORD_DROP:
-		FCB 4, "DROP" 		;Name
-		FDB	WORD_OVER		;Next word
-		FCB 6				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 4, "DROP" 			;Name
+		FDB	WORD_OVER			;Next word
+		FCB TOKEN_DROP			;ID - 6
 		CODE_DROP:
-			FCB MIN1		;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN1			;Flags
 			
 			TXA
 			CLC
@@ -65,12 +65,12 @@
 			RTS
 	
 	WORD_OVER:
-		FCB 4, "OVER" 		;Name
-		FDB	WORD_ROT		;Next word
-		FCB 8				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 4, "OVER" 			;Name
+		FDB	WORD_ROT			;Next word
+		FCB TOKEN_OVER			;ID - 8
 		CODE_OVER:
-			FCB MIN2|ADD1	;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2|ADD1		;Flags
 			
 			LDY #OBJ_SIZE
 			TXA
@@ -86,12 +86,12 @@
 			RTS
 			
 	WORD_ROT:
-		FCB 3, "ROT" 		;Name
-		FDB	WORD_MIN_ROT	;Next word
-		FCB 10				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 3, "ROT" 			;Name
+		FDB	WORD_MIN_ROT		;Next word
+		FCB TOKEN_ROT			;ID - 10
 		CODE_ROT:
-			FCB MIN3		;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN3			;Flags
 			
 			LDY #OBJ_SIZE
 			TXA
@@ -116,12 +116,12 @@
 			RTS
 	
 	WORD_MIN_ROT:
-		FCB 4, "-ROT" 		;Name
-		FDB	WORD_CLEAR		;Next word
-		FCB 12				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 4, "-ROT" 			;Name
+		FDB	WORD_CLEAR			;Next word
+		FCB TOKEN_MIN_ROT		;ID - 12
 		CODE_MIN_ROT:
-			FCB MIN3		;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN3			;Flags
 			
 			LDY #OBJ_SIZE
 			TXA
@@ -146,24 +146,24 @@
 			RTS
 	
 	WORD_CLEAR:
-		FCB 5,"CLEAR"		;Name
-		FDB WORD_ADD		;Next word
-		FCB 14				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 5,"CLEAR"			;Name
+		FDB WORD_ADD			;Next word
+		FCB TOKEN_CLEAR			;ID - 14
 		CODE_CLEAR:
-			FCB 0			;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB 0				;Flags
 			
 			LDX #0
 			STX stack_count
 			RTS
 			
 	WORD_ADD:
-		FCB 1,"+"			;Name
-		FDB WORD_SUB		;Next word
-		FCB 16				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 1,"+"				;Name
+		FDB WORD_SUB			;Next word
+		FCB TOKEN_ADD			;ID - 16
 		CODE_ADD:
-			FCB MIN2|SAME	;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2|SAME		;Flags
 			
 			LDA 0,X
 			
@@ -174,6 +174,9 @@
 			BNE add_not_float
 				ADD_FLOAT:
 					TODO: adding floats
+					
+					
+					
 					RTS
 			add_not_float:
 			
@@ -198,19 +201,19 @@
 				LDA HEX_SUM+1,X
 				ADC OBJ_SIZE+HEX_SUM+1,X
 				STA OBJ_SIZE+HEX_SUM+1,X
-				JMP CODE_DROP+1
+				JMP CODE_DROP+EXEC_HEADER
 			.not_raw_hex:
 			CMP #1
 			BNE .not_mixed1
 				;Top most is raw so ready to add
 				.mixed_add:
-					TODO: adding mixed hex types
-				JMP CODE_DROP+1
+					
+				JMP CODE_DROP+EXEC_HEADER
 			.not_mixed1:
 			CMP #2
 			BNE .no_swap
 				;Top most is smart hex so need to swap
-				JSR CODE_SWAP+1
+				JSR CODE_SWAP+EXEC_HEADER
 				JMP .mixed_add
 			.no_swap:
 			
@@ -220,12 +223,12 @@
 			RTS
 			
 	WORD_SUB:
-		FCB 1,"-"			;Name
-		FDB WORD_MULT		;Next word
-		FCB 18				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 1,"-"				;Name
+		FDB WORD_MULT			;Next word
+		FCB TOKEN_SUB			;ID - 18
 		CODE_SUB:
-			FCB MIN2|SAME	;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2|SAME		;Flags
 			
 			LDA 0,X
 			
@@ -250,7 +253,7 @@
 				LDA OBJ_SIZE+HEX_SUM+1,X
 				SBC HEX_SUM+1,X
 				STA OBJ_SIZE+HEX_SUM+1,X
-				JMP CODE_DROP+1
+				JMP CODE_DROP+EXEC_HEADER
 			.not_raw_hex:
 			
 			;Either strings or at least one smart hex
@@ -259,12 +262,12 @@
 			RTS
 	
 	WORD_MULT:
-		FCB 1,"*"			;Name
-		FDB WORD_DIV		;Next word
-		FCB 20				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 1,"*"				;Name
+		FDB WORD_DIV			;Next word
+		FCB TOKEN_MULT			;ID - 20
 		CODE_MULT:
-			FCB MIN2|SAME	;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2|SAME		;Flags
 	
 			LDA 0,X
 			
@@ -318,7 +321,7 @@
 				STA OBJ_SIZE+HEX_SUM,X
 				LDA R0+2
 				STA OBJ_SIZE+HEX_SUM+1,X
-				JMP CODE_DROP+1
+				JMP CODE_DROP+EXEC_HEADER
 				
 				.mult_sub:
 					STA R0+4	;Halved value
@@ -351,12 +354,12 @@
 			
 	
 	WORD_DIV:
-		FCB 1,"/"			;Name
-		FDB WORD_TICK		;Next word
-		FCB 22				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 1,"/"				;Name
+		FDB WORD_TICK			;Next word
+		FCB TOKEN_DIV			;ID - 22
 		CODE_DIV:
-			FCB MIN2|SAME	;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2|SAME		;Flags
 	
 			LDA 0,X
 			
@@ -429,7 +432,7 @@
 				STA OBJ_SIZE+HEX_SUM,X
 				LDA R0+3
 				STA OBJ_SIZE+HEX_SUM+1,X
-				JMP CODE_DROP+1
+				JMP CODE_DROP+EXEC_HEADER
 			.not_raw_hex:
 			
 			;Either strings or at least one smart hex
@@ -440,18 +443,79 @@
 	
 	
 	WORD_TICK:
-		FCB 1,"'"			;Name
-		FDB 0				;Next word
-		FCB 24				;ID
-		FCB OBJ_PRIMITIVE	;Type
+		FCB 1,"'"				;Name
+		FDB WORD_EXEC			;Next word
+		FCB TOKEN_TICK			;ID - 24
 		CODE_TICK:
-			FCB ADD1		;Flags
+			FCB OBJ_PRIMITIVE	;Type
+			FCB ADD1			;Flags
 			
+			CALL LineWord
+			LDA new_word_len
+			BNE .word_found
+				.error_exit:
+				LDA #ERROR_INPUT
+				STA ret_val
+				JMP CODE_DROP+EXEC_HEADER
+			.word_found:
 			
+			CALL FindWord
+			LDA ret_val
+			BEQ .error_exit
 			
+			LDA ret_address
+			STA HEX_BASE,X
+			STA HEX_SUM,X
+			LDA ret_address+1
+			STA HEX_BASE+1,X
+			STA HEX_SUM+1,X
+			LDA #0
+			STA HEX_OFFSET,X
+			STA HEX_OFFSET+1,X
+			LDA #OBJ_HEX
+			STA 0,X
+			LDA #1
+			STA HEX_TYPE,X
+			
+			LDA #ERROR_NONE
+			STA ret_val
 			RTS
 	
-	
+	WORD_EXEC:
+		FCB 4,"EXEC"			;Name
+		FDB WORD_WORD			;Next word
+		FCB TOKEN_EXEC			;ID - 26
+		CODE_EXEC:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN1|HEX		;Flags
+			
+			halt
+			
+			LDA HEX_SUM,X
+			STA ret_address
+			LDA HEX_SUM+1,X
+			STA ret_address+1
+			JSR CODE_DROP+EXEC_HEADER
+			;Return address still on stack
+			LDA #TOKEN_WORD
+			JMP ExecToken
+			
+	WORD_WORD:
+		FCB 0,""				;Name
+		FDB 0					;Next word
+		FCB TOKEN_WORD			;ID - 28
+		CODE_WORD:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB 0				;Flags
+			
+			LDA HEX_SUM,X
+			STA ret_address
+			LDA HEX_SUM+1,X
+			STA ret_address+1
+			JSR CODE_DROP+EXEC_HEADER
+			;Return address still on stack
+			LDA #TOKEN_WORD			
+			
 	
 	
 	JUMP_TABLE:
@@ -468,5 +532,5 @@
 		FDB CODE_MULT		;20
 		FDB CODE_DIV		;22
 		FDB CODE_TICK		;24
-		
+		FDB CODE_EXEC		;26
 		

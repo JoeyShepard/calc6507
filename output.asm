@@ -276,17 +276,6 @@
 			BNE .loop_line
 	END
 	
-	
-	
-	ERROR_NONE =				0
-	ERROR_INPUT =				2
-	ERROR_WORD_TOO_LONG =		4
-	ERROR_STRING =				6
-	ERROR_STACK_OVERFLOW =		8
-	ERROR_STACK_UNDERFLOW =		10
-	;Input not recognized
-	
-	
 	ERROR_MSG_INPUT:
 	FCB " INPUT ERROR  ",0		;2
 	ERROR_MSG_WORD_TOO_LONG:
@@ -300,8 +289,9 @@
 	ERROR_MSG_WRONG_TYPE:
 	FCB "  WRONG TYPE  ",0		;12
 	ERROR_MSG_DIV_ZERO:
-	FCB " ZERO DIVIDE  ",0		;14
+	FCB "DIVIDE BY ZERO",0		;14
 	
+	TODO: table smaller than fixed length strings?
 	ERROR_TABLE:
 		FDB	ERROR_MSG_INPUT
 		FDB ERROR_MSG_WORD_TOO_LONG
@@ -313,8 +303,7 @@
 		
 	;error code in A
 	FUNC ErrorMsg
-		ARGS
-			;BYTE error_code
+		VARS
 			WORD msg
 		END
 		
