@@ -62,6 +62,11 @@ LOCALS_END set		$1F
 	;Output
 	WORD screen_ptr
 	
+	;Forth
+	WORD dict_ptr
+	WORD new_dict_ptr
+	WORD exec_ptr
+	
 	;Don't need header byte, +3 for guard, round, sticky
 	R0: DFS OBJ_SIZE-1+3
 	R1: DFS OBJ_SIZE-1+3
@@ -72,9 +77,7 @@ LOCALS_END set		$1F
 	R6: DFS OBJ_SIZE-1+3
 	R7: DFS OBJ_SIZE-1+3
 	Regs_end:
-	
-STACK_END:
-	
+		
 	
 ;Variables in main RAM
 ;=====================
@@ -126,6 +129,20 @@ STACK_END:
 		CALL stats
 		
 		.input_loop:
+			;Colon definitions must fit on one line
+			LDA mode
+			CMP #MODE_IMMEDIATE
+			BEQ .mode_good
+				LDA #MODE_IMMEDIATE
+				STA mode
+				LDA #ERROR_INPUT
+				JMP .error_sub
+			.mode_good:
+		
+			;Reset dict_ptr in case anything went wrong below
+			MOV.W dict_save,dict_ptr
+			
+			
 			CALL DrawStack
 			CALL ReadLine
 			
@@ -137,15 +154,25 @@ STACK_END:
 				CALL FindWord
 				LDA ret_val
 				BEQ .word_not_found
-				
+					
 					;Word found
+					LDA mode
+					CMP #MODE_IMMEDIATE
+					BNE .compile
+						LDA ret_val
+						CALL ExecToken
+						LDA ret_val
+						BEQ .no_exec_error
+							JMP .error_sub
+						.no_exec_error:
+						JMP .process_loop
+					.compile:
 					LDA ret_val
-					CALL ExecToken
+					JSR WriteToken
 					LDA ret_val
-					BEQ .no_exec_error
-						CALL ErrorMsg
-						JMP .input_loop
-					.no_exec_error:
+					BEQ .no_compile_error
+						JMP .error_sub
+					.no_compile_error:
 					JMP .process_loop
 				.word_not_found:
 				
@@ -155,8 +182,7 @@ STACK_END:
 				CMP #OBJ_ERROR
 				BNE .input_good
 					LDA #ERROR_INPUT
-					CALL ErrorMsg
-					JMP .input_loop
+					JMP .error_sub
 				.input_good:
 				
 				;Check stack size
@@ -164,8 +190,7 @@ STACK_END:
 				CMP stack_count
 				BCS .no_overflow
 					LDA #ERROR_STACK_OVERFLOW
-					CALL ErrorMsg
-					JMP .input_loop
+					JMP .error_sub
 				.no_overflow:
 				
 				;add new data to stack
@@ -177,7 +202,12 @@ STACK_END:
 				CALL MemCopy, #new_stack_item, dest, #OBJ_SIZE
 				
 				JMP .process_loop
-				
+		
+		.error_sub:
+			CALL ErrorMsg
+			JMP .input_loop
 	END
+	
+	
 	code_end:
 	

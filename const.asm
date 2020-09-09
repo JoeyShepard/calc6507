@@ -27,10 +27,12 @@ OBJ_ARRAY =				7
 
 OBJ_SIZE =				9
 
-;Input buffer
+;Input
 BUFF_SIZE =				64
 WORD_MAX_SIZE =			19	;-1.23456789012e-999
 MAX_DIGITS =			12
+MODE_IMMEDIATE =		64
+MODE_COMPILE =			128
 
 ;Key constants
 KEY_BACKSPACE = 		8
@@ -64,6 +66,9 @@ ERROR_STACK_OVERFLOW =		8
 ERROR_STACK_UNDERFLOW =		10
 ERROR_WRONG_TYPE =			12
 ERROR_DIV_ZERO =			14
+ERROR_IMMED_ONLY =			16
+ERROR_COMPILE_ONLY =		18
+ERROR_OUT_OF_MEM =			20
 
 ;Forth
 ;=====
@@ -82,7 +87,8 @@ ERROR_DIV_ZERO =			14
 	STRINGS =			16
 	HEX =				24
 	SAME =				32
-	COMPILE_ONLY =		128
+	IMMED =				64
+	COMPILE =			128
 	
 	;Word tokens
 	;				0 - reserved
@@ -104,10 +110,13 @@ ERROR_DIV_ZERO =			14
 	TOKEN_FETCH =	32
 	TOKEN_CSTORE =	34
 	TOKEN_CFETCH =	36
+	TOKEN_COLON =	38
+	TOKEN_SEMI =	40
 	
 	;Flag masks
 	FLAG_MIN =			3
 	FLAG_TYPES =		$38
+	FLAG_MODE =			$C0
 	
 	;Stack
 	STACK_SIZE =		8
@@ -115,5 +124,8 @@ ERROR_DIV_ZERO =			14
 	
 	;Two byte header of each word
 	EXEC_HEADER =		2
+	
+	;Three byte header for empty item at end of stack
+	DICT_END_SIZE =		3
 	
 	

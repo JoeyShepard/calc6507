@@ -17,9 +17,15 @@
 	
 	;Forth
 	BYTE stack_count
+	BYTE mode
+	WORD dict_save
 	
 	;Tests
 	BYTE test_count
-
 	
+	;Rest of RAM for user dictionary
+	dict_begin:
+
+	ORG $900
+	dict_end:
 	

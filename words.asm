@@ -606,7 +606,7 @@
 	
 	WORD_CFETCH:
 		FCB 2,"C@"				;Name
-		FDB 0					;Next word
+		FDB WORD_COLON			;Next word
 		FCB TOKEN_CFETCH		;ID - 36
 		CODE_CFETCH:
 			FCB OBJ_PRIMITIVE	;Type
@@ -625,7 +625,29 @@
 			STA HEX_TYPE,X
 			RTS
 	
+	WORD_COLON:
+		FCB 1,":"				;Name
+		FDB WORD_SEMI			;Next word
+		FCB TOKEN_COLON			;ID - 38
+		CODE_COLON:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB IMMED			;Flags
+			
+			LDA #MODE_COMPILE
+			STA mode
+			RTS
 	
+	WORD_SEMI:
+		FCB 1,";"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_SEMI			;ID - 40
+		CODE_SEMI:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB COMPILE			;Flags
+			
+			LDA #MODE_IMMEDIATE
+			STA mode
+			RTS
 	
 	
 	JUMP_TABLE:
@@ -648,5 +670,6 @@
 		FDB CODE_FETCH		;32
 		FDB CODE_CSTORE		;34
 		FDB CODE_CFETCH		;36
-		
+		FDB CODE_COLON		;38
+		FDB CODE_SEMI		;40
 		

@@ -7,10 +7,10 @@
 		STA new_word_len
 	END
 	
-	SPECIAL_CHARS_LEN = 13
+	SPECIAL_CHARS_LEN = 15
 	special_chars:
 	FCB CHAR_EXP, CHAR_QUOTE			;2
-	FCB " .$m+-*/'!@"					;11
+	FCB " .$m+-*/'!@:;"					;13
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -290,9 +290,9 @@
 		TYA
 		ADC ret_address
 		STA ret_address
-		LDA ret_address+1
-		ADC #0
-		STA ret_address+1
+		BCC .skip
+			INC ret_address+1
+		.skip:
 	END
 	
 	FUNC CheckData
@@ -860,6 +860,21 @@
 				PLA
 				TAX
 			.type_check_done:
+			
+			;Check immediate or compile only
+			LDA flags
+			AND #FLAG_MODE
+			BEQ .mode_check_done
+				CMP mode
+				BEQ .mode_check_done
+					LDY #ERROR_IMMED_ONLY
+					CMP #MODE_IMMEDIATE
+					BEQ .immed
+						LDY #ERROR_COMPILE_ONLY
+					.immed:
+					STY ret_val
+					RTS
+			.mode_check_done:
 		.no_flags:
 		
 		CLC
@@ -881,4 +896,87 @@
 		INC stack_count
 	END
 	
+	;Put placeholder stop word at dictionary pointer and increment
+	FUNC DictEnd
+		LDA #0
+		TAY
+		STA (dict_ptr),Y		;Length of name
+		INY
+		STA (dict_ptr),Y		;Next word low
+		INY
+		STA (dict_ptr),Y		;Next word high
+	END
+	
+	;Amount in A
+	FUNC AllocMem
+		VARS
+			BYTE bytes
+		END
 		
+		STA bytes
+		LDY #ERROR_NONE
+		STY ret_val
+		
+		CLC
+		ADC dict_ptr
+		STA new_dict_ptr
+		LDA #0
+		ADC dict_ptr+1
+		STA new_dict_ptr+1
+		
+		SEC
+		LDA #(dict_end-DICT_END_SIZE) % 256
+		SBC new_dict_ptr
+		LDA #(dict_end-DICT_END_SIZE) / 256
+		SBC new_dict_ptr+1
+		
+		BCS .no_GC
+			TODO: trigger garbage collection
+		.no_GC:
+	END
+	
+	;Token in A
+	FUNC WriteToken
+		VARS
+			BYTE token
+			WORD flag_ptr
+		END
+		
+		TODO: this sequence is repeated several times
+		TODO: simpler to hold in separate table?
+		
+		STA token
+		TAY
+		LDA JUMP_TABLE,Y
+		STA flag_ptr
+		LDA JUMP_TABLE+1,Y
+		STA flag_ptr+1
+		LDY #1
+		LDA (flag_ptr),Y
+		AND #FLAG_MODE
+		CMP #MODE_COMPILE
+		BNE .compile
+			LDA token
+			JMP ExecToken
+		.compile:
+		LDA #1
+		CALL AllocMem
+		LDA ret_val
+		BEQ .success
+			LDA #ERROR_OUT_OF_MEM
+			STA ret_val
+			RTS
+		.success:
+		
+		;Store token
+		LDA token
+		LDY #0
+		STA (dict_ptr),Y
+		
+		;Adjust dict pointer
+		MOV.W new_dict_ptr,dict_ptr
+	END
+	
+	
+	
+	

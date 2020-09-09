@@ -21,6 +21,17 @@
 		LDA #0
 		STA font_inverted
 		
+		LDA #dict_begin % 256
+		STA dict_ptr
+		STA dict_save
+		LDA #dict_begin / 256
+		STA dict_ptr+1
+		STA dict_save+1
+		CALL DictEnd
+		
+		LDA #MODE_IMMEDIATE
+		STA mode
+		
 		;Emulator only!
 		MOV #BANK_GFX_RAM1,RAM_BANK2		
 		MOV #BANK_GFX_RAM2,RAM_BANK3		
