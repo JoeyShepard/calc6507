@@ -175,8 +175,6 @@
 				ADD_FLOAT:
 					TODO: adding floats
 					
-					
-					
 					RTS
 			add_not_float:
 			
@@ -207,8 +205,14 @@
 			BNE .not_mixed1
 				;Top most is raw so ready to add
 				.mixed_add:
-					
-				JMP CODE_DROP+EXEC_HEADER
+					CLC
+					LDA HEX_SUM,X
+					ADC OBJ_SIZE+HEX_OFFSET,X
+					STA OBJ_SIZE+HEX_OFFSET,X
+					LDA HEX_SUM+1,X
+					ADC OBJ_SIZE+HEX_OFFSET+1,X
+					STA OBJ_SIZE+HEX_OFFSET+1,X
+					JMP HEX_RECALC
 			.not_mixed1:
 			CMP #2
 			BNE .no_swap
@@ -221,6 +225,18 @@
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
+			
+		;Helper function
+		HEX_RECALC:
+			CLC
+			LDA OBJ_SIZE+HEX_BASE,X
+			ADC OBJ_SIZE+HEX_OFFSET,X
+			STA OBJ_SIZE+HEX_SUM,X
+			LDA OBJ_SIZE+HEX_BASE+1,X
+			ADC OBJ_SIZE+HEX_OFFSET+1,X
+			STA OBJ_SIZE+HEX_SUM+1,X
+					
+			JMP CODE_DROP+EXEC_HEADER
 			
 	WORD_SUB:
 		FCB 1,"-"				;Name
@@ -255,6 +271,18 @@
 				STA OBJ_SIZE+HEX_SUM+1,X
 				JMP CODE_DROP+EXEC_HEADER
 			.not_raw_hex:
+			
+			CMP #1
+			BNE .not_smart_hex
+				SEC
+				LDA OBJ_SIZE+HEX_OFFSET,X
+				SBC HEX_SUM,X
+				STA OBJ_SIZE+HEX_OFFSET,X
+				LDA OBJ_SIZE+HEX_OFFSET+1,X
+				SBC HEX_SUM+1,X
+				STA OBJ_SIZE+HEX_OFFSET+1,X
+				JMP HEX_RECALC
+			.not_smart_hex:
 			
 			;Either strings or at least one smart hex
 			LDA #ERROR_WRONG_TYPE
@@ -439,9 +467,7 @@
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
-	
-	
-	
+			
 	WORD_TICK:
 		FCB 1,"'"				;Name
 		FDB WORD_EXEC			;Next word
@@ -474,7 +500,7 @@
 			STA HEX_OFFSET+1,X
 			LDA #OBJ_HEX
 			STA 0,X
-			LDA #1
+			LDA #HEX_SMART
 			STA HEX_TYPE,X
 			
 			LDA #ERROR_NONE
@@ -489,8 +515,6 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
 			
-			halt
-			
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
@@ -502,20 +526,106 @@
 			
 	WORD_WORD:
 		FCB 0,""				;Name
-		FDB 0					;Next word
+		FDB WORD_STORE			;Next word
 		FCB TOKEN_WORD			;ID - 28
 		CODE_WORD:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB 0				;Flags
 			
+			halt
+			
+			;LDA HEX_SUM,X
+			;STA ret_address
+			;LDA HEX_SUM+1,X
+			;STA ret_address+1
+			;JSR CODE_DROP+EXEC_HEADER
+	
+	
+	WORD_STORE:
+		FCB 1,"!"				;Name
+		FDB WORD_FETCH			;Next word
+		FCB TOKEN_STORE			;ID - 30
+		CODE_STORE:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2|HEX		;Flags
+	
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
 			STA ret_address+1
-			JSR CODE_DROP+EXEC_HEADER
-			;Return address still on stack
-			LDA #TOKEN_WORD			
+			LDY #0
+			LDA OBJ_SIZE+HEX_SUM,X
+			STA (ret_address),Y
+			LDA OBJ_SIZE+HEX_SUM+1,X
+			INY
+			STA (ret_address),Y
 			
+			JSR CODE_DROP+EXEC_HEADER
+			JMP CODE_DROP+EXEC_HEADER
+	
+	WORD_FETCH:
+		FCB 1,"@"				;Name
+		FDB WORD_CSTORE			;Next word
+		FCB TOKEN_FETCH			;ID - 32
+		CODE_FETCH:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN1|HEX		;Flags
+	
+			LDA HEX_SUM,X
+			STA ret_address
+			LDA HEX_SUM+1,X
+			STA ret_address+1
+			LDY #0
+			LDA (ret_address),Y
+			STA HEX_SUM,X
+			INY
+			LDA (ret_address),Y
+			STA HEX_SUM+1,X
+			LDA #0
+			STA HEX_TYPE,X
+			RTS
+	
+	WORD_CSTORE:
+		FCB 2,"C!"				;Name
+		FDB WORD_CFETCH			;Next word
+		FCB TOKEN_CSTORE		;ID - 34
+		CODE_CSTORE:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN2|HEX		;Flags
+	
+			LDA HEX_SUM,X
+			STA ret_address
+			LDA HEX_SUM+1,X
+			STA ret_address+1
+			LDY #0
+			LDA OBJ_SIZE+HEX_SUM,X
+			STA (ret_address),Y
+			
+			JSR CODE_DROP+EXEC_HEADER
+			JMP CODE_DROP+EXEC_HEADER
+	
+	WORD_CFETCH:
+		FCB 2,"C@"				;Name
+		FDB 0					;Next word
+		FCB TOKEN_CFETCH		;ID - 36
+		CODE_CFETCH:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN1|HEX		;Flags
+	
+			LDA HEX_SUM,X
+			STA ret_address
+			LDA HEX_SUM+1,X
+			STA ret_address+1
+			LDY #0
+			LDA (ret_address),Y
+			STA HEX_SUM,X
+			LDA #0
+			STA HEX_SUM+1,X
+			LDA #0
+			STA HEX_TYPE,X
+			RTS
+	
+	
 	
 	
 	JUMP_TABLE:
@@ -533,4 +643,10 @@
 		FDB CODE_DIV		;22
 		FDB CODE_TICK		;24
 		FDB CODE_EXEC		;26
+		FDB CODE_WORD		;28
+		FDB CODE_STORE		;30
+		FDB CODE_FETCH		;32
+		FDB CODE_CSTORE		;34
+		FDB CODE_CFETCH		;36
+		
 		

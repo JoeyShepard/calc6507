@@ -7,10 +7,10 @@
 		STA new_word_len
 	END
 	
-	SPECIAL_CHARS_LEN = 11
+	SPECIAL_CHARS_LEN = 13
 	special_chars:
 	FCB CHAR_EXP, CHAR_QUOTE			;2
-	FCB " .$m+-*/'"						;9
+	FCB " .$m+-*/'!@"					;11
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
