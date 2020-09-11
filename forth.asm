@@ -953,9 +953,9 @@
 		
 		STA token
 		TAY
-		LDA JUMP_TABLE,Y
+		LDA JUMP_TABLE-2,Y
 		STA flag_ptr
-		LDA JUMP_TABLE+1,Y
+		LDA JUMP_TABLE-1,Y
 		STA flag_ptr+1
 		LDY #1
 		LDA (flag_ptr),Y

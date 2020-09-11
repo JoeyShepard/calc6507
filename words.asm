@@ -647,7 +647,6 @@
 				RTS
 			.alloc_good:
 			
-			
 			;Setup header for new word
 			LDA new_word_len
 			LDY #0

@@ -147,6 +147,7 @@ LOCALS_END set		$1F
 			CALL ReadLine
 			
 			.process_loop:
+				
 				CALL LineWord
 				LDA new_word_len
 				BEQ .input_loop
