@@ -65,6 +65,7 @@ LOCALS_END set		$1F
 	;Forth
 	WORD dict_ptr
 	WORD new_dict_ptr
+	WORD dict_save
 	WORD exec_ptr
 	
 	;Don't need header byte, +3 for guard, round, sticky
@@ -142,7 +143,6 @@ LOCALS_END set		$1F
 			;Reset dict_ptr in case anything went wrong below
 			MOV.W dict_save,dict_ptr
 			
-			
 			CALL DrawStack
 			CALL ReadLine
 			
@@ -158,7 +158,9 @@ LOCALS_END set		$1F
 					;Word found
 					LDA mode
 					CMP #MODE_IMMEDIATE
-					BNE .compile
+					BNE .compile_word
+					
+						;Immediate mode - execute word
 						LDA ret_val
 						CALL ExecToken
 						LDA ret_val
@@ -166,7 +168,9 @@ LOCALS_END set		$1F
 							JMP .error_sub
 						.no_exec_error:
 						JMP .process_loop
-					.compile:
+					.compile_word:
+					
+					;Compile mode - compile word
 					LDA ret_val
 					JSR WriteToken
 					LDA ret_val
@@ -193,16 +197,61 @@ LOCALS_END set		$1F
 					JMP .error_sub
 				.no_overflow:
 				
-				;add new data to stack
-				JSR StackAddItem
+				LDA mode
+				CMP #MODE_IMMEDIATE
+				BNE .compile_value
+					;Immediate mode - add to stack
+					JSR StackAddItem
+					
+					STX dest
+					LDA #0
+					STA dest+1
+					CALL MemCopy, #new_stack_item, dest, #OBJ_SIZE
+					JMP .process_loop
+				.compile_value:
 				
-				STX dest
-				LDA #0
-				STA dest+1
-				CALL MemCopy, #new_stack_item, dest, #OBJ_SIZE
+				;Compile mode - compile value
+				LDA new_stack_item
+				CMP #OBJ_FLOAT
+				BNE .not_float
+					LDA #OBJ_SIZE
+					JSR AllocMem
+					LDA ret_val
+					BEQ .float_alloc_good
+						JMP .error_sub
+					.float_alloc_good:
+					LDA #TOKEN_FLOAT
+					LDY #0
+					STA (dict_ptr),Y
+					
+					TODO: smaller than calling MemCopy here?
+					.loop:
+						INY
+						LDA new_stack_item,Y
+						STA (dict_ptr),Y
+						CPY #8
+						BNE .loop
+						
+					;Adjust dict pointer
+					MOV.W new_dict_ptr,dict_ptr
+					JMP .process_loop
+				.not_float:
+				
+				CMP #OBJ_STR
+				BNE .not_string
+					TODO: more efficient encoding? just write all for now
+					
+				.not_string:
+				
+				CMP #OBJ_HEX
+				BNE .not_hex
+					
+				.not_hex:
+				
+				
 				
 				JMP .process_loop
-		
+				
 		.error_sub:
 			CALL ErrorMsg
 			JMP .input_loop

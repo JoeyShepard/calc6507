@@ -755,9 +755,8 @@
 		VARS
 			BYTE flags
 			BYTE temp
-			WORD ret_address
 		END
-		
+			
 		;No error unless set below
 		LDY #ERROR_NONE
 		STY ret_val
@@ -765,9 +764,9 @@
 		CMP #TOKEN_WORD
 		BEQ .not_word
 			TAY
-			LDA JUMP_TABLE,Y
+			LDA JUMP_TABLE-2,Y
 			STA ret_address
-			LDA JUMP_TABLE+1,Y
+			LDA JUMP_TABLE-1,Y
 			STA ret_address+1
 		.not_word:
 		
@@ -776,13 +775,18 @@
 		
 		;Check type
 		CMP #OBJ_PRIMITIVE
-		BEQ .exec_good
+		BEQ .exec_primitive
 		CMP #OBJ_WORD
-		BEQ .exec_good
+		BEQ .exec_word
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
-		.exec_good:
+		.exec_word:
+		
+			TODO: implement interpretter for tokenized words
+			
+			RTS
+		.exec_primitive:
 		
 		;Check flags
 		INY
@@ -907,6 +911,7 @@
 		STA (dict_ptr),Y		;Next word high
 	END
 	
+	TODO: return value in A too?
 	;Amount in A
 	FUNC AllocMem
 		VARS
@@ -925,13 +930,14 @@
 		STA new_dict_ptr+1
 		
 		SEC
-		LDA #(dict_end-DICT_END_SIZE) % 256
+		LDA #dict_end % 256
 		SBC new_dict_ptr
-		LDA #(dict_end-DICT_END_SIZE) / 256
+		LDA #dict_end / 256
 		SBC new_dict_ptr+1
 		
 		BCS .no_GC
 			TODO: trigger garbage collection
+			TODO: check free mem again
 		.no_GC:
 	END
 	
@@ -956,6 +962,7 @@
 		AND #FLAG_MODE
 		CMP #MODE_COMPILE
 		BNE .compile
+			;Execute if compile-mode word
 			LDA token
 			JMP ExecToken
 		.compile:
@@ -971,6 +978,9 @@
 		;Store token
 		LDA token
 		LDY #0
+		STA (dict_ptr),Y
+		LDA #TOKEN_DONE
+		INY
 		STA (dict_ptr),Y
 		
 		;Adjust dict pointer

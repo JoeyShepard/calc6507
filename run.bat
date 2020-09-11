@@ -15,11 +15,12 @@ echo Re-assembling...
 python "remove escape.py" asm.txt
 echo Generating hex file...
 ..\..\AS\bin\p2hex processed.p -F Intel -l 32 -r $0000-$FFFF > hex.txt
-copy processed.hex emu.hex
+copy processed.hex emu.hex > nul
 echo :02FFFC000009BF >> emu.hex
 echo Copying...
 copy processed.lst "..\..\projects\6502 emu\main\listing.lst" > nul
 REM copy processed.hex "..\..\projects\6502 emu\main\prog.hex" > nul
 copy emu.hex "..\..\projects\6502 emu\main\prog.hex" > nul
-break > "..\..\projects\6502 emu\main\keys.txt"
+REM break > "..\..\projects\6502 emu\main\keys.txt"
+copy keys.txt "..\..\projects\6502 emu\main\keys.txt" > nul
 echo.

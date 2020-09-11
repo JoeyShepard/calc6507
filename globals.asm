@@ -18,7 +18,6 @@
 	;Forth
 	BYTE stack_count
 	BYTE mode
-	WORD dict_save
 	
 	;Tests
 	BYTE test_count

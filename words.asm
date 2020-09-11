@@ -115,8 +115,9 @@
 			TAX
 			RTS
 	
+	TODO: could be smalled by rotating twice
 	WORD_MIN_ROT:
-		FCB 4, "-ROT" 			;Name
+		FCB 4, "cROT" 			;Name
 		FDB	WORD_CLEAR			;Next word
 		FCB TOKEN_MIN_ROT		;ID - 12
 		CODE_MIN_ROT:
@@ -509,7 +510,7 @@
 	
 	WORD_EXEC:
 		FCB 4,"EXEC"			;Name
-		FDB WORD_WORD			;Next word
+		FDB WORD_STORE			;Next word
 		FCB TOKEN_EXEC			;ID - 26
 		CODE_EXEC:
 			FCB OBJ_PRIMITIVE	;Type
@@ -520,31 +521,14 @@
 			LDA HEX_SUM+1,X
 			STA ret_address+1
 			JSR CODE_DROP+EXEC_HEADER
-			;Return address still on stack
+			;Original return address still on stack, so no recursion problems
 			LDA #TOKEN_WORD
 			JMP ExecToken
-			
-	WORD_WORD:
-		FCB 0,""				;Name
-		FDB WORD_STORE			;Next word
-		FCB TOKEN_WORD			;ID - 28
-		CODE_WORD:
-			FCB OBJ_PRIMITIVE	;Type
-			FCB 0				;Flags
-			
-			halt
-			
-			;LDA HEX_SUM,X
-			;STA ret_address
-			;LDA HEX_SUM+1,X
-			;STA ret_address+1
-			;JSR CODE_DROP+EXEC_HEADER
-	
 	
 	WORD_STORE:
 		FCB 1,"!"				;Name
 		FDB WORD_FETCH			;Next word
-		FCB TOKEN_STORE			;ID - 30
+		FCB TOKEN_STORE			;ID - 28
 		CODE_STORE:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|HEX		;Flags
@@ -566,7 +550,7 @@
 	WORD_FETCH:
 		FCB 1,"@"				;Name
 		FDB WORD_CSTORE			;Next word
-		FCB TOKEN_FETCH			;ID - 32
+		FCB TOKEN_FETCH			;ID - 30
 		CODE_FETCH:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
@@ -588,7 +572,7 @@
 	WORD_CSTORE:
 		FCB 2,"C!"				;Name
 		FDB WORD_CFETCH			;Next word
-		FCB TOKEN_CSTORE		;ID - 34
+		FCB TOKEN_CSTORE		;ID - 32
 		CODE_CSTORE:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|HEX		;Flags
@@ -607,7 +591,7 @@
 	WORD_CFETCH:
 		FCB 2,"C@"				;Name
 		FDB WORD_COLON			;Next word
-		FCB TOKEN_CFETCH		;ID - 36
+		FCB TOKEN_CFETCH		;ID - 34
 		CODE_CFETCH:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
@@ -628,30 +612,155 @@
 	WORD_COLON:
 		FCB 1,":"				;Name
 		FDB WORD_SEMI			;Next word
-		FCB TOKEN_COLON			;ID - 38
+		FCB TOKEN_COLON			;ID - 36
 		CODE_COLON:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB IMMED			;Flags
 			
+			;Get next word in stream
+			CALL LineWord
+			LDA new_word_len
+			BNE .name_word
+				;No more words left in stream
+				.error_exit:
+				LDA #ERROR_INPUT
+				STA ret_val
+				RTS
+			.name_word:
+			
+			;Word already exists?
+			CALL FindWord
+			LDA ret_val
+			BEQ .word_not_found
+				;Word exists - error instead of redefining word
+				BNE .error_exit
+			.word_not_found:
+			
+			;Allocate room for word header
+			LDA new_word_len
+			CLC
+			ADC #WORD_HEADER_SIZE
+			JSR AllocMem
+			LDA ret_val
+			BEQ .alloc_good
+				;Alloc failed - out of memory
+				RTS
+			.alloc_good:
+			
+			
+			;Setup header for new word
+			LDA new_word_len
+			LDY #0
+			STA (dict_ptr),Y
+			.loop:
+				LDA new_word_buff,Y
+				INY
+				STA (dict_ptr),Y
+				CPY new_word_len
+				BNE .loop
+				
+			TODO: smaller to copy run of bytes?
+			;Next word - 0 being end of chain
+			LDA #0
+			INY
+			STA (dict_ptr),Y
+			INY
+			STA (dict_ptr),Y
+			;Token
+			LDA #TOKEN_WORD
+			INY
+			STA (dict_ptr),Y
+			;Only one byte header
+			LDA #OBJ_WORD
+			INY
+			STA (dict_ptr),Y
+			
+			;Adjust dict pointer
+			MOV.W new_dict_ptr,dict_ptr
+			
+			;Now in compile mode
 			LDA #MODE_COMPILE
 			STA mode
 			RTS
 	
 	WORD_SEMI:
 		FCB 1,";"				;Name
-		FDB dict_begin			;Next word
-		FCB TOKEN_SEMI			;ID - 40
+		FDB WORD_FLOAT			;Next word
+		FCB TOKEN_SEMI			;ID - 38
 		CODE_SEMI:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB COMPILE			;Flags
 			
+			;Allocate dict end item
+			LDA #DICT_END_SIZE
+			JSR AllocMem
+			LDA ret_val
+			BEQ .alloc_good
+				.error_exit:
+				LDA #ERROR_INPUT
+				STA ret_val
+				RTS
+			.alloc_good:
+			
+			;Write dict end item
+			TODO: copying run of bytes is faster?
+			LDA #TOKEN_DONE
+			LDY #0
+			STA (dict_ptr),Y
+			LDA #0
+			INY
+			STA (dict_ptr),Y
+			INY
+			STA (dict_ptr),Y
+			INY
+			STA (dict_ptr),Y
+			
+			;Point past done byte to dict end item
+			INC dict_ptr
+			BNE .skip
+				INC dict_ptr
+			.skip:
+			
+			;Set next word to new dict end item
+			LDY #0
+			LDA (dict_save),Y
+			TAY
+			INY
+			LDA dict_ptr
+			STA (dict_save),Y
+			LDA dict_ptr+1
+			INY
+			STA (dict_save),Y
+			
 			LDA #MODE_IMMEDIATE
 			STA mode
+			RTS
+			
+	WORD_FLOAT:
+		FCB 0,""				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_FLOAT			;ID - 40
+		CODE_FLOAT:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB ADD1			;Flags
+			
+			TXA
+			PHA
+			LDA #OBJ_FLOAT
+			STA 0,X
+			LDY #OBJ_SIZE-1
+			.loop:
+				INX
+				LDA (exec_ptr),Y
+				STA 0,X
+				DEY
+				BNE .loop
+			PLA
+			TAX
 			RTS
 	
 	
 	JUMP_TABLE:
-		FDB 0				;0 - reserved
 		FDB CODE_DUP		;2
 		FDB CODE_SWAP		;4
 		FDB CODE_DROP		;6
@@ -665,11 +774,13 @@
 		FDB CODE_DIV		;22
 		FDB CODE_TICK		;24
 		FDB CODE_EXEC		;26
-		FDB CODE_WORD		;28
-		FDB CODE_STORE		;30
-		FDB CODE_FETCH		;32
-		FDB CODE_CSTORE		;34
-		FDB CODE_CFETCH		;36
-		FDB CODE_COLON		;38
-		FDB CODE_SEMI		;40
+		FDB CODE_STORE		;28
+		FDB CODE_FETCH		;30
+		FDB CODE_CSTORE		;32
+		FDB CODE_CFETCH		;34
+		FDB CODE_COLON		;36
+		FDB CODE_SEMI		;38
+		FDB CODE_FLOAT		;40
+		
+		
 		

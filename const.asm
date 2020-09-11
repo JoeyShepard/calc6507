@@ -105,13 +105,17 @@ ERROR_OUT_OF_MEM =			20
 	TOKEN_DIV =		22
 	TOKEN_TICK =	24
 	TOKEN_EXEC =	26
-	TOKEN_WORD =	28
-	TOKEN_STORE =	30
-	TOKEN_FETCH =	32
-	TOKEN_CSTORE =	34
-	TOKEN_CFETCH =	36
-	TOKEN_COLON =	38
-	TOKEN_SEMI =	40
+	TOKEN_STORE =	28
+	TOKEN_FETCH =	30
+	TOKEN_CSTORE =	32
+	TOKEN_CFETCH =	34
+	TOKEN_COLON =	36
+	TOKEN_SEMI =	38
+	TOKEN_FLOAT =	40
+	
+	;Odd tokens - no jump table entry
+	TOKEN_DONE =	1
+	TOKEN_WORD =	3
 	
 	;Flag masks
 	FLAG_MIN =			3
@@ -126,6 +130,12 @@ ERROR_OUT_OF_MEM =			20
 	EXEC_HEADER =		2
 	
 	;Three byte header for empty item at end of stack
-	DICT_END_SIZE =		3
+	;Extra byte for 1 byte token ending word
+	DICT_END_SIZE =		4
+	
+	;Header for new dictionary words
+	WORD_HEADER_SIZE =	5
+	
+	
 	
 	
