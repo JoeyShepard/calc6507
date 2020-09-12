@@ -1,0 +1,5 @@
+: FOO 3 ;
+: BAR 2 FOO ;
+: BAZ 1 BAR ;
+BAZ
+

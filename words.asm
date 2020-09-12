@@ -636,43 +636,13 @@
 				BNE .error_exit
 			.word_not_found:
 			
-			;Allocate room for word header
-			LDA new_word_len
-			CLC
-			ADC #WORD_HEADER_SIZE
-			JSR AllocMem
-			LDA ret_val
-			BEQ .alloc_good
-				;Alloc failed - out of memory
-				RTS
-			.alloc_good:
-			
-			;Setup header for new word
-			LDA new_word_len
-			LDY #0
-			STA (dict_ptr),Y
-			.loop:
-				LDA new_word_buff,Y
-				INY
-				STA (dict_ptr),Y
-				CPY new_word_len
-				BNE .loop
-				
-			TODO: smaller to copy run of bytes?
-			;Next word - 0 being end of chain
-			LDA #0
-			INY
-			STA (dict_ptr),Y
-			INY
-			STA (dict_ptr),Y
-			;Token
-			LDA #TOKEN_WORD
-			INY
-			STA (dict_ptr),Y
-			;Only one byte header
-			LDA #OBJ_WORD
-			INY
-			STA (dict_ptr),Y
+			CALL WriteHeader
+			CALL DictBytes
+			FCB WORD_HEADER_SIZE-1	;Number of bytes
+			FDB 0					;Next word
+			FCB TOKEN_WORD			;Token
+			FCB OBJ_WORD			;Type header
+			FDB 0					;Old address
 			
 			;Adjust dict pointer
 			MOV.W new_dict_ptr,dict_ptr
@@ -680,6 +650,7 @@
 			;Now in compile mode
 			LDA #MODE_COMPILE
 			STA mode
+			
 			RTS
 	
 	WORD_SEMI:
@@ -695,9 +666,6 @@
 			JSR AllocMem
 			LDA ret_val
 			BEQ .alloc_good
-				.error_exit:
-				LDA #ERROR_INPUT
-				STA ret_val
 				RTS
 			.alloc_good:
 			
@@ -731,13 +699,16 @@
 			INY
 			STA (dict_save),Y
 			
+			;Save changes to dictionary pointer
+			MOV.W dict_ptr,dict_save
+			
 			LDA #MODE_IMMEDIATE
 			STA mode
 			RTS
 			
 	WORD_FLOAT:
 		FCB 0,""				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_HALT			;Next word
 		FCB TOKEN_FLOAT			;ID - 40
 		CODE_FLOAT:
 			FCB OBJ_PRIMITIVE	;Type
@@ -747,17 +718,97 @@
 			PHA
 			LDA #OBJ_FLOAT
 			STA 0,X
-			LDY #OBJ_SIZE-1
+			LDY #1
 			.loop:
 				INX
 				LDA (exec_ptr),Y
 				STA 0,X
-				DEY
+				INY
+				CPY #OBJ_SIZE
 				BNE .loop
 			PLA
 			TAX
+			
+			LDA exec_ptr
+			CLC
+			ADC #OBJ_SIZE-1
+			STA exec_ptr
+			BCC .skip
+				INC exec_ptr
+			.skip:
 			RTS
 	
+	WORD_HALT:
+		FCB 4,"HALT"			;Name
+		FDB WORD_VAR			;Next word
+		FCB TOKEN_HALT			;ID - 42
+		CODE_HALT:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB 0				;Flags
+			
+			halt
+			RTS
+	
+	WORD_VAR:
+		FCB 3,"VAR"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_VAR			;ID - 44
+		CODE_VAR:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB 0				;Flags
+			
+			TODO: Share this with TICK
+			CALL LineWord
+			LDA new_word_len
+			BNE .word_found
+				.error_exit:
+				LDA #ERROR_INPUT
+				STA ret_val
+				JMP CODE_DROP+EXEC_HEADER
+			.word_found:
+			
+			;Check if name already exists
+			CALL FindWord
+			LDA ret_val
+			BNE .error_exit
+			
+			TODO: check name begins with variable
+			
+			halt
+			
+			CALL WriteHeader
+			CALL DictBytes
+			FCB WORD_HEADER_SIZE-1	;Number of bytes
+			FDB 0					;Next word
+			FCB TOKEN_VAR			;Token
+			FCB OBJ_VAR				;Type header
+			FDB 0					;Old address
+			
+			TYA
+			CLC
+			ADC dict_ptr
+			STA dict_ptr
+			BCC .skip
+				INC dict_ptr
+			.skip:
+			
+			LDA #$A5
+			LDY #0
+			.loop:
+				STA (dict_ptr),Y
+				INY
+				CPY #OBJ_SIZE-1
+				BNE .loop
+			
+			TODO: end item
+			TODO: update pointer to next word
+			
+			;Adjust dict pointer
+			MOV.W new_dict_ptr,dict_ptr
+			
+			RTS
+			
+			
 	
 	JUMP_TABLE:
 		FDB CODE_DUP		;2
@@ -780,6 +831,9 @@
 		FDB CODE_COLON		;36
 		FDB CODE_SEMI		;38
 		FDB CODE_FLOAT		;40
+		FDB CODE_HALT		;42
+		FDB CODE_VAR		;44
+		
 		
 		
 		

@@ -5,7 +5,7 @@
 ;	8 outputs for LCD data lines and keyboard
 ;	1 output for LCD E
 ;	1 output for latch
-;		4 or 5 for rst, rs, cs1, cs2, and maybe r/w
+;		4 or 5 for rst, rs, cs1, cs2, and r/w (NEEDED)
 ;		1-3 for EEPROM bank
 ;		1 for power transistor
 ;	1 output for Tx <== latched? speed may not matter
@@ -14,19 +14,18 @@
 ;***1 PIN SHORT!***
 
 
-;Constants
-;=========
-	include emu.asm
-	include const.asm
-
 ;Macros
 ;======
 	include macros.asm
 	include optimizer_nmos.asm
 
+;Constants
+;=========
+	include emu.asm
+	include const.asm
+
 ;Notes
 ;=====
-TODO: compare to bc for rounding
 TODO: checking - p110 in Handbook of Floating Point Arithmetic
 
 

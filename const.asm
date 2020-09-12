@@ -21,9 +21,10 @@ OBJ_FLOAT = 			1
 OBJ_STR = 				2
 OBJ_HEX = 				3
 OBJ_ERROR =				4
+TODO: replace with code that isnt op code, so unlikely to crash on EXEC
 OBJ_PRIMITIVE =			5
 OBJ_WORD =				6
-OBJ_ARRAY =				7
+OBJ_VAR =				7
 
 OBJ_SIZE =				9
 
@@ -112,10 +113,17 @@ ERROR_OUT_OF_MEM =			20
 	TOKEN_COLON =	36
 	TOKEN_SEMI =	38
 	TOKEN_FLOAT =	40
+	TOKEN_HALT =	42
+	TOKEN_VAR =		44
 	
 	;Odd tokens - no jump table entry
 	TOKEN_DONE =	1
 	TOKEN_WORD =	3
+	TOKEN_NONE =	5 ;Placeholder token for var
+	
+	;Return stack types
+	R_RAW =			0
+	R_THREAD =		1
 	
 	;Flag masks
 	FLAG_MIN =			3
@@ -134,7 +142,13 @@ ERROR_OUT_OF_MEM =			20
 	DICT_END_SIZE =		4
 	
 	;Header for new dictionary words
-	WORD_HEADER_SIZE =	5
+	WORD_HEADER_SIZE =	7
+		;1 - name length
+		;2 - next word
+		;1 - token
+		;1 - type
+		;2 - old address
+		
 	
 	
 	
