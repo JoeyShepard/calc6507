@@ -43,7 +43,7 @@
 		
 		LDA #' '
 		STA sign
-		LDY #8
+		LDY #6
 		LDA (source),Y
 		AND #SIGN_BIT
 		BEQ .positive
@@ -74,7 +74,7 @@
 			BNE .loop
 		LDA #'+'
 		STA sign
-		LDY #8
+		LDY #6
 		LDA (source),Y
 		AND #E_SIGN_BIT
 		BEQ .positive_e
@@ -340,6 +340,8 @@
 		STA screen_ptr+1
 		CALL LCD_print, "bbbbbbbbbbbbbb"
 		MOV.B #0,font_inverted
+		
+		halt
 		
 		.loop:
 			CALL ReadKey

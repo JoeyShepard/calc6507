@@ -14,6 +14,30 @@
 		SEI
 		CLD
 		
+		;Fill RAM with $FF for debugging
+		PLA
+		STA 2
+		PLA
+		STA 3
+		LDA #0
+		STA 0
+		STA 1
+		LDY #4
+		.loop_begin:
+		LDA #$FF
+		.loop:
+			STA (0),Y
+			INY
+			BNE .loop
+		INC 1
+		LDA 1
+		CMP #9
+		BNE .loop_begin
+		LDA 3
+		PHA
+		LDA 2
+		PHA
+		
 		;Stack grows down
 		LDX #0
 		STX stack_count
@@ -27,7 +51,11 @@
 		LDA #dict_begin / 256
 		STA dict_ptr+1
 		STA dict_save+1
-		CALL DictEnd
+		
+		LDA #0
+		STA dict_begin
+		STA dict_begin+1
+		STA dict_begin+2
 		
 		LDA #MODE_IMMEDIATE
 		STA mode

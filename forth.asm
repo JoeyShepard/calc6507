@@ -762,6 +762,8 @@
 		
 		CMP #TOKEN_WORD
 		BEQ .not_primitive
+		CMP #TOKEN_VAR_DATA
+		BEQ .not_primitive
 			TAY
 			LDA JUMP_TABLE-2,Y
 			STA ret_address
@@ -777,8 +779,19 @@
 		BEQ .exec_primitive
 		CMP #OBJ_WORD
 		BEQ .exec_word
+		CMP #OBJ_VAR
+		BEQ .exec_var
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
+			RTS
+		
+		.exec_var:
+			halt
+			LDA ret_address
+			LDA ret_address+1
+			
+			TODO: stuff address in exec_ptr then jump to exec_primitive below?
+			
 			RTS
 		.exec_word:
 			
@@ -909,37 +922,48 @@
 		.loop:
 			LDY #0
 			LDA (exec_ptr),Y
-			CMP #TOKEN_DONE
-			BEQ .done
-			CMP #TOKEN_WORD
-			BNE .not_word
+			LSR
+			BCC .primitive
+				;Odd-numbered token - not in jump table
+				ROL
+				CMP #TOKEN_DONE
+				BEQ .done
+				CMP #TOKEN_WORD
+				BNE .not_word
+			
+					TODO: check stack space left to prevent underflow
+						
+					;Push current thread address to stack
+					LDA exec_ptr
+					CLC
+					ADC #3
+					TAY
+					LDA exec_ptr+1
+					ADC #0
+					PHA
+					TYA
+					PHA
+					LDA #R_THREAD
+					PHA
+					
+					;Load new thread address
+					LDY #1
+					LDA (exec_ptr),Y
+					PHA
+					INY
+					LDA (exec_ptr),Y
+					STA exec_ptr+1
+					PLA 
+					STA exec_ptr
+					JMP .loop
 				
-				TODO: check stack space left to prevent underflow
+				.not_word:
 				
-				;Push current thread address to stack
-				LDA exec_ptr
-				CLC
-				ADC #3
-				TAY
-				LDA exec_ptr+1
-				ADC #0
-				PHA
-				TYA
-				PHA
-				LDA #R_THREAD
-				PHA
-				
-				;Load new thread address
-				LDY #1
-				LDA (exec_ptr),Y
-				PHA
-				INY
-				LDA (exec_ptr),Y
-				STA exec_ptr+1
-				PLA 
-				STA exec_ptr
-				JMP .loop
-			.not_word:
+				;Unknown token!
+				halt
+			
+			.primitive:
+			ASL
 			CALL ExecToken
 			LDA ret_val
 			BNE .error
@@ -947,6 +971,7 @@
 			BNE .loop
 				INC exec_ptr+1
 			BNE .loop
+		
 		.error:
 			;Something in the thread caused an error
 			;Dump all threads and return to top level
@@ -992,13 +1017,58 @@
 	
 	;Put placeholder stop word at dictionary pointer and increment
 	FUNC DictEnd
+		
+		PHA
+		JSR AllocMem
+		LDA ret_val
+		BEQ .alloc_good
+			PLA
+			RTS
+		.alloc_good:
+		
+		LDY #0
+		PLA
+		CMP #4
+		BNE .no_end_token
+			LDA #TOKEN_DONE
+			STA (dict_ptr),Y
+			INC dict_ptr
+			BNE .skip
+				INC dict_ptr
+			.skip:
+		.no_end_token:
+		
+		;Three byte empty header signifying end of dictionary
 		LDA #0
-		TAY
 		STA (dict_ptr),Y		;Length of name
 		INY
 		STA (dict_ptr),Y		;Next word low
 		INY
 		STA (dict_ptr),Y		;Next word high
+		
+		;Set next word to new dict end item
+		LDY #0
+		LDA (dict_save),Y
+		TAY
+		INY
+		LDA dict_ptr
+		STA (dict_save),Y
+		LDA dict_ptr+1
+		INY
+		STA (dict_save),Y
+		
+		;Save changes to dictionary pointer
+		MOV.W dict_ptr,dict_save
+	END
+	
+	;Amount in A
+	FUNC IncDictPtr
+		CLC
+		ADC dict_ptr
+		STA dict_ptr
+		BCC .skip
+			INC dict_ptr+1
+		.skip:
 	END
 	
 	TODO: return value in A too?
@@ -1035,15 +1105,23 @@
 	FUNC WriteToken
 		VARS
 			BYTE token
+			BYTE user_defined
 			WORD flag_ptr
 		END
 		
-		TODO: this sequence is repeated several times
+		halt
 		
+		TODO: this sequence is repeated several times
+		LDY #0
+		STY user_defined
 		STA token
 		CMP #TOKEN_WORD
+		BEQ .not_primitive
+		CMP #TOKEN_VAR_DATA
 		BNE .primitive
-			;User defined word
+			.not_primitive:
+			LDA #$FF
+			STA user_defined
 			LDA #3
 			JMP .alloc
 		;Primitive token
@@ -1076,9 +1154,9 @@
 		LDY #0
 		STA (dict_ptr),Y
 		
-		CMP #TOKEN_WORD
-		BNE .no_address
-			;Write address if user defined word
+		LDA user_defined 
+		BEQ .no_address
+			;Write address of user defined word
 			LDA ret_address
 			CLC
 			ADC #3	;Skip over type byte and old address pointer
@@ -1089,17 +1167,13 @@
 			INY
 			STA (dict_ptr),Y
 		.no_address:
-		
-		LDA #TOKEN_DONE
-		INY
-		STA (dict_ptr),Y
-		
+				
 		;Adjust dict pointer
 		MOV.W new_dict_ptr,dict_ptr
 	END
 	
-	;59 bytes
-	FUNC DictBytes
+	;Allocate room for word header
+	FUNC WriteHeader
 		;Optimizer doesn't work unless function called from function!
 		;VARS
 		;	BYTE count
@@ -1112,46 +1186,17 @@
 		dest_index =	R0+2
 		ptr =			R0+3
 		
-		STY dest_index
 		PLA
 		STA ptr
 		PLA
 		STA ptr+1
 		
-		LDY #1
-		LDA (ptr),Y
-		STA count
-		INY
-		.loop:
-			LDA (ptr),Y
-			INY
-			STY src_index
-			LDY dest_index
-			INY
-			STA (dict_ptr),Y
-			STY dest_index
-			LDY src_index
-			DEC count
-			BNE .loop
-		LDY #1
-		LDA (ptr),Y
-		SEC
-		ADC ptr
-		TAY
-		LDA ptr+1
-		ADC #0
-		PHA
-		TYA
-		PHA	
-		LDY dest_index
-		INY
-	END
-	
-	;Allocate room for word header
-	FUNC WriteHeader
 		LDA new_word_len
+		STA dest_index
 		CLC
 		ADC #WORD_HEADER_SIZE
+		LDY #1
+		ADC (ptr),Y
 		JSR AllocMem
 		LDA ret_val
 		BEQ .alloc_good
@@ -1166,12 +1211,39 @@
 		LDA new_word_len
 		LDY #0
 		STA (dict_ptr),Y
-		.loop:
+		.name_loop:
 			LDA new_word_buff,Y
 			INY
 			STA (dict_ptr),Y
 			CPY new_word_len
-			BNE .loop
+			BNE .name_loop
+		
+		LDA #WORD_HEADER_SIZE-1
+		STA count
+		
+		LDY #2
+		.header_loop:
+			LDA (ptr),Y
+			INY
+			STY src_index
+			LDY dest_index
+			INY
+			STA (dict_ptr),Y
+			STY dest_index
+			LDY src_index
+			DEC count
+			BNE .header_loop
+		LDA #WORD_HEADER_SIZE-1
+		SEC
+		;CLC
+		ADC ptr
+		TAY
+		LDA ptr+1
+		ADC #0
+		PHA
+		TYA
+		PHA	
+		
 	END
 	
 	

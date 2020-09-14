@@ -637,9 +637,8 @@
 			.word_not_found:
 			
 			CALL WriteHeader
-			CALL DictBytes
-			FCB WORD_HEADER_SIZE-1	;Number of bytes
-			FDB 0					;Next word
+			FCB 0					;Extra space
+			FDB 0					;Next address
 			FCB TOKEN_WORD			;Token
 			FCB OBJ_WORD			;Type header
 			FDB 0					;Old address
@@ -661,50 +660,13 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB COMPILE			;Flags
 			
-			;Allocate dict end item
-			LDA #DICT_END_SIZE
-			JSR AllocMem
-			LDA ret_val
-			BEQ .alloc_good
-				RTS
-			.alloc_good:
-			
-			;Write dict end item
-			TODO: copying run of bytes is faster?
-			LDA #TOKEN_DONE
-			LDY #0
-			STA (dict_ptr),Y
-			LDA #0
-			INY
-			STA (dict_ptr),Y
-			INY
-			STA (dict_ptr),Y
-			INY
-			STA (dict_ptr),Y
-			
-			;Point past done byte to dict end item
-			INC dict_ptr
-			BNE .skip
-				INC dict_ptr
-			.skip:
-			
-			;Set next word to new dict end item
-			LDY #0
-			LDA (dict_save),Y
-			TAY
-			INY
-			LDA dict_ptr
-			STA (dict_save),Y
-			LDA dict_ptr+1
-			INY
-			STA (dict_save),Y
-			
-			;Save changes to dictionary pointer
-			MOV.W dict_ptr,dict_save
-			
 			LDA #MODE_IMMEDIATE
 			STA mode
-			RTS
+			
+			;Extra byte for end token
+			LDA #DICT_END_SIZE+1
+			JMP DictEnd
+			
 			
 	WORD_FLOAT:
 		FCB 0,""				;Name
@@ -751,7 +713,7 @@
 	
 	WORD_VAR:
 		FCB 3,"VAR"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_VAR_DATA		;Next word
 		FCB TOKEN_VAR			;ID - 44
 		CODE_VAR:
 			FCB OBJ_PRIMITIVE	;Type
@@ -767,44 +729,70 @@
 				JMP CODE_DROP+EXEC_HEADER
 			.word_found:
 			
+			;Make sure variable name starts with character
+			LDA new_word_buff
+			CMP #'A'
+			BCC .error_exit
+			CMP #'Z'+1
+			BCS .error_exit
+			
 			;Check if name already exists
 			CALL FindWord
 			LDA ret_val
 			BNE .error_exit
-			
-			TODO: check name begins with variable
-			
-			halt
-			
+				
 			CALL WriteHeader
-			CALL DictBytes
-			FCB WORD_HEADER_SIZE-1	;Number of bytes
-			FDB 0					;Next word
-			FCB TOKEN_VAR			;Token
+			FCB OBJ_SIZE			;Extra space to reserve
+			FDB 0					;Next address
+			FCB TOKEN_VAR_DATA		;Token
 			FCB OBJ_VAR				;Type header
 			FDB 0					;Old address
 			
-			TYA
+			;Update dict ptr
+			LDA new_word_len
 			CLC
-			ADC dict_ptr
-			STA dict_ptr
-			BCC .skip
-				INC dict_ptr
-			.skip:
+			ADC #WORD_HEADER_SIZE
+			CALL IncDictPtr
 			
-			LDA #$A5
+			;Write variable data
+			LDA #OBJ_FLOAT
 			LDY #0
+			STA (dict_ptr),Y
+			INY
+			LDA #0
 			.loop:
 				STA (dict_ptr),Y
 				INY
-				CPY #OBJ_SIZE-1
+				CPY #OBJ_SIZE
 				BNE .loop
 			
-			TODO: end item
-			TODO: update pointer to next word
+			LDA #OBJ_SIZE
+			CALL IncDictPtr
 			
-			;Adjust dict pointer
-			MOV.W new_dict_ptr,dict_ptr
+			LDA #DICT_END_SIZE
+			JMP DictEnd
+			
+			
+	WORD_VAR_DATA:
+		FCB 0,""				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_VAR_DATA		;ID - 46
+		CODE_VAR_DATA:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB ADD1			;Flags
+			
+			halt
+			
+			LDY #0
+			LDA (exec_ptr),Y
+			
+			LDA exec_ptr
+			CLC
+			ADC #2
+			STA exec_ptr
+			BCC .skip
+				INC exec_ptr+1
+			.skip:
 			
 			RTS
 			
@@ -833,6 +821,7 @@
 		FDB CODE_FLOAT		;40
 		FDB CODE_HALT		;42
 		FDB CODE_VAR		;44
+		FDB CODE_VAR_DATA	;46
 		
 		
 		
