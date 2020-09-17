@@ -13,7 +13,9 @@
 ;	5 inputs for keyboard
 ;***1 PIN SHORT!***
 
-
+;Unlimited lines per page in listing
+	PAGE 0
+	
 ;Macros
 ;======
 	include macros.asm
@@ -31,8 +33,6 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 
 ;Main code
 ;=========
-	;Unlimited lines per page in listing
-	PAGE 0
 	
 DEBUG_MODE set "off"
 		
@@ -66,6 +66,8 @@ LOCALS_END set		$1F
 	WORD new_dict_ptr
 	WORD dict_save
 	WORD exec_ptr
+	TODO: share with ret_address?
+	WORD obj_address
 	
 	;Don't need header byte, +3 for guard, round, sticky
 	R0: DFS OBJ_SIZE-1+3

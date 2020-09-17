@@ -490,10 +490,10 @@
 			LDA ret_val
 			BEQ .error_exit
 			
-			LDA ret_address
+			LDA obj_address
 			STA HEX_BASE,X
 			STA HEX_SUM,X
-			LDA ret_address+1
+			LDA obj_address+1
 			STA HEX_BASE+1,X
 			STA HEX_SUM+1,X
 			LDA #0
@@ -517,9 +517,9 @@
 			FCB MIN1|HEX		;Flags
 			
 			LDA HEX_SUM,X
-			STA ret_address
+			STA obj_address
 			LDA HEX_SUM+1,X
-			STA ret_address+1
+			STA obj_address+1
 			JSR CODE_DROP+EXEC_HEADER
 			;Original return address still on stack, so no recursion problems
 			LDA #TOKEN_WORD
@@ -691,14 +691,8 @@
 			PLA
 			TAX
 			
-			LDA exec_ptr
-			CLC
-			ADC #OBJ_SIZE-1
-			STA exec_ptr
-			BCC .skip
-				INC exec_ptr
-			.skip:
-			RTS
+			LDA #OBJ_SIZE-1
+			JMP IncExecPtr
 	
 	WORD_HALT:
 		FCB 4,"HALT"			;Name
@@ -758,8 +752,8 @@
 			LDA #OBJ_FLOAT
 			LDY #0
 			STA (dict_ptr),Y
+			TYA
 			INY
-			LDA #0
 			.loop:
 				STA (dict_ptr),Y
 				INY
@@ -775,27 +769,57 @@
 			
 	WORD_VAR_DATA:
 		FCB 0,""				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_VAR_THREAD		;Next word
 		FCB TOKEN_VAR_DATA		;ID - 46
 		CODE_VAR_DATA:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 			
-			halt
-			
-			LDY #0
-			LDA (exec_ptr),Y
-			
-			LDA exec_ptr
-			CLC
-			ADC #2
-			STA exec_ptr
-			BCC .skip
-				INC exec_ptr+1
-			.skip:
-			
+			TXA
+			PHA
+			LDY #3
+			.loop:
+				LDA (obj_address),Y
+				STA 0,X
+				INY
+				INX
+				CPY #OBJ_SIZE+3
+				BNE .loop
+			PLA
+			TAX
 			RTS
 			
+	WORD_VAR_THREAD:
+		FCB 0,""				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_VAR_THREAD	;ID - 48
+		CODE_VAR_THREAD:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB ADD1			;Flags
+			
+			halt
+			TXA
+			PHA
+			LDY #1
+			LDA (exec_ptr),Y
+			STA ret_address
+			INY
+			LDA (exec_ptr),Y
+			STA ret_address+1
+			LDY #0
+			.loop:
+				LDA (ret_address),Y
+				STA 0,X
+				INX
+				INY
+				CPY #OBJ_SIZE
+				BNE .loop
+			PLA
+			TAX
+			
+			LDA #2
+			JMP IncExecPtr
+	
 			
 	
 	JUMP_TABLE:
@@ -822,7 +846,7 @@
 		FDB CODE_HALT		;42
 		FDB CODE_VAR		;44
 		FDB CODE_VAR_DATA	;46
-		
+		FDB CODE_VAR_THREAD	;46
 		
 		
 		

@@ -2,4 +2,5 @@
 : BAR 2 FOO ;
 : BAZ 1 BAR ;
 BAZ
-
+VAR TEST
+TEST

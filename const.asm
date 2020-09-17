@@ -116,10 +116,15 @@
 		TOKEN_HALT =		42
 		TOKEN_VAR =			44
 		TOKEN_VAR_DATA =	46
+		TOKEN_VAR_THREAD =	48
 		
 		;Odd tokens - no jump table entry
 		TOKEN_DONE =		1
 		TOKEN_WORD =		3
+		
+		;Execution modes
+		EXEC_INPUT =		0
+		EXEC_THREAD =		1
 		
 		;Return stack types
 		R_RAW =			0

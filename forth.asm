@@ -288,10 +288,10 @@
 		CLC
 		TYA
 		ADC ret_address
-		STA ret_address
-		BCC .skip
-			INC ret_address+1
-		.skip:
+		STA obj_address
+		LDA ret_address+1
+		ADC #0
+		STA obj_address+1
 	END
 	
 	FUNC CheckData
@@ -761,15 +761,21 @@
 		STY ret_val
 		
 		CMP #TOKEN_WORD
-		BEQ .not_primitive
-		CMP #TOKEN_VAR_DATA
-		BEQ .not_primitive
+		BNE .primitive
+			;User-defined word
+			LDA obj_address
+			STA ret_address
+			LDA obj_address+1
+			STA ret_address+1
+			JMP .address_done
+		.primitive:
 			TAY
 			LDA JUMP_TABLE-2,Y
 			STA ret_address
 			LDA JUMP_TABLE-1,Y
 			STA ret_address+1
-		.not_primitive:
+		.address_done:
+		
 		
 		LDY #0
 		LDA (ret_address),Y
@@ -779,20 +785,10 @@
 		BEQ .exec_primitive
 		CMP #OBJ_WORD
 		BEQ .exec_word
-		CMP #OBJ_VAR
-		BEQ .exec_var
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
 		
-		.exec_var:
-			halt
-			LDA ret_address
-			LDA ret_address+1
-			
-			TODO: stuff address in exec_ptr then jump to exec_primitive below?
-			
-			RTS
 		.exec_word:
 			
 			;Mark return value as raw
@@ -967,6 +963,7 @@
 			CALL ExecToken
 			LDA ret_val
 			BNE .error
+			;Same size and faster than IncExecPtr
 			INC exec_ptr
 			BNE .loop
 				INC exec_ptr+1
@@ -1071,6 +1068,16 @@
 		.skip:
 	END
 	
+	;Amount in A
+	FUNC IncExecPtr
+		CLC
+		ADC exec_ptr
+		STA exec_ptr
+		BCC .done
+			INC exec_ptr
+		.done:
+	END
+	
 	TODO: return value in A too?
 	;Amount in A
 	FUNC AllocMem
@@ -1108,9 +1115,7 @@
 			BYTE user_defined
 			WORD flag_ptr
 		END
-		
-		halt
-		
+				
 		TODO: this sequence is repeated several times
 		LDY #0
 		STY user_defined
@@ -1119,6 +1124,9 @@
 		BEQ .not_primitive
 		CMP #TOKEN_VAR_DATA
 		BNE .primitive
+			;Recode variable token
+			LDA #TOKEN_VAR_THREAD
+			STA token
 			.not_primitive:
 			LDA #$FF
 			STA user_defined
@@ -1157,12 +1165,12 @@
 		LDA user_defined 
 		BEQ .no_address
 			;Write address of user defined word
-			LDA ret_address
+			LDA obj_address
 			CLC
 			ADC #3	;Skip over type byte and old address pointer
 			INY
 			STA (dict_ptr),Y
-			LDA ret_address+1
+			LDA obj_address+1
 			ADC #0
 			INY
 			STA (dict_ptr),Y
