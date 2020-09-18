@@ -791,13 +791,12 @@
 			
 	WORD_VAR_THREAD:
 		FCB 0,""				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_STO			;Next word
 		FCB TOKEN_VAR_THREAD	;ID - 48
 		CODE_VAR_THREAD:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 			
-			halt
 			TXA
 			PHA
 			LDY #1
@@ -819,7 +818,53 @@
 			
 			LDA #2
 			JMP IncExecPtr
-	
+			
+	WORD_STO:
+		FCB 3,"STO"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_STO			;ID - 50
+		CODE_STO:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN1			;Flags
+			
+			CALL LineWord
+			LDA new_word_len
+			BNE .word_found
+				.error_exit:
+				LDA #ERROR_INPUT
+				STA ret_val
+				RTS
+			.word_found:
+			
+			CALL FindWord
+			LDA ret_val
+			BEQ .error_exit
+				
+			LDY #0
+			LDA (obj_address),Y
+			CMP #OBJ_VAR
+			BEQ .type_good
+				LDA #ERROR_WRONG_TYPE
+				STA ret_val
+				RTS
+			.type_good:
+			
+			LDY #3
+			TXA
+			PHA
+			.loop:
+				LDA 0,X
+				STA (obj_address),Y
+				INX
+				INY
+				CPY #11
+				BNE .loop
+			PLA
+			TAX
+			
+			LDA #ERROR_NONE
+			STA ret_val
+			JMP CODE_DROP+EXEC_HEADER
 			
 	
 	JUMP_TABLE:
@@ -846,7 +891,8 @@
 		FDB CODE_HALT		;42
 		FDB CODE_VAR		;44
 		FDB CODE_VAR_DATA	;46
-		FDB CODE_VAR_THREAD	;46
+		FDB CODE_VAR_THREAD	;48
+		FDB CODE_STO		;50
 		
 		
 		

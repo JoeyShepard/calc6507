@@ -117,6 +117,7 @@
 		TOKEN_VAR =			44
 		TOKEN_VAR_DATA =	46
 		TOKEN_VAR_THREAD =	48
+		TOKEN_STO =			50
 		
 		;Odd tokens - no jump table entry
 		TOKEN_DONE =		1
