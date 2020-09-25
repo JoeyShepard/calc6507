@@ -43,7 +43,8 @@
 		
 		LDA #' '
 		STA sign
-		LDY #6
+		;halt
+		LDY #EXP_HI-1
 		LDA (source),Y
 		AND #SIGN_BIT
 		BEQ .positive
@@ -74,7 +75,7 @@
 			BNE .loop
 		LDA #'+'
 		STA sign
-		LDY #6
+		LDY #EXP_HI-1
 		LDA (source),Y
 		AND #E_SIGN_BIT
 		BEQ .positive_e

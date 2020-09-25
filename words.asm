@@ -175,8 +175,9 @@
 			BNE add_not_float
 				ADD_FLOAT:
 					TODO: adding floats
-					
-					RTS
+					halt
+					JSR TosR0R1
+					JMP BCD_Add
 			add_not_float:
 			
 			;Adding strings
@@ -184,6 +185,7 @@
 			BNE add_not_string
 				ADD_STRING:
 					TODO: adding strings
+					
 					RTS
 			add_not_string:
 			
@@ -722,7 +724,7 @@
 
 			TXA
 			PHA
-			LDA #OBJ_HEX
+			LDA #OBJ_STR
 			JMP COPY_STUB
 		
 	WORD_HALT:

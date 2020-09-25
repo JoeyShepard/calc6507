@@ -69,15 +69,15 @@ LOCALS_END set		$1F
 	TODO: share with ret_address?
 	WORD obj_address
 	
-	;Don't need header byte, +3 for guard, round, sticky
-	R0: DFS OBJ_SIZE-1+3
-	R1: DFS OBJ_SIZE-1+3
-	R2: DFS OBJ_SIZE-1+3
-	R3: DFS OBJ_SIZE-1+3
-	R4: DFS OBJ_SIZE-1+3
-	R5: DFS OBJ_SIZE-1+3
-	R6: DFS OBJ_SIZE-1+3
-	R7: DFS OBJ_SIZE-1+3
+	;Don't need header byte, +3 for guard, round, sticky, +1 for exp sign
+	R0: DFS OBJ_SIZE-1+4
+	R1: DFS OBJ_SIZE-1+4
+	R2: DFS OBJ_SIZE-1+4
+	R3: DFS OBJ_SIZE-1+4
+	R4: DFS OBJ_SIZE-1+4
+	R5: DFS OBJ_SIZE-1+4
+	R6: DFS OBJ_SIZE-1+4
+	R7: DFS OBJ_SIZE-1+4
 	Regs_end:
 		
 	
@@ -117,7 +117,7 @@ LOCALS_END set		$1F
 	FUNC main, begin
 		VARS
 			WORD dest
-			BYTE arg
+			BYTE arg,type
 		END
 		
 		;Only use bottom 48 bytes of stack
@@ -191,18 +191,18 @@ LOCALS_END set		$1F
 					JMP .error_sub
 				.input_good:
 				
-				;Check stack size
-				LDA #STACK_SIZE-1
-				CMP stack_count
-				BCS .no_overflow
-					LDA #ERROR_STACK_OVERFLOW
-					JMP .error_sub
-				.no_overflow:
-				
 				LDA mode
 				CMP #MODE_IMMEDIATE
 				BNE .compile_value
+				
 					;Immediate mode - add to stack
+					LDA #STACK_SIZE-1
+					CMP stack_count
+					BCS .no_overflow
+						LDA #ERROR_STACK_OVERFLOW
+						JMP .error_sub
+					.no_overflow:
+					
 					JSR StackAddItem
 					
 					STX dest
@@ -214,69 +214,51 @@ LOCALS_END set		$1F
 				
 				;Compile mode - compile value
 				LDA new_stack_item
+				;float?
+				LDY #TOKEN_FLOAT
 				CMP #OBJ_FLOAT
-				BNE .not_float
-					LDA #OBJ_SIZE
-					JSR AllocMem
-					LDA ret_val
-					BEQ .float_alloc_good
-						JMP .error_sub
-					.float_alloc_good:
-					LDA #TOKEN_FLOAT
-					LDY #0
-					STA (dict_ptr),Y
-					
-					TODO: smaller than calling MemCopy here?
-					.loop:
-						INY
-						LDA new_stack_item,Y
-						STA (dict_ptr),Y
-						CPY #8
-						BNE .loop
-						
-					;Adjust dict pointer
-					MOV.W new_dict_ptr,dict_ptr
-					JMP .process_loop
-				.not_float:
-				
-				CMP #OBJ_STR
-				BNE .not_string
-					TODO: more efficient encoding? just write all for now
-					
-				.not_string:
-				
+				BEQ .value_compile
+				;hex?
+				LDY #TOKEN_HEX
 				CMP #OBJ_HEX
-				BNE .not_hex
-					LDA #OBJ_SIZE
-					JSR AllocMem
-					LDA ret_val
-					BEQ .hex_alloc_good
-						JMP .error_sub
-					.hex_alloc_good:
-					LDA #TOKEN_HEX
-					LDY #0
-					STA (dict_ptr),Y
+				BEQ .value_compile
+				;string?
+				LDY #TOKEN_STRING
+				CMP #OBJ_STR
+				BEQ .value_compile
+				
+				;unknown type - something is very wrong
+				halt
 					
-					TODO: smaller than calling MemCopy here?
-					.loop_hex:
-						INY
-						LDA new_stack_item,Y
-						STA (dict_ptr),Y
-						CPY #8
-						BNE .loop_hex
-						
-					;Adjust dict pointer
-					MOV.W new_dict_ptr,dict_ptr
-					JMP .process_loop
-				.not_hex:
-				
-				
-				
 				JMP .process_loop
 				
 		.error_sub:
 			CALL ErrorMsg
 			JMP .input_loop
+			
+		.value_compile:
+			STY type
+			LDA #OBJ_SIZE
+			JSR AllocMem
+			LDA ret_val
+			BEQ .float_alloc_good
+				JMP .error_sub
+			.float_alloc_good:
+			LDA type
+			LDY #0
+			STA (dict_ptr),Y
+			
+			TODO: smaller than calling MemCopy here?
+			.loop:
+				INY
+				LDA new_stack_item,Y
+				STA (dict_ptr),Y
+				CPY #8
+				BNE .loop
+				
+			;Adjust dict pointer
+			MOV.W new_dict_ptr,dict_ptr
+			JMP .process_loop
 	END
 	
 	

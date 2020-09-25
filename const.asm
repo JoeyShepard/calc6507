@@ -45,6 +45,9 @@
 	E_SIGN_BIT =			$40
 	EXP_LO =				7
 	EXP_HI =				8
+	;Only in registers, not on stack
+	EXP_INFO =				9
+	GRS_OFFSET =			3
 	
 	;Hex fields
 	HEX_SUM = 				1

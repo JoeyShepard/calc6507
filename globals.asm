@@ -19,6 +19,10 @@
 	BYTE stack_count
 	BYTE mode
 	
+	;Math
+	BYTE R0_Exp
+	BYTE R1_Exp
+	
 	;Tests
 	BYTE test_count
 	
