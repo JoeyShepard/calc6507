@@ -113,11 +113,13 @@
 		TOKEN_COLON =		36
 		TOKEN_SEMI =		38
 		TOKEN_FLOAT =		40
-		TOKEN_HALT =		42
-		TOKEN_VAR =			44
-		TOKEN_VAR_DATA =	46
-		TOKEN_VAR_THREAD =	48
-		TOKEN_STO =			50
+		TOKEN_HEX =			42
+		TOKEN_STRING =		44
+		TOKEN_HALT =		46
+		TOKEN_VAR =			48
+		TOKEN_VAR_DATA =	50
+		TOKEN_VAR_THREAD =	52
+		TOKEN_STO =			54
 		
 		;Odd tokens - no jump table entry
 		TOKEN_DONE =		1

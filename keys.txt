@@ -1,6 +1,5 @@
-: FOO 3 ;
-: BAR 2 FOO ;
-: BAZ 1 BAR ;
+: FOO 0.3e7 ;
+: BAR 2e5 FOO ;
+: BAZ 10e3 BAR ;
 BAZ
-VAR TEST
-TEST
+

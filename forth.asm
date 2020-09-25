@@ -918,6 +918,7 @@
 		.loop:
 			LDY #0
 			LDA (exec_ptr),Y
+			
 			LSR
 			BCC .primitive
 				;Odd-numbered token - not in jump table

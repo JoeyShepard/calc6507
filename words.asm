@@ -667,10 +667,26 @@
 			LDA #DICT_END_SIZE+1
 			JMP DictEnd
 			
+	;Stub for copying data from word to stack
+	COPY_STUB:
+		STA 0,X
+		LDY #1
+		.loop:
+			INX
+			LDA (exec_ptr),Y
+			STA 0,X
+			INY
+			CPY #OBJ_SIZE
+			BNE .loop
+		PLA
+		TAX
+		
+		LDA #OBJ_SIZE-1
+		JMP IncExecPtr
 			
 	WORD_FLOAT:
 		FCB 0,""				;Name
-		FDB WORD_HALT			;Next word
+		FDB WORD_HEX			;Next word
 		FCB TOKEN_FLOAT			;ID - 40
 		CODE_FLOAT:
 			FCB OBJ_PRIMITIVE	;Type
@@ -679,25 +695,40 @@
 			TXA
 			PHA
 			LDA #OBJ_FLOAT
-			STA 0,X
-			LDY #1
-			.loop:
-				INX
-				LDA (exec_ptr),Y
-				STA 0,X
-				INY
-				CPY #OBJ_SIZE
-				BNE .loop
-			PLA
-			TAX
-			
-			LDA #OBJ_SIZE-1
-			JMP IncExecPtr
+			JMP COPY_STUB
 	
+	TODO: more efficient way than sharing stub?
+	WORD_HEX:
+		FCB 0,""
+		FDB WORD_STRING			;Next word
+		FCB TOKEN_HEX			;ID - 42
+		CODE_HEX:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB ADD1			;Flags
+			
+			TXA
+			PHA
+			LDA #OBJ_HEX
+			JMP COPY_STUB
+	
+	TODO: more efficient way than sharing stub?	
+	WORD_STRING:
+		FCB 0,""
+		FDB WORD_HALT			;Next word
+		FCB TOKEN_STRING		;ID - 44
+		CODE_STRING:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB ADD1			;Flags
+
+			TXA
+			PHA
+			LDA #OBJ_HEX
+			JMP COPY_STUB
+		
 	WORD_HALT:
 		FCB 4,"HALT"			;Name
 		FDB WORD_VAR			;Next word
-		FCB TOKEN_HALT			;ID - 42
+		FCB TOKEN_HALT			;ID - 46
 		CODE_HALT:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB 0				;Flags
@@ -708,7 +739,7 @@
 	WORD_VAR:
 		FCB 3,"VAR"				;Name
 		FDB WORD_VAR_DATA		;Next word
-		FCB TOKEN_VAR			;ID - 44
+		FCB TOKEN_VAR			;ID - 48
 		CODE_VAR:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB 0				;Flags
@@ -770,7 +801,7 @@
 	WORD_VAR_DATA:
 		FCB 0,""				;Name
 		FDB WORD_VAR_THREAD		;Next word
-		FCB TOKEN_VAR_DATA		;ID - 46
+		FCB TOKEN_VAR_DATA		;ID - 50
 		CODE_VAR_DATA:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
@@ -792,7 +823,7 @@
 	WORD_VAR_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_STO			;Next word
-		FCB TOKEN_VAR_THREAD	;ID - 48
+		FCB TOKEN_VAR_THREAD	;ID - 52
 		CODE_VAR_THREAD:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
@@ -822,7 +853,7 @@
 	WORD_STO:
 		FCB 3,"STO"				;Name
 		FDB dict_begin			;Next word
-		FCB TOKEN_STO			;ID - 50
+		FCB TOKEN_STO			;ID - 54
 		CODE_STO:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1			;Flags
@@ -888,11 +919,13 @@
 		FDB CODE_COLON		;36
 		FDB CODE_SEMI		;38
 		FDB CODE_FLOAT		;40
-		FDB CODE_HALT		;42
-		FDB CODE_VAR		;44
-		FDB CODE_VAR_DATA	;46
-		FDB CODE_VAR_THREAD	;48
-		FDB CODE_STO		;50
+		FDB CODE_HEX		;42
+		FDB CODE_STRING		;44
+		FDB CODE_HALT		;46
+		FDB CODE_VAR		;48
+		FDB CODE_VAR_DATA	;50
+		FDB CODE_VAR_THREAD	;52
+		FDB CODE_STO		;54
 		
 		
 		

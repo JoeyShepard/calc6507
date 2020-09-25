@@ -247,7 +247,27 @@ LOCALS_END set		$1F
 				
 				CMP #OBJ_HEX
 				BNE .not_hex
+					LDA #OBJ_SIZE
+					JSR AllocMem
+					LDA ret_val
+					BEQ .hex_alloc_good
+						JMP .error_sub
+					.hex_alloc_good:
+					LDA #TOKEN_HEX
+					LDY #0
+					STA (dict_ptr),Y
 					
+					TODO: smaller than calling MemCopy here?
+					.loop_hex:
+						INY
+						LDA new_stack_item,Y
+						STA (dict_ptr),Y
+						CPY #8
+						BNE .loop_hex
+						
+					;Adjust dict pointer
+					MOV.W new_dict_ptr,dict_ptr
+					JMP .process_loop
 				.not_hex:
 				
 				
