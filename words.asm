@@ -175,9 +175,10 @@
 			BNE add_not_float
 				ADD_FLOAT:
 					TODO: adding floats
-					halt
 					JSR TosR0R1
-					JMP BCD_Add
+					JSR BCD_Add
+					JSR CODE_DROP+EXEC_HEADER
+					JMP R1Tos
 			add_not_float:
 			
 			;Adding strings

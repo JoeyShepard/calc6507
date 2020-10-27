@@ -20,8 +20,15 @@
 	BYTE mode
 	
 	;Math
-	BYTE R0_Exp
-	BYTE R1_Exp
+	TODO: move to zero page if room
+	BYTE math_a
+	BYTE math_b
+	BYTE math_c
+	BYTE math_d
+	BYTE math_e
+	BYTE math_f
+	BYTE math_signs
+	BYTE math_sticky
 	
 	;Tests
 	BYTE test_count
@@ -29,6 +36,7 @@
 	;Rest of RAM for user dictionary
 	dict_begin:
 
-	ORG $900
+	TODO: what about extra 128 bytes in RIOT? not preserved by backup battery
+	ORG $800
 	dict_end:
 	

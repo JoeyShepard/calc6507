@@ -43,7 +43,6 @@
 		
 		LDA #' '
 		STA sign
-		;halt
 		LDY #EXP_HI-1
 		LDA (source),Y
 		AND #SIGN_BIT

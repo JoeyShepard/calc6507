@@ -69,15 +69,15 @@ LOCALS_END set		$1F
 	TODO: share with ret_address?
 	WORD obj_address
 	
-	;Don't need header byte, +3 for guard, round, sticky, +1 for exp sign
-	R0: DFS OBJ_SIZE-1+4
-	R1: DFS OBJ_SIZE-1+4
-	R2: DFS OBJ_SIZE-1+4
-	R3: DFS OBJ_SIZE-1+4
-	R4: DFS OBJ_SIZE-1+4
-	R5: DFS OBJ_SIZE-1+4
-	R6: DFS OBJ_SIZE-1+4
-	R7: DFS OBJ_SIZE-1+4
+	;Don't need header byte, +1 for guard and round, +1 for exp sign
+	R0: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R1: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R2: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R3: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R4: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R5: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R6: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R7: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
 	Regs_end:
 		
 	
@@ -99,6 +99,7 @@ LOCALS_END set		$1F
 	JMP main	;static entry address for emulator
 	
 	;504 bytes 0_0
+	TODO: compress? ie count of empty rows before and after
 	font_table:
 	include font_8x8.asm
 	

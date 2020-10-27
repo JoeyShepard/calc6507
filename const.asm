@@ -26,6 +26,7 @@
 	OBJ_WORD =				6
 	OBJ_VAR =				7
 	
+	TYPE_SIZE =				1
 	OBJ_SIZE =				9
 	
 	;Input
@@ -41,13 +42,14 @@
 	KEY_ESCAPE =			27
 	
 	;Floats
+	DEC_COUNT =				12
 	SIGN_BIT =				$80
 	E_SIGN_BIT =			$40
 	EXP_LO =				7
 	EXP_HI =				8
 	;Only in registers, not on stack
-	EXP_INFO =				9
-	GRS_OFFSET =			3
+	SIGN_INFO =				9
+	GR_OFFSET =				1
 	
 	;Hex fields
 	HEX_SUM = 				1
