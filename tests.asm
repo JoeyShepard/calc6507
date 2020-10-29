@@ -310,3 +310,30 @@
 		LDX #0
 	END 
 	
+	FUNC DebugR1
+		TXA
+		PHA
+		
+		CALL DebugText,"\\n"
+		LDX #(DEC_COUNT/2)-1+GR_OFFSET
+		.loop:
+			LDA R1,X
+			STA DEBUG_HEX
+			DEX
+			BNE .loop
+		LDA #' '
+		STA DEBUG
+		
+		LDA R1		;GR
+		STA DEBUG_HEX
+		
+		CALL DebugText," E"
+		LDA R1+DEC_COUNT/2+2
+		STA DEBUG_HEX
+		LDA R1+DEC_COUNT/2+1
+		STA DEBUG_HEX
+		
+		PLA
+		TAX
+	END
+	

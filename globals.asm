@@ -21,12 +21,12 @@
 	
 	;Math
 	TODO: move to zero page if room
+	BYTE math_lo
+	BYTE math_hi
 	BYTE math_a
 	BYTE math_b
 	BYTE math_c
 	BYTE math_d
-	BYTE math_e
-	BYTE math_f
 	BYTE math_signs
 	BYTE math_sticky
 	

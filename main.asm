@@ -23,9 +23,9 @@
 
 ;Constants
 ;=========
-	include emu.asm
 	include const.asm
-
+	include emu.asm
+	
 ;Notes
 ;=====
 TODO: checking - p110 in Handbook of Floating Point Arithmetic

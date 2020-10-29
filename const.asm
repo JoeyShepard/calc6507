@@ -45,6 +45,7 @@
 	DEC_COUNT =				12
 	SIGN_BIT =				$80
 	E_SIGN_BIT =			$40
+	SAME_BIT =				$20	;Only used during calculation
 	EXP_LO =				7
 	EXP_HI =				8
 	;Only in registers, not on stack
