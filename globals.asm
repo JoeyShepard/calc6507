@@ -37,6 +37,7 @@
 	dict_begin:
 
 	TODO: what about extra 128 bytes in RIOT? not preserved by backup battery
+		;could put fp variables here or anything else not preserved
 	ORG $800
 	dict_end:
 	

@@ -177,7 +177,6 @@
 					TODO: adding floats
 					JSR TosR0R1
 					JSR BCD_Add
-					JSR DebugR1
 					JSR CODE_DROP+EXEC_HEADER
 					JMP R1Tos
 			add_not_float:
