@@ -1,5 +1,6 @@
 ;Global variables in RAM
 ;=======================
+	TODO: move these to zp if room
 	global_error:		DFS 1
 	
 	;Line input
@@ -7,17 +8,24 @@
 	input_buff_end:		DFS 1
 	input_buff:			DFS BUFF_SIZE
 	
-	;Splitting input into words
-	new_word_len:		DFS 1
-	new_word_buff:		DFS WORD_MAX_SIZE
-	new_stack_item:		DFS 9
-	
 	;Font
 	BYTE font_inverted
 	
 	;Forth
 	BYTE stack_count
 	BYTE mode
+		
+	;Tests
+	WORD test_count
+	
+	;Rest of RAM for user dictionary
+	dict_begin:
+
+	ORG $800
+	dict_end:
+	
+	;extra RAM in RIOT - not preserved by backup battery
+	TODO: what else will fit in RIOT RAM?
 	
 	;Math
 	TODO: move to zero page if room
@@ -30,14 +38,10 @@
 	BYTE math_signs
 	BYTE math_sticky
 	
-	;Tests
-	WORD test_count
+	;Splitting input into words
+	new_word_len:		DFS 1
+	new_word_buff:		DFS WORD_MAX_SIZE
+	new_stack_item:		DFS 9
 	
-	;Rest of RAM for user dictionary
-	dict_begin:
-
-	TODO: what about extra 128 bytes in RIOT? not preserved by backup battery
-		;could put fp variables here or anything else not preserved
-	ORG $800
-	dict_end:
+	ORG 880
 	
