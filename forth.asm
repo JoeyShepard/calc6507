@@ -83,11 +83,11 @@
 					CMP special_chars,Y
 					BNE .special_next
 						STA arg
-						;recode m for minus as c since c assigned to minus sign
-						CMP #'m'
-						BNE .key_done
-							LDA #CHAR_MINUS
-							STA arg
+						;;recode m for minus as c since c assigned to minus sign
+						;CMP #'m'
+						;BNE .key_done
+						;	LDA #CHAR_MINUS
+						;	STA arg
 						JMP .key_done
 					.special_next:
 					INY
@@ -445,7 +445,8 @@
 		
 		;first character is negative or digit?
 		LDA new_word_buff
-		CMP #CHAR_MINUS
+		;CMP #CHAR_MINUS
+		CMP #'-'
 		BNE .float_no_neg
 			;neg sign
 			LDA #$FF
@@ -575,7 +576,8 @@
 				BNE .float_next		
 			.not_exp:
 			
-			CMP #CHAR_MINUS
+			;CMP #CHAR_MINUS
+			CMP #'-'
 			BNE .not_minus
 				;only allowed if exp_found and at first character:
 				LDA exp_found

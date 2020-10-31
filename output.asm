@@ -47,7 +47,8 @@
 		LDA (source),Y
 		AND #SIGN_BIT
 		BEQ .positive
-			LDA #CHAR_MINUS
+			;LDA #CHAR_MINUS
+			LDA #'-'
 			STA sign
 		.positive:
 		
@@ -78,7 +79,8 @@
 		LDA (source),Y
 		AND #E_SIGN_BIT
 		BEQ .positive_e
-			LDA #CHAR_MINUS
+			;LDA #CHAR_MINUS
+			LDA #'-'
 			STA sign
 		.positive_e:
 		CALL LCD_char,sign

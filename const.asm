@@ -12,7 +12,7 @@
 	;Special characters
 	CHAR_ARROW =			'a'
 	CHAR_BOX =				'b'
-	CHAR_MINUS =			'c'
+	;CHAR_MINUS =			'c'	;actually, better to use - for this
 	CHAR_EXP =				'e'
 	CHAR_QUOTE = 			34	;double quote
 	

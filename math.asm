@@ -89,18 +89,21 @@
 			ORA #E_SIGN_BIT
 			STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
 		.no_rev:
-		CMP #$90
+		CMP #$50
 		BCC .no_underflow
 			;exp negative and exceeded 999: set to 0
 			;CALL ZeroR1
 			;JMP .overflow_done
 			JMP ZeroR1
 		.no_underflow:
+		;AND #~E_SIGN_BIT	
+		AND #$BF
 		CMP #$10
 		BCC .overflow_done
 			;exp positive and exceeded 999: set to max val
 			;CALL MaxR1
 			JMP MaxR1
+			;RTS
 		.overflow_done:
 		
 		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
@@ -200,12 +203,11 @@
 		.do_shift:
 		LDA math_lo
 		JSR ShiftR0
-				
+		
 		.do_add:
 		CLC
 		LDX #0
 		LDY #DEC_COUNT/2+GR_OFFSET
-		CLC
 		.add_loop:
 			LDA R1,X
 			ADC R0,X

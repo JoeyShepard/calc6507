@@ -44,10 +44,10 @@
 		.loop:
 			LDA (input),Y
 			BEQ .loop_done
-			CMP #'-'
-			BNE .not_minus
-				LDA #CHAR_MINUS
-			.not_minus:
+			;CMP #'-'
+			;BNE .not_minus
+			;	LDA #CHAR_MINUS
+			;.not_minus:
 			STA new_word_buff,Y
 			INY
 			JMP .loop
@@ -163,10 +163,10 @@
 		.loop:
 			LDA (num1),Y
 			BEQ .loop_done
-			CMP #'-'
-			BNE .not_minus
-				LDA #CHAR_MINUS
-			.not_minus:
+			;CMP #'-'
+			;BNE .not_minus
+			;	LDA #CHAR_MINUS
+			;.not_minus:
 			STA new_word_buff,Y
 			INY
 			JMP .loop
@@ -748,6 +748,57 @@
         ;617
         CALL AddTest, "111111111111", "-0.09", "111111111111"
 		
+        ;618
+        CALL AddTest, "5e5", "5e-5", "500000.00005"
+
+        ;619
+        CALL AddTest, "5e5", "-5e-5", "499999.99995"
+
+        ;620
+        CALL AddTest, "-5e5", "5e-5", "-499999.99995"
+
+        ;621
+        CALL AddTest, "-5e5", "-5e-5", "-500000.00005"
+		
+        ;622
+        CALL AddTest, "5e5", "5e-5", "500000.00005"
+
+        ;623
+        CALL AddTest, "5e5", "-5e-5", "499999.99995"
+
+        ;624
+        CALL AddTest, "-5e5", "5e-5", "-499999.99995"
+
+        ;625
+        CALL AddTest, "-5e5", "-5e-5", "-500000.00005"
+
+        ;626
+        CALL AddTest, "5e-5", "5e5", "500000.00005"
+
+        ;627
+        CALL AddTest, "5e-5", "-5e5", "-499999.99995"
+
+        ;628
+        CALL AddTest, "-5e-5", "5e5", "499999.99995"
+
+        ;629
+        CALL AddTest, "-5e-5", "-5e5", "-500000.00005"
+
+        ;630
+        CALL AddTest, "5e-5", "5e-5", "0.0001"
+
+        ;631
+        CALL AddTest, "5e-5", "-5e-5", "0"
+
+        ;632
+        CALL AddTest, "-5e-5", "5e-5", "0"
+
+        ;633
+        CALL AddTest, "-5e-5", "-5e-5", "-0.0001"
+		
+		
+		;more tests with negative e	
+
 		
 		CALL DebugText, "\\n\\gAll tests passed"
 		MOV.W #0,test_count
