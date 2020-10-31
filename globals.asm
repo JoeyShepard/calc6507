@@ -31,7 +31,7 @@
 	BYTE math_sticky
 	
 	;Tests
-	BYTE test_count
+	WORD test_count
 	
 	;Rest of RAM for user dictionary
 	dict_begin:

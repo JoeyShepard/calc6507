@@ -1,6 +1,16 @@
 ;Math functions
 ;==============
 
+	;Constants
+	;=========
+	;this converts in both directions!
+	hex_table: FCB 0,1,2,3,4,5,6,7,8,9,$10,$11,$12,$13,$14,$15,10,11,12,13,14,15
+	
+	
+	;Functions
+	;=========
+	
+	TODO: combine with below
 	FUNC BCD_Reverse
 		ARGS
 			WORD source
@@ -34,6 +44,8 @@
 	
 	;Register address in Y
 	FUNC BCD_RevSig
+		;PHP
+		;SED
 		
 		;reverse significand
 		LDA #DEC_COUNT/2+GR_OFFSET
@@ -46,6 +58,8 @@
 			INY
 			DEC math_a
 			BNE .loop
+		
+		;PLP
 	END
 	
 	;Register address in Y
@@ -75,10 +89,19 @@
 			ORA #E_SIGN_BIT
 			STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
 		.no_rev:
-		
-		TODO: check if sum more than 999
-		
-		TODO: flag overflow if necessary
+		CMP #$90
+		BCC .no_underflow
+			;exp negative and exceeded 999: set to 0
+			;CALL ZeroR1
+			;JMP .overflow_done
+			JMP ZeroR1
+		.no_underflow:
+		CMP #$10
+		BCC .overflow_done
+			;exp positive and exceeded 999: set to max val
+			;CALL MaxR1
+			JMP MaxR1
+		.overflow_done:
 		
 		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
 		ORA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
@@ -177,7 +200,7 @@
 		.do_shift:
 		LDA math_lo
 		JSR ShiftR0
-		
+				
 		.do_add:
 		CLC
 		LDX #0
@@ -293,10 +316,11 @@
 		TXA
 		PHA
 		
+		;not here - numbers may reach R0 by different route
 		;guard and round
-		LDA #0
-		STA R0
-		STA R1
+		;LDA #0
+		;STA R0
+		;STA R1
 
 		LDY #GR_OFFSET
 		.loop:
@@ -370,12 +394,11 @@
 	
 	;Number in A
 	;ASSUMES X IS SAVED ON STACK!!!
-	shift_table: FCB 0,1,2,3,4,5,6,7,8,9,$FF,$FF,$FF,$FF,$FF,$FF,10,11,12,13
 	FUNC ShiftR0
 		TODO: consider byte by byte - slower but smaller
 		
 		TAY
-		LDA shift_table,Y
+		LDA hex_table,Y
 		STA math_a
 		
 		;calculate sticky first
@@ -462,17 +485,26 @@
 			LDA R1,Y
 			BEQ .c2
 			AND #$F0
-			BEQ .c1
-			BNE .done	
+			BNE .done
+			INC math_a
+			BNE .done
 			.c2:
 			INC math_a
-			.c1:
 			INC math_a
 			DEY
 			BNE .loop
 		.done:
 		
-		TODO: CHECK FOR ZERO!!!
+		;check if zero
+		LDA math_a
+		CMP #DEC_COUNT
+		BCC .not_0
+			LDA #0
+			STA R1	;guard/round
+			STA R1+OBJ_SIZE-1
+			STA R1+OBJ_SIZE-2
+			RTS
+		.not_0:
 		
 		LDA math_a
 		BEQ .return ;normalized!
@@ -489,27 +521,25 @@
 		LDA math_a	;bytes to shift
 		BEQ .adjust_exp
 		PHA
-		LDA #(DEC_COUNT/2)+GR_OFFSET
+		LDA #(DEC_COUNT/2)
+		STA math_c	;dest
 		SEC
 		SBC math_a
-		TAY			;counter
-		LDA #0
-		STA math_c	;dest
+		STA math_a
 		.shift_loop:
 			LDX math_a
 			LDA R1,X
 			LDX math_c
 			STA R1,X
-			INC math_a
-			INC math_c
-			DEY
-			BNE .shift_loop
+			DEC math_c
+			DEC math_a
+			BPL .shift_loop
 		
 		;fill empty bytes with fill byte
-		LDX math_c
+		LDX #0
 		PLA
 		TAY
-		LDA #0
+		TXA
 		.fill_loop:
 			STA R1,X
 			INX
@@ -518,11 +548,9 @@
 		
 		.adjust_exp:
 		PLA	;saved count of zeroes
-		CMP #10
-		BCC .exp
-			CLC
-			ADC #6
-		.exp:
+		
+		TAY
+		LDA hex_table,Y
 		STA math_a
 		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
 		SEC
@@ -533,6 +561,29 @@
 		STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
 		
 		.return:
+	END
+	
+	FUNC ZeroR1
+		LDX #1
+		LDA #0
+		.loop:
+			STA R1,X
+			INX
+			CPX #OBJ_SIZE-TYPE_SIZE
+			BNE .loop
+	END
+	
+	FUNC MaxR1
+		LDX #1
+		LDA #$99
+		.loop:
+			STA R1,X
+			INX
+			CPX #DEC_COUNT/2+1
+			BNE .loop
+		STA R1+OBJ_SIZE-2
+		LDA #9
+		STA R1+OBJ_SIZE-1
 	END
 	
 	;Number in A

@@ -174,7 +174,6 @@
 			CMP #OBJ_FLOAT
 			BNE add_not_float
 				ADD_FLOAT:
-					TODO: adding floats
 					JSR TosR0R1
 					JSR BCD_Add
 					JSR CODE_DROP+EXEC_HEADER
@@ -256,8 +255,11 @@
 			CMP #OBJ_FLOAT
 			BNE sub_not_float
 				SUB_FLOAT:
-					TODO: subtracting floats
-					RTS
+					halt
+					LDA EXP_HI,X
+					EOR #SIGN_BIT
+					STA EXP_HI,X
+					JMP ADD_FLOAT
 			sub_not_float:
 			
 			;Subtracting hex objects

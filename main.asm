@@ -52,7 +52,7 @@ LOCALS_END set		$1F
 	
 	ORG $20
 	;For macros
-	BYTE dummy
+	WORD dummy
 	WORD ret_val
 	
 	;Temp address for variables
