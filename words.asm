@@ -856,7 +856,7 @@
 			
 	WORD_STO:
 		FCB 3,"STO"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_FREE			;Next word
 		FCB TOKEN_STO			;ID - 54
 		CODE_STO:
 			FCB OBJ_PRIMITIVE	;Type
@@ -900,7 +900,28 @@
 			LDA #ERROR_NONE
 			STA ret_val
 			JMP CODE_DROP+EXEC_HEADER
+	
+	WORD_FREE:
+		FCB 4,"FREE"			;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_FREE			;ID - 56
+		CODE_FREE:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB ADD1			;Flags
 			
+			LDA #OBJ_HEX
+			STA 0,X
+			LDA #dict_end % 256
+			SEC
+			SBC dict_ptr
+			STA HEX_SUM,X
+			LDA #dict_end/256
+			SBC dict_ptr+1
+			STA HEX_SUM+1,X
+			LDA #0
+			STA HEX_TYPE,X
+			RTS
+	
 	
 	JUMP_TABLE:
 		FDB CODE_DUP		;2
@@ -930,6 +951,7 @@
 		FDB CODE_VAR_DATA	;50
 		FDB CODE_VAR_THREAD	;52
 		FDB CODE_STO		;54
+		FDB CODE_FREE		;56
 		
 		
 		
