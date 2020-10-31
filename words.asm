@@ -255,7 +255,6 @@
 			CMP #OBJ_FLOAT
 			BNE sub_not_float
 				SUB_FLOAT:
-					halt
 					LDA EXP_HI,X
 					EOR #SIGN_BIT
 					STA EXP_HI,X
