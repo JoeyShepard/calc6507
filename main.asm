@@ -90,8 +90,9 @@ LOCALS_END set		$1F
 
 ;Functions in ROM
 ;================
-	ORG $C000
+	ORG $8900
 	include tests.asm
+	include rand_tests.asm
 	include stats.asm
 	
 	ORG $900
@@ -128,8 +129,10 @@ LOCALS_END set		$1F
 		TXS
 		
 		CALL setup
-		CALL tests
+		;CALL tests
+		CALL random_tests
 		CALL stats
+		CALL gfx_setup
 		
 		.input_loop:
 			;Colon definitions must fit on one line
@@ -151,6 +154,10 @@ LOCALS_END set		$1F
 			.process_loop:
 				
 				CALL LineWord
+				LDA ret_val
+				BEQ .no_word_error
+					JMP .error_sub
+				.no_word_error:
 				LDA new_word_len
 				BEQ .input_loop
 			

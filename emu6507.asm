@@ -60,10 +60,18 @@
 		LDA #MODE_IMMEDIATE
 		STA mode
 		
+		;Point to RAM so tests can run
+		;Emulator only!
+		MOV #BANK_GEN_RAM2,RAM_BANK2		
+		MOV #BANK_GEN_RAM3,RAM_BANK3		
+		
+	END
+
+	FUNC gfx_setup
+		
 		;Emulator only!
 		MOV #BANK_GFX_RAM1,RAM_BANK2		
 		MOV #BANK_GFX_RAM2,RAM_BANK3		
-		
 	END
 
 	FUNC ReadKey

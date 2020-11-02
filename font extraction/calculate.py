@@ -22,6 +22,8 @@ print("total bytes:",size)
 #6 bit encoding would be 384 bytes
 #fit decoder in 128 bytes???
     #seems very tiny gain
+    # hmm, * 3/4 is easy
+    # wait until LCD in place then
 
 #only a handful had zeroes on end
 #unlikely that decompresser would fit in that many bytes

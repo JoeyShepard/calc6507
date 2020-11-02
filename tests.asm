@@ -138,6 +138,7 @@
 		STA DEBUG_DEC16
 		CALL DebugText,": passed\\n"
 		INC.W test_count
+		
 	END
 
 	FUNC NewToR
@@ -175,6 +176,33 @@
 		CALL CheckData
 	END
 
+	FUNC DebugR1
+		TXA
+		PHA
+		
+		;CALL DebugText,"\\n"
+		LDX #(DEC_COUNT/2)-1+GR_OFFSET
+		.loop:
+			LDA R1,X
+			STA DEBUG_HEX
+			DEX
+			BNE .loop
+		LDA #' '
+		STA DEBUG
+		
+		LDA R1		;GR
+		STA DEBUG_HEX
+		
+		CALL DebugText," E"
+		LDA R1+DEC_COUNT/2+2
+		STA DEBUG_HEX
+		LDA R1+DEC_COUNT/2+1
+		STA DEBUG_HEX
+		
+		PLA
+		TAX
+	END
+
 	FUNC AddTest
 		ARGS
 			STRING num1,num2,ans
@@ -184,8 +212,10 @@
 		CALL NewToR, #R1
 		CALL CopyNew,num2
 		CALL NewToR, #R0
-		CALL BCD_Add
 		CALL CopyNew,ans
+		CALL BCD_Add
+		
+		CALL halt_test, #649
 		
 		LDY #8
 		.loop:
@@ -796,41 +826,58 @@
         ;633
         CALL AddTest, "-5e-5", "-5e-5", "-0.0001"
 		
+		;634
+        CALL AddTest, "234567892345e-100", "-234567892345e-101", "2.1111110311e-89"
 		
-		;more tests with negative e	
+        ;635
+        CALL AddTest, "234567892345e-100", "-234567892345e-102", "2.32222213422e-89"
 
+		;636
+        CALL AddTest, "234567892345e-100", "-234567892345e-103", "2.34333324453e-89"
+
+        ;637
+        CALL AddTest, "234567892345e-100", "-234567892345e-104", "2.34544435556e-89"
+
+        ;638
+        CALL AddTest, "234567892345e-100", "-234567892345e-105", "2.34565546666e-89"
+
+        ;639
+        CALL AddTest, "234567892345e-100", "-234567892345e-106", "2.34567657777e-89"
+
+        ;640
+        CALL AddTest, "234567892345e-100", "-234567892345e-107", "2.34567868888e-89"
+
+        ;641
+        CALL AddTest, "234567892345e-100", "-234567892345e-108", "2.34567889999e-89"
+
+        ;642
+        CALL AddTest, "234567892345e-100", "-234567892345e-109", "2.3456789211e-89"
+
+        ;643
+        CALL AddTest, "234567892345e-100", "-234567892345e-110", "2.34567892322e-89"
+
+        ;644
+        CALL AddTest, "234567892345e-100", "-234567892345e-111", "2.34567892343e-89"
+
+        ;645
+        CALL AddTest, "234567892345e-100", "-234567892345e-112", "2.34567892345e-89"
+
+        ;646
+        CALL AddTest, "234567892345e-100", "-234567892345e-113", "2.34567892345e-89"
+
+        ;647
+        CALL AddTest, "234567892345e-100", "-234567892345e-114", "2.34567892345e-89"
+
+        ;648
+        CALL AddTest, "234567892345e-100", "-234567892345e-115", "2.34567892345e-89"
 		
-		CALL DebugText, "\\n\\gAll tests passed"
+		;temp
+        ;CALL AddTest, "1e-999", "-6.05e-006", "-0.00000605000000000"
+		
+		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count
 		
 		;Reset stack pointer
 		LDX #0
 	END 
-	
-	FUNC DebugR1
-		TXA
-		PHA
-		
-		;CALL DebugText,"\\n"
-		LDX #(DEC_COUNT/2)-1+GR_OFFSET
-		.loop:
-			LDA R1,X
-			STA DEBUG_HEX
-			DEX
-			BNE .loop
-		LDA #' '
-		STA DEBUG
-		
-		LDA R1		;GR
-		STA DEBUG_HEX
-		
-		CALL DebugText," E"
-		LDA R1+DEC_COUNT/2+2
-		STA DEBUG_HEX
-		LDA R1+DEC_COUNT/2+1
-		STA DEBUG_HEX
-		
-		PLA
-		TAX
-	END
 	

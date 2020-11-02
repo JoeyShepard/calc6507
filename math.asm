@@ -62,247 +62,38 @@
 		;PLP
 	END
 	
-	;Register address in Y
-	FUNC BCD_Unpack
+	FUNC ZeroR1
+		LDX #1
 		LDA #0
-		STA 0,Y		;guard/round byte
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
-		AND #$F
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
-		AND #E_SIGN_BIT
-		BEQ .no_reverse
-			JSR BCD_RevExp
-		.no_reverse:
-		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
-		AND #SIGN_BIT
-		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
-	END
-	
-	;Register address in Y
-	FUNC BCD_Pack
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		BPL .no_rev
-			JSR BCD_RevExp
-			;High byte of exp in A
-			ORA #E_SIGN_BIT
-			STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		.no_rev:
-		CMP #$50
-		BCC .no_underflow
-			;exp negative and exceeded 999: set to 0
-			;CALL ZeroR1
-			;JMP .overflow_done
-			JMP ZeroR1
-		.no_underflow:
-		;AND #~E_SIGN_BIT	
-		AND #$BF
-		CMP #$10
-		BCC .overflow_done
-			;exp positive and exceeded 999: set to max val
-			;CALL MaxR1
-			JMP MaxR1
-			;RTS
-		.overflow_done:
-		
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		ORA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-	END
-	
-	FUNC BCD_Exp_diff
-		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
-		SEC
-		SBC R0+GR_OFFSET+EXP_LO-TYPE_SIZE
-		STA math_lo
-		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
-		SBC R0+GR_OFFSET+EXP_HI-TYPE_SIZE
-		STA math_hi
-	END
-	
-	FUNC BCD_Add
-		PHP
-		SED
-		TXA
-		PHA
-		
-		LDY #R0
-		JSR BCD_Unpack
-		LDY #R1
-		JSR BCD_Unpack
-		JSR BCD_Exp_diff
-		
-		LDY #0
-		STY math_sticky
-		
-		TODO: abstract this if reused by other routines
-		;only invert digits if signs different
-		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-		EOR R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-		STA math_signs
-		BEQ .same_sign
-			LDY #R0
-			;A = #SIGN_BIT
-			AND R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-			BNE .invert_R0
-				LDY #R1
-			.invert_R0:
-			JSR BCD_RevSig
-		.same_sign:
-		
-		;0 - no shift
-		;1-11 - shift R0
-		;13+ - ignore
-		;-1 to -13 - swap, shift R0
-		;-14+ - ignore
-		
-		;0 - no shift
-		LDA math_lo
-		ORA math_hi
-		BEQ .do_add
-		
-		;-1 to -11?
-		LDA math_hi
-		CMP #$99
-		BNE .not_neg
-			LDA math_lo
-			;CMP #-DEC_COUNT
-			
-			TODO: test #$89 below
-			
-			CMP #$89
-			;-14+
-			JCC .ignore
-			
-			;swap
-			LDY #GR_OFFSET
-			.swap_loop:
-				LDA R0,Y
-				PHA
-				LDA R1,Y
-				STA R0,Y
-				PLA
-				STA R1,Y
-				INY
-				CPY #GR_OFFSET+OBJ_SIZE
-				BNE .swap_loop
-			JSR BCD_Exp_diff
-			JMP .do_shift
-		.not_neg:
-		
-		;1-13?
-		CMP #0
-		;high byte not 0 - ignore
-		JNE .ignore
-		LDA math_lo
-		CMP #$14	;must be BCD!
-		;14+
-		JCS .ignore
-		
-		.do_shift:
-		LDA math_lo
-		JSR ShiftR0
-		
-		.do_add:
-		CLC
-		LDX #0
-		LDY #DEC_COUNT/2+GR_OFFSET
-		.add_loop:
-			LDA R1,X
-			ADC R0,X
+		.loop:
 			STA R1,X
 			INX
-			DEY
-			BNE .add_loop
-		
-		;process carry
-		PHP
-		LDA math_signs
-		BNE .not_same
-			;both operands same
-			;carry set means increase exponent
-			PLP
-			BCC .no_carry
-				JSR IncR1Exp
-				
-				LDA R1
-				AND #$F
-				ORA math_sticky
-				STA math_sticky
-				LDX #R1
-				LDA #$10		;fill byte
-				JSR HalfShift
-			.no_carry:
-			LDA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-			AND #SIGN_BIT
-			JMP .carry_done
-		.not_same:
-			;operands different
-			;carry set means positive result
-			LDA #0
-			PLP
-			BCS .no_carry2
-				LDY #R1
-				JSR BCD_RevSig
-				LDA #SIGN_BIT
-			.no_carry2:
-		.carry_done:
-		STA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-		
-		;shift forward
-		JSR NormR1
-		
-		;round
-		LDA R1
-		CMP #$50
-		BNE .not_50
-			LDA math_sticky
-			BNE .round
-			;round to nearest
-			LDA R1+1
-			AND #1
-			BNE .round
-			BEQ .no_round
-		.not_50:
-		BCC .no_round
-			.round:
-			LDX #0
-			LDY #DEC_COUNT/2
-			SEC
-			.round_loop:
-				LDA R1+GR_OFFSET,X
-				ADC #0
-				STA R1+GR_OFFSET,X
-				INX
-				DEY
-				BNE .round_loop
-			BCC .round_done
-				JSR IncR1Exp
-				LDX #R1
-				LDA #$10		;fill byte
-				JSR HalfShift
-			.round_done:
-		.no_round:
-		
-		LDY #R1
-		JSR BCD_Pack
-		
-		.ignore:
-		PLA
-		TAX
-		PLP
+			CPX #OBJ_SIZE-TYPE_SIZE
+			BNE .loop
 	END
 	
-	FUNC DecR1Exp
-		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
-		SEC
-		SBC #1
-		STA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
-		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
-		SBC #0
-		STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE		
+	FUNC MaxR1
+		LDX #1
+		LDA #$99
+		.loop:
+			STA R1,X
+			INX
+			CPX #DEC_COUNT/2+1
+			BNE .loop
+		STA R1+OBJ_SIZE-2
+		LDA #9
+		STA R1+OBJ_SIZE-1
 	END
+	
+	;FUNC DecR1Exp
+	;	LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+	;	SEC
+	;	SBC #1
+	;	STA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+	;	LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
+	;	SBC #0
+	;	STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE		
+	;END
 	
 	FUNC IncR1Exp
 		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
@@ -312,6 +103,33 @@
 		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
 		ADC #0
 		STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE		
+	END
+	
+	FUNC SwapR0R1
+	
+		LDY #GR_OFFSET
+		.swap_loop:
+			LDA R0,Y
+			PHA
+			LDA R1,Y
+			STA R0,Y
+			PLA
+			STA R1,Y
+			INY
+			CPY #GR_OFFSET+OBJ_SIZE
+			BNE .swap_loop
+	END
+	
+	TODO: SwapR0R1? slower but smaller
+	FUNC CopyR0R1
+	
+		LDY #GR_OFFSET
+		.swap_loop:
+			LDA R0,Y
+			STA R1,Y
+			INY
+			CPY #GR_OFFSET+OBJ_SIZE
+			BNE .swap_loop
 	END
 	
 	FUNC TosR0R1
@@ -375,7 +193,6 @@
 		STA GR_OFFSET+(DEC_COUNT/2)-1,X
 	END
 	
-	TODO: combine with HalfShift to save space?
 	;Which register in X
 	FUNC HalfShiftForward
 		LDY #4
@@ -392,7 +209,6 @@
 			DEY
 			BNE .half_loop
 	END
-	
 	
 	;Number in A
 	;ASSUMES X IS SAVED ON STACK!!!
@@ -424,16 +240,6 @@
 				BPL .sticky_loop
 		.sticky_done:
 		
-		;byte for filling empty space
-		LDY #0
-		LDA math_signs
-		BEQ .pos
-			LDA R0+SIGN_INFO+GR_OFFSET-TYPE_SIZE
-			BPL .pos
-				LDY #$99
-		.pos:
-		STY math_b
-		
 		;shift by half byte?
 		TODO: abstract?
 		LDA math_a
@@ -441,8 +247,7 @@
 		STA math_a
 		BCC .no_half_shift
 			LDX #R0
-			LDA math_b		;fill byte
-			AND #$F0
+			LDA #0
 			JSR HalfShift
 		.no_half_shift:
 		
@@ -455,22 +260,22 @@
 		SBC math_a
 		TAY			;counter
 		LDA #0
-		STA math_c	;dest
+		STA math_b	;dest
 		.loop:
 			LDX math_a
 			LDA R0,X
-			LDX math_c
+			LDX math_b
 			STA R0,X
 			INC math_a
-			INC math_c
+			INC math_b
 			DEY
 			BNE .loop
 		
 		;fill empty bytes with fill byte
-		LDX math_c
+		LDX math_b
 		PLA
 		TAY
-		LDA math_b
+		LDA #0
 		.fill_loop:
 			STA R0,X
 			INX
@@ -565,27 +370,242 @@
 		.return:
 	END
 	
-	FUNC ZeroR1
-		LDX #1
+	
+	;Register address in Y
+	FUNC BCD_Unpack
 		LDA #0
-		.loop:
-			STA R1,X
-			INX
-			CPX #OBJ_SIZE-TYPE_SIZE
-			BNE .loop
+		STA 0,Y		;guard/round byte
+		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		AND #$F
+		STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		AND #E_SIGN_BIT
+		BEQ .no_reverse
+			JSR BCD_RevExp
+		.no_reverse:
+		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		AND #SIGN_BIT
+		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
 	END
 	
-	FUNC MaxR1
-		LDX #1
-		LDA #$99
-		.loop:
+	;Register address in Y
+	FUNC BCD_Pack
+		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		BPL .no_rev
+			JSR BCD_RevExp
+			;High byte of exp in A
+			ORA #E_SIGN_BIT
+			STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		.no_rev:
+		CMP #$50	;high byte of $10 (overflow) | E_SIGN_BIT
+		BCC .no_underflow
+			;exp negative and exceeded 999: set to 0
+			;CALL ZeroR1
+			;JMP .overflow_done
+			JMP ZeroR1
+		.no_underflow:
+		;AND #~E_SIGN_BIT	
+		AND #$BF	;mask out E_SIGN_BIT
+		CMP #$10
+		BCC .overflow_done
+			;exp positive and exceeded 999: set to max val
+			;CALL MaxR1
+			JMP MaxR1
+			;RTS
+		.overflow_done:
+		
+		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		ORA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+	END
+	
+	FUNC BCD_Exp_diff
+		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+		SEC
+		SBC R0+GR_OFFSET+EXP_LO-TYPE_SIZE
+		STA math_lo
+		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
+		SBC R0+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA math_hi
+	END
+	
+	FUNC BCD_Add
+		PHP
+		SED
+		TXA
+		PHA
+		
+		;check for zero - simplifies logic below
+		LDA R0+GR_OFFSET+DEC_COUNT/2-1
+		JEQ .zero_exit
+		LDA R1+GR_OFFSET+DEC_COUNT/2-1
+		BNE .R1_good
+			JSR CopyR0R1
+			JMP .zero_exit
+		.R1_good:
+		
+		LDY #0
+		STY math_sticky
+		
+		LDY #R0
+		JSR BCD_Unpack
+		LDY #R1
+		JSR BCD_Unpack
+		JSR BCD_Exp_diff
+		
+		;0 exp diff - no shift
+		LDA math_lo
+		ORA math_hi
+		BEQ .do_sign
+		
+		;-1 to -13?
+		LDA math_hi
+		CMP #$99
+		BNE .not_neg
+			LDA math_lo
+			
+			;CMP #-DEC_COUNT
+			CMP #$86
+			;-14+
+			JCC .ignore
+			
+			;swap
+			CALL SwapR0R1
+			JSR BCD_Exp_diff
+			JMP .do_shift
+		.not_neg:
+		
+		;1-13?
+		CMP #0
+		;high byte not 0 - ignore
+		JNE .ignore
+		LDA math_lo
+		CMP #$14	;must be BCD!
+		;14+
+		JCS .ignore
+		
+		.do_shift:
+		LDA math_lo
+		JSR ShiftR0
+		
+		.do_sign:
+		TODO: abstract this if reused by other routines
+		;only invert digits if signs different
+		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		EOR R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		STA math_signs
+		BEQ .same_sign
+			LDY #R0
+			;A = #SIGN_BIT
+			AND R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+			BNE .invert_R0
+				LDY #R1
+			.invert_R0:
+			JSR BCD_RevSig
+		.same_sign:
+		
+		.do_add:
+		CLC
+		LDX #0
+		LDY #DEC_COUNT/2+GR_OFFSET
+		.add_loop:
+			LDA R1,X
+			ADC R0,X
 			STA R1,X
 			INX
-			CPX #DEC_COUNT/2+1
-			BNE .loop
-		STA R1+OBJ_SIZE-2
-		LDA #9
-		STA R1+OBJ_SIZE-1
+			DEY
+			BNE .add_loop
+		
+		;process carry
+		PHP
+		LDA math_signs
+		BNE .not_same
+			;both operands same
+			;carry set means increase exponent
+			PLP
+			BCC .no_carry
+				JSR IncR1Exp
+				
+				LDA R1
+				AND #$F
+				ORA math_sticky
+				STA math_sticky
+				LDX #R1
+				LDA #$10		;fill byte
+				JSR HalfShift
+			.no_carry:
+			LDA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+			AND #SIGN_BIT
+			JMP .carry_done
+		.not_same:
+			;operands different
+			;carry set means positive result
+			LDA #0
+			PLP
+			BCS .no_carry2
+				LDY #R1
+				JSR BCD_RevSig
+				LDA #SIGN_BIT
+			.no_carry2:
+		.carry_done:
+		STA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		
+		;shift forward
+		JSR NormR1
+		
+		;round
+		LDA R1
+		CMP #$50
+		BNE .not_50
+			LDA math_sticky
+			BNE .round
+			;round to nearest
+			LDA R1+1
+			AND #1
+			BNE .round
+			BEQ .no_round
+		.not_50:
+		BCC .no_round
+			.round:
+			LDX #0
+			LDY #DEC_COUNT/2
+			SEC
+			.round_loop:
+				LDA R1+GR_OFFSET,X
+				ADC #0
+				STA R1+GR_OFFSET,X
+				INX
+				DEY
+				BNE .round_loop
+			BCC .round_done
+				JSR IncR1Exp
+				LDX #R1
+				LDA #$10		;fill byte
+				JSR HalfShift
+			.round_done:
+		.no_round:
+		
+		JMP .done
+		.ignore:
+			;exp diff too large, so skipped adding
+			;if exp neg, keep the one with smaller abs magnitude
+			;if exp pos, keep the one with larger abs magnitude
+			;ie, just compare diff in exponents
+			
+			LDA math_hi
+			BPL .no_copy
+				CALL CopyR0R1
+			.no_copy:
+		.done:
+		
+		LDY #R1
+		JSR BCD_Pack
+		
+		.zero_exit:
+		PLA
+		TAX
+		PLP
 	END
 	
 	;Number in A

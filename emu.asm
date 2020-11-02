@@ -14,9 +14,11 @@ DEBUG_HEX = 	$FFE8
 DEBUG_DEC = 	$FFE9
 DEBUG_DEC16 = 	$FFEA
 DEBUG_TIMING =	$FFEB
-LOG_ON =		$FFEC; 		;Turn instruction logging on
-LOG_OFF = 		$FFED; 		;Turn instruction logging off
-LOG_SEND =		$FFEE; 		;Send instruction log file
+LOG_ON =		$FFEC 		;Turn instruction logging on
+LOG_OFF = 		$FFED 		;Turn instruction logging off
+LOG_SEND =		$FFEE 		;Send instruction log file
+BELL_SOUND =	$FFEF		;Play bell sound on printing character 7
+FILE_INPUT =	$FFF0
 
 
 ;RAM/ROM bank indexes

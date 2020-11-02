@@ -21,6 +21,7 @@ echo Copying...
 copy processed.lst "..\..\projects\6502 emu\main\listing.lst" > nul
 REM copy processed.hex "..\..\projects\6502 emu\main\prog.hex" > nul
 copy emu.hex "..\..\projects\6502 emu\main\prog.hex" > nul
+copy input.txt "..\..\projects\6502 emu\main\input.txt" > nul
 REM break > "..\..\projects\6502 emu\main\keys.txt"
 copy keys.txt "..\..\projects\6502 emu\main\keys.txt" > nul
 echo.

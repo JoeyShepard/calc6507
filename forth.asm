@@ -129,6 +129,7 @@
 					LDY index
 					CPY #BUFF_SIZE
 					BCS .buffer_full
+						
 						STA input_buff,Y
 						INC index
 						CPY #CHAR_SCREEN_WIDTH-1
@@ -220,10 +221,14 @@
 				STA new_word_buff,Y
 				INY
 				STY new_word_len
+				
+				halt
+				
 				CPY #WORD_MAX_SIZE
 				BNE .word_size_good
 					;Word too big to fit into 18 byte buffer
-					LDA #ERROR_WORD_TOO_LONG
+					;LDA #ERROR_WORD_TOO_LONG
+					LDA #ERROR_INPUT
 					STA ret_val
 					RTS
 				.word_size_good:
@@ -310,6 +315,7 @@
 			BYTE exp_digit_count	;count of digits during float input
 			BYTE zero_found			;whether leading zero found
 		END
+		
 		LDA #OBJ_ERROR
 		STA new_stack_item
 		
@@ -614,12 +620,14 @@
 		;Adjust exponent
 		LDA exp_negative
 		BEQ .exp_positive
+			TODO: smaller?
 			CALL BCD_Reverse, #new_stack_item+EXP_LO, #2
 		.exp_positive:
 		
 		SED
 		;Convert exp offset to BCD
 		;Looping here is slower but smaller
+		TODO: optimize?
 		LDA #0
 		LDY exp_count
 		BMI .exp_count_neg
@@ -662,6 +670,7 @@
 		LDY new_stack_item+8
 		CPY #$50
 		BCC .exp_positive2
+			TODO: smaller?
 			CALL BCD_Reverse, #new_stack_item+EXP_LO, #2
 			LDA #$FF 
 		.exp_positive2:
