@@ -16,5 +16,8 @@ processed.lst
 processed.map
 processed.p
 
+#randomized tests - large file size
+input.txt
+
 #documents downloaded from elsewhere
 /docs/
