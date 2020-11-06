@@ -10,6 +10,17 @@
 		BNE .carry_done
 			INC counter1+1
 			BNE .carry_done
+			
+			CALL DebugText, "\\n\\l"
+			LDA counter2+1
+			STA DEBUG_HEX
+			LDA counter2
+			STA DEBUG_HEX
+			LDA counter1+1
+			STA DEBUG_HEX
+			LDA counter1
+			STA DEBUG_HEX
+			
 				INC counter2
 				BNE .carry_done
 					INC counter2+1
@@ -50,6 +61,8 @@
 		MOV.W #0,counter2
 		MOV.W #0,failed1
 		MOV.W #0,failed2
+		
+		CALL DebugText,"\\n\\nBeginning randomized tests"
 		
 		.loop:
 			CALL inc_line, #counter1
@@ -112,6 +125,7 @@
 			CALL DebugText, "\\n\\n\\gAll randomized tests passed"
 			JMP .failed_done
 		.none_failed:
+		
 		CALL DebugText, "\\n\\n\\rRandomized tests failed: "
 		LDA failed2+1
 		STA DEBUG_HEX
@@ -157,6 +171,8 @@
 			CALL DebugText,": FAILED!\\n"
 			CALL DebugText,"   Expected: "
 			
+			halt
+			
 			LDY #(DEC_COUNT/2)-1+GR_OFFSET
 			.floop:
 				LDA new_stack_item,Y
@@ -170,15 +186,14 @@
 			STA DEBUG_HEX
 			
 			CALL DebugText," E"
-			LDA R1+DEC_COUNT/2+2
+			
+			LDA new_stack_item+EXP_HI
 			STA DEBUG_HEX
-			LDA R1+DEC_COUNT/2+1
+			LDA new_stack_item+EXP_LO
 			STA DEBUG_HEX
 			
 			CALL DebugText,"\\n   Found:    "
 			CALL DebugR1
-			
-			halt
 			
 			JMP .loop
 	END

@@ -37,8 +37,8 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 DEBUG_MODE set "off"
 		
 	;Reset vector
-	;ORG $FFFC
-	ORG $1FFC
+	ORG $FFFC
+	;ORG $1FFC
 	FDB main
 		
 	
@@ -90,7 +90,13 @@ LOCALS_END set		$1F
 
 ;Functions in ROM
 ;================
-	ORG $8900
+	;ORG $C000
+	ORG $D000
+	;should be visible to tests below which overflow $C000
+	include debug.asm
+	
+	ORG $8900	;RAM + ROM size
+	;overlaps with video memory, no video output
 	include tests.asm
 	include rand_tests.asm
 	include stats.asm
@@ -113,7 +119,6 @@ LOCALS_END set		$1F
 	include forth.asm
 	include words.asm
 	
-	
 ;Main function
 ;=============
 	FUNC main, begin
@@ -127,9 +132,12 @@ LOCALS_END set		$1F
 		;Must come before any JSR
 		LDX #$2F
 		TXS
-		
+				
+		TODO: move tests to separate file like randomized tests
+		TODO: support E+ format
+				
 		CALL setup
-		;CALL tests
+		CALL tests
 		CALL random_tests
 		CALL stats
 		CALL gfx_setup

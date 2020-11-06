@@ -901,6 +901,7 @@
 			STA ret_val
 			JMP CODE_DROP+EXEC_HEADER
 	
+	TODO: this is called UNUSED in forth
 	WORD_FREE:
 		FCB 4,"FREE"			;Name
 		FDB dict_begin			;Next word

@@ -466,7 +466,7 @@
 			LDA math_lo
 			
 			;CMP #-DEC_COUNT
-			CMP #$86
+			CMP #$87
 			;-14+
 			JCC .ignore
 			
@@ -535,8 +535,8 @@
 				LDA #$10		;fill byte
 				JSR HalfShift
 			.no_carry:
-			LDA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-			AND #SIGN_BIT
+			;LDA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+			;AND #SIGN_BIT
 			JMP .carry_done
 		.not_same:
 			;operands different
@@ -548,8 +548,9 @@
 				JSR BCD_RevSig
 				LDA #SIGN_BIT
 			.no_carry2:
+			STA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		.carry_done:
-		STA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		;STA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		
 		;shift forward
 		JSR NormR1
@@ -558,9 +559,15 @@
 		LDA R1
 		CMP #$50
 		BNE .not_50
+			;if GRS=50|1 and signs same, round up
+			;if GRS=50|1 and signs different, round down
 			LDA math_sticky
-			BNE .round
-			;round to nearest
+			BEQ .round_even
+				;LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+				LDA math_signs
+				BNE .no_round
+				BEQ .round
+			.round_even:
 			LDA R1+1
 			AND #1
 			BNE .round
