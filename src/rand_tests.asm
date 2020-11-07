@@ -5,21 +5,25 @@
 	WORD counter1, counter2
 	WORD failed1, failed2
 	
+	FUNC line_num
+		CALL DebugText, "\\n\\l"
+		LDA counter2+1
+		STA DEBUG_HEX
+		LDA counter2
+		STA DEBUG_HEX
+		LDA counter1+1
+		STA DEBUG_HEX
+		LDA counter1
+		STA DEBUG_HEX
+	END
+	
 	FUNC inc_line
 		INC counter1
 		BNE .carry_done
 			INC counter1+1
 			BNE .carry_done
 			
-			CALL DebugText, "\\n\\l"
-			LDA counter2+1
-			STA DEBUG_HEX
-			LDA counter2
-			STA DEBUG_HEX
-			LDA counter1+1
-			STA DEBUG_HEX
-			LDA counter1
-			STA DEBUG_HEX
+			CALL line_num
 			
 				INC counter2
 				BNE .carry_done
@@ -62,7 +66,7 @@
 		MOV.W #0,failed1
 		MOV.W #0,failed2
 		
-		CALL DebugText,"\\n\\nBeginning randomized tests"
+		CALL DebugText,"\\n\\n\\lBeginning randomized tests"
 		
 		.loop:
 			CALL inc_line, #counter1
@@ -70,7 +74,7 @@
 			LDA FILE_INPUT
 			
 			;No more input
-			BEQ .done
+			JEQ .done
 			
 			;Addition test
 			CMP #'A'
@@ -114,6 +118,19 @@
 			.not_Z:
 			
 			;unrecognized mode!
+			PHA
+			CALL DebugText,"\\n\\rUnrecognized input code: $"
+			PLA
+			STA DEBUG_HEX
+			CALL DebugText, "\\n\\l"
+			LDA counter2+1
+			STA DEBUG_HEX
+			LDA counter2
+			STA DEBUG_HEX
+			LDA counter1+1
+			STA DEBUG_HEX
+			LDA counter1
+			STA DEBUG_HEX
 			halt
 		.done:
 		
@@ -121,10 +138,11 @@
 		ORA failed1+1
 		ORA failed2
 		ORA failed2+1
-		BNE .none_failed
+		BNE .some_failed
 			CALL DebugText, "\\n\\n\\gAll randomized tests passed"
+			;storing any value here will exit node.js. ignored otherwise
 			JMP .failed_done
-		.none_failed:
+		.some_failed:
 		
 		CALL DebugText, "\\n\\n\\rRandomized tests failed: "
 		LDA failed2+1
@@ -147,6 +165,8 @@
 		LDA counter1
 		STA DEBUG_HEX
 		
+		STA NODE_EXIT
+		
 		RTS
 		
 		.failed:
@@ -159,43 +179,46 @@
 						INC failed2+1
 			.failed_carry_done:
 			
-			CALL DebugText, "\\n\\n\\rLine "
-			LDA counter2+1
-			STA DEBUG_HEX
-			LDA counter2
-			STA DEBUG_HEX
-			LDA counter1+1
-			STA DEBUG_HEX
-			LDA counter1
-			STA DEBUG_HEX
-			CALL DebugText,": FAILED!\\n"
-			CALL DebugText,"   Expected: "
-			
-			halt
-			
-			LDY #(DEC_COUNT/2)-1+GR_OFFSET
-			.floop:
-				LDA new_stack_item,Y
+			.fail_loop:
+				CALL DebugText, "\\n\\n\\rLine "
+				LDA counter2+1
 				STA DEBUG_HEX
-				DEY
-				BNE .floop
-			LDA #' '
-			STA DEBUG
+				LDA counter2
+				STA DEBUG_HEX
+				LDA counter1+1
+				STA DEBUG_HEX
+				LDA counter1
+				STA DEBUG_HEX
+				CALL DebugText,": FAILED!\\n"
+				CALL DebugText,"   Expected: "
+				
 			
-			LDA R1		;GR
-			STA DEBUG_HEX
+				LDY #(DEC_COUNT/2)-1+GR_OFFSET
+				.floop:
+					LDA new_stack_item,Y
+					STA DEBUG_HEX
+					DEY
+					BNE .floop
+				LDA #' '
+				STA DEBUG
+				
+				LDA R1		;GR
+				STA DEBUG_HEX
+				
+				CALL DebugText," E"
+				
+				LDA new_stack_item+EXP_HI
+				STA DEBUG_HEX
+				LDA new_stack_item+EXP_LO
+				STA DEBUG_HEX
+				
+				CALL DebugText,"\\n   Found:    "
+				CALL DebugR1
 			
-			CALL DebugText," E"
+				halt
 			
-			LDA new_stack_item+EXP_HI
-			STA DEBUG_HEX
-			LDA new_stack_item+EXP_LO
-			STA DEBUG_HEX
-			
-			CALL DebugText,"\\n   Found:    "
-			CALL DebugR1
-			
-			JMP .loop
+			JMP .fail_loop
+			;JMP .loop
 	END
 	
 	FUNC CompareR1

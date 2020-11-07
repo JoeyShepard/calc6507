@@ -5,8 +5,8 @@ for /f %%i in ('time /T') do set datetime=%%i
 echo [%datetime%] Assembling...
 cd src
 "C:\Program Files\nasm\nasm" --no-line -e -Z main.err -l main.lst nasm.asm > main.i
-copy main.i ..\main.i
-copy main.err ..\main.err
+copy main.i ..\main.i > nul
+copy main.err ..\main.err > nul
 cd ..
 type main.err
 echo.

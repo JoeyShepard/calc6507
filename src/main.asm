@@ -37,7 +37,7 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 DEBUG_MODE set "off"
 		
 	;Reset vector
-	ORG $FFFC
+	ORG RESET_VECTOR
 	;ORG $1FFC
 	FDB main
 		
@@ -135,6 +135,7 @@ LOCALS_END set		$1F
 				
 		TODO: move tests to separate file like randomized tests
 		TODO: support E+ format
+		TODO: node.js into git
 				
 		CALL setup
 		CALL tests

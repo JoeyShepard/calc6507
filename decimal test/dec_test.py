@@ -4,13 +4,11 @@ from sys import exit
 from os import system
 getcontext().prec=12
 
-fp = open("input.txt","wt")
-
 MAX_VAL = "9.99999999999e999"
 MIN_VAL = "1e-999"
 
 test_count=0
-
+rand_seed=0
 
 def test1(amount):
     
@@ -48,7 +46,9 @@ def test1(amount):
 
     return ret_list
 
-def write_list(which_list):    
+def write_list(which_list):
+    fp = open("input.txt","wt")
+    
     for n,i in enumerate(which_list):
         print("Writing to file ("+str(n)+"/"+str(len(which_list)))
         for j in num_list:
@@ -67,10 +67,22 @@ def write_list(which_list):
     fp.close()
     
 while(1):
+    #Seed so don't lose progress if program stops
+    seed(rand_seed)
+    print("Random seed:",rand_seed,"\n")
+    rand_seed+=1
+    
     #STEP 1 - randomized round robin
     print("Test 1: randomized round robin")
     print(f'Total tests: {test_count:,}')
-    num_list=test1(100)
+    print()
+    num_list=test1(10)
     test_count+=len(num_list)**2
+    write_list(num_list)
+
+    system('copy input.txt "..\\..\\..\\projects\\6502 emu\\node.js\\input.txt')
+    
+    #Run tests through node.js
     system('"..\\..\\..\\projects\\6502 emu\\node.js\\run.bat"')
+
     break

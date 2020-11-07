@@ -18,7 +18,12 @@ LOG_ON =		$FFEC 		;Turn instruction logging on
 LOG_OFF = 		$FFED 		;Turn instruction logging off
 LOG_SEND =		$FFEE 		;Send instruction log file
 BELL_SOUND =	$FFEF		;Play bell sound on printing character 7
-FILE_INPUT =	$FFF0
+FILE_INPUT =	$FFF0		
+NODE_EXIT =		$FFF1		;Reading or writing this address will exit node.js
+
+NMI_VECTOR =	$FFFA
+RESET_VECTOR =	$FFFC
+IRQ_VECTOR =	$FFFE
 
 
 ;RAM/ROM bank indexes
