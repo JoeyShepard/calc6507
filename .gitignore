@@ -21,3 +21,6 @@ input.txt
 
 #documents downloaded from elsewhere
 /docs/
+
+#randomized test data
+"/decimal test/input*.txt"
