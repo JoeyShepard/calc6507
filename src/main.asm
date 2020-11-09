@@ -138,7 +138,7 @@ LOCALS_END set		$1F
 		TODO: node.js into git
 				
 		CALL setup
-		CALL tests
+		;CALL tests
 		CALL random_tests
 		CALL stats
 		CALL gfx_setup

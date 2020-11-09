@@ -221,9 +221,6 @@
 				STA new_word_buff,Y
 				INY
 				STY new_word_len
-				
-				halt
-				
 				CPY #WORD_MAX_SIZE
 				BNE .word_size_good
 					;Word too big to fit into 18 byte buffer
@@ -313,7 +310,7 @@
 			BYTE nonzero_found		;whether non-zero encountered yet in float
 			BYTE digit_count		;count of digits during float input
 			BYTE exp_digit_count	;count of digits during float input
-			BYTE zero_found			;whether leading zero found
+			BYTE digit_found		;whether digit found yet
 		END
 		
 		LDA #OBJ_ERROR
@@ -447,7 +444,7 @@
 		STA nonzero_found
 		STA dec_found
 		STA exp_found
-		STA zero_found
+		STA digit_found
 		
 		;first character is negative or digit?
 		LDA new_word_buff
@@ -469,6 +466,9 @@
 		
 		.float_first_done:
 		
+		;CALL halt_test, #6
+		;halt
+		
 		.loop_float:
 			LDA new_word_buff,Y
 			JSR .digit
@@ -476,9 +476,10 @@
 				PHA
 				LDA nonzero_found
 				BNE .digit_good
-					;no nonzero yet
+					;mark at least one digit found in case all 0(s)
+					;otherwise, can't tell e from 0e
 					LDA #$FF
-					STA zero_found
+					STA digit_found
 					PLA
 					PHA
 					BEQ .digit_zero
@@ -495,7 +496,7 @@
 					BNE .float_next
 						LDA dec_found
 						BNE .dec_exp_count
-							LDA #0
+							LDA #1
 							STA exp_count
 						.dec_exp_count:
 						DEC exp_count
@@ -561,6 +562,12 @@
 					;decimal in exponent!
 					RTS
 				.exp_good:
+				;if starts with . or only zeroes
+				LDA nonzero_found
+				BNE .no_implied_0
+					DEC exp_count
+				.no_implied_0:
+				
 				LDA #$FF
 				STA dec_found
 				BNE .float_next
@@ -573,6 +580,7 @@
 					;second e found, error!
 					RTS
 				.first_exp:
+				
 				LDA #0
 				STA index
 				STA which_digit
@@ -606,7 +614,7 @@
 		;Error if no digits, even if exponent given ie e500
 		LDA digit_count
 		BNE .exp_count_good
-			LDA zero_found
+			LDA digit_found
 			BNE .zero_ret
 				RTS
 			.zero_ret:
@@ -616,6 +624,8 @@
 				STA new_stack_item+EXP_HI
 				JMP .float_success
 		.exp_count_good:
+		
+		;CALL halt_no_test
 		
 		;Adjust exponent
 		LDA exp_negative

@@ -30,3 +30,13 @@
 		.no_match:
 		
 	END
+	
+	FUNC halt_no_test
+		LDA test_count
+		AND test_count+1
+		CMP #$FF
+		IF_EQ
+			halt
+		END_IF
+	END 
+	
