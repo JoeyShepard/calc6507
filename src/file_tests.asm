@@ -1,5 +1,5 @@
-;Randomized tests
-;================
+;Tests from file input
+;=====================
 
 	;should never run from ROM, so ok to put variables here
 	WORD counter1, counter2
@@ -50,8 +50,86 @@
 		CALL CheckData
 	END
 	
-	FUNC read3
+	FUNC FileInputTest
+		VARS
+			BYTE value
+		END
 		
+		CALL read_file_line
+		
+		LDY #0
+		.check_loop:
+			LDA FILE_INPUT
+			CMP #'A'
+			BCS .letter
+				SEC
+				SBC #'0'
+				JMP .letter_done
+			.letter:
+				SEC
+				SBC #'A'-10
+			.letter_done:
+			ASL
+			ASL
+			ASL
+			ASL
+			STA value
+			
+			LDA FILE_INPUT
+			CMP #'A'
+			BCS .letter2
+				SEC
+				SBC #'0'
+				JMP .letter_done2
+			.letter2:
+				SEC
+				SBC #'A'-10
+			.letter_done2:
+			ORA value
+			STA value
+			
+			LDA new_stack_item,Y
+			CMP value
+			BNE .failed_input
+			INY
+			LDA FILE_INPUT
+			CMP #$D
+			BNE .continue
+				JMP .done
+			.continue:
+			JMP .check_loop
+		
+			.failed_input:
+				CALL DebugText, "\\n\\n\\rLine "
+				LDA counter2+1
+				STA DEBUG_HEX
+				LDA counter2
+				STA DEBUG_HEX
+				LDA counter1+1
+				STA DEBUG_HEX
+				LDA counter1
+				STA DEBUG_HEX
+				CALL DebugText,": FAILED!\\n"
+				CALL DebugText,"   Found:    "
+				LDY #0
+				.fail_loop:
+					LDA new_stack_item,Y
+					STA DEBUG_HEX
+					LDA #' '
+					STA DEBUG
+					INY
+					CPY #9
+					BNE .fail_loop
+				halt
+				LDA new_stack_item
+				JMP .failed_input
+			
+		.done:
+		LDA FILE_INPUT
+		INC.W test_count
+	END
+	
+	FUNC read3
 		CALL read_file_line
 		CALL NewToR, #R1
 		CALL read_file_line
@@ -59,14 +137,14 @@
 		CALL read_file_line
 	END
 	
-	FUNC random_tests
+	FUNC file_tests
 		
 		MOV.W #0,counter1
 		MOV.W #0,counter2
 		MOV.W #0,failed1
 		MOV.W #0,failed2
 		
-		CALL DebugText,"\\n\\n\\lBeginning randomized tests"
+		CALL DebugText,"\\n\\n\\lBeginning file-based tests"
 		
 		.loop:
 			CALL inc_line, #counter1
@@ -75,6 +153,15 @@
 			
 			;No more input
 			JEQ .done
+			
+			;Input test
+			CMP #'I'
+			BNE .not_I
+				LDA FILE_INPUT
+				LDA FILE_INPUT
+				CALL FileInputTest
+				JMP .loop
+			.not_I:
 			
 			;Addition test
 			CMP #'A'
@@ -139,12 +226,12 @@
 		ORA failed2
 		ORA failed2+1
 		BNE .some_failed
-			CALL DebugText, "\\n\\n\\gAll randomized tests passed"
+			CALL DebugText, "\\n\\n\\gAll filed-based tests passed"
 			;storing any value here will exit node.js. ignored otherwise
 			JMP .failed_done
 		.some_failed:
 		
-		CALL DebugText, "\\n\\n\\rRandomized tests failed: "
+		CALL DebugText, "\\n\\n\\rFile-based tests failed: "
 		LDA failed2+1
 		STA DEBUG_HEX
 		LDA failed2
@@ -192,7 +279,6 @@
 				CALL DebugText,": FAILED!\\n"
 				CALL DebugText,"   Expected: "
 				
-			
 				LDY #(DEC_COUNT/2)-1+GR_OFFSET
 				.floop:
 					LDA new_stack_item,Y

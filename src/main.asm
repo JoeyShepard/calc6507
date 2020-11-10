@@ -98,7 +98,7 @@ LOCALS_END set		$1F
 	ORG $8900	;RAM + ROM size
 	;overlaps with video memory, no video output
 	include tests.asm
-	include rand_tests.asm
+	include file_tests.asm
 	include stats.asm
 	
 	ORG $900
@@ -135,11 +135,14 @@ LOCALS_END set		$1F
 				
 		TODO: move tests to separate file like randomized tests
 		TODO: support E+ format
-		TODO: node.js into git
+		TODO: too long numbers should be rounded, not errors
+		TODO: copyright
+		
+		
 				
 		CALL setup
 		;CALL tests
-		CALL random_tests
+		CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		

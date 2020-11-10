@@ -8,7 +8,7 @@ MAX_VAL = "9.99999999999e999"
 MIN_VAL = "1e-999"
 
 #Randomized round robin
-TEST1_COUNT = 100
+TEST1_COUNT = 500
     #500 = 4m tests
 
 #Randomized pairs - whole exponent range
@@ -135,7 +135,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
-rand_seed=input("Seed? (default: 0)")
+rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0
 else: rand_seed=int(rand_seed)
@@ -161,9 +161,6 @@ while(1):
     
     #Run tests through node.js
     system('"..\\..\\..\\projects\\6502 emu\\node.js\\run.bat"')
-
-    break
-
 
     #TEST 2 - randomized pairs
     print("\n\nTest 2: randomized pairs")

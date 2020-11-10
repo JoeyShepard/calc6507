@@ -224,182 +224,11 @@
 	
 	FUNC tests
 		
+		;Number input
 		MOV.W #1,test_count
 		
-		;Reading inputs
-	
-		;1 - 5 = 5e0
-		CALL InputTest, "5", "01 00 00 00 00 00 50 00 00" 
+		;Moved to input.txt
 		
-		;2 - 500 = 5e2
-		CALL InputTest, "500", "01 00 00 00 00 00 50 02 00"
-		
-		;3 - 500. = 5e2
-		CALL InputTest, "500", "01 00 00 00 00 00 50 02 00"
-		
-		;4 - 500.0 = 5e2
-		CALL InputTest, "500.0", "01 00 00 00 00 00 50 02 00"
-		
-		;5 - 500.00 = 5e2
-		CALL InputTest, "500.00", "01 00 00 00 00 00 50 02 00"
-		
-		;6 - 5e00003 = 5e3
-		CALL InputTest, "5e00003", "01 00 00 00 00 00 50 03 00"
-		
-		;7 - 500e0 = 5e2
-		CALL InputTest, "500e0", "01 00 00 00 00 00 50 02 00"
-		
-		;8 - 500e2 = 5e4
-		CALL InputTest, "500e2", "01 00 00 00 00 00 50 04 00"
-		
-		;9 - 500e997 = 5e999
-		CALL InputTest, "500e997", "01 00 00 00 00 00 50 99 09"
-		
-		;10 - 500e998 = Error! overflow
-		CALL InputTest, "500e998", "04"
-		
-		;11 - -5 = -5e0
-		CALL InputTest, "-5", "01 00 00 00 00 00 50 00 80"
-		
-		;12 - -500 = -5e2
-		CALL InputTest, "-500", "01 00 00 00 00 00 50 02 80"
-		
-		;13 - -500e997 = -5e999
-		CALL InputTest, "-500e997", "01 00 00 00 00 00 50 99 89"
-		
-		;14 - 0.05 = 5e-2
-		CALL InputTest, "0.05", "01 00 00 00 00 00 50 02 40"
-		
-		;15 - 0.05e2 = 5e0
-		CALL InputTest, "0.05e2", "01 00 00 00 00 00 50 00 00"
-		
-		;16 - 0.05e1 = 5e-1
-		CALL InputTest, "0.05e1", "01 00 00 00 00 00 50 01 40"
-		
-		;17 - 0.05e3 = 5e1
-		CALL InputTest, "0.05e3", "01 00 00 00 00 00 50 01 00"
-		
-		;18 - 0.05e-2 = 5e-4
-		CALL InputTest, "0.05e-2", "01 00 00 00 00 00 50 04 40"
-		
-		;19 - 5e-0 = 5e0
-		CALL InputTest, "5e-0", "01 00 00 00 00 00 50 00 00"
-		
-		;20 - 5e-2 = 5e-2
-		CALL InputTest, "5e-2", "01 00 00 00 00 00 50 02 40"
-		
-		;21 - 0.05e-997 = 5e-999
-		CALL InputTest, "0.05e-997", "01 00 00 00 00 00 50 99 49"
-		
-		;22 - 0.05e-998 = Error! underflow
-		CALL InputTest, "0.05e-998", "04"
-		
-		;23 - 0.05e101 = 5e99
-		CALL InputTest, "0.05e101", "01 00 00 00 00 00 50 99 00"
-		
-		;24 - 0.05e99 = 5e97
-		CALL InputTest, "0.05e99", "01 00 00 00 00 00 50 97 00"
-		
-		;25 - 500e99 = 5e101
-		CALL InputTest, "500e99", "01 00 00 00 00 00 50 01 01"
-		
-		;26 - 500e97 = 5e99
-		CALL InputTest, "500e97", "01 00 00 00 00 00 50 99 00"
-		
-		;27 - 500e98 = 5e100
-		CALL InputTest, "500e98", "01 00 00 00 00 00 50 00 01"
-		
-		;28 - 0.05e102 = 5e100
-		CALL InputTest, "0.05e102", "01 00 00 00 00 00 50 00 01"
-		
-		;29 - 1.23456789012 = 1.23456789012e0
-		CALL InputTest, "1.23456789012", "01 12 90 78 56 34 12 00 00"
-		
-		;30 - 12345.6789012 = 1.23456789012e4
-		CALL InputTest, "12345.6789012", "01 12 90 78 56 34 12 04 00"
-		
-		;31 - 1.23456789012e10 = 1.23456789012e10
-		CALL InputTest, "1.23456789012e10", "01 12 90 78 56 34 12 10 00"
-		
-		;32 - e = Error!
-		CALL InputTest, "e", "04"
-		
-		;33 - . = Error!
-		CALL InputTest, ".", "04"
-		
-		;34 - .e = Error!
-		CALL InputTest, ".e", "04"
-		
-		;35 - 1.5. = Error
-		CALL InputTest, "1.5.", "04"
-		
-		;36 - .5 = 5e-1
-		CALL InputTest, ".5", "01 00 00 00 00 00 50 01 40"
-		
-		;37 - 0 = 0
-		CALL InputTest, "0", "01 00 00 00 00 00 00 00 00"
-		
-		;38 - 00 = 0
-		CALL InputTest, "00", "01 00 00 00 00 00 00 00 00"
-		
-		;39 - 00.0 = 0
-		CALL InputTest, "00.0", "01 00 00 00 00 00 00 00 00"
-		
-		;40 - 1e2e = Error!
-		CALL InputTest, "1e2e", "04"
-		
-		;41 - 1e2e3 = Error!
-		CALL InputTest, "1e2e3", "04"
-		
-		;42 - .5. = Error!
-		CALL InputTest, ".5.", "04"
-		
-		;43 - 1234567890123 = Error! too long
-		CALL InputTest, "1234567890123", "04"
-		
-		;44 - 5e9999 = Error! exp too long
-		CALL InputTest, "5e9999", "04"
-		
-		;45 - 0.000123456789012 = 1.23456789012e-4
-		CALL InputTest, "0.000123456789012", "01 12 90 78 56 34 12 04 40"
-		
-		;46 - -5- = Error!
-		CALL InputTest, "-5-", "04"
-		
-		;47 - 5-e = Error!
-		CALL InputTest, "-5-e", "04"
-		
-		;48 - 5e- = 5
-		CALL InputTest, "5e", "01 00 00 00 00 00 50 00 00"
-		
-		;49 - 0e500 = 0e0
-		CALL InputTest, "0e500", "01 00 00 00 00 00 00 00 00"
-		
-		;50 - 0e-500 = 0e0
-		CALL InputTest, "0e-500", "01 00 00 00 00 00 00 00 00"
-		
-		;51 - 0.00000123456789012 = 1.23456789012e-6 (max size)
-		CALL InputTest, "0.00000123456789012", "01 12 90 78 56 34 12 06 40"
-		
-		;52 - 0.000000123456789012 = Error! too large
-		CALL InputTest, "0.000000123456789012", "04"
-		
-		;53 - 5e = 5
-		CALL InputTest, "5e", "01 00 00 00 00 00 50 00 00"
-		
-		;54
-		CALL InputTest, "e500", "04"
-		
-		;55 - 0.08 = 8e-2
-		CALL InputTest, "0.08", "01 00 00 00 00 00 80 02 40"
-		
-		;56 - .08 = 8e-2
-		CALL InputTest, ".08", "01 00 00 00 00 00 80 02 40"
-		
-		;57 - 0500 = 5e2
-		CALL InputTest, "0500", "01 00 00 00 00 00 50 02 00"
-	
-	
 		TODO: tests for hex arithmetic
 		
 		;Floating point add
@@ -410,8 +239,8 @@
 	;	
 	;	TODO: try 3 other sign combos
 	;	
-	;	CALL DebugText, "\\n\\gAll specific tests passed"
-	;	MOV.W #0,test_count
+		CALL DebugText, "\\n\\gAll specific tests passed"
+		MOV.W #0,test_count
 		
 		MOV.W #$FFFF,test_count
 		
