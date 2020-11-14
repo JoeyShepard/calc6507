@@ -431,6 +431,8 @@
 			RTS
 		.not_hex:
 		
+		TODO: this whole routine should use R1 so it can share functionality!
+		
 		;not string or hex, so must be float
 		LDA #6
 		STA index
@@ -445,7 +447,6 @@
 		STA dec_found
 		STA exp_found
 		STA digit_found
-		STA math_sticky
 		
 		;first character is negative or digit?
 		LDA new_word_buff
@@ -505,13 +506,11 @@
 					BNE .exp_digit
 						
 						LDA digit_count
-						CMP #MAX_DIGITS+2*GR_OFFSET
-						BNE .digit_ok
+						CMP #MAX_DIGITS+2*GR_OFFSET+1
+						BCC .digit_ok
 							;;max digits exceeded!
 							;PLA
 							;RTS
-							ORA math_sticky
-							STA math_sticky
 							PLA
 							JMP .exp_check
 						.digit_ok:
@@ -719,7 +718,11 @@
 		
 		TODO: round if necessary
 		
-		START HERE
+		halt
+		
+		;g/r is overwriting object type!
+		;better to move to R1 than fixing this
+		LDA new_stack_item+GR_OFFSET
 		
 		;Copy exponent bytes over guard/round byte
 		LDA new_stack_item+GR_OFFSET+EXP_LO
