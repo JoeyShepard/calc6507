@@ -322,7 +322,7 @@
 			RTS
 		.not_zero_len:
 		
-		LDY #8
+		LDY #OBJ_SIZE
 		LDA #0
 		.zero_loop:
 			STA new_stack_item,Y
@@ -445,6 +445,7 @@
 		STA dec_found
 		STA exp_found
 		STA digit_found
+		STA math_sticky
 		
 		;first character is negative or digit?
 		LDA new_word_buff
@@ -465,9 +466,6 @@
 		.float_not_exp:
 		
 		.float_first_done:
-		
-		;CALL halt_test, #6
-		;halt
 		
 		.loop_float:
 			LDA new_word_buff,Y
@@ -505,20 +503,28 @@
 					.digit_good:
 					LDA exp_found
 					BNE .exp_digit
+						
 						LDA digit_count
-						CMP #MAX_DIGITS
+						CMP #MAX_DIGITS+2*GR_OFFSET
 						BNE .digit_ok
-							;max digits exceeded!
+							;;max digits exceeded!
+							;PLA
+							;RTS
+							ORA math_sticky
+							STA math_sticky
 							PLA
-							RTS
+							JMP .exp_check
 						.digit_ok:
+						
+						PLA
+						JSR .add_digit
+						
+						.exp_check:
 						LDA dec_found
 						BNE .no_dec_yet
 							INC exp_count
 						.no_dec_yet:
 						
-						PLA
-						JSR .add_digit
 						.float_next:
 						INY
 						CPY new_word_len
@@ -537,13 +543,13 @@
 						STY y_buff
 						LDY #4
 						.exp_loop:
-							ASL new_stack_item+EXP_LO
-							ROL new_stack_item+EXP_HI
+							ASL new_stack_item+GR_OFFSET+EXP_LO
+							ROL new_stack_item+GR_OFFSET+EXP_HI
 							DEY
 							BNE .exp_loop
 						LDY y_buff
-						ORA new_stack_item+EXP_LO
-						STA new_stack_item+EXP_LO
+						ORA new_stack_item+GR_OFFSET+EXP_LO
+						STA new_stack_item+GR_OFFSET+EXP_LO
 						INC index
 						INC exp_digit_count
 						JMP .float_next
@@ -620,8 +626,8 @@
 			.zero_ret:
 				;if input is zero, clear exponent
 				LDA #0
-				STA new_stack_item+EXP_LO
-				STA new_stack_item+EXP_HI
+				STA new_stack_item+GR_OFFSET+EXP_LO
+				STA new_stack_item+GR_OFFSET+EXP_HI
 				JMP .float_success
 		.exp_count_good:
 		
@@ -631,7 +637,7 @@
 		LDA exp_negative
 		BEQ .exp_positive
 			TODO: smaller?
-			CALL BCD_Reverse, #new_stack_item+EXP_LO, #2
+			CALL BCD_Reverse, #new_stack_item+GR_OFFSET+EXP_LO, #2
 		.exp_positive:
 		
 		SED
@@ -660,6 +666,7 @@
 		.exp_count_done:
 		STA exp_count
 		
+		TODO: move exp to math_lo/hi and reuse code from BCD_Add
 		;Add decimal place offset to exponent
 		LDY #$99
 		CMP #$50
@@ -668,26 +675,26 @@
 		.exp_count_neg2:
 		STY index
 		CLC
-		ADC new_stack_item+EXP_LO
-		STA new_stack_item+EXP_LO
+		ADC new_stack_item+GR_OFFSET+EXP_LO
+		STA new_stack_item+GR_OFFSET+EXP_LO
 		LDA index
-		ADC new_stack_item+EXP_HI
-		STA new_stack_item+EXP_HI
+		ADC new_stack_item+GR_OFFSET+EXP_HI
+		STA new_stack_item+GR_OFFSET+EXP_HI
 		CLD
 		
 		;Reverse exponent bytes
 		LDA #0
-		LDY new_stack_item+8
+		LDY new_stack_item+GR_OFFSET+EXP_HI
 		CPY #$50
 		BCC .exp_positive2
 			TODO: smaller?
-			CALL BCD_Reverse, #new_stack_item+EXP_LO, #2
+			CALL BCD_Reverse, #new_stack_item+GR_OFFSET+EXP_LO, #2
 			LDA #$FF 
 		.exp_positive2:
 		STA exp_negative
 		
 		;Check for overflow or underflow
-		LDA new_stack_item+EXP_HI
+		LDA new_stack_item+GR_OFFSET+EXP_HI
 		CMP #$10
 		BNE .no_exp_overflow
 			;Exponent underflowed or overflowed!
@@ -697,18 +704,28 @@
 		;Mark negative sign bit
 		LDA exp_negative
 		BEQ .exp_no_neg_bit
-			LDA new_stack_item+EXP_HI
+			LDA new_stack_item+GR_OFFSET+EXP_HI
 			ORA #E_SIGN_BIT
-			STA new_stack_item+EXP_HI
+			STA new_stack_item+GR_OFFSET+EXP_HI
 		.exp_no_neg_bit:
 		
 		;Mark negative bit
 		LDA negative
 		BEQ .positive
-			LDA new_stack_item+EXP_HI
+			LDA new_stack_item+GR_OFFSET+EXP_HI
 			ORA #SIGN_BIT
-			STA new_stack_item+EXP_HI
+			STA new_stack_item+GR_OFFSET+EXP_HI
 		.positive:
+		
+		TODO: round if necessary
+		
+		START HERE
+		
+		;Copy exponent bytes over guard/round byte
+		LDA new_stack_item+GR_OFFSET+EXP_LO
+		STA new_stack_item+EXP_LO
+		LDA new_stack_item+GR_OFFSET+EXP_HI
+		STA new_stack_item+EXP_HI
 		
 		;success - mark object type as float and return
 		.float_success:

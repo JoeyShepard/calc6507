@@ -229,6 +229,8 @@
 		
 		;Moved to input.txt
 		
+		CALL InputTest, "1234567890123456789", "01 12 90 78 56 34 12 18 00"
+		
 		TODO: tests for hex arithmetic
 		
 		;Floating point add

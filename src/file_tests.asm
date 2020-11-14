@@ -126,6 +126,7 @@
 			
 		.done:
 		LDA FILE_INPUT
+		CALL inc_line
 		INC.W test_count
 	END
 	
@@ -143,6 +144,7 @@
 		MOV.W #0,counter2
 		MOV.W #0,failed1
 		MOV.W #0,failed2
+		MOV.W #0,test_count
 		
 		CALL DebugText,"\\n\\n\\lBeginning file-based tests"
 		

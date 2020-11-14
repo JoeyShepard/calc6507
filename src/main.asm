@@ -133,12 +133,11 @@ LOCALS_END set		$1F
 		LDX #$2F
 		TXS
 		
-		TODO: support E+ format
 		TODO: too long numbers should be rounded, not errors
 		TODO: copyright
 		
 		CALL setup
-		CALL tests
+		;CALL tests
 		CALL file_tests
 		CALL stats
 		CALL gfx_setup
