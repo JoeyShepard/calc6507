@@ -25,4 +25,4 @@ processed.p
 /docs/
 
 #randomized test data
-"/decimal test/input*.txt"
+/decimal\ test/input*.txt
