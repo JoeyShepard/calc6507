@@ -235,10 +235,15 @@
 		MOV.W #501,test_count
 		
 		;temp
-    	CALL AddTest, "8.50938894e9", "-7.983e20", "-7.98299999991e20"
-	;	
-	;	TODO: try 3 other sign combos
-	;	
+    	
+		;1e-999
+		;-1.1242385757e-999
+		;1e-999
+		;HP-48 rounds to 0!!!
+		;Python dec gives -1e-1000, which should round to 0
+		
+		CALL AddTest, "1e-999","-1.1242385757e-999","0"
+		
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count
 		

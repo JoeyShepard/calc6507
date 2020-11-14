@@ -68,7 +68,7 @@
 		.loop:
 			STA R1,X
 			INX
-			CPX #OBJ_SIZE-TYPE_SIZE
+			CPX #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
 			BNE .loop
 	END
 	

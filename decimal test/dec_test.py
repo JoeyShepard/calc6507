@@ -104,7 +104,7 @@ def write_list_rr(which_list):
                 sum_dec=Decimal(0)
             elif abs(sum_dec)<Decimal(MIN_VAL):
                 #print("under:",sum_dec)
-                sum_dec=Decimal(MIN_VAL)
+                sum_dec=Decimal(0)
             sum_try="{:e}".format(Decimal(sum_dec)).replace("+","")
             fp.write(sum_try+"\n")
     fp.write("Z")
@@ -135,6 +135,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
+print("Passed seeds 0-14 but need to retest")
 rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0
