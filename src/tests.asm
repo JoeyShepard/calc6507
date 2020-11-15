@@ -231,7 +231,7 @@
 		
 		;CALL InputTest, "1234567890123456789", "01 12 90 78 56 34 12 18 00"
 		;CALL InputTest, "1234567890124999999", "01 12 90 78 56 34 12 18 00"
-		CALL InputTest, "1234567890125000000", "01 13 90 78 56 34 12 18 00"
+		;CALL InputTest, "1234567890125000000", "01 13 90 78 56 34 12 18 00"
 		;CALL InputTest, "1234567890129999999", "01 13 90 78 56 34 12 18 00"
 		;CALL InputTest, "9999999999999999999", "01 00 00 08 06 04 10 19 00"
 		
@@ -242,13 +242,11 @@
 		
 		;temp
     	
-		;1e-999
-		;-1.1242385757e-999
-		;1e-999
-		;HP-48 rounds to 0!!!
-		;Python dec gives -1e-1000, which should round to 0
+		;0
+		;0.1e-999
+		;0e0
 		
-		CALL AddTest, "1e-999","-1.1242385757e-999","0"
+		;CALL AddTest, "0","0.1e-999","0"
 		
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count

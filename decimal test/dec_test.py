@@ -20,8 +20,8 @@ rand_seed=0
 
 def rand_num():
     #digits
-    digit_count=randint(1,12)
-    digits=""
+    digit_count=randint(0,12)
+    digits=str(randint(1,9)
     for j in range(digit_count):
         digits+=str(randint(0,9))
 
@@ -48,7 +48,6 @@ def test1(amount):
     #20 - 310k file, 28k lines, gen: 1s
     #100 - 7.59mb, 652k lines, gen: 3s, run: 19s
     #500 - 184mb, 16m lines, gen: 75s, run: ~8min
-        #passed ~4m tests!
 
         digits,exp=rand_num()
 
@@ -135,7 +134,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
-print("Passed seeds 0-14 but need to retest")
+print("Passed through 24")
 rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0
