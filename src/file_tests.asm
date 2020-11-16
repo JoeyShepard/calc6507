@@ -172,7 +172,7 @@
 				LDA FILE_INPUT
 				CALL read3
 				CALL BCD_Add
-				CALL CompareR1
+				CALL CompareRans
 				BEQ .loop
 				JMP .failed
 			.not_A:
@@ -290,7 +290,7 @@
 				LDA #' '
 				STA DEBUG
 				
-				LDA R1		;GR
+				LDA R_ans		;GR
 				STA DEBUG_HEX
 				
 				CALL DebugText," E"
@@ -301,7 +301,7 @@
 				STA DEBUG_HEX
 				
 				CALL DebugText,"\\n   Found:    "
-				CALL DebugR1
+				CALL DebugRans
 			
 				halt
 			
@@ -309,11 +309,11 @@
 			;JMP .loop
 	END
 	
-	FUNC CompareR1
+	FUNC CompareRans
 	
 		LDY #8
 		.loop:
-			LDA R1,Y
+			LDA R_ans,Y
 			CMP new_stack_item,Y
 			BNE .failed
 			DEY

@@ -177,7 +177,7 @@
 					JSR TosR0R1
 					JSR BCD_Add
 					JSR CODE_DROP+EXEC_HEADER
-					JMP R1Tos
+					JMP RansTos
 			add_not_float:
 			
 			;Adding strings

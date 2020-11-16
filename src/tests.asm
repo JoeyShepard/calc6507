@@ -146,27 +146,27 @@
 		CALL CheckData
 	END
 
-	FUNC DebugR1
+	FUNC DebugRans
 		TXA
 		PHA
 		
 		;CALL DebugText,"\\n"
 		LDX #(DEC_COUNT/2)-1+GR_OFFSET
 		.loop:
-			LDA R1,X
+			LDA R_ans,X
 			STA DEBUG_HEX
 			DEX
 			BNE .loop
 		LDA #' '
 		STA DEBUG
 		
-		LDA R1		;GR
+		LDA R_ans		;GR
 		STA DEBUG_HEX
 		
 		CALL DebugText," E"
-		LDA R1+DEC_COUNT/2+2
+		LDA R_ans+DEC_COUNT/2+2
 		STA DEBUG_HEX
-		LDA R1+DEC_COUNT/2+1
+		LDA R_ans+DEC_COUNT/2+1
 		STA DEBUG_HEX
 		
 		PLA
@@ -187,7 +187,7 @@
 		
 		LDY #8
 		.loop:
-			LDA R1,Y
+			LDA R_ans,Y
 			CMP new_stack_item,Y
 			BNE .failed
 			DEY
@@ -203,7 +203,7 @@
 				CALL DebugText,"   Expected: "
 				CALL DebugText,ans
 				CALL DebugText,"\\n   Found:    "
-				CALL DebugR1
+				CALL DebugRans
 				CALL DebugText,"\\n\\n"
 				
 				halt
@@ -216,7 +216,7 @@
 		LDA test_count
 		STA DEBUG_DEC16
 		CALL DebugText,": passed - "
-		CALL DebugR1
+		CALL DebugRans
 		CALL DebugText,"\\n"
 		INC.W test_count
 		
@@ -241,13 +241,9 @@
 		MOV.W #501,test_count
 		
 		;temp
+		
+		CALL AddTest, "12345", "0", "12345"
     	
-		;0
-		;0.1e-999
-		;0e0
-		
-		;CALL AddTest, "0","0.1e-999","0"
-		
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count
 		

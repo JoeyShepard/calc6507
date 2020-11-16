@@ -62,27 +62,33 @@
 		;PLP
 	END
 	
-	FUNC ZeroR1
-		LDX #1
+	;Reg in Y
+	FUNC ZeroReg
+		halt
+		TYA
+		TAX
+		LDY #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
 		LDA #0
 		.loop:
-			STA R1,X
+			STA 1,X
 			INX
-			CPX #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
+			DEY
 			BNE .loop
 	END
 	
-	FUNC MaxR1
-		LDX #1
+	;Reg in Y
+	FUNC MaxReg
+		TYA
+		TAX
+		LDY #DEC_COUNT/2+1
 		LDA #$99
 		.loop:
-			STA R1,X
+			STA 1,X
 			INX
-			CPX #DEC_COUNT/2+1
+			DEY
 			BNE .loop
-		STA R1+OBJ_SIZE-2
 		LDA #9
-		STA R1+OBJ_SIZE-1
+		STA 1,X
 	END
 	
 	;FUNC DecR1Exp
@@ -95,14 +101,14 @@
 	;	STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE		
 	;END
 	
-	FUNC IncR1Exp
-		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+	FUNC IncRansExp
+		LDA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
 		CLC
 		ADC #1
-		STA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
-		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
 		ADC #0
-		STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE		
+		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE		
 	END
 	
 	FUNC SwapR0R1
@@ -120,13 +126,30 @@
 			BNE .swap_loop
 	END
 	
-	TODO: SwapR0R1? slower but smaller
-	FUNC CopyR0R1
+	;TODO: SwapR0R1? slower but smaller
+	;FUNC CopyR0R1
+	;
+	;	LDY #GR_OFFSET
+	;	.swap_loop:
+	;		LDA R0,Y
+	;		STA R1,Y
+	;		INY
+	;		CPY #GR_OFFSET+OBJ_SIZE
+	;		BNE .swap_loop
+	;END
 	
+	;A-source, Y-dest
+	FUNC CopyRegs
+		STA math_ptr1
+		STY math_ptr2
+		LDA #0
+		STA math_ptr1+1
+		STA math_ptr2+1
+		
 		LDY #GR_OFFSET
 		.swap_loop:
-			LDA R0,Y
-			STA R1,Y
+			LDA (math_ptr1),Y
+			STA (math_ptr2),Y
 			INY
 			CPY #GR_OFFSET+OBJ_SIZE
 			BNE .swap_loop
@@ -156,7 +179,7 @@
 		TAX
 	END
 	
-	FUNC R1Tos
+	FUNC RansTos
 		TXA
 		PHA
 		LDA #OBJ_FLOAT
@@ -164,7 +187,7 @@
 		INX
 		LDY #GR_OFFSET
 		.loop:
-			LDA R1,Y
+			LDA R_ans,Y
 			STA 0,X
 			INX
 			INY
@@ -284,12 +307,12 @@
 		.done:
 	END
 	
-	FUNC NormR1
+	FUNC NormRans
 		LDY #DEC_COUNT/2
 		LDA #0
 		STA math_a	;count
 		.loop:
-			LDA R1,Y
+			LDA R_ans,Y
 			BEQ .c2
 			AND #$F0
 			BNE .done
@@ -307,9 +330,9 @@
 		CMP #DEC_COUNT
 		BCC .not_0
 			LDA #0
-			STA R1	;guard/round
-			STA R1+OBJ_SIZE-1
-			STA R1+OBJ_SIZE-2
+			STA R_ans	;guard/round
+			STA R_ans+OBJ_SIZE-1
+			STA R_ans+OBJ_SIZE-2
 			RTS
 		.not_0:
 		
@@ -320,7 +343,7 @@
 		STA math_a
 		BCC .even_shift
 			;odd number of shift places
-			LDX #R1
+			LDX #R_ans
 			JSR HalfShiftForward
 		.even_shift:
 		
@@ -335,9 +358,9 @@
 		STA math_a
 		.shift_loop:
 			LDX math_a
-			LDA R1,X
+			LDA R_ans,X
 			LDX math_c
-			STA R1,X
+			STA R_ans,X
 			DEC math_c
 			DEC math_a
 			BPL .shift_loop
@@ -348,7 +371,7 @@
 		TAY
 		TXA
 		.fill_loop:
-			STA R1,X
+			STA R_ans,X
 			INX
 			DEY
 			BNE .fill_loop
@@ -359,13 +382,13 @@
 		TAY
 		LDA hex_table,Y
 		STA math_a
-		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
 		SEC
 		SBC math_a
-		STA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
-		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
 		SBC #0
-		STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
 		
 		.return:
 	END
@@ -403,7 +426,7 @@
 			;exp negative and exceeded 999: set to 0
 			;CALL ZeroR1
 			;JMP .overflow_done
-			JMP ZeroR1
+			JMP ZeroReg
 		.no_underflow:
 		;AND #~E_SIGN_BIT	
 		AND #$BF	;mask out E_SIGN_BIT
@@ -411,7 +434,7 @@
 		BCC .overflow_done
 			;exp positive and exceeded 999: set to max val
 			;CALL MaxR1
-			JMP MaxR1
+			JMP MaxReg
 			;RTS
 		.overflow_done:
 		
@@ -436,13 +459,20 @@
 		TXA
 		PHA
 		
+				
 		;check for zero - simplifies logic below
 		LDA R0+GR_OFFSET+DEC_COUNT/2-1
-		JEQ .zero_exit
+		BNE .no_zero_exit
+			LDA #R1		;source
+			.zero_copy_exit:
+			LDY #R_ans	;dest
+			JSR CopyRegs
+			JMP .zero_exit
+		.no_zero_exit:
 		LDA R1+GR_OFFSET+DEC_COUNT/2-1
 		BNE .R1_good
-			JSR CopyR0R1
-			JMP .zero_exit
+			LDA #R0		;source
+			BNE .zero_copy_exit
 		.R1_good:
 		
 		LDY #0
@@ -505,6 +535,15 @@
 			JSR BCD_RevSig
 		.same_sign:
 		
+		TODO: generic opcy routine?
+		;copy exponent to answer so ready to adjust if needed
+		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+		STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
+		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE+1
+		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE+1
+		
 		.do_add:
 		CLC
 		LDX #0
@@ -512,7 +551,7 @@
 		.add_loop:
 			LDA R1,X
 			ADC R0,X
-			STA R1,X
+			STA R_ans,X
 			INX
 			DEY
 			BNE .add_loop
@@ -525,18 +564,16 @@
 			;carry set means increase exponent
 			PLP
 			BCC .no_carry
-				JSR IncR1Exp
+				JSR IncRansExp
 				
-				LDA R1
+				LDA R_ans
 				AND #$F
 				ORA math_sticky
 				STA math_sticky
-				LDX #R1
+				LDX #R_ans
 				LDA #$10		;fill byte
 				JSR HalfShift
 			.no_carry:
-			;LDA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-			;AND #SIGN_BIT
 			JMP .carry_done
 		.not_same:
 			;operands different
@@ -544,19 +581,18 @@
 			LDA #0
 			PLP
 			BCS .no_carry2
-				LDY #R1
+				LDY #R_ans
 				JSR BCD_RevSig
 				LDA #SIGN_BIT
 			.no_carry2:
-			STA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+			STA R_ans+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		.carry_done:
-		;STA R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		
 		;shift forward
-		JSR NormR1
+		JSR NormRans
 		
 		;round
-		LDA R1
+		LDA R_ans
 		CMP #$50
 		BNE .not_50
 			;if GRS=50|1 and signs same, round up
@@ -568,7 +604,7 @@
 				BNE .no_round
 				BEQ .round
 			.round_even:
-			LDA R1+1
+			LDA R_ans+1
 			AND #1
 			BNE .round
 			BEQ .no_round
@@ -579,15 +615,15 @@
 			LDY #DEC_COUNT/2
 			SEC
 			.round_loop:
-				LDA R1+GR_OFFSET,X
+				LDA R_ans+GR_OFFSET,X
 				ADC #0
-				STA R1+GR_OFFSET,X
+				STA R_ans+GR_OFFSET,X
 				INX
 				DEY
 				BNE .round_loop
 			BCC .round_done
-				JSR IncR1Exp
-				LDX #R1
+				JSR IncRansExp
+				LDX #R_ans
 				LDA #$10		;fill byte
 				JSR HalfShift
 			.round_done:
@@ -600,13 +636,17 @@
 			;if exp pos, keep the one with larger abs magnitude
 			;ie, just compare diff in exponents
 			
-			LDA math_hi
+			LDA #R1
+			LDY math_hi
 			BPL .no_copy
-				CALL CopyR0R1
+				LDA #R0
 			.no_copy:
+			
+			LDY #R_ans
+			JSR CopyRegs
 		.done:
 		
-		LDY #R1
+		LDY #R_ans
 		JSR BCD_Pack
 		
 		.zero_exit:

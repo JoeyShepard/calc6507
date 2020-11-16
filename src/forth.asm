@@ -433,8 +433,9 @@
 		
 		TODO: this whole routine should use R1 so it can share functionality!
 		
+		TODO: give name to numbers
 		;not string or hex, so must be float
-		LDA #6
+		LDA #7
 		STA index
 		LDA #0
 		STA which_digit
@@ -447,6 +448,302 @@
 		STA dec_found
 		STA exp_found
 		STA digit_found
+		
+		;;first character is negative or digit?
+		;LDA new_word_buff
+		;;CMP #CHAR_MINUS
+		;CMP #'-'
+		;BNE .float_no_neg
+		;	;neg sign
+		;	LDA #$FF
+		;	STA negative
+		;	INY
+		;	JMP .float_first_done
+		;.float_no_neg:
+		;
+		;CMP #CHAR_EXP
+		;BNE .float_not_exp
+		;	;First character cannot be exponent sign
+		;	RTS
+		;.float_not_exp:
+		;
+		;.float_first_done:
+		;
+		;.loop_float:
+		;	LDA new_word_buff,Y
+		;	JSR .digit
+		;	BCC .float_not_digit
+		;		PHA
+		;		LDA nonzero_found
+		;		BNE .digit_good
+		;			;mark at least one digit found in case all 0(s)
+		;			;otherwise, can't tell e from 0e
+		;			LDA #$FF
+		;			STA digit_found
+		;			PLA
+		;			PHA
+		;			BEQ .digit_zero
+		;				;non zero digit
+		;				LDA #$FF
+		;				STA nonzero_found
+		;				BNE .digit_good
+		;				
+		;			.digit_zero:
+		;			;only zeroes so far, so just count exponent
+		;			
+		;			PLA
+		;			LDA exp_found
+		;			BNE .float_next
+		;				LDA dec_found
+		;				BNE .dec_exp_count
+		;					LDA #1
+		;					STA exp_count
+		;				.dec_exp_count:
+		;				DEC exp_count
+		;				JMP .float_next
+		;
+		;			.digit_good:
+		;			LDA exp_found
+		;			BNE .exp_digit
+		;				
+		;				LDA digit_count
+		;				CMP #MAX_DIGITS+2*GR_OFFSET
+		;				BCC .digit_ok
+		;					;;max digits exceeded!
+		;					;PLA
+		;					;RTS
+		;					PLA
+		;					JMP .exp_check
+		;				.digit_ok:
+		;				
+		;				PLA
+		;				JSR .add_digit
+		;				
+		;				.exp_check:
+		;				LDA dec_found
+		;				BNE .no_dec_yet
+		;					INC exp_count
+		;				.no_dec_yet:
+		;				
+		;				.float_next:
+		;				INY
+		;				CPY new_word_len
+		;				BEQ .float_done
+		;				JMP .loop_float
+		;			.exp_digit:
+		;				LDA exp_digit_count
+		;				CMP #3
+		;				BNE .exp_digit_ok
+		;					;max exp digits exceeded!
+		;					PLA
+		;					RTS
+		;				.exp_digit_ok:
+		;				
+		;				PLA
+		;				STY y_buff
+		;				LDY #4
+		;				.exp_loop:
+		;					ASL new_stack_item+GR_OFFSET+EXP_LO
+		;					ROL new_stack_item+GR_OFFSET+EXP_HI
+		;					DEY
+		;					BNE .exp_loop
+		;				LDY y_buff
+		;				ORA new_stack_item+GR_OFFSET+EXP_LO
+		;				STA new_stack_item+GR_OFFSET+EXP_LO
+		;				INC index
+		;				INC exp_digit_count
+		;				JMP .float_next
+		;	.float_not_digit:
+		;	
+		;	;not digit
+		;	CMP #'.'
+		;	BNE .not_decimal_point
+		;		LDA dec_found
+		;		BEQ .decimal_good
+		;			;second decimal found!
+		;			RTS
+		;		.decimal_good:
+		;		LDA exp_found
+		;		BEQ .exp_good
+		;			;decimal in exponent!
+		;			RTS
+		;		.exp_good:
+		;		;if starts with . or only zeroes
+		;		LDA nonzero_found
+		;		BNE .no_implied_0
+		;			DEC exp_count
+		;		.no_implied_0:
+		;		
+		;		LDA #$FF
+		;		STA dec_found
+		;		BNE .float_next
+		;	.not_decimal_point:
+		;
+		;	CMP #CHAR_EXP
+		;	BNE .not_exp
+		;		LDA exp_found
+		;		BEQ .first_exp
+		;			;second e found, error!
+		;			RTS
+		;		.first_exp:
+		;		
+		;		LDA #0
+		;		STA index
+		;		STA which_digit
+		;		STA nonzero_found
+		;		LDA #$FF
+		;		STA exp_found
+		;		BNE .float_next		
+		;	.not_exp:
+		;	
+		;	;CMP #CHAR_MINUS
+		;	CMP #'-'
+		;	BNE .not_minus
+		;		;only allowed if exp_found and at first character:
+		;		LDA exp_found
+		;		EOR #$FF
+		;		ORA index
+		;		ORA exp_negative
+		;		BEQ .minus_good
+		;			;minus in wrong place!
+		;			RTS
+		;		.minus_good:
+		;		LDA #$FF
+		;		STA exp_negative
+		;		BNE .float_next
+		;	.not_minus:
+		;	
+		;	;character not recognized - invalid input!
+		;	RTS
+		;.float_done:
+		;
+		;;Error if no digits, even if exponent given ie e500
+		;LDA digit_count
+		;BNE .exp_count_good
+		;	LDA digit_found
+		;	BNE .zero_ret
+		;		RTS
+		;	.zero_ret:
+		;		;if input is zero, clear exponent
+		;		LDA #0
+		;		STA new_stack_item+GR_OFFSET+EXP_LO
+		;		STA new_stack_item+GR_OFFSET+EXP_HI
+		;		JMP .float_success
+		;.exp_count_good:
+		;
+		;;Adjust exponent
+		;LDA exp_negative
+		;BEQ .exp_positive
+		;	TODO: smaller?
+		;	CALL BCD_Reverse, #new_stack_item+GR_OFFSET+EXP_LO, #2
+		;.exp_positive:
+		;
+		;SED
+		;;Convert exp offset to BCD
+		;;Looping here is slower but smaller
+		;TODO: optimize?
+		;LDA #0
+		;LDY exp_count
+		;BMI .exp_count_neg
+		;	DEY				;count of digits, so -1 since 5 is e0 not e1
+		;	BEQ .exp_count_done
+		;	CPY #$FF
+		;	BEQ .exp_count_neg
+		;	.exp_pos_loop:
+		;		CLC
+		;		ADC #1
+		;		DEY
+		;		BNE .exp_pos_loop
+		;		JMP .exp_count_done
+		;.exp_count_neg:
+		;	.exp_min_loop:
+		;		SEC
+		;		SBC #1
+		;		INY
+		;		BNE .exp_min_loop
+		;.exp_count_done:
+		;STA exp_count
+		;
+		;TODO: move exp to math_lo/hi and reuse code from BCD_Add
+		;;Add decimal place offset to exponent
+		;LDY #$99
+		;CMP #$50
+		;BCS .exp_count_neg2
+		;	LDY #0
+		;.exp_count_neg2:
+		;STY index
+		;CLC
+		;ADC new_stack_item+GR_OFFSET+EXP_LO
+		;STA new_stack_item+GR_OFFSET+EXP_LO
+		;LDA index
+		;ADC new_stack_item+GR_OFFSET+EXP_HI
+		;STA new_stack_item+GR_OFFSET+EXP_HI
+		;CLD
+		;
+		;;Reverse exponent bytes
+		;LDA #0
+		;LDY new_stack_item+GR_OFFSET+EXP_HI
+		;CPY #$50
+		;BCC .exp_positive2
+		;	TODO: smaller?
+		;	CALL BCD_Reverse, #new_stack_item+GR_OFFSET+EXP_LO, #2
+		;	LDA #$FF 
+		;.exp_positive2:
+		;STA exp_negative
+		;
+		;;Check for overflow or underflow
+		;LDA new_stack_item+GR_OFFSET+EXP_HI
+		;CMP #$10
+		;BNE .no_exp_overflow
+		;	;Exponent underflowed or overflowed!
+		;	RTS
+		;.no_exp_overflow:
+		;
+		;;Mark negative sign bit
+		;LDA exp_negative
+		;BEQ .exp_no_neg_bit
+		;	LDA new_stack_item+GR_OFFSET+EXP_HI
+		;	ORA #E_SIGN_BIT
+		;	STA new_stack_item+GR_OFFSET+EXP_HI
+		;.exp_no_neg_bit:
+		;
+		;;Mark negative bit
+		;LDA negative
+		;BEQ .positive
+		;	LDA new_stack_item+GR_OFFSET+EXP_HI
+		;	ORA #SIGN_BIT
+		;	STA new_stack_item+GR_OFFSET+EXP_HI
+		;.positive:
+		;
+		;;round if necessary
+		;LDA new_stack_item+GR_OFFSET
+		;CMP #$50
+		;BCC .no_round
+		;	LDY #DEC_COUNT/2
+		;	SEC
+		;	.round_loop:
+		;		LDA new_stack_item+GR_OFFSET,Y
+		;		ADC #0
+		;		STA new_stack_item+GR_OFFSET,Y
+		;		DEY
+		;		BNE .round_loop
+		;.no_round:
+		;
+		;TODO: handle carry
+		;
+		;;shift everything one byte left - slow but fine since input
+		;LDY #0
+		;.shift_loop:
+		;	LDA new_stack_item+GR_OFFSET+1,Y
+		;	STA new_stack_item+GR_OFFSET,Y
+		;	INY
+		;	CPY #OBJ_SIZE
+		;	BNE .shift_loop
+		;
+		;;success - mark object type as float and return
+		;.float_success:
+		;LDA #OBJ_FLOAT
+		;STA new_stack_item
 		
 		;first character is negative or digit?
 		LDA new_word_buff
@@ -506,7 +803,7 @@
 					BNE .exp_digit
 						
 						LDA digit_count
-						CMP #MAX_DIGITS+2*GR_OFFSET+1
+						CMP #MAX_DIGITS+2*GR_OFFSET
 						BCC .digit_ok
 							;;max digits exceeded!
 							;PLA
@@ -630,8 +927,6 @@
 				JMP .float_success
 		.exp_count_good:
 		
-		;CALL halt_no_test
-		
 		;Adjust exponent
 		LDA exp_negative
 		BEQ .exp_positive
@@ -715,20 +1010,31 @@
 			ORA #SIGN_BIT
 			STA new_stack_item+GR_OFFSET+EXP_HI
 		.positive:
-		
-		TODO: round if necessary
-		
-		halt
-		
-		;g/r is overwriting object type!
-		;better to move to R1 than fixing this
+	
+		;round if necessary
 		LDA new_stack_item+GR_OFFSET
-		
-		;Copy exponent bytes over guard/round byte
-		LDA new_stack_item+GR_OFFSET+EXP_LO
-		STA new_stack_item+EXP_LO
-		LDA new_stack_item+GR_OFFSET+EXP_HI
-		STA new_stack_item+EXP_HI
+		CMP #$50
+		BCC .no_round
+			LDY #DEC_COUNT/2
+			SEC
+			.round_loop:
+				LDA new_stack_item+GR_OFFSET,Y
+				ADC #0
+				STA new_stack_item+GR_OFFSET,Y
+				DEY
+				BNE .round_loop
+		.no_round:
+	
+		TODO: handle carry
+	
+		;shift everything one byte left - slow but fine since input
+		LDY #0
+		.shift_loop:
+			LDA new_stack_item+GR_OFFSET+1,Y
+			STA new_stack_item+GR_OFFSET,Y
+			INY
+			CPY #OBJ_SIZE
+			BNE .shift_loop
 		
 		;success - mark object type as float and return
 		.float_success:
