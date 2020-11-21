@@ -88,7 +88,7 @@
 			ORA value
 			STA value
 			
-			LDA new_stack_item,Y
+			LDA R_ans,Y
 			CMP value
 			BNE .failed_input
 			INY
@@ -113,7 +113,7 @@
 				CALL DebugText,"   Found:    "
 				LDY #0
 				.fail_loop:
-					LDA new_stack_item,Y
+					LDA R_ans,Y
 					STA DEBUG_HEX
 					LDA #' '
 					STA DEBUG
@@ -130,12 +130,20 @@
 		INC.W test_count
 	END
 	
-	FUNC read3
+	;FUNC read3
+	;	CALL read_file_line
+	;	CALL NewToR, #R1
+	;	CALL read_file_line
+	;	CALL NewToR, #R0
+	;	CALL read_file_line
+	;END
+	
+	FUNC read2
 		CALL read_file_line
 		CALL NewToR, #R1
 		CALL read_file_line
 		CALL NewToR, #R0
-		CALL read_file_line
+		;CALL read_file_line
 	END
 	
 	FUNC file_tests
@@ -170,10 +178,12 @@
 			BNE .not_A
 				LDA FILE_INPUT
 				LDA FILE_INPUT
-				CALL read3
+				CALL read2
 				CALL BCD_Add
+				CALL RansToBuff
+				CALL read_file_line
 				CALL CompareRans
-				BEQ .loop
+				BCC .loop
 				JMP .failed
 			.not_A:
 			
@@ -280,28 +290,28 @@
 				STA DEBUG_HEX
 				CALL DebugText,": FAILED!\\n"
 				CALL DebugText,"   Expected: "
+				CALL DebugRans
+				
+				CALL DebugText,"\\n   Found:    "
 				
 				LDY #(DEC_COUNT/2)-1+GR_OFFSET
 				.floop:
-					LDA new_stack_item,Y
+					LDA test_buff,Y
 					STA DEBUG_HEX
 					DEY
 					BNE .floop
 				LDA #' '
 				STA DEBUG
 				
-				LDA R_ans		;GR
+				LDA test_buff		;GR
 				STA DEBUG_HEX
 				
 				CALL DebugText," E"
 				
-				LDA new_stack_item+EXP_HI
+				LDA test_buff+EXP_HI
 				STA DEBUG_HEX
-				LDA new_stack_item+EXP_LO
+				LDA test_buff+EXP_LO
 				STA DEBUG_HEX
-				
-				CALL DebugText,"\\n   Found:    "
-				CALL DebugRans
 			
 				halt
 			
@@ -309,20 +319,6 @@
 			;JMP .loop
 	END
 	
-	FUNC CompareRans
-	
-		LDY #8
-		.loop:
-			LDA R_ans,Y
-			CMP new_stack_item,Y
-			BNE .failed
-			DEY
-			BNE .loop
-		LDA #0
-		RTS
-		.failed:
-		LDA #$FF
-	END
 	
 	
 	

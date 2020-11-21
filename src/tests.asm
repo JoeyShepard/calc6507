@@ -175,6 +175,31 @@
 		TAX
 	END
 
+	FUNC RansToBuff
+		LDY #0
+		.loop:
+			LDA R_ans,Y
+			STA test_buff,Y
+			INY
+			CPY #OBJ_SIZE
+			BNE .loop
+	END
+
+	FUNC CompareRans
+		LDY #8
+		.loop:
+			LDA R_ans,Y
+			CMP test_buff,Y
+			BNE .failed
+			DEY
+			BNE .loop
+		CLC
+		RTS
+		
+		.failed:
+		SEC
+	END
+
 	FUNC AddTest
 		ARGS
 			STRING num1,num2,ans
@@ -185,19 +210,11 @@
 		CALL CopyNew,num2
 		CALL NewToR, #R0
 		CALL BCD_Add
-		
-		;copy R_ans to test_buff before over writing
-		
+		CALL RansToBuff
 		CALL CopyNew,ans
+		CALL CompareRans
 		
-		LDY #8
-		.loop:
-			LDA R_ans,Y
-			CMP new_stack_item,Y
-			BNE .failed
-			DEY
-			BNE .loop
-		JMP .done
+		JCC .done
 		
 		.failed:
 				CALL DebugText, "\\rTest "
@@ -233,7 +250,9 @@
 		MOV.W #1,test_count
 		
 		;Moved to input.txt
-				
+		
+		;CALL InputTest, "1234567890123456789", "01 12 90 78 56 34 12 18 00"
+		
 		TODO: tests for hex arithmetic
 		
 		;Floating point add
@@ -242,7 +261,8 @@
 		;temp
 		
 		;CALL AddTest, "12345", "0", "12345"
-    	
+    	;CALL AddTest, "100000000000", "-0.04", "100000000000"
+		
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count
 		
