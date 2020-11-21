@@ -458,7 +458,6 @@
 		SED
 		TXA
 		PHA
-		
 				
 		;check for zero - simplifies logic below
 		LDA R0+GR_OFFSET+DEC_COUNT/2-1

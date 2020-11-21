@@ -21,7 +21,7 @@ rand_seed=0
 def rand_num():
     #digits
     digit_count=randint(0,12)
-    digits=str(randint(1,9)
+    digits=str(randint(1,9))
     for j in range(digit_count):
         digits+=str(randint(0,9))
 
@@ -134,7 +134,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
-print("Passed through 24")
+print("Must re-pass from 0!")
 rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0

@@ -3,6 +3,8 @@
 
 ;Frameworks
 
+	test_buff: DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+
 	FUNC InputTest
 		ARGS
 			STRING input, output
@@ -64,7 +66,7 @@
 			STY output_index
 			
 			LDY calculated_index
-			LDA new_stack_item,Y
+			LDA R_ans,Y
 			CMP value
 			BNE .failed
 			INY
@@ -90,7 +92,7 @@
 				CALL DebugText,"\\n   Found:    "
 				LDY #0
 				.fail_loop:
-					LDA new_stack_item,Y
+					LDA R_ans,Y
 					STA DEBUG_HEX
 					LDA #' '
 					STA DEBUG
@@ -98,7 +100,7 @@
 					CPY #9
 					BNE .fail_loop
 				halt
-				LDA new_stack_item
+				
 				JMP .failed
 			
 		.done:
@@ -110,7 +112,7 @@
 		INC.W test_count
 		
 	END
-
+	
 	FUNC NewToR
 		ARGS
 			WORD Rx
@@ -118,7 +120,7 @@
 		
 		LDY #1
 		.loop:
-			LDA new_stack_item,Y
+			LDA R_ans,Y
 			STA (Rx),Y
 			INY
 			CPY #9
@@ -182,8 +184,11 @@
 		CALL NewToR, #R1
 		CALL CopyNew,num2
 		CALL NewToR, #R0
-		CALL CopyNew,ans
 		CALL BCD_Add
+		
+		;copy R_ans to test_buff before over writing
+		
+		CALL CopyNew,ans
 		
 		LDY #8
 		.loop:
@@ -229,9 +234,9 @@
 		
 		;Moved to input.txt
 		
-		;CALL InputTest, "1234567890123456789", "01 12 90 78 56 34 12 18 00"
-		;CALL InputTest, "1234567890124999999", "01 12 90 78 56 34 12 18 00"
-		;CALL InputTest, "1234567890125000000", "01 13 90 78 56 34 12 18 00"
+		CALL InputTest, "1234567890123456789", "01 12 90 78 56 34 12 18 00"
+		CALL InputTest, "1234567890124999999", "01 12 90 78 56 34 12 18 00"
+		CALL InputTest, "1234567890125000000", "01 13 90 78 56 34 12 18 00"
 		;CALL InputTest, "1234567890129999999", "01 13 90 78 56 34 12 18 00"
 		;CALL InputTest, "9999999999999999999", "01 00 00 08 06 04 10 19 00"
 		
@@ -242,7 +247,7 @@
 		
 		;temp
 		
-		CALL AddTest, "12345", "0", "12345"
+		;CALL AddTest, "12345", "0", "12345"
     	
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count

@@ -135,6 +135,7 @@ LOCALS_END set		$1F
 		;Only use bottom 48 bytes of stack
 		;May need a lot more for R stack
 		;Must come before any JSR
+		TODO: expand this - will need a lot of stack space
 		LDX #$2F
 		TXS
 		
@@ -142,8 +143,8 @@ LOCALS_END set		$1F
 		TODO: copyright
 		
 		CALL setup
-		;CALL tests
-		CALL file_tests
+		CALL tests
+		;CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		
