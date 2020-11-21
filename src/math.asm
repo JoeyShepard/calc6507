@@ -231,6 +231,45 @@
 			BNE .half_loop
 	END
 	
+	;Which register in X
+	FUNC HalfShiftBackward
+		LDY #4
+		.half_loop:
+			;guard/round byte
+			LSR 6,X
+			ROR 5,X
+			ROR 4,X
+			ROR 3,X
+			ROR 2,X
+			ROR 1,X
+			DEY
+			BNE .half_loop
+	END
+	
+	;Which register in X
+	TODO: combine with HalfShiftBackward to save space
+	TODO: roll into loop
+	FUNC HalfShiftWide
+		LDY #4
+		.half_loop:
+			;guard/round byte
+			LSR 13,X
+			ROR 12,X
+			ROR 11,X
+			ROR 10,X
+			ROR 9,X
+			ROR 8,X
+			ROR 7,X
+			ROR 6,X
+			ROR 5,X
+			ROR 4,X
+			ROR 3,X
+			ROR 2,X
+			ROR 1,X
+			DEY
+			BNE .half_loop
+	END
+	
 	;Number in A
 	;ASSUMES X IS SAVED ON STACK!!!
 	FUNC ShiftR0
@@ -431,6 +470,7 @@
 	END
 	
 	;Register address in Y
+	TODO: use X reg instead?
 	FUNC BCD_Unpack
 		LDA #0
 		STA 0,Y		;guard/round byte
@@ -685,6 +725,104 @@
 		JSR BCD_Pack
 		
 		.zero_exit:
+		PLA
+		TAX
+		PLP
+	END
+	
+	FUNC BCD_Mult
+		PHP
+		SED
+		TXA
+		PHA
+		
+		;calculate exponent first
+		LDY #R0
+		JSR BCD_Unpack
+		LDY #R1
+		JSR BCD_Unpack
+		
+		halt
+		
+		TODO: abstract
+		CLC
+		LDA R0+GR_OFFSET+EXP_LO-TYPE_SIZE
+		ADC R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+		;STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
+		STA math_lo
+		LDA R0+GR_OFFSET+EXP_HI-TYPE_SIZE
+		ADC R1+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
+		
+		;zero double wide answer register
+		TODO: clears 18 bytes when only 13 needed
+		LDY #R_ans_wide
+		JSR ZeroReg
+		LDY #R_ans-3	;leave 3 bytes for exp and sign byte
+		JSR ZeroReg
+		
+		LDA #DEC_COUNT
+		STA math_b
+		.loop:
+			;bits in nibble
+			LDY #4	
+			
+			;save least significant digit - addition count
+			LDA R0+1
+			AND #$F
+			STA R0
+			
+			TODO: consider ShiftR0 - slower but smaller
+			TODO: pointer to R0 would be less shifts. smaller too?
+			LDX #R0
+			JSR HalfShiftBackward
+			
+			LDA R0
+			BEQ .add_skip
+			
+			halt
+			
+			;clear carry buffer
+			LDA #0
+			STA R_ans+DEC_COUNT/2+1
+			
+			;add digits
+			TODO: russian peasant faster but any smaller? 
+			.mult_loop:
+				LDY #DEC_COUNT/2
+				LDX #1
+				CLC
+				.add_loop:
+					LDA R1,X
+					ADC R_ans,X
+					STA R_ans,X
+					INX
+					DEY
+					BNE .add_loop
+				BCC .no_carry
+					INC R_ans+DEC_COUNT/2+1
+				.no_carry:
+				
+				DEC R0	;least significant digit of other arg
+				BNE .mult_loop
+			.add_skip:
+			
+			halt
+			
+			;shift answer and shift in carry
+			TODO: check if last time through before shifting
+			TODO: below fails. problem in optimizer?
+			;LDX #R_ans_wide+GR_OFFSET
+			LDX #R_ans_wide+1
+			JSR HalfShiftWide
+			
+			START here - shift on last cycle and round
+			
+		DEC math_b
+		BNE .loop
+		
+		halt
+		
 		PLA
 		TAX
 		PLP

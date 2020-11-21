@@ -94,7 +94,15 @@ def write_list_rr(which_list):
             fp.write("A\n")
             fp.write(i+"\n")
             fp.write(j+"\n")
-            sum_dec=Decimal(i)+Decimal(j)
+
+            #round input up
+            getcontext().rounding=ROUND_HALF_UP
+            n1=Decimal(i)+Decimal(0)
+            n2=Decimal(j)+Decimal(0)
+            
+            #round half even for addition
+            getcontext().rounding=ROUND_HALF_EVEN
+            sum_dec=n1+n2
             if abs(sum_dec)>Decimal(MAX_VAL):
                 #print("over:",sum_dec)
                 sum_dec=Decimal(MAX_VAL)
@@ -121,7 +129,16 @@ def write_list_seq(which_list):
         fp.write("A\n")
         fp.write(i[0]+"\n")
         fp.write(i[1]+"\n")
-        sum_dec=Decimal(i[0])+Decimal(i[1])
+
+        #round input up
+        getcontext().rounding=ROUND_HALF_UP
+        n1=Decimal(i[0])+Decimal(0)
+        n2=Decimal(i[1])+Decimal(0)
+            
+        #round half even for addition
+        getcontext().rounding=ROUND_HALF_EVEN
+        sum_dec=n1+n2
+            
         if abs(sum_dec)>Decimal(MAX_VAL):
             sum_dec=Decimal(MAX_VAL)
         elif sum_dec==Decimal(0):

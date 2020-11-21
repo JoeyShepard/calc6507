@@ -83,6 +83,11 @@ LOCALS_END set		$1F
 	R6: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
 	R7: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
 	R_ans:	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	
+	;reg before R_ans in case double wide reg needed
+	;+3 since only need 6 of 9 bytes 
+	R_ans_wide = R7+3
+	
 	Regs_end:
 		
 	
@@ -143,8 +148,8 @@ LOCALS_END set		$1F
 		TODO: copyright
 		
 		CALL setup
-		;CALL tests
-		CALL file_tests
+		CALL tests
+		;CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		
@@ -206,7 +211,7 @@ LOCALS_END set		$1F
 				
 				;Word not found, so check if data
 				CALL CheckData
-				LDA new_stack_item
+				LDA R_ans
 				CMP #OBJ_ERROR
 				BNE .input_good
 					LDA #ERROR_INPUT
@@ -230,12 +235,12 @@ LOCALS_END set		$1F
 					STX dest
 					LDA #0
 					STA dest+1
-					CALL MemCopy, #new_stack_item, dest, #OBJ_SIZE
+					CALL MemCopy, #R_ans, dest, #OBJ_SIZE
 					JMP .process_loop
 				.compile_value:
 				
 				;Compile mode - compile value
-				LDA new_stack_item
+				LDA R_ans
 				;float?
 				LDY #TOKEN_FLOAT
 				CMP #OBJ_FLOAT
@@ -273,7 +278,7 @@ LOCALS_END set		$1F
 			TODO: smaller than calling MemCopy here?
 			.loop:
 				INY
-				LDA new_stack_item,Y
+				LDA R_ans,Y
 				STA (dict_ptr),Y
 				CPY #8
 				BNE .loop

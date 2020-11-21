@@ -1,5 +1,7 @@
 ;Unit tests
 ;==========
+;Stored in extended RAM of emulator, not on calculator, so not size constrained
+
 
 ;Frameworks
 
@@ -162,10 +164,10 @@
 		LDA #' '
 		STA DEBUG
 		
-		LDA R_ans		;GR
-		STA DEBUG_HEX
+		;LDA R_ans		;GR
+		;STA DEBUG_HEX
 		
-		CALL DebugText," E"
+		CALL DebugText,"E"
 		LDA R_ans+DEC_COUNT/2+2
 		STA DEBUG_HEX
 		LDA R_ans+DEC_COUNT/2+1
@@ -175,6 +177,35 @@
 		TAX
 	END
 
+	FUNC DebugBuff
+		TXA
+		PHA
+		
+		;CALL DebugText,"\\n"
+		LDX #(DEC_COUNT/2)-1+GR_OFFSET
+		.loop:
+			LDA test_buff,X
+			STA DEBUG_HEX
+			DEX
+			BNE .loop
+		LDA #' '
+		STA DEBUG
+		
+		;LDA R_ans		;GR
+		;STA DEBUG_HEX
+		
+		CALL DebugText,"E"
+		LDA test_buff+DEC_COUNT/2+2
+		STA DEBUG_HEX
+		LDA test_buff+DEC_COUNT/2+1
+		STA DEBUG_HEX
+		
+		PLA
+		TAX
+	END
+
+	
+	
 	FUNC RansToBuff
 		LDY #0
 		.loop:
@@ -200,6 +231,43 @@
 		SEC
 	END
 
+
+	FUNC TestFail
+		ARGS
+			STRING ans
+		END
+		
+		.loop:
+			CALL DebugText, "\\rTest "
+			LDX test_count+1
+			LDA test_count
+			STA DEBUG_DEC16
+			CALL DebugText,": FAILED!\\n"
+			CALL DebugText,"   Expected: "
+			CALL DebugText,ans
+			CALL DebugText,"\\n   Found:    "
+			;CALL DebugRans
+			CALL DebugBuff
+			CALL DebugText,"\\n\\n"
+			
+			halt
+			
+			JMP .loop
+	END
+
+	FUNC TestsPassed
+		
+		CALL DebugText, "\\gTest "
+		LDX test_count+1
+		LDA test_count
+		STA DEBUG_DEC16
+		CALL DebugText,": passed - "
+		CALL DebugRans
+		CALL DebugText,"\\n"
+		INC.W test_count
+	
+	END
+
 	FUNC AddTest
 		ARGS
 			STRING num1,num2,ans
@@ -214,34 +282,30 @@
 		CALL CopyNew,ans
 		CALL CompareRans
 		
-		JCC .done
-		
-		.failed:
-				CALL DebugText, "\\rTest "
-				LDX test_count+1
-				LDA test_count
-				STA DEBUG_DEC16
-				CALL DebugText,": FAILED!\\n"
-				CALL DebugText,"   Expected: "
-				CALL DebugText,ans
-				CALL DebugText,"\\n   Found:    "
-				CALL DebugRans
-				CALL DebugText,"\\n\\n"
-				
-				halt
-				
-				JMP .failed
-			
+		BCC .done
+			CALL TestFail, ans
 		.done:
-		CALL DebugText, "\\gTest "
-		LDX test_count+1
-		LDA test_count
-		STA DEBUG_DEC16
-		CALL DebugText,": passed - "
-		CALL DebugRans
-		CALL DebugText,"\\n"
-		INC.W test_count
+		CALL TestsPassed
+	END
+	
+	FUNC MultTest
+		ARGS
+			STRING num1,num2,ans
+		END
 		
+		CALL CopyNew,num1
+		CALL NewToR, #R1
+		CALL CopyNew,num2
+		CALL NewToR, #R0
+		CALL BCD_Mult
+		CALL RansToBuff
+		CALL CopyNew,ans
+		CALL CompareRans
+		
+		BCC .done
+			CALL TestFail, ans
+		.done:
+		CALL TestsPassed
 	END
 	
 	FUNC tests
@@ -262,6 +326,12 @@
 		
 		;CALL AddTest, "12345", "0", "12345"
     	;CALL AddTest, "100000000000", "-0.04", "100000000000"
+		CALL AddTest, "1", "-3.017454705535e556","-3.01745470554e556"
+		
+		;Floating point mult
+		MOV.W #601,test_count
+		
+		CALL MultTest, "123456789012", "234567890123", "2.89589985199e22"
 		
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count

@@ -6,7 +6,9 @@
 	WORD failed1, failed2
 	
 	FUNC line_num
-		CALL DebugText, "\\n\\l"
+		CALL DebugText, "\\l"
+		LDA #13		;new line for node.j
+		STA DEBUG
 		LDA counter2+1
 		STA DEBUG_HEX
 		LDA counter2
@@ -121,7 +123,7 @@
 					CPY #9
 					BNE .fail_loop
 				halt
-				LDA new_stack_item
+				;LDA new_stack_item
 				JMP .failed_input
 			
 		.done:
@@ -154,7 +156,7 @@
 		MOV.W #0,failed2
 		MOV.W #0,test_count
 		
-		CALL DebugText,"\\n\\n\\lBeginning file-based tests"
+		CALL DebugText,"\\n\\n\\lBeginning file-based tests\\n"
 		
 		.loop:
 			CALL inc_line, #counter1
@@ -239,7 +241,6 @@
 		ORA failed2+1
 		BNE .some_failed
 			CALL DebugText, "\\n\\n\\gAll filed-based tests passed"
-			;storing any value here will exit node.js. ignored otherwise
 			JMP .failed_done
 		.some_failed:
 		
@@ -303,10 +304,11 @@
 				LDA #' '
 				STA DEBUG
 				
-				LDA test_buff		;GR
-				STA DEBUG_HEX
+				;GR not preserved
+				;LDA test_buff		;GR
+				;STA DEBUG_HEX
 				
-				CALL DebugText," E"
+				CALL DebugText,"E"
 				
 				LDA test_buff+EXP_HI
 				STA DEBUG_HEX
