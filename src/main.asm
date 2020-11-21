@@ -143,8 +143,8 @@ LOCALS_END set		$1F
 		TODO: copyright
 		
 		CALL setup
-		CALL tests
-		;CALL file_tests
+		;CALL tests
+		CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		

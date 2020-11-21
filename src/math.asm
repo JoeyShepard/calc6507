@@ -64,15 +64,13 @@
 	
 	;Reg in Y
 	FUNC ZeroReg
-		halt
-		TYA
-		TAX
-		LDY #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
+		LDA #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
+		STA math_a
 		LDA #0
 		.loop:
-			STA 1,X
-			INX
-			DEY
+			STA 1,Y
+			INY
+			DEC math_a
 			BNE .loop
 	END
 	
@@ -393,6 +391,44 @@
 		.return:
 	END
 	
+	;Register address in Y
+	TODO: simplify if only ever used on R_ans
+	TODO: push X then use instead of Y
+	FUNC BCD_Round
+		
+		;round if necessary
+		LDA 0,Y
+		CMP #$50
+		BCC .no_round
+			PHP
+			SED
+		
+			LDA #DEC_COUNT/2
+			STA math_a
+			SEC
+			.round_loop:
+				LDA 1,Y
+				ADC #0
+				STA 1,Y
+				INY
+				DEC math_a
+				BNE .round_loop
+			
+			BCC .no_carry
+				;mantissa should be zeroed
+				LDA #$10
+				STA 0,Y
+				;SEC
+				LDA 1,Y
+				ADC #0
+				STA 1,Y
+				LDA 2,Y
+				ADC #0
+				STA 2,Y
+			.no_carry:
+			PLP
+		.no_round:
+	END
 	
 	;Register address in Y
 	FUNC BCD_Unpack
@@ -675,23 +711,7 @@
 	;	LSR
 	;	ADC total
 	;END
-	
-	;Reg address in A
-	;FUNC ZeroReg
-	;	VARS
-	;		WORD address
-	;	END
-	;	
-	;	STA address
-	;	LDA #0
-	;	STA address+1
-	;	LDY #0
-	;	.loop:
-	;		STA (address),Y
-	;		INY
-	;		CPY #OBJ_SIZE
-	;		BNE .loop
-	;END
+
 	
 	
 	

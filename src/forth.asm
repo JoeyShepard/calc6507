@@ -644,6 +644,7 @@
 		;Convert exp offset to BCD
 		;Looping here is slower but smaller
 		TODO: optimize?
+		TODO: look up table?
 		LDA #0
 		LDY exp_count
 		BMI .exp_count_neg
@@ -682,6 +683,10 @@
 		STA R_ans+GR_OFFSET+EXP_HI
 		CLD
 		
+		;round if necessary
+		LDY #R_ans+1
+		JSR BCD_Round
+		
 		;Reverse exponent bytes
 		LDA #0
 		LDY R_ans+GR_OFFSET+EXP_HI
@@ -716,26 +721,10 @@
 			ORA #SIGN_BIT
 			STA R_ans+GR_OFFSET+EXP_HI
 		.positive:
-	
-		;round if necessary
-		LDA R_ans+GR_OFFSET
-		CMP #$50
-		BCC .no_round
 		
-			LDY #DEC_COUNT/2
-			SEC
-			.round_loop:
-				LDA R_ans+GR_OFFSET,Y
-				ADC #0
-				STA R_ans+GR_OFFSET,Y
-				DEY
-				BNE .round_loop
-		.no_round:
-	
-		TODO: handle carry
-	
 		;shift everything one byte left - slow but fine since input
 		TODO: replace with CopyRegs?
+		TODO: change offset to -1 so shifting not necessary
 		LDY #1
 		.shift_loop:
 			LDA R_ans+GR_OFFSET,Y
