@@ -270,6 +270,29 @@
 			BNE .half_loop
 	END
 	
+	;Which register in X
+	TODO: roll into loop
+	FUNC HalfShiftWideForward
+		LDY #4
+		.half_loop:
+			;guard/round byte
+			ASL 1,X
+			ROL 2,X
+			ROL 3,X
+			ROL 4,X
+			ROL 5,X
+			ROL 6,X
+			ROL 7,X
+			ROL 8,X
+			ROL 9,X
+			ROL 10,X
+			ROL 11,X
+			ROL 12,X
+			DEY
+			BNE .half_loop
+	END
+	
+	
 	;Number in A
 	;ASSUMES X IS SAVED ON STACK!!!
 	FUNC ShiftR0
@@ -529,6 +552,46 @@
 		STA math_hi
 	END
 	
+	FUNC BCD_StickyRound
+		LDA R_ans
+		CMP #$50
+		BNE .not_50
+			;if GRS=50|1 and signs same, round up
+			;if GRS=50|1 and signs different, round down
+			LDA math_sticky
+			BEQ .round_even
+				;LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+				LDA math_signs
+				BNE .no_round
+				BEQ .round
+			.round_even:
+			LDA R_ans+1
+			AND #1
+			BNE .round
+			BEQ .no_round
+		.not_50:
+		BCC .no_round
+			.round:
+			TODO: combine with BCD_Round
+			LDX #0
+			LDY #DEC_COUNT/2
+			SEC
+			.round_loop:
+				LDA R_ans+GR_OFFSET,X
+				ADC #0
+				STA R_ans+GR_OFFSET,X
+				INX
+				DEY
+				BNE .round_loop
+			BCC .round_done
+				JSR IncRansExp
+				LDX #R_ans
+				LDA #$10		;fill byte
+				JSR HalfShift
+			.round_done:
+		.no_round:
+	END
+	
 	FUNC BCD_Add
 		PHP
 		SED
@@ -667,42 +730,7 @@
 		JSR NormRans
 		
 		;round
-		LDA R_ans
-		CMP #$50
-		BNE .not_50
-			;if GRS=50|1 and signs same, round up
-			;if GRS=50|1 and signs different, round down
-			LDA math_sticky
-			BEQ .round_even
-				;LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-				LDA math_signs
-				BNE .no_round
-				BEQ .round
-			.round_even:
-			LDA R_ans+1
-			AND #1
-			BNE .round
-			BEQ .no_round
-		.not_50:
-		BCC .no_round
-			.round:
-			LDX #0
-			LDY #DEC_COUNT/2
-			SEC
-			.round_loop:
-				LDA R_ans+GR_OFFSET,X
-				ADC #0
-				STA R_ans+GR_OFFSET,X
-				INX
-				DEY
-				BNE .round_loop
-			BCC .round_done
-				JSR IncRansExp
-				LDX #R_ans
-				LDA #$10		;fill byte
-				JSR HalfShift
-			.round_done:
-		.no_round:
+		JSR BCD_StickyRound
 		
 		JMP .done
 		.ignore:
@@ -742,7 +770,9 @@
 		LDY #R1
 		JSR BCD_Unpack
 		
-		halt
+		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		EOR R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		STA R_ans+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		
 		TODO: abstract
 		CLC
@@ -780,8 +810,6 @@
 			LDA R0
 			BEQ .add_skip
 			
-			halt
-			
 			;clear carry buffer
 			LDA #0
 			STA R_ans+DEC_COUNT/2+1
@@ -807,8 +835,6 @@
 				BNE .mult_loop
 			.add_skip:
 			
-			halt
-			
 			;shift answer and shift in carry
 			TODO: below fails. problem in optimizer?
 			;LDX #R_ans_wide+GR_OFFSET
@@ -818,44 +844,45 @@
 		DEC math_b
 		BNE .loop
 		
-		halt
-		
 		;restore exponent since low byte no longer used for mantissa
 		LDA math_lo
 		STA R_ans+DEC_COUNT/2+1
 		
-		
-		
-		
 		halt
+		
+		;shift forward if necessary
+		LDA R_ans+DEC_COUNT/2
+		AND #$F0
+		BEQ .shift
+			JSR IncRansExp
+			JMP .shift_done
+		.shift:
+			LDX #R_ans_wide+1
+			JSR HalfShiftWideForward
+		.shift_done:
+		
+		;calculate sticky
+		LDY #6
+		LDA #0
+		.sticky_loop:
+			ORA R_ans_wide+1,Y
+			DEY
+			BNE .sticky_loop
+		STA math_sticky
+		
+		;round
+		JSR BCD_StickyRound
+		
+		START here - update BCD_Pack to work with larger range
+		
+		LDY #R_ans
+		JSR BCD_Pack
 		
 		PLA
 		TAX
 		PLP
 	END
 	
-	;Number in A
-	;FUNC BCDtoDec
-	;	VARS
-	;		BYTE total
-	;	END
-	;	
-	;	PHA
-	;	AND #$F
-	;	STA total
-	;	PLA
-	;	AND #$F0
-	;	LSR
-	;	PHA
-	;	CLC
-	;	ADC total
-	;	STA total
-	;	PLA
-	;	LSR
-	;	LSR
-	;	ADC total
-	;END
-
 	
 	
 	
