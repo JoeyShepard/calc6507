@@ -810,16 +810,22 @@
 			halt
 			
 			;shift answer and shift in carry
-			TODO: check if last time through before shifting
 			TODO: below fails. problem in optimizer?
 			;LDX #R_ans_wide+GR_OFFSET
 			LDX #R_ans_wide+1
 			JSR HalfShiftWide
 			
-			START here - shift on last cycle and round
-			
 		DEC math_b
 		BNE .loop
+		
+		halt
+		
+		;restore exponent since low byte no longer used for mantissa
+		LDA math_lo
+		STA R_ans+DEC_COUNT/2+1
+		
+		
+		
 		
 		halt
 		

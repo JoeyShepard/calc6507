@@ -86,7 +86,8 @@ def test2(amount):
     return ret_list
 
 def write_list_rr(which_list):
-    fp = open("input.txt","wt")
+    #fp = open("input.txt","wt")
+    fp = open("Z:\\input.txt","wt")
     
     for n,i in enumerate(which_list):
         print(chr(13)+"Writing to file ("+str(n+1)+"/"+str(len(which_list))+")",end="")
@@ -121,7 +122,8 @@ def write_list_rr(which_list):
 def write_list_seq(which_list):
     list_100_part=int(len(which_list)/100)
 
-    fp = open("input.txt","wt")
+    #fp = open("input.txt","wt")
+    fp = open("Z:\\input.txt","wt")
     
     for n,i in enumerate(which_list):
         if n%list_100_part==0:
@@ -151,7 +153,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
-print("Must re-pass from 0!")
+print("Passed through 33")
 rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0
