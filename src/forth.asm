@@ -684,7 +684,7 @@
 		CLD
 		
 		;round if necessary
-		LDY #R_ans+1
+		LDX #R_ans+1
 		JSR BCD_Round
 		
 		;Reverse exponent bytes

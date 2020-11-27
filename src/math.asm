@@ -31,53 +31,51 @@
 		PLP
 	END
 	
-	;Register address in Y
+	;Register address in X
 	FUNC BCD_RevExp
 		SEC
 		LDA #0
-		SBC GR_OFFSET+EXP_LO-TYPE_SIZE,Y
-		STA GR_OFFSET+EXP_LO-TYPE_SIZE,Y
+		SBC GR_OFFSET+EXP_LO-TYPE_SIZE,X
+		STA GR_OFFSET+EXP_LO-TYPE_SIZE,X
 		LDA #0
-		SBC GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		SBC GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
 	END
 	
-	;Register address in Y
+	;Register address in X
 	FUNC BCD_RevSig
 		;PHP
 		;SED
 		
 		;reverse significand
-		LDA #DEC_COUNT/2+GR_OFFSET
-		STA math_a
+		;LDA #DEC_COUNT/2+GR_OFFSET
+		;STA math_a
+		LDY #DEC_COUNT/2+GR_OFFSET
 		SEC
 		.loop:
 			LDA #0
-			SBC 0,Y
-			STA 0,Y
-			INY
-			DEC math_a
+			SBC 0,X
+			STA 0,X
+			INX
+			DEY
 			BNE .loop
 		
 		;PLP
 	END
 	
-	;Reg in Y
+	;Reg in X
 	FUNC ZeroReg
-		LDA #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
-		STA math_a
+		LDY #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
 		LDA #0
 		.loop:
-			STA 1,Y
-			INY
-			DEC math_a
+			STA 1,X
+			INX
+			DEY
 			BNE .loop
 	END
 	
-	;Reg in Y
+	;Reg in X
 	FUNC MaxReg
-		TYA
-		TAX
 		LDY #DEC_COUNT/2+1
 		LDA #$99
 		.loop:
@@ -99,6 +97,8 @@
 	;	STA R1+GR_OFFSET+EXP_HI-TYPE_SIZE		
 	;END
 	
+	;Assumes dec mode
+	TODO: mark all functions that assumes dec mode
 	FUNC IncRansExp
 		LDA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
 		CLC
@@ -109,33 +109,22 @@
 		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE		
 	END
 	
+	TODO: replace with 3 calls to CopyRegs?
 	FUNC SwapR0R1
 	
-		LDY #GR_OFFSET
+		LDX #GR_OFFSET
 		.swap_loop:
-			LDA R0,Y
+			LDA R0,X
 			PHA
-			LDA R1,Y
-			STA R0,Y
+			LDA R1,X
+			STA R0,X
 			PLA
-			STA R1,Y
-			INY
-			CPY #GR_OFFSET+OBJ_SIZE
+			STA R1,X
+			INX
+			CPX #GR_OFFSET+OBJ_SIZE
 			BNE .swap_loop
 	END
-	
-	;TODO: SwapR0R1? slower but smaller
-	;FUNC CopyR0R1
-	;
-	;	LDY #GR_OFFSET
-	;	.swap_loop:
-	;		LDA R0,Y
-	;		STA R1,Y
-	;		INY
-	;		CPY #GR_OFFSET+OBJ_SIZE
-	;		BNE .swap_loop
-	;END
-	
+		
 	;A-source, Y-dest
 	FUNC CopyRegs
 		STA math_ptr1
@@ -453,72 +442,79 @@
 		.return:
 	END
 	
-	;Register address in Y
+	;Register address in X
 	TODO: simplify if only ever used on R_ans
-	TODO: push X then use instead of Y
 	FUNC BCD_Round
 		
 		;round if necessary
-		LDA 0,Y
+		LDA 0,X
 		CMP #$50
 		BCC .no_round
 			PHP
 			SED
 		
-			LDA #DEC_COUNT/2
-			STA math_a
+			LDY #DEC_COUNT/2
 			SEC
 			.round_loop:
-				LDA 1,Y
+				LDA 1,X
 				ADC #0
-				STA 1,Y
-				INY
-				DEC math_a
+				STA 1,X
+				INX
+				DEY
 				BNE .round_loop
 			
 			BCC .no_carry
 				;mantissa should be zeroed
 				LDA #$10
-				STA 0,Y
+				STA 0,X
 				;SEC
-				LDA 1,Y
+				LDA 1,X
 				ADC #0
-				STA 1,Y
-				LDA 2,Y
+				STA 1,X
+				LDA 2,X
 				ADC #0
-				STA 2,Y
+				STA 2,X
 			.no_carry:
 			PLP
 		.no_round:
 	END
 	
-	;Register address in Y
-	TODO: use X reg instead?
+	;Register address in X
 	FUNC BCD_Unpack
 		LDA #0
-		STA 0,Y		;guard/round byte
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		STA 0,X		;guard/round byte
+		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
 		AND #$F
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
 		AND #E_SIGN_BIT
 		BEQ .no_reverse
 			JSR BCD_RevExp
 		.no_reverse:
-		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
 		AND #SIGN_BIT
-		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
+		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
 	END
 	
-	;Register address in Y
+	;Register address in X
 	FUNC BCD_Pack
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		;addition ranges
+			;0000-0999	0-9		positive
+			;1000		10 		overflow
+			;9001-9999	90-99	negative
+			;9000		10		underflow
+		;multiplication ranges
+			;0000-0999	0-9		positive
+			;1000-1999	10-19 	overflow
+			;9001-9999	90-99	negative
+			;8001-9000	10-19	underflow
 		BPL .no_rev
 			JSR BCD_RevExp
 			;High byte of exp in A
 			ORA #E_SIGN_BIT
-			STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+			STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
 		.no_rev:
 		CMP #$50	;high byte of $10 (overflow) | E_SIGN_BIT
 		BCC .no_underflow
@@ -532,14 +528,15 @@
 		CMP #$10
 		BCC .overflow_done
 			;exp positive and exceeded 999: set to max val
-			;CALL MaxR1
-			JMP MaxReg
+			CALL MaxR1
+			LDA 
 			;RTS
 		.overflow_done:
 		
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
-		ORA GR_OFFSET+SIGN_INFO-TYPE_SIZE,Y
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,Y
+		TODO: get rid of GR_OFFSET+...-TYPE_SIZE - not much point since same size and kind of unclear
+		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		ORA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
+		STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
 	END
 	
 	FUNC BCD_Exp_diff
@@ -586,6 +583,7 @@
 			BCC .round_done
 				JSR IncRansExp
 				LDX #R_ans
+				TODO: slow! set MS nibble explicitly?
 				LDA #$10		;fill byte
 				JSR HalfShift
 			.round_done:
@@ -597,7 +595,7 @@
 		SED
 		TXA
 		PHA
-				
+			
 		;check for zero - simplifies logic below
 		LDA R0+GR_OFFSET+DEC_COUNT/2-1
 		BNE .no_zero_exit
@@ -616,9 +614,9 @@
 		LDY #0
 		STY math_sticky
 		
-		LDY #R0
+		LDX #R0
 		JSR BCD_Unpack
-		LDY #R1
+		LDX #R1
 		JSR BCD_Unpack
 		JSR BCD_Exp_diff
 		
@@ -664,16 +662,16 @@
 		EOR R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		STA math_signs
 		BEQ .same_sign
-			LDY #R0
+			LDX #R0
 			;A = #SIGN_BIT
 			AND R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 			BNE .invert_R0
-				LDY #R1
+				LDX #R1
 			.invert_R0:
 			JSR BCD_RevSig
 		.same_sign:
 		
-		TODO: generic opcy routine?
+		TODO: generic copy routine?
 		;copy exponent to answer so ready to adjust if needed
 		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
 		STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
@@ -719,7 +717,7 @@
 			LDA #0
 			PLP
 			BCS .no_carry2
-				LDY #R_ans
+				LDX #R_ans
 				JSR BCD_RevSig
 				LDA #SIGN_BIT
 			.no_carry2:
@@ -749,7 +747,7 @@
 			JSR CopyRegs
 		.done:
 		
-		LDY #R_ans
+		LDX #R_ans
 		JSR BCD_Pack
 		
 		.zero_exit:
@@ -765,13 +763,14 @@
 		PHA
 		
 		;calculate exponent first
-		LDY #R0
+		LDX #R0
 		JSR BCD_Unpack
-		LDY #R1
+		LDX #R1
 		JSR BCD_Unpack
 		
 		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		EOR R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		AND #SIGN_BIT
 		STA R_ans+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		
 		TODO: abstract
@@ -786,9 +785,9 @@
 		
 		;zero double wide answer register
 		TODO: clears 18 bytes when only 13 needed
-		LDY #R_ans_wide
+		LDX #R_ans_wide
 		JSR ZeroReg
-		LDY #R_ans-3	;leave 3 bytes for exp and sign byte
+		LDX #R_ans-3	;leave 3 bytes for exp and sign byte
 		JSR ZeroReg
 		
 		LDA #DEC_COUNT
@@ -848,8 +847,6 @@
 		LDA math_lo
 		STA R_ans+DEC_COUNT/2+1
 		
-		halt
-		
 		;shift forward if necessary
 		LDA R_ans+DEC_COUNT/2
 		AND #$F0
@@ -870,12 +867,14 @@
 			BNE .sticky_loop
 		STA math_sticky
 		
+		halt
+		
 		;round
 		JSR BCD_StickyRound
 		
-		START here - update BCD_Pack to work with larger range
+		;START here - update BCD_Pack to work with larger range
 		
-		LDY #R_ans
+		LDX #R_ans
 		JSR BCD_Pack
 		
 		PLA

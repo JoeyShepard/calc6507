@@ -153,7 +153,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
-print("Passed through 33")
+print("Passed through 130)
 rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0
