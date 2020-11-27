@@ -58,6 +58,7 @@
 						DEC index
 						CMP #CHAR_SCREEN_WIDTH
 						BCS .backspace_scroll
+							TODO: pass input in register?
 							CALL LCD_char, #' '
 							LDA screen_ptr
 							SEC

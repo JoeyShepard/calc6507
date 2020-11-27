@@ -6,6 +6,8 @@ getcontext().prec=12
 
 MAX_VAL = "9.99999999999e999"
 MIN_VAL = "1e-999"
+MAX_NEG_VAL = "-9.99999999999e999"
+MIN_NEG_VAL = "-1e-999"
 
 #Randomized round robin
 TEST1_COUNT = 500
@@ -40,7 +42,9 @@ def test1(amount):
         "0",
         "1",
         MAX_VAL,
-        MIN_VAL
+        MIN_VAL,
+        MAX_NEG_VAL,
+        MIN_NEG_VAL
         ]
 
     #generate random number strings
@@ -104,9 +108,10 @@ def write_list_rr(which_list):
             #round half even for addition
             getcontext().rounding=ROUND_HALF_EVEN
             sum_dec=n1+n2
-            if abs(sum_dec)>Decimal(MAX_VAL):
-                #print("over:",sum_dec)
+            if sum_dec>Decimal(MAX_VAL):
                 sum_dec=Decimal(MAX_VAL)
+            elif sum_dec<Decimal(MAX_NEG_VAL):
+                sum_dec=Decimal(MAX_NEG_VAL)
             elif sum_dec==Decimal(0):
                 #prevent 0e-1000
                 sum_dec=Decimal(0)
@@ -153,7 +158,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
-print("Passed through 130)
+#print("Repass all from 0") 
 rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0

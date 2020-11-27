@@ -37,11 +37,12 @@
 	BYTE math_d
 	BYTE math_signs
 	BYTE math_sticky
+	BYTE math_max
 	
 	;Splitting input into words
 	new_word_len:		DFS 1
 	new_word_buff:		DFS WORD_MAX_SIZE
-	new_stack_item:		DFS OBJ_SIZE+GR_OFFSET
+	;new_stack_item:		DFS OBJ_SIZE+GR_OFFSET
 	
 	ORG 880
 	

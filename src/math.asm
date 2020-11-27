@@ -84,6 +84,7 @@
 			DEY
 			BNE .loop
 		LDA #9
+		ORA math_max
 		STA 1,X
 	END
 	
@@ -260,7 +261,7 @@
 	END
 	
 	;Which register in X
-	TODO: roll into loop
+	TODO: roll into loop?
 	FUNC HalfShiftWideForward
 		LDY #4
 		.half_loop:
@@ -528,9 +529,9 @@
 		CMP #$10
 		BCC .overflow_done
 			;exp positive and exceeded 999: set to max val
-			CALL MaxR1
-			LDA 
+			;CALL MaxReg
 			;RTS
+			JMP MaxReg
 		.overflow_done:
 		
 		TODO: get rid of GR_OFFSET+...-TYPE_SIZE - not much point since same size and kind of unclear
@@ -625,7 +626,7 @@
 		ORA math_hi
 		BEQ .do_sign
 		
-		;-1 to -13?
+		;exp -1 to -13?
 		LDA math_hi
 		CMP #$99
 		BNE .not_neg
@@ -642,7 +643,7 @@
 			JMP .do_shift
 		.not_neg:
 		
-		;1-13?
+		;exp 1 to 13?
 		CMP #0
 		;high byte not 0 - ignore
 		JNE .ignore
@@ -747,6 +748,11 @@
 			JSR CopyRegs
 		.done:
 		
+		;sign if positive or negative overflow
+		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		STA math_max
+		
+		;pack sign bits into exponent
 		LDX #R_ans
 		JSR BCD_Pack
 		
@@ -867,13 +873,14 @@
 			BNE .sticky_loop
 		STA math_sticky
 		
-		halt
-		
 		;round
 		JSR BCD_StickyRound
 		
-		;START here - update BCD_Pack to work with larger range
+		;sign if positive or negative overflow
+		LDA R_ans+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		STA math_max
 		
+		;pack sign bits into exponent
 		LDX #R_ans
 		JSR BCD_Pack
 		

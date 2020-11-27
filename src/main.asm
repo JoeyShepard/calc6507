@@ -144,12 +144,14 @@ LOCALS_END set		$1F
 		LDX #$2F
 		TXS
 		
-		TODO: too long numbers should be rounded, not errors
 		TODO: copyright
+		TODO: number entry wraps if backspace past beginning - cant reproduce!
+		TODO: stack disappears when entering number - change in new_stack_item?
+		TODO: overflow logic is wrong in python script
 		
 		CALL setup
-		CALL tests
-		;CALL file_tests
+		;CALL tests
+		CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		
