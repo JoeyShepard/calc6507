@@ -685,8 +685,12 @@
 		CLD
 		
 		;round if necessary
+		TXA
+		PHA
 		LDX #R_ans+1
 		JSR BCD_Round
+		PLA
+		TAX
 		
 		;Reverse exponent bytes
 		LDA #0

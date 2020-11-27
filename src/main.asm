@@ -155,6 +155,9 @@ LOCALS_END set		$1F
 		CALL stats
 		CALL gfx_setup
 		
+		;Reset data stack pointer
+		LDX #0
+		
 		.input_loop:
 			;Colon definitions must fit on one line
 			LDA mode
@@ -181,7 +184,7 @@ LOCALS_END set		$1F
 				.no_word_error:
 				LDA new_word_len
 				BEQ .input_loop
-			
+				
 				CALL FindWord
 				LDA ret_val
 				BEQ .word_not_found

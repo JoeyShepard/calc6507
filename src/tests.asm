@@ -348,7 +348,5 @@
 		
 		MOV.W #$FFFF,test_count
 		
-		;Reset stack pointer
-		LDX #0
 	END 
 	
