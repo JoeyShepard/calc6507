@@ -10,12 +10,19 @@ MAX_NEG_VAL = "-9.99999999999e999"
 MIN_NEG_VAL = "-1e-999"
 
 #Randomized round robin
-TEST1_COUNT = 500
+TEST1_COUNT = 350
+    #350 = 1.96m tests
     #500 = 4m tests
 
 #Randomized pairs - whole exponent range
-TEST2_COUNT = 4000
+TEST2_COUNT = 2000
+    #2000 = 2m tests
     #4000 = 4m tests
+
+#Tests to perform
+TEST_LIST = ["A","M"]
+TEST_FUNCS = [lambda a,b: a+b,
+              lambda a,b: a*b]
 
 test_count=0
 rand_seed=0
@@ -110,20 +117,21 @@ def write_list_rr(which_list):
     for n,i in enumerate(which_list):
         print(chr(13)+"Writing to file ("+str(n+1)+"/"+str(len(which_list))+")",end="")
         for j in which_list:
-            fp.write("A\n")
-            fp.write(i+"\n")
-            fp.write(j+"\n")
+            for k,test in enumerate(TEST_LIST):
+                fp.write(test+"\n")
+                fp.write(i+"\n")
+                fp.write(j+"\n")
 
-            #round input up
-            getcontext().rounding=ROUND_HALF_UP
-            n1=Decimal(i)+Decimal(0)
-            n2=Decimal(j)+Decimal(0)
-            
-            #round half even for addition
-            getcontext().rounding=ROUND_HALF_EVEN
-            sum_dec=sum_filter(n1+n2)
-            sum_try="{:e}".format(Decimal(sum_dec)).replace("+","")
-            fp.write(sum_try+"\n")
+                #round input up
+                getcontext().rounding=ROUND_HALF_UP
+                n1=Decimal(i)+Decimal(0)
+                n2=Decimal(j)+Decimal(0)
+                
+                #round half even for addition
+                getcontext().rounding=ROUND_HALF_EVEN
+                sum_dec=sum_filter(TEST_FUNCS[k](n1,n2))
+                sum_try="{:e}".format(Decimal(sum_dec)).replace("+","")
+                fp.write(sum_try+"\n")
     fp.write("Z")
     fp.close()
     print()
@@ -137,20 +145,21 @@ def write_list_seq(which_list):
     for n,i in enumerate(which_list):
         if n%list_100_part==0:
              print(chr(13)+"Writing to file ("+str(n)+"/"+str(len(which_list))+")",end="")
-        fp.write("A\n")
-        fp.write(i[0]+"\n")
-        fp.write(i[1]+"\n")
+        for k,test in enumerate(TEST_LIST):
+            fp.write(test+"\n")
+            fp.write(i[0]+"\n")
+            fp.write(i[1]+"\n")
 
-        #round input up
-        getcontext().rounding=ROUND_HALF_UP
-        n1=Decimal(i[0])+Decimal(0)
-        n2=Decimal(i[1])+Decimal(0)
-            
-        #round half even for addition
-        getcontext().rounding=ROUND_HALF_EVEN
-        sum_dec=sum_filter(n1+n2)
-        sum_try="{:e}".format(Decimal(sum_dec)).replace("+","")
-        fp.write(sum_try+"\n")        
+            #round input up
+            getcontext().rounding=ROUND_HALF_UP
+            n1=Decimal(i[0])+Decimal(0)
+            n2=Decimal(i[1])+Decimal(0)
+                
+            #round half even for addition
+            getcontext().rounding=ROUND_HALF_EVEN
+            sum_dec=sum_filter(TEST_FUNCS[k](n1,n2))
+            sum_try="{:e}".format(Decimal(sum_dec)).replace("+","")
+            fp.write(sum_try+"\n")        
     fp.write("Z")
     fp.close()
     print()
@@ -175,7 +184,7 @@ while(1):
     print("Test 1: randomized round robin")
     
     num_list=test1(TEST1_COUNT)
-    test_count+=len(num_list)**2
+    test_count+=(len(num_list)**2)*len(TEST_LIST)
     write_list_rr(num_list)
 
     system('copy input.txt "..\\..\\..\\projects\\6502 emu\\node.js\\input.txt" > nul')
@@ -187,7 +196,7 @@ while(1):
     print("\n\nTest 2: randomized pairs")
     
     num_list=test2(TEST2_COUNT)
-    test_count+=len(num_list)
+    test_count+=len(num_list)*len(TEST_LIST)
     write_list_seq(num_list)
 
     system('copy input.txt "..\\..\\..\\projects\\6502 emu\\node.js\\input.txt" > nul')

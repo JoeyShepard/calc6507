@@ -189,6 +189,20 @@
 				JMP .failed
 			.not_A:
 			
+			;Multiplication test
+			CMP #'M'
+			BNE .not_M
+				LDA FILE_INPUT
+				LDA FILE_INPUT
+				CALL read2
+				CALL BCD_Mult
+				CALL RansToBuff
+				CALL read_file_line
+				CALL CompareRans
+				BCC .loop
+				JMP .failed
+			.not_M:
+			
 			;Comment
 			CMP #';'
 			BNE .not_comment

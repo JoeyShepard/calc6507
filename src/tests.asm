@@ -329,7 +329,7 @@
     	;CALL AddTest, "100000000000", "-0.04", "100000000000"
 		;CALL AddTest, "9.99999999999e999","1e999","9.99999999999e999"
 		;CALL AddTest, "-6e999","-6e999","-9.99999999999e999"
-		CALL AddTest, "-1.781e999","-9.e999","9.99999999999e999"
+		;CALL AddTest, "-1.781e999","-9.e999","-9.99999999999e999"
 				
 		;Floating point mult
 		MOV.W #601,test_count
@@ -337,6 +337,11 @@
 		;CALL MultTest, "123456789012", "234567890123", "2.89589985199e22"
 		;CALL MultTest, "-987654321098e17", "876543210987e23", "-8.65721689960e63"
 		;CALL MultTest, "-9.87654321098e432", "8.76543210987e543", "-8.65721689960e976"
+		;CALL MultTest, "12345", "0", "0"
+		;CALL MultTest, "0", "12345", "0"
+		;CALL MultTest, "1","1e-999","1e-999"
+		
+		CALL MultTest, "7.048764e59","5.711220186e848","4.02570432432e908"
 		
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count

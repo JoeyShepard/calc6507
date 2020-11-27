@@ -748,8 +748,6 @@
 			JSR CopyRegs
 		.done:
 		
-		halt
-		
 		;sign if positive or negative overflow
 		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		STA math_max
@@ -769,6 +767,21 @@
 		SED
 		TXA
 		PHA
+		
+		;zero double wide answer register
+		LDX #R_ans_wide
+		JSR ZeroReg
+		LDX #R_ans
+		JSR ZeroReg
+		
+		;exit if either arg is zero
+		LDA R0+DEC_COUNT/2
+		BEQ .ret_zero
+		LDA R1+DEC_COUNT/2
+		BNE .no_zero_exit
+			.ret_zero:
+			JMP .zero_exit
+		.no_zero_exit:
 		
 		;calculate exponent first
 		LDX #R0
@@ -790,13 +803,6 @@
 		LDA R0+GR_OFFSET+EXP_HI-TYPE_SIZE
 		ADC R1+GR_OFFSET+EXP_HI-TYPE_SIZE
 		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
-		
-		;zero double wide answer register
-		TODO: clears 18 bytes when only 13 needed
-		LDX #R_ans_wide
-		JSR ZeroReg
-		LDX #R_ans-3	;leave 3 bytes for exp and sign byte
-		JSR ZeroReg
 		
 		LDA #DEC_COUNT
 		STA math_b
@@ -867,7 +873,7 @@
 		.shift_done:
 		
 		;calculate sticky
-		LDY #6
+		LDY #5
 		LDA #0
 		.sticky_loop:
 			ORA R_ans_wide+1,Y
@@ -876,6 +882,8 @@
 		STA math_sticky
 		
 		;round
+		LDA #0
+		STA math_signs	;round as if same sign
 		JSR BCD_StickyRound
 		
 		;sign if positive or negative overflow
@@ -886,6 +894,7 @@
 		LDX #R_ans
 		JSR BCD_Pack
 		
+		.zero_exit:
 		PLA
 		TAX
 		PLP
