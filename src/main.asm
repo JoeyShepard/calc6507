@@ -107,6 +107,7 @@ LOCALS_END set		$1F
 	
 	ORG $8900	;RAM + ROM size
 	;overlaps with video memory, no video output
+	;but banked out after all tests pass
 	include tests.asm
 	include file_tests.asm
 	include stats.asm
@@ -150,8 +151,8 @@ LOCALS_END set		$1F
 		TODO: overflow logic is wrong in python script
 		
 		CALL setup
-		;CALL tests
-		CALL file_tests
+		CALL tests
+		;CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		

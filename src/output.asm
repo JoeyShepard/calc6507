@@ -278,6 +278,8 @@
 			BNE .loop_line
 	END
 	
+	TODO: shorten messages?
+	TODO: remove ending 0
 	ERROR_MSG_INPUT:
 	FCB " INPUT ERROR  ",0		;2
 	ERROR_MSG_WORD_TOO_LONG:

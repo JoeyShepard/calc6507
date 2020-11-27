@@ -748,6 +748,8 @@
 			JSR CopyRegs
 		.done:
 		
+		halt
+		
 		;sign if positive or negative overflow
 		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
 		STA math_max

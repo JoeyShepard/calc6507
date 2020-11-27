@@ -89,6 +89,20 @@ def test2(amount):
         
     return ret_list
 
+def sum_filter(sum_dec):
+    if sum_dec>Decimal(MAX_VAL):
+        sum_dec=Decimal(MAX_VAL)
+    elif sum_dec<Decimal(MAX_NEG_VAL):
+        sum_dec=Decimal(MAX_NEG_VAL)
+    elif sum_dec==Decimal(0):
+        #prevent 0e-1000
+        sum_dec=Decimal(0)
+    elif abs(sum_dec)<Decimal(MIN_VAL):
+        #print("under:",sum_dec)
+        sum_dec=Decimal(0)
+
+    return sum_dec
+
 def write_list_rr(which_list):
     #fp = open("input.txt","wt")
     fp = open("Z:\\input.txt","wt")
@@ -107,17 +121,7 @@ def write_list_rr(which_list):
             
             #round half even for addition
             getcontext().rounding=ROUND_HALF_EVEN
-            sum_dec=n1+n2
-            if sum_dec>Decimal(MAX_VAL):
-                sum_dec=Decimal(MAX_VAL)
-            elif sum_dec<Decimal(MAX_NEG_VAL):
-                sum_dec=Decimal(MAX_NEG_VAL)
-            elif sum_dec==Decimal(0):
-                #prevent 0e-1000
-                sum_dec=Decimal(0)
-            elif abs(sum_dec)<Decimal(MIN_VAL):
-                #print("under:",sum_dec)
-                sum_dec=Decimal(0)
+            sum_dec=sum_filter(n1+n2)
             sum_try="{:e}".format(Decimal(sum_dec)).replace("+","")
             fp.write(sum_try+"\n")
     fp.write("Z")
@@ -144,14 +148,7 @@ def write_list_seq(which_list):
             
         #round half even for addition
         getcontext().rounding=ROUND_HALF_EVEN
-        sum_dec=n1+n2
-            
-        if abs(sum_dec)>Decimal(MAX_VAL):
-            sum_dec=Decimal(MAX_VAL)
-        elif sum_dec==Decimal(0):
-            sum_dec=Decimal(0)
-        elif abs(sum_dec)<Decimal(MIN_VAL):
-            sum_dec=Decimal(MIN_VAL)
+        sum_dec=sum_filter(n1+n2)
         sum_try="{:e}".format(Decimal(sum_dec)).replace("+","")
         fp.write(sum_try+"\n")        
     fp.write("Z")
