@@ -35,11 +35,11 @@
 	FUNC BCD_RevExp
 		SEC
 		LDA #0
-		SBC GR_OFFSET+EXP_LO-TYPE_SIZE,X
-		STA GR_OFFSET+EXP_LO-TYPE_SIZE,X
+		SBC EXP_LO,X
+		STA EXP_LO,X
 		LDA #0
-		SBC GR_OFFSET+EXP_HI-TYPE_SIZE,X
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		SBC EXP_HI,X
+		STA EXP_HI,X
 	END
 	
 	;Register address in X
@@ -65,7 +65,7 @@
 	
 	;Reg in X
 	FUNC ZeroReg
-		LDY #GR_OFFSET+OBJ_SIZE-TYPE_SIZE
+		LDY #OBJ_SIZE
 		LDA #0
 		.loop:
 			STA 1,X
@@ -101,13 +101,13 @@
 	;Assumes dec mode
 	TODO: mark all functions that assumes dec mode
 	FUNC IncRansExp
-		LDA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R_ans+EXP_LO
 		CLC
 		ADC #1
-		STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
-		LDA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+EXP_LO
+		LDA R_ans+EXP_HI
 		ADC #0
-		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE		
+		STA R_ans+EXP_HI
 	END
 	
 	TODO: replace with 3 calls to CopyRegs?
@@ -432,13 +432,13 @@
 		TAY
 		LDA hex_table,Y
 		STA math_a
-		LDA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R_ans+EXP_LO
 		SEC
 		SBC math_a
-		STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
-		LDA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+EXP_LO
+		LDA R_ans+EXP_HI
 		SBC #0
-		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
+		STA R_ans+EXP_HI
 		
 		.return:
 	END
@@ -484,23 +484,23 @@
 	FUNC BCD_Unpack
 		LDA #0
 		STA 0,X		;guard/round byte
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,X
-		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
+		LDA EXP_HI,X
+		STA SIGN_INFO,X
 		AND #$F
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
-		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
+		STA EXP_HI,X
+		LDA SIGN_INFO,X
 		AND #E_SIGN_BIT
 		BEQ .no_reverse
 			JSR BCD_RevExp
 		.no_reverse:
-		LDA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
+		LDA SIGN_INFO,X
 		AND #SIGN_BIT
-		STA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
+		STA SIGN_INFO,X
 	END
 	
 	;Register address in X
 	FUNC BCD_Pack
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		LDA EXP_HI,X
 		;addition ranges
 			;0000-0999	0-9		positive
 			;1000		10 		overflow
@@ -515,7 +515,7 @@
 			JSR BCD_RevExp
 			;High byte of exp in A
 			ORA #E_SIGN_BIT
-			STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+			STA EXP_HI,X
 		.no_rev:
 		CMP #$50	;high byte of $10 (overflow) | E_SIGN_BIT
 		BCC .no_underflow
@@ -534,19 +534,18 @@
 			JMP MaxReg
 		.overflow_done:
 		
-		TODO: get rid of GR_OFFSET+...-TYPE_SIZE - not much point since same size and kind of unclear
-		LDA GR_OFFSET+EXP_HI-TYPE_SIZE,X
-		ORA GR_OFFSET+SIGN_INFO-TYPE_SIZE,X
-		STA GR_OFFSET+EXP_HI-TYPE_SIZE,X
+		LDA EXP_HI,X
+		ORA SIGN_INFO,X
+		STA EXP_HI,X
 	END
 	
 	FUNC BCD_Exp_diff
-		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R1+EXP_LO
 		SEC
-		SBC R0+GR_OFFSET+EXP_LO-TYPE_SIZE
+		SBC R0+EXP_LO
 		STA math_lo
-		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
-		SBC R0+GR_OFFSET+EXP_HI-TYPE_SIZE
+		LDA R1+EXP_HI
+		SBC R0+EXP_HI
 		STA math_hi
 	END
 	
@@ -659,13 +658,13 @@
 		.do_sign:
 		TODO: abstract this if reused by other routines
 		;only invert digits if signs different
-		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-		EOR R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		LDA R0+SIGN_INFO
+		EOR R1+SIGN_INFO
 		STA math_signs
 		BEQ .same_sign
 			LDX #R0
 			;A = #SIGN_BIT
-			AND R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+			AND R0+SIGN_INFO
 			BNE .invert_R0
 				LDX #R1
 			.invert_R0:
@@ -674,12 +673,12 @@
 		
 		TODO: generic copy routine?
 		;copy exponent to answer so ready to adjust if needed
-		LDA R1+GR_OFFSET+EXP_LO-TYPE_SIZE
-		STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
-		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE
-		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
-		LDA R1+GR_OFFSET+EXP_HI-TYPE_SIZE+1
-		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE+1
+		LDA R1+EXP_LO
+		STA R_ans+EXP_LO
+		LDA R1+EXP_HI
+		STA R_ans+EXP_HI
+		LDA R1+EXP_HI+1
+		STA R_ans+EXP_HI+1
 		
 		.do_add:
 		CLC
@@ -722,7 +721,7 @@
 				JSR BCD_RevSig
 				LDA #SIGN_BIT
 			.no_carry2:
-			STA R_ans+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+			STA R_ans+SIGN_INFO
 		.carry_done:
 		
 		;shift forward
@@ -749,7 +748,7 @@
 		.done:
 		
 		;sign if positive or negative overflow
-		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		LDA R0+SIGN_INFO
 		STA math_max
 		
 		;pack sign bits into exponent
@@ -789,20 +788,20 @@
 		LDX #R1
 		JSR BCD_Unpack
 		
-		LDA R0+GR_OFFSET+SIGN_INFO-TYPE_SIZE
-		EOR R1+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		LDA R0+SIGN_INFO
+		EOR R1+SIGN_INFO
 		AND #SIGN_BIT
-		STA R_ans+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		STA R_ans+SIGN_INFO
 		
 		TODO: abstract
 		CLC
-		LDA R0+GR_OFFSET+EXP_LO-TYPE_SIZE
-		ADC R1+GR_OFFSET+EXP_LO-TYPE_SIZE
+		LDA R0+EXP_LO
+		ADC R1+EXP_LO
 		;STA R_ans+GR_OFFSET+EXP_LO-TYPE_SIZE
 		STA math_lo
-		LDA R0+GR_OFFSET+EXP_HI-TYPE_SIZE
-		ADC R1+GR_OFFSET+EXP_HI-TYPE_SIZE
-		STA R_ans+GR_OFFSET+EXP_HI-TYPE_SIZE
+		LDA R0+EXP_HI
+		ADC R1+EXP_HI
+		STA R_ans+EXP_HI
 		
 		LDA #DEC_COUNT
 		STA math_b
@@ -887,7 +886,7 @@
 		JSR BCD_StickyRound
 		
 		;sign if positive or negative overflow
-		LDA R_ans+GR_OFFSET+SIGN_INFO-TYPE_SIZE
+		LDA R_ans+SIGN_INFO
 		STA math_max
 		
 		;pack sign bits into exponent

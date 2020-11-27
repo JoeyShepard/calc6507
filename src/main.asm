@@ -148,7 +148,6 @@ LOCALS_END set		$1F
 		TODO: copyright
 		TODO: number entry wraps if backspace past beginning - cant reproduce!
 		TODO: stack disappears when entering number - change in new_stack_item?
-		TODO: overflow logic is wrong in python script
 		
 		CALL setup
 		;CALL tests
