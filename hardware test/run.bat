@@ -21,6 +21,7 @@ echo Copying...
 copy processed.lst "..\..\..\projects\6502 emu\main\listing.lst" > nul
 REM copy processed.hex "..\..\..\projects\6502 emu\main\prog.hex" > nul
 copy emu.hex "..\..\..\projects\6502 emu\main\prog.hex" > nul
+copy processed.hex "\\DESKTOP-580JERL\compile share\eeprom.hex" > nul
 break > "..\..\..\projects\6502 emu\main\input.txt" > nul
 break > "..\..\..\projects\6502 emu\main\keys.txt" > nul
 

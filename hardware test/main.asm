@@ -224,7 +224,7 @@ LOCALS_END set		$7F
 		SEI
 		CLD
 		
-		LDX #$FF
+		LDX #$0
 		TXS
 		
 		;;$800-$87F		SRAM
