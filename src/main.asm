@@ -147,7 +147,7 @@ LOCALS_END set		$1F
 		
 		TODO: copyright
 		TODO: number entry wraps if backspace past beginning - cant reproduce!
-		TODO: stack disappears when entering number - change in new_stack_item?
+		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
 		
 		CALL setup
 		;CALL tests

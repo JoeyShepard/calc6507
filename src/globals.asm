@@ -24,11 +24,13 @@
 	ORG $800
 	dict_end:
 	
+	RIOT_mem_begin:
 	;extra RAM in RIOT - not preserved by backup battery
 	TODO: what else will fit in RIOT RAM?
 	
 	;Math
 	TODO: move to zero page if room
+	TODO: rename these to something useful
 	BYTE math_lo
 	BYTE math_hi
 	BYTE math_a
@@ -39,10 +41,16 @@
 	BYTE math_sticky
 	BYTE math_max
 	
+	;Locals for functions
+	;wasteful of memory but RIOT mem not used otherwise
+	BYTE shift_counter
+	
 	;Splitting input into words
 	new_word_len:		DFS 1
 	new_word_buff:		DFS WORD_MAX_SIZE
 	;new_stack_item:		DFS OBJ_SIZE+GR_OFFSET
 	
-	ORG 880
+	RIOT_mem_end:
+	
+	ORG $880
 	

@@ -99,7 +99,7 @@
 	;END
 	
 	;Assumes dec mode
-	TODO: mark all functions that assumes dec mode
+	TODO: mark all functions that assume dec mode
 	FUNC IncRansExp
 		LDA R_ans+EXP_LO
 		CLC
@@ -185,9 +185,30 @@
 		TAX
 	END
 	
-	;Which register in X
+	;;which register in X
+	;;fill byte in A
+	;FUNC HalfShift
+	;	LDY #4
+	;	.half_loop:
+	;		LSR GR_OFFSET+(DEC_COUNT/2)-1,X
+	;		ROR GR_OFFSET+(DEC_COUNT/2)-2,X
+	;		ROR GR_OFFSET+(DEC_COUNT/2)-3,X
+	;		ROR GR_OFFSET+(DEC_COUNT/2)-4,X
+	;		ROR GR_OFFSET+(DEC_COUNT/2)-5,X
+	;		ROR GR_OFFSET+(DEC_COUNT/2)-6,X
+	;		;guard/round byte
+	;		ROR GR_OFFSET+(DEC_COUNT/2)-7,X
+	;		DEY
+	;		BNE .half_loop
+	;	ORA GR_OFFSET+(DEC_COUNT/2)-1,X
+	;	STA GR_OFFSET+(DEC_COUNT/2)-1,X
+	;END
+	
+	;which register in X
+	;shift count in Y
 	;fill byte in A
 	FUNC HalfShift
+		STY shift_counter
 		LDY #4
 		.half_loop:
 			LSR GR_OFFSET+(DEC_COUNT/2)-1,X
@@ -203,6 +224,8 @@
 		ORA GR_OFFSET+(DEC_COUNT/2)-1,X
 		STA GR_OFFSET+(DEC_COUNT/2)-1,X
 	END
+	
+	
 	
 	;Which register in X
 	FUNC HalfShiftForward
