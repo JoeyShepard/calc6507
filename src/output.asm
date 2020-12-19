@@ -317,6 +317,7 @@
 		FDB ERROR_MSG_COMPILE_ONLY
 		FDB ERROR_MSG_OUT_OF_MEM
 		
+	TODO: adjust display and messages for new 5x8 font
 	;error code in A
 	FUNC ErrorMsg
 		VARS

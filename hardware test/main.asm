@@ -90,6 +90,8 @@ LOCALS_END set		$7F
 	ORG $900
 	JMP main	;static entry address for emulator
 	
+	font_table:
+	include font_5x8.asm
 	
 ;System functions
 ;================
@@ -173,13 +175,43 @@ LOCALS_END set		$7F
 		LCD_Control
 		;LDA #1			;500ns in datahseet! also Tbusy - 1us?
 		;delay
-		
-		start here:
+		TODO: necessary?
 		delay15			;1us is enough?
 	
 	%endmacro
 
-
+	%macro LCD_Clear 0
+		
+		LDA #0
+		STA counter1
+		
+		%%loop1:
+			
+			LDA #$40	;Y address=0
+			LCD_Data
+			LCD_Enable #LCD_RST|LCD_I
+		
+			LDA counter1
+			ORA #$B8	;X address
+			LCD_Data
+			LCD_Enable #LCD_RST|LCD_I
+		
+			LDY #64
+			%%loop2:
+				LDA #$0
+				LCD_Data
+				LCD_Enable #LCD_RST|LCD_D
+				;LDA #10
+				;delay
+				DEY
+				BNE %%loop2
+				
+			INC counter1
+			LDA counter1
+			CMP #8
+			JNE %%loop1
+			
+	%endmacro
 	
 ;Main function
 ;=============
@@ -210,13 +242,14 @@ LOCALS_END set		$7F
 		LDA #0
 		STA RIOT_A
 		
+		;Pull reset low
 		LDA #0
 		LCD_Control
 		
 		LDA #1			;<==1us/1000ns in datasheet!
 		delay
 		
-		LDA #LCD_RST|LCD_CS1
+		LDA #LCD_RST
 		LCD_Control
 		
 		LDA #10			;<==how long after reset???
@@ -224,43 +257,17 @@ LOCALS_END set		$7F
 				
 		LDA #$3F	;LCD on
 		LCD_Data
-		LCD_Enable #LCD_RST|LCD_CS1|LCD_I
+		LCD_Enable #LCD_RST|LCD_I
 		
 		LDA #10			;<==how long after power on???
 		delay
 		
-		;LDA #$C0	;Z address
-		;LCD_Enable #LCD_RST|LCD_CS1|LCD_I
+		LDA #$C0	;Z address
+		LCD_Enable #LCD_RST|LCD_I
 		
-		LDX #0
-		.lcd_loop:
-			TXA
-			LCD_Data
-			LCD_Enable #LCD_RST|LCD_CS1|LCD_D
-			
-			INX
-			CPX #200
-			BNE .lcd_loop
+		LCD_Clear
 		
-		.lcd_test:
-			;TXA
-			;LCD_Data
-			;INX
-						
-			LDA #$3F	;LCD on
-			LCD_Data
-			LCD_Enable #LCD_RST|LCD_CS1|LCD_I
-			
-			LDA #200
-			delay
-			
-			LDA #$3E	;LCD off
-			LCD_Data
-			LCD_Enable #LCD_RST|LCD_CS1|LCD_I
-			
-			LDA #100
-			delay
-			
+		.lcd_test:	
 		JMP .lcd_test
 		
 		.loop:

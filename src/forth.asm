@@ -26,7 +26,9 @@
 		STA screen_ptr
 		LDA #INPUT_Y
 		STA screen_ptr+1
-		CALL LCD_print,"a               "
+		CALL LCD_print,"a                     "
+		LDA #0
+		STA screen_ptr
 		LDA TIMER_S
 		STA cursor_timer
 		
