@@ -116,10 +116,9 @@ LOCALS_END set		$1F
 	code_begin:
 	JMP main	;static entry address for emulator
 	
-	;504 bytes 0_0
-	TODO: compress? ie count of empty rows before and after
 	font_table:
-	include font_8x8.asm
+	include font_5x8.asm
+	include font_custom.asm
 	
 	;include calc6507.asm
 	include emu6507.asm
@@ -151,8 +150,8 @@ LOCALS_END set		$1F
 		TODO: tagging stack maybe not good idea - save first address then error calls function to clear r stack
 		
 		CALL setup
-		;CALL tests
-		CALL file_tests
+		CALL tests
+		;CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		

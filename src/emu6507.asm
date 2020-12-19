@@ -124,14 +124,20 @@
 		STA pixel_ptr
 		LDA #0
 		STA pixel_ptr+1
-		
+	
+		LDA pixel_ptr
 		ASL pixel_ptr
 		;ROL pixel_ptr+1	;highest char <128
 		ASL pixel_ptr
 		ROL pixel_ptr+1
-		ASL pixel_ptr
-		ROL pixel_ptr+1
 		;CLC ;16-bit can't overflow
+		ADC pixel_ptr
+		STA pixel_ptr
+		BCC .no_C
+			INC pixel_ptr+1
+		.no_C:
+		
+		CLC
 		LDA #font_table % 256
 		ADC pixel_ptr
 		STA pixel_ptr
@@ -141,7 +147,7 @@
 		
 		LDA #0
 		STA pixel_index
-		LDA #8
+		LDA #5
 		STA lc1
 		.loop:
 			LDA #8
@@ -153,38 +159,54 @@
 			STA pixel
 			LDY #0
 			.loop.inner:
-				ROL pixel
+				ASL pixel
 				LDA #FG_COLOR
 				BCS .color
 					LDA #BG_COLOR
 				.color:
-				;16x24 - ie 8x8 stretched over half pixels :/
-				;STA (screen_ptr),Y
-				;INC screen_ptr+1
+				STA (screen_ptr),Y
+				INY
 				STA (screen_ptr),Y
 				INC screen_ptr+1
+				STA (screen_ptr),Y				
+				DEY
 				STA (screen_ptr),Y
-				INY
-				;STA (screen_ptr),Y
-				;DEC screen_ptr+1
-				STA (screen_ptr),Y
-				DEC screen_ptr+1
-				STA (screen_ptr),Y
-				INY
+				INC screen_ptr+1
 				DEC lc2
 				BNE .loop.inner
-			;INC screen_ptr+1
-			INC screen_ptr+1
-			INC screen_ptr+1
+			INC screen_ptr
+			INC screen_ptr
+			
+			LDA screen_ptr+1
+			SEC
+			SBC #16
+			STA screen_ptr+1
+			
 			DEC lc1
-			BNE .loop
-		CLC
-		LDA screen_ptr
-		ADC #16
-		STA screen_ptr
-		SEC
+			BNE .loop	
+		
+		LDA #16
+		STA lc1
+		LDA #BG_COLOR
+		LDY font_inverted
+		BEQ .no_inv
+			LDA #FG_COLOR
+		.no_inv:
+		LDY #0
+		.blank_loop:
+			STA (screen_ptr),Y
+			INY
+			STA (screen_ptr),Y
+			DEY
+			INC screen_ptr+1
+			
+			DEC lc1
+			BNE .blank_loop
+		
+		INC screen_ptr
+		INC screen_ptr
 		LDA screen_ptr+1
-		;SBC #24
+		SEC
 		SBC #16
 		STA screen_ptr+1
 	END

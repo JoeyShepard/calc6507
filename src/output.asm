@@ -70,8 +70,11 @@
 			CALL DigitHigh, arg
 			CALL DigitLow, arg
 			DEC index
+			
+			TODO: instead, adjust R0 above
 			LDA index
-			CMP #1
+			CMP #$FF
+			
 			BNE .loop
 		LDA #'+'
 		STA sign

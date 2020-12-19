@@ -7,7 +7,10 @@ font_img=Image(Point(20,48),"5x8.png")
 
 for i in range(12):
     for j in range(8):
-        out_str=";"+chr(32+i*8+j)+"\n  FCB "
+        if chr(32+i*8+j)=="\\":
+            out_str=";back slash\n  FCB "
+        else:
+            out_str=";"+chr(32+i*8+j)+"\n  FCB "
         for cx in range(5):
             byte_data=0
             for cy in range(8):    
