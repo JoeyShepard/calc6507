@@ -1,5 +1,6 @@
 # html output from optimizer
 /output/
+/hardware test/output/
 
 # hex files for loading into emulator or ROM
 *.hex
