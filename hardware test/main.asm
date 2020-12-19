@@ -26,8 +26,19 @@
 ;Constants
 ;=========
 
-LCD_E set $10
-LCD_RS set $20
+LCD_CS1	set $2	;active low
+LCD_CS2	set $1	;active low
+LCD_DI	set $4
+LCD_E 	set $8
+LCD_RST	set $10
+
+LCD_D 	set $4
+LCD_I	set $0
+
+
+RIOT_A		set $880
+RIOT_B		set $882
+
 
 	include emu.asm
 
@@ -60,13 +71,18 @@ LOCALS_END set		$7F
 	BYTE debug_ptr
 	
 	BYTE dummy
-		
+	
 	
 ;Variables in main RAM
 ;=====================
 	ORG $130
 	;Must come after include const.asm for constants
 	;include globals.asm
+
+;Variables in RIOT
+;=================
+	ORG $800
+	BYTE counter1, counter2
 
 
 ;Functions in ROM
@@ -78,143 +94,92 @@ LOCALS_END set		$7F
 ;System functions
 ;================
 	
-	FUNC delay
-		ARGS
-			BYTE loops
-		VARS 
-			BYTE counter
-		END
+	;count in A
+	;FUNC delay
+	%macro delay 0
+	
+		STA counter1
+		LDA #0
+		STA counter2
 		
-		MOV #0,counter
-		.loop:
+		%%loop:
 		NOP
 		NOP
 		NOP
 		NOP
-		DEC counter
-		BNE .loop
-		DEC loops
-		BNE .loop
+		NOP
+		NOP
+		DEC counter2
+		BNE %%loop
+		DEC counter1
+		BNE %%loop
 				
-	END
-		
-	FUNC LCD_nibble
-		ARGS
-			BYTE nibble, RS_mode
-		END
-				
-		LDA nibble
-		ORA RS_mode
-		STA nibble
-		ORA #LCD_E
-		STA $880 ;write data, E=1
-		
-		;300ns, so shouldnt be necessary
-		;CALL delay, #1
-		
-		LDA nibble
-		STA $880
-		
-		;May need 39-43us after command (ie 39 cycles)
-		;CALL delay, #1
-	END
+	;END
+	%endmacro
 	
-	FUNC LCD_byte
-		ARGS
-			BYTE dbyte, RS_mode
-		VARS
-			BYTE arg
-		END
+	;15us? https://exploreembedded.com/wiki/Interfacing_KS0108_based_JHD12864E_Graphics_LCD_with_Atmega32
+	;1us?  https://openlabpro.com/guide/ks0108-graphic-lcd-interfacing-with-pic18f4550-part-1/
+	%macro delay15 0
 		
-		LDA dbyte
-		LSR
-		LSR
-		LSR
-		LSR
-		STA arg
-		CALL LCD_nibble, arg, RS_mode
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
+		NOP
 		
-		LDA dbyte
-		AND #$F
-		STA arg
-		CALL LCD_nibble, arg, RS_mode
-	END
+	%endmacro
 	
-	FUNC LCD_print
-		ARGS
-			STRING msg
-		VARS
-			BYTE character
-		END
+	
+	;data in A
+	;FUNC LCD_Data
+	%macro LCD_Data 0
+	
+		STA RIOT_B
+		;data is latch 2
+		LDA #2
+		STA RIOT_A
+		;could optimize out potentially
+		LDA #0
+		STA RIOT_A
 		
-		LDY #0
-		.loop:
-			LDA (msg),Y
-			BEQ .loop_done
-			STA character
-			;STA DEBUG_HEX
-			CALL LCD_byte, character, #LCD_RS
-			INY
-			JMP .loop
-		.loop_done:
-	END
+	;END
+	%endmacro
 	
-	LCD_commands:
-	;Taken from other project
-	;FCB $28, $E, $1, $6, $C, $1, 0
-	;From datasheet
-	FCB $28	;4-bit/2-line
-	FCB $10	;Set cursor
-	FCB $F	;Display ON, blinking cursor
-	FCB 6	;Entry mode
-	FCB 1	;Clear display
-	FCB 2	;Return home
-	FCB 0	;End of data 	
+	;FUNC LCD_Control
+	%macro LCD_Control 0
 	
-	FUNC LCD_setup
-		VARS
-			BYTE arg
-			WORD ptr
-			
-			BYTE d_counter
-			
-		END
+		STA RIOT_B
+		;control is latch 2
+		LDA #1
+		STA RIOT_A
+		;could optimize out potentially
+		LDA #0
+		STA RIOT_A
+		
+	;END
+	%endmacro
+	
+	%macro LCD_Enable 1
+		
+		LDA %1
+		LCD_Control
+		LDA %1|LCD_E
+		LCD_Control
+		;min 500ns delay in datasheet!
+		LDA %1
+		LCD_Control
+		;LDA #1			;500ns in datahseet! also Tbusy - 1us?
+		;delay
+		
+		start here:
+		delay15			;1us is enough?
+	
+	%endmacro
 
 
-		;THIS DISAGREES WITH DATASHEET	;https://www.bipom.com/documents/appnotes/LCD%20Interfacing%20using%20HD44780%20Hitachi%20chipset%20compatible%20LCD.pdf
-		
-		;USING THIS INSTEAD
-		;http://www.newhavendisplay.com/specs/NHD-0420H1Z-FSW-GBW.pdf
-		
-		;40ms = 40 / 4 = 10
-		CALL delay, #12
-		
-		CALL LCD_nibble, #3, #0
-		
-		;5 msecs = 5 / 4 = ~1
-		CALL delay, #2
-		
-		CALL LCD_nibble, #3, #0
-		CALL LCD_nibble, #3, #0
-		CALL LCD_nibble, #2, #0
-				
-		;33 bytes shorter
-		MOV.W #LCD_commands,ptr
-		LDY #0
-		.loop:
-			LDA (ptr),Y
-			BEQ .loop_done
-			STA arg
-			;STA DEBUG_HEX
-			CALL LCD_byte, arg, #0
-			;1 and 2 require 1.53ms
-			CALL delay, #1
-			INY
-			JMP .loop
-		.loop_done:
-		
-	END
-		
 	
 ;Main function
 ;=============
@@ -224,19 +189,102 @@ LOCALS_END set		$7F
 		SEI
 		CLD
 		
-		LDX #$0
-		TXS
+		;LDX #$0
+		;TXS
 		
-		;;$800-$87F		SRAM
-		;;$880-$8FF		RIOT
-		;
-		;LDA #$FF
-		;STA $881		;DDRA
-		;STA $883		;DDRB
-		;;LDA #$A5
+		;$800-$87F		SRAM
+		;$880-$8FF		RIOT
+		
+		;.test:
+		;	JMP .test
+		
+		LDA #$FF
+		STA $881		;DDRA
+		STA $883		;DDRB
+		;LDA #$A5
 		;STA $880		;DRA
 		;LDA #$96
 		;STA $882		;DRB
+		
+		;Latch write low in preparation
+		LDA #0
+		STA RIOT_A
+		
+		LDA #0
+		LCD_Control
+		
+		LDA #1			;<==1us/1000ns in datasheet!
+		delay
+		
+		LDA #LCD_RST|LCD_CS1
+		LCD_Control
+		
+		LDA #10			;<==how long after reset???
+		delay
+				
+		LDA #$3F	;LCD on
+		LCD_Data
+		LCD_Enable #LCD_RST|LCD_CS1|LCD_I
+		
+		LDA #10			;<==how long after power on???
+		delay
+		
+		;LDA #$C0	;Z address
+		;LCD_Enable #LCD_RST|LCD_CS1|LCD_I
+		
+		LDX #0
+		.lcd_loop:
+			TXA
+			LCD_Data
+			LCD_Enable #LCD_RST|LCD_CS1|LCD_D
+			
+			INX
+			CPX #200
+			BNE .lcd_loop
+		
+		.lcd_test:
+			;TXA
+			;LCD_Data
+			;INX
+						
+			LDA #$3F	;LCD on
+			LCD_Data
+			LCD_Enable #LCD_RST|LCD_CS1|LCD_I
+			
+			LDA #200
+			delay
+			
+			LDA #$3E	;LCD off
+			LCD_Data
+			LCD_Enable #LCD_RST|LCD_CS1|LCD_I
+			
+			LDA #100
+			delay
+			
+		JMP .lcd_test
+		
+		.loop:
+			
+			LDA #$A5
+			LCD_Data
+			LDA #$FF
+			LCD_Control
+			
+			LDA #250
+			delay
+			
+			LDA #$5A
+			LCD_Data
+			LDA #0
+			LCD_Control
+			
+			LDA #100
+			delay
+			
+			JMP .loop
+			
+		
+		
 
 		;CALL LCD_setup
 		;CALL LCD_print, "Hello, World!"
@@ -244,6 +292,5 @@ LOCALS_END set		$7F
 		.done:		
 		JMP .done
 		
-		CALL LCD_print, "112"
 	END
 	

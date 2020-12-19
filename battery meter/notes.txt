@@ -1,0 +1,4 @@
+can omit Q2 and instead feed gpio
+can connect R1 to 5v instead of 6v and feed to 6532
+   6532 has pull up so dont need R1 anyway
+monitor 6v line since 5v line may drop suddenly when battery low

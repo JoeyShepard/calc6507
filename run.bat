@@ -12,7 +12,7 @@ type main.err
 echo.
 del processed.asm
 python "..\..\projects\6502 Optimizer\NASM based\main.py" main.i
-type mem_template.asm >> processed.asm
+type src\mem_template.asm >> processed.asm
 echo.
 echo Re-assembling...
 ..\..\AS\bin\asw processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt

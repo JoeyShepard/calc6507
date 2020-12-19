@@ -1,7 +1,0 @@
-UPGRADING FROM OLDER VERSIONS:
-
-If you have any fonts from v1.x of the pack installed on your systems, I
-*strongly recommend* removing all older "Bm" and "Px" fonts before you install
-any from v2.0. Quite a few fonts have been renamed or have changed roles, so
-keeping the older versions will leave you with duplicates and with an
-inconsistent set.

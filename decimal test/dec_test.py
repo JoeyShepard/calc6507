@@ -10,7 +10,7 @@ MAX_NEG_VAL = "-9.99999999999e999"
 MIN_NEG_VAL = "-1e-999"
 
 #Randomized round robin
-TEST1_COUNT = 350
+TEST1_COUNT = 20
     #350 = 1.96m tests
     #500 = 4m tests
 
@@ -164,7 +164,7 @@ def write_list_seq(which_list):
     fp.close()
     print()
 
-#print("Repass all from 0") 
+print("Passed through 88") 
 rand_seed=input("Seed? (default: 0) ")
 if rand_seed=="":
     rand_seed=0

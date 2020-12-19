@@ -51,23 +51,9 @@ This scheme is very efficient compared to the main two alternatives: stack based
 boxlist=[];
 linelist=[];
 boxlist.push([0.0,0,'main','0 bytes']);
-boxlist.push([0.0,1,'LCD_print','3 bytes']);
-boxlist.push([0.0,2,'LCD_byte','3 bytes']);
-boxlist.push([0.0,3,'LCD_nibble','2 bytes']);
-linelist.push([0.0,1,0.0,0]);
-linelist.push([0.0,2,0.0,1]);
-linelist.push([0.0,3,0.0,2]);
 graphwidth=1;
-graphheight=4;
-tabledata.push([['LCD_print','msg',2,0]]);
-tabledata.push([['LCD_print','msg',2,1]]);
-tabledata.push([['LCD_print','character',1,0]]);
-tabledata.push([['LCD_byte','dbyte',1,0]]);
-tabledata.push([['LCD_byte','RS_mode',1,0]]);
-tabledata.push([['LCD_byte','arg',1,0]]);
-tabledata.push([['LCD_nibble','nibble',1,0]]);
-tabledata.push([['LCD_nibble','RS_mode',1,0]]);
-max_row_length=1;
+graphheight=1;
+max_row_length=0;
 	
 	var c = document.getElementById("GraphCanvas");
 	//c.style.padding="0px 50px 50px 0px";	//This is inside the picture, not outside!
