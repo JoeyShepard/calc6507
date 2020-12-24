@@ -5,7 +5,7 @@
 	FG_COLOR = $0
 	
 	;Layout
-	INPUT_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*6+12
+	INPUT_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*7
 	ERROR_X =				2*8*1
 	ERROR_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
 	
@@ -44,6 +44,8 @@
 		
 		LDA #0
 		STA font_inverted
+		
+		MOV.W #font_table,font_ptr
 		
 		LDA #dict_begin % 256
 		STA dict_ptr
@@ -137,11 +139,20 @@
 			INC pixel_ptr+1
 		.no_C:
 		
+		TODO: remove after debugging
+		;CLC
+		;LDA #font_table % 256
+		;ADC pixel_ptr
+		;STA pixel_ptr
+		;LDA #font_table / 256
+		;ADC pixel_ptr+1
+		;STA pixel_ptr+1
+		
 		CLC
-		LDA #font_table % 256
+		LDA font_ptr
 		ADC pixel_ptr
 		STA pixel_ptr
-		LDA #font_table / 256
+		LDA font_ptr+1
 		ADC pixel_ptr+1
 		STA pixel_ptr+1
 		
@@ -185,6 +196,8 @@
 			DEC lc1
 			BNE .loop	
 		
+		;blank line after character
+		;looks fine on actual LCD since room around edge
 		LDA #16
 		STA lc1
 		LDA #BG_COLOR

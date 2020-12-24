@@ -265,11 +265,21 @@
 			BNE .loop
 		LDA #0
 		STA screen_ptr
+		
+		TODO: 6th line of stack or status??? (would save code space)
+		TODO: status=bytes free? auto complete? too much space :(
+		TODO: actually, this goes on the top line!
+		TODO: could use tiny font just for numbers
+		;LDA screen_ptr+1
+		;CLC
+		;ADC #CHAR_HEIGHT
+		;STA screen_ptr+1
+		;CALL LCD_print, "--------------STATUS?"
+		
 		LDA screen_ptr+1
 		CLC
-		ADC #20
+		ADC #CHAR_HEIGHT*1.5
 		STA screen_ptr+1
-		
 		LDY #0
 		LDA #FG_COLOR
 		.loop_line:

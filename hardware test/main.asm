@@ -201,8 +201,6 @@ LOCALS_END set		$7F
 				LDA #$0
 				LCD_Data
 				LCD_Enable #LCD_RST|LCD_D
-				;LDA #10
-				;delay
 				DEY
 				BNE %%loop2
 				

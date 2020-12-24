@@ -60,6 +60,8 @@ LOCALS_END set		$1F
 	
 	;Output
 	WORD screen_ptr
+	TODO: remove after debugging done
+	WORD font_ptr
 	
 	;Forth
 	WORD dict_ptr
@@ -104,6 +106,9 @@ LOCALS_END set		$1F
 	ORG $D000
 	;should be visible to tests below which overflow $C000
 	include debug.asm
+	
+	TODO: remove after debugging
+	include font_debug.asm
 	
 	ORG $8900	;RAM + ROM size
 	;overlaps with video memory, no video output
