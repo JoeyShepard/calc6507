@@ -5,11 +5,6 @@ import os
 f=open("font_5x8.asm","w")
 f_debug=open("font_debug.asm","w")
 
-#font_img=Image(Point(20,48),"5x8.png")
-#font_img=Image(Point(20,48),"5x8 square.png")
-#font_img=Image(Point(20,48),"5x8 fat.png")
-#font_img=Image(Point(20,48),"5x8 fat rounded.png")
-
 selected_font="5x8 square.png"
 
 font_counter=1
