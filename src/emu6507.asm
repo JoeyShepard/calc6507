@@ -156,15 +156,18 @@
 		ADC pixel_ptr+1
 		STA pixel_ptr+1
 		
-		LDA #0
-		STA pixel_index
+		;LDA #0
+		;STA pixel_index
 		LDA #5
 		STA lc1
+		STA pixel_index
 		.loop:
 			LDA #8
 			STA lc2
+			;LDY pixel_index
+			;INC pixel_index
+			DEC pixel_index
 			LDY pixel_index
-			INC pixel_index
 			LDA (pixel_ptr),Y
 			EOR font_inverted
 			STA pixel

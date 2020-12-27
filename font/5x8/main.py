@@ -25,7 +25,8 @@ for font in ["5x8.png", "5x8 square.png", "5x8 fat.png", "5x8 fat rounded.png"]:
                 out_str=";back slash\n  FCB "
             else:
                 out_str=";"+chr(32+i*8+j)+"\n  FCB "
-            for cx in range(5):
+            #for cx in range(5):
+            for cx in range(4,-1,-1):
                 byte_data=0
                 for cy in range(8):    
                     byte_data<<=1
@@ -38,7 +39,8 @@ for font in ["5x8.png", "5x8 square.png", "5x8 fat.png", "5x8 fat rounded.png"]:
                     else:
                         font_img.setPixel(px, py, "red")
                 out_str+="$"+str(hex(byte_data))[2:]
-                if cx!=4:
+                #if cx!=4:
+                if cx!=0:
                     out_str+=", "
             if i*8+j!=95:
                 f_debug.write(out_str+"\n\n")

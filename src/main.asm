@@ -1,17 +1,44 @@
 ;Notes
 ;=====
-;
+
 ;GPIO
-;	8 outputs for LCD data lines and keyboard
-;	1 output for LCD E
-;	1 output for latch
-;		4 or 5 for rst, rs, cs1, cs2, and r/w (NEEDED)
-;		1-3 for EEPROM bank
-;		1 for power transistor
-;	1 output for Tx <== latched? speed may not matter
-;	1 input for Rx
-;	5 inputs for keyboard
-;***1 PIN SHORT!***
+	;RIOT A
+		;1 RX
+		;1 low battery transistor
+		;2 latch enables
+		;1 EEPROM bank
+		;0 EEPROM lock
+			;built into EEPROM
+		;1 keyboard buffer OE (74HCT244)
+			;can't be driven from latch!
+		;*2 free
+	;RIOT B
+		;8 LCD data bus to latch 2
+		;also, 8 keyboard inputs
+			;inputs are pulled up, so just need diodes
+	;Latch 1
+		;1 LCD DI
+		;1 LCD E
+		;1 LCD CS1
+		;1 LCD CS2
+		;1 LCD RST? may not be necessary
+		;1 power transistor
+			;will only work if starts in known state :/
+		;1 TX
+			;4v min output, so must drive through latch
+			;alternative is level shift transistor on RIOT
+		;*1 free
+	;Latch 2
+		;8 LCD data bus out
+	;TODO:
+		;5.75k instead of 4k split in eeprom
+			;better would be fixed 1.75k and banked 4k
+			;lock one 256 byte page?
+	;Chips to add:
+		;UART
+		;keyboard buffer
+		;power transistor
+		;vreg?
 
 ;Unlimited lines per page in listing
 	PAGE 0
@@ -155,8 +182,8 @@ LOCALS_END set		$1F
 		TODO: tagging stack maybe not good idea - save first address then error calls function to clear r stack
 		
 		CALL setup
-		CALL tests
-		;CALL file_tests
+		;CALL tests
+		CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		

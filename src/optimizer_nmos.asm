@@ -49,7 +49,7 @@ LOCALS_END set $FF
 	%endmacro
 
 	%macro ARGS 0
-		%if var_state=="func"
+		%ifidn var_state,"func"
 			setup_vars
 		%else
 			%error "BEGIN_ARGS without FUNC!"
@@ -59,9 +59,9 @@ LOCALS_END set $FF
 	%endmacro
 	
 	%macro VARS 0
-		%if var_state=="args"
+		%ifidn var_state,"args"
 			;do nothing. already setup in BEGIN_VARS!
-		%elif var_state=="func"
+		%elifidn var_state,"func"
 			setup_vars
 		%else
 			%error "BEGIN_VARS without FUNC!"
@@ -70,7 +70,10 @@ LOCALS_END set $FF
 	%endmacro
 	
 	%macro END_VARS 0
-		%if ((var_state="args")||(var_state="vars"))
+		;%if ((var_state="args")||(var_state="vars"))
+		%ifidn var_state,"args"
+			;nothing to do since not adjusting X
+		%elifidn var_state,"vars"
 			;nothing to do since not adjusting X
 		%else
 			error "END_VARS without BEGIN_ARGS or BEGIN_VARS!"
@@ -85,7 +88,7 @@ LOCALS_END set $FF
 				%strcat byte_list, %%temp ";" byte_list
 				%assign xcounter xcounter+1
 				%1 set ASSIGN_LOCAL_BYTE
-				%if var_state=="args"
+				%ifidn var_state,"args"
 					%strcat args_list args_list "b"
 					%defstr %%temp_counter local_counter
 					%strcat %%temp_local func_name,".a",%%temp_counter
@@ -114,7 +117,7 @@ LOCALS_END set $FF
 				%strcat word_list, %%temp ";" word_list
 				%assign xcounter xcounter+2
 				%1 set ASSIGN_LOCAL_WORD
-				%if var_state=="args"
+				%ifidn var_state,"args"
 					%strcat args_list args_list "w"
 					%defstr %%temp_counter local_counter
 					%strcat %%temp_local func_name,".a",%%temp_counter
@@ -143,7 +146,7 @@ LOCALS_END set $FF
 				%strcat word_list, %%temp ";" word_list
 				%assign xcounter xcounter+2
 				%1 set ASSIGN_LOCAL_WORD
-				%if var_state=="args"
+				%ifidn var_state,"args"
 					%strcat args_list args_list "s"
 					%defstr %%temp_counter local_counter
 					%strcat %%temp_local func_name,".a",%%temp_counter
@@ -172,22 +175,22 @@ LOCALS_END set $FF
 		%xdefine mov_ret "other"
 		upper %1
 		%defstr %%a1 %1
-		%if upper_ret="A"
+		%ifidn upper_ret,"A"
 			%xdefine mov_ret "A"
-		%elif upper_ret="X"
+		%elifidn upper_ret,"X"
 			%xdefine mov_ret "X"
-		%elif upper_ret="Y"
+		%elifidn upper_ret,"Y"
 			%xdefine mov_ret "Y"
-		%elif upper_ret="S"
+		%elifidn upper_ret,"S"
 			%xdefine mov_ret "S"
 		%else
 			%substr %%temp upper_ret 1
-			%if %%temp="#"
+			%ifidn %%temp,"#"
 				%xdefine mov_ret "immed"
 			%else
 				%xdefine %%temp_list byte_list
 				%rep 1000	;infinite loops not allowed so loop 1,000 times
-					%if %%temp_list=""
+					%ifidn %%temp_list,""
 						%exitrep
 					%else
 						;%warning "========"
@@ -209,14 +212,14 @@ LOCALS_END set $FF
 						%endif
 					%endif
 				%endrep
-				%if %%temp_list<>""
+				%ifnidn %%temp_list,""
 					%fatal "More than 1,000 symbols in function. Something is definitely wrong."
 				%endif
 				
-				%if mov_ret="other"				
+				%ifidn mov_ret,"other"				
 					%xdefine %%temp_list word_list
 					%rep 1000	;infinite loops not allowed so loop 1,000 times
-						%if %%temp_list=""
+						%ifidn %%temp_list,""
 							%exitrep
 						%else
 							;%warning "========"
@@ -238,7 +241,7 @@ LOCALS_END set $FF
 							%endif
 						%endif
 					%endrep
-					%if %%temp_list<>""
+					%ifnidn %%temp_list,""
 						%fatal "More than 1,000 symbols in function. Something is definitely wrong."
 					%endif
 				%endif
@@ -246,7 +249,7 @@ LOCALS_END set $FF
 		%endif
 	%endmacro
 
-	%macro MOV.B 2-3
+	%macro MOV.B 2-3 ""
 		upper %1
 		%xdefine %%arg1 upper_ret
 		upper %2
@@ -256,14 +259,14 @@ LOCALS_END set $FF
 		%xdefine %%arg1type mov_ret
 		mov_helper %2
 		%xdefine %%arg2type mov_ret
-	
+		
 		upper %3
 		%xdefine %%temp_arg upper_ret
 		
-		%if %%temp_arg=""
+		%ifidn %%temp_arg,""
 			;good. argument is optional
-		%elif %%temp_arg="X"
-			%if %%arg2type="other"
+		%elifidn %%temp_arg,"X"
+			%ifidn%%arg2type,"other"
 				%xdefine %%arg2type "other,X"
 			%else
 				%%strcat %%temp_msg "Invalid third argument: ",%3
@@ -275,28 +278,28 @@ LOCALS_END set $FF
 		%endif
 		
 		;message "arg1 is \{arg1type} and arg2 is \{arg2type}"
-		%if %%arg1type="A"
-			%if %%arg2type="X"
+		%ifidn %%arg1type,"A"
+			%ifidn %%arg2type,"X"
 				TAX
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				TAY
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				STA %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				STA %2
 				;STZ %2+1
 				
 				LDA #0
 				STA %2+1
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				STA %2
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				STA %2,X
 			%endif
-		%elif %%arg1type="X"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"X"
+			%ifidn %%arg2type,"A"
 				TXA
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				;PHX
 				;PLY
 				
@@ -305,13 +308,13 @@ LOCALS_END set $FF
 				TAY
 				PLA
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				STX %2
 			%endif
-		%elif %%arg1type="Y"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"Y"
+			%ifidn %%arg2type,"A"
 				TYA
-			%elif %%arg2type="X"
+			%elifidn %%arg2type,"X"
 				;PHY
 				;PLX
 				
@@ -320,29 +323,29 @@ LOCALS_END set $FF
 				TAX
 				PLA
 				
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				STY %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				STY %2
 				;STZ %2+1
 				
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				STY %2
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				STY %2,X
 			%endif
-		%elif %%arg1type="byte"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"byte"
+			%ifidn %%arg2type,"A"
 				LDA %1
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY %1
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				LDA %1
 				STA %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				LDA %1
 				STA %2
 				;STZ %2+1
@@ -350,22 +353,22 @@ LOCALS_END set $FF
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				LDA %1
 				STA %2
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				LDA %1
 				STA %2,X
 			%endif
-		%elif %%arg1type="word"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"word"
+			%ifidn %%arg2type,"A"
 				LDA %1
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY %1
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				LDA %1
 				STA %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				LDA %1
 				STA %2
 				;STZ %2+1
@@ -373,25 +376,25 @@ LOCALS_END set $FF
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				LDA %1
 				STA %2
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				LDA %1
 				STA %2,X
 			%endif
-		%elif %%arg1type="immed"
+		%elifidn %%arg1type,"immed"
 			%defstr %%immed_str %1
 			%strlen %%immed_len %%immed_str
 			%substr %%immed_temp %%immed_str 2,%%immed_len
 			%deftok %%immed_temp %%immed_temp
-			%if %%arg2type="A"
+			%ifidn %%arg2type,"A"
 				LDA #(%%immed_temp) % 256
-			%elif %%arg2type="X"
+			%elifidn %%arg2type,"X"
 				LDX #(%%immed_temp) % 256
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY #(%%immed_temp) % 256
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				;%if %%arg1="#0"
 				;	STZ %2
 				;%else
@@ -402,7 +405,7 @@ LOCALS_END set $FF
 				LDA #(%%immed_temp) % 256
 				STA %2
 				
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				;%if %%arg1="#0"
 				;	STZ %2
 				;%else
@@ -413,7 +416,7 @@ LOCALS_END set $FF
 				LDA #(%%immed_temp) % 256
 				STA %2
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				;%if %%arg1="#0"
 				;	STZ %2
 				;%else
@@ -424,7 +427,7 @@ LOCALS_END set $FF
 				LDA #(%%immed_temp) % 256
 				STA %2
 				
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				;%if %%arg1="#0"
 				;	STZ %2,X
 				;%else
@@ -436,17 +439,17 @@ LOCALS_END set $FF
 				STA %2,X
 				
 			%endif
-		%elif %%arg1type="other"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"other"
+			%ifidn %%arg2type,"A"
 				LDA %1
-			%elif %%arg2type="X"
+			%elifidn %%arg2type,"X"
 				LDX %1
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY %1
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				LDA %1
 				STA %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				LDA %1
 				STA %2
 				;STZ %2+1
@@ -454,10 +457,10 @@ LOCALS_END set $FF
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				LDA %1
 				STA %2
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				LDA %1
 				STA %2,X
 			%endif
@@ -487,10 +490,10 @@ LOCALS_END set $FF
 		upper %3
 		%xdefine %%temp_arg upper_ret
 		
-		%if %%temp_arg=""
+		%ifidn %%temp_arg,""
 			;good. argument is optional
-		%elif %%temp_arg="X"
-			%if %%arg2type="other"
+		%elifidn %%temp_arg,"X"
+			%ifidn %%arg2type,"other"
 				%xdefine %%arg2type "other,X"
 			%else
 				%%strcat %%temp_msg "Invalid third argument: ",%3
@@ -502,28 +505,28 @@ LOCALS_END set $FF
 		%endif
 		
 		;message "arg1 is \{arg1type} and arg2 is \{arg2type}"
-		%if %%arg1type="A"
-			%if %%arg2type="X"
+		%ifidn %%arg1type,"A"
+			%ifidn %%arg2type,"X"
 				TAX
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				TAY
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				STA %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				STA %2	
 				;STZ %2+1
 				
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				STA %2
 				;STZ %2+1
 				
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type="other,X"
 				STA %2,X
 				;STZ %2+1,X
 				
@@ -531,10 +534,10 @@ LOCALS_END set $FF
 				STA %2+1,X
 				
 			%endif
-		%elif %%arg1type="X"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"X"
+			%ifidn %%arg2type,"A"
 				TXA
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				;PHX
 				;PLY
 				
@@ -543,7 +546,7 @@ LOCALS_END set $FF
 				TAY
 				PLA
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				STA %2
 				;STZ %2+1
 				
@@ -551,10 +554,10 @@ LOCALS_END set $FF
 				STA %2+1
 				
 			%endif
-		%elif %%arg1type="Y"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"Y"
+			%ifidn %%arg2type,"A"
 				TYA
-			%elif %%arg2type="X"
+			%elifidn %%arg2type,"X"
 				;PHY
 				;PLX
 				
@@ -563,23 +566,23 @@ LOCALS_END set $FF
 				TAX
 				PLA
 				
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				STY %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				STY %2	
 				;STZ %2+1
 				
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				STY %2
 				;STZ %2+1
 				
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				STY %2,X
 				;STZ %2+1,X
 				
@@ -587,15 +590,15 @@ LOCALS_END set $FF
 				STA %2+1,X
 				
 			%endif
-		%elif %%arg1type="byte"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"byte"
+			%ifidn %%arg2type,"A"
 				LDA %1
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY %1
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				LDA %1
 				STA %2
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				LDA %1
 				STA %2
 				;STZ %2+1
@@ -603,49 +606,49 @@ LOCALS_END set $FF
 				LDA #0
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				LDA %1
 				STA %2
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				LDA %1
 				STA %2,X
 			%endif
-		%elif %%arg1type="word"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"word"
+			%ifidn %%arg2type,"A"
 				LDA %1
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY %1
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				LDA %1
 				STA %2
-			%elif %%arg2type="word"
-				LDA %1
-				STA %2
-				LDA %1+1
-				STA %2+1
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"word"
 				LDA %1
 				STA %2
 				LDA %1+1
 				STA %2+1
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other"
+				LDA %1
+				STA %2
+				LDA %1+1
+				STA %2+1
+			%elifidn %%arg2type,"other,X"
 				LDA %1
 				STA %2,X
 				LDA %1+1
 				STA %2+1,X
 			%endif
-		%elif %%arg1type="immed"
+		%elifidn %%arg1type,"immed"
 			%defstr %%immed_str %1
 			%strlen %%immed_len %%immed_str
 			%substr %%immed_temp %%immed_str 2,%%immed_len
 			%deftok %%immed_temp %%immed_temp
-			%if %%arg2type="A"
+			%ifidn %%arg2type,"A"
 				LDA %1
-			%elif %%arg2type="X"
+			%elifidn %%arg2type,"X"
 				LDX %1
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY %1
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				;%if %%arg1="#0"
 				;	STZ %2
 				;%else
@@ -656,7 +659,7 @@ LOCALS_END set $FF
 				LDA #(%%immed_temp) % 256
 				STA %2
 				
-			%elif %%arg2type="word"
+			%elifidn %%arg2type,"word"
 				;%if %%arg1="#0"
 				;	STZ %2
 				;	STZ %2+1
@@ -672,7 +675,7 @@ LOCALS_END set $FF
 				LDA #(%%immed_temp) / 256
 				STA %2+1
 				
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"other"
 				;%if %%arg1=="#0"
 				;	STZ %2
 				;	STZ %2+1
@@ -688,7 +691,7 @@ LOCALS_END set $FF
 				LDA #(%%immed_temp) / 256
 				STA %2+1
 				
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other,X"
 				;%if %%arg1=="#0"
 				;	STZ %2,X
 				;	STZ %2+1,X
@@ -705,34 +708,34 @@ LOCALS_END set $FF
 				STA %2+1,X
 				
 			%endif
-		%elif %%arg1type="string"
+		%elifidn %%arg1type,"string"
 			;BRA %%str_after
 			JMP %%str_after
 			
 			%%str_name:
 			FCC %%arg1
 			%%str_after:
-		%elif %%arg1type="other"
-			%if %%arg2type="A"
+		%elifidn %%arg1type,"other"
+			%ifidn %%arg2type,"A"
 				LDA %1
-			%elif %%arg2type="X"
+			%elifidn %%arg2type,"X"
 				LDX %1
-			%elif %%arg2type="Y"
+			%elifidn %%arg2type,"Y"
 				LDY %1
-			%elif %%arg2type="byte"
+			%elifidn %%arg2type,"byte"
 				LDA %1
 				STA %2
-			%elif %%arg2type="word"
-				LDA %1
-				STA %2
-				LDA %1+1
-				STA %2+1
-			%elif %%arg2type="other"
+			%elifidn %%arg2type,"word"
 				LDA %1
 				STA %2
 				LDA %1+1
 				STA %2+1
-			%elif %%arg2type="other,X"
+			%elifidn %%arg2type,"other"
+				LDA %1
+				STA %2
+				LDA %1+1
+				STA %2+1
+			%elifidn %%arg2type,"other,X"
 				LDA %1
 				STA %2,X
 				LDA %1+1
@@ -899,11 +902,11 @@ LOCALS_END set $FF
 		mov_helper %2
 		%xdefine %%arg2type mov_ret
 		upper %1
-		%if upper_ret="A"
+		%ifidn upper_ret,"A"
 			;value already loaded`
 		%elif (%%arg1type="byte")||(%%arg1type="word")
 			LDA %1
-		%elif %%arg1type="immed"
+		%elifidn %%arg1type,"immed"
 			%defstr %%immed_str %1
 			%strlen %%immed_len %%immed_str
 			%substr %%immed_temp %%immed_str 2,%%immed_len
@@ -914,10 +917,10 @@ LOCALS_END set $FF
 		%endif
 		
 		CLC
-		%if %%arg2type="byte"
+		%ifidn %%arg2type,"byte"
 			ADC %2
 			STA %2
-		%elif %%arg2type="word"
+		%elifidn %%arg2type,"word"
 			ADC %2
 			STA %2
 			BCC %%skip
@@ -938,14 +941,14 @@ LOCALS_END set $FF
 		mov_helper %2
 		%xdefine %%arg2type mov_ret
 		upper %1
-		%if upper_ret="A"
+		%ifidn upper_ret,"A"
 			STA saveA
 		%endif
 		
 		LDA %2
 		
 		SEC
-		%if upper_ret="A"
+		%ifidn upper_ret,"A"
 			SBC saveA
 		%else
 			SBC %1
@@ -963,7 +966,7 @@ LOCALS_END set $FF
 		;mov_helper %2
 		;%xdefine %%arg2type mov_ret
 		
-		%if %%arg1type="immed"
+		%ifidn %%arg1type,"immed"
 			%defstr %%immed_str %1
 			%strlen %%immed_len %%immed_str
 			%substr %%immed_temp %%immed_str 2,%%immed_len
@@ -992,7 +995,7 @@ LOCALS_END set $FF
 		;mov_helper %2
 		;%xdefine %%arg2type mov_ret
 		
-		%if %%arg1type="immed"
+		%ifidn %%arg1type,"immed"
 			%defstr %%immed_str %1
 			%strlen %%immed_len %%immed_str
 			%substr %%immed_temp %%immed_str 2,%%immed_len
@@ -1183,9 +1186,9 @@ LOCALS_END set $FF
 		%if which_counter>0
 			END_WHICH
 		%else
-			%if var_state=="func"
+			%ifidn var_state,"func"
 				END_FUNC
-			%elif var_state=="end"
+			%elifidn var_state,"end"
 				END_FUNC
 			%else
 				END_VARS
@@ -1200,7 +1203,8 @@ LOCALS_END set $FF
 ;(utility macro for FUNC not to be called by user)
 	%macro FUNC_ATTRIB 2
 		upper %2
-		%if upper_ret="BEGIN"
+		;%if upper_ret="BEGIN"
+		%ifidn upper_ret,"BEGIN"
 			BEGIN_FUNC set %1
 		%endif
 	%endmacro
@@ -1208,7 +1212,7 @@ LOCALS_END set $FF
 	%macro FUNC 1-2 ""
 		FUNC_ATTRIB %1, %2
 		%1:
-		%if var_state<>"done"
+		%ifnidn var_state,"done"
 			%error "FUNC within FUNC not allowed!"
 			%error var_state
 		%endif
@@ -1244,11 +1248,11 @@ LOCALS_END set $FF
 				%defstr %%temp_fname %1
 				%strcat %%temp_label %%temp_fname,".a",%%temp_counter
 				%deftok %%temp_tok %%temp_label
-				%if %%temp_c="b"
+				%ifidn %%temp_c,"b"
 					MOV.B %2, %%temp_tok
-				%elif %%temp_c="w"
+				%elifidn %%temp_c,"w"
 					MOV.W %2, %%temp_tok
-				%elif %%temp_c="s"
+				%elifidn %%temp_c,"s"
 					%ifstr %2
 						;BRA %%str_skip
 						JMP %%str_skip
@@ -1271,7 +1275,7 @@ LOCALS_END set $FF
 		;%defstr %%debug "=====",%1,"====="
 		;%warning %%debug
 		
-		%if funcs_list<>""
+		%ifnidn funcs_list,""
 			%defstr %%temp_buff %1
 			%strcat %%temp_buff ":" %%temp_buff ","
 			strstr funcs_list,%%temp_buff
@@ -1337,7 +1341,8 @@ LOCALS_END set $FF
 ;	ENDIF
 ;	ENDM
 
-	%macro ORG 1
-		ORG %1
-	%endmacro
+	;no longer works in NASM
+	;%macro ORG 1
+	;	ORG %1
+	;%endmacro
 
