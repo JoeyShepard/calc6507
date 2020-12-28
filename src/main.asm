@@ -3,9 +3,9 @@
 
 ;GPIO
 	;RIOT A
+		;2 latch enables
 		;1 RX
 		;1 low battery transistor
-		;2 latch enables
 		;1 EEPROM bank
 		;0 EEPROM lock
 			;built into EEPROM
@@ -23,7 +23,7 @@
 		;1 LCD CS2
 		;1 LCD RST? may not be necessary
 		;1 power transistor
-			;will only work if starts in known state :/
+			;must be driven by latch for MOSFET
 		;1 TX
 			;4v min output, so must drive through latch
 			;alternative is level shift transistor on RIOT
@@ -182,8 +182,8 @@ LOCALS_END set		$1F
 		TODO: tagging stack maybe not good idea - save first address then error calls function to clear r stack
 		
 		CALL setup
-		;CALL tests
-		CALL file_tests
+		CALL tests
+		;CALL file_tests
 		CALL stats
 		CALL gfx_setup
 		

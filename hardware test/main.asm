@@ -3,22 +3,54 @@
 ;=========
 LCD_WIDTH	set 128
 
-LCD_RIGHT	set $2	;active low
-LCD_LEFT	set $1	;active low
-LCD_BOTH	set $0	;active low
+;RIOT Port A pins
+CONTROL_CP	set $1
+BUS_CP		set $2
+UART_RX		set $4
+BATTERY		set $8
+BANK		set $10
+KEYPAD		set $20
+
+;Constants for RIOT Port A pins
+BANK_0		set $0
+BANK_1		set BANK
+KEYPAD_OFF	set KEYPAD
+KEYPAD_ON	set $0
+
+;Command latch pins
+LCD_LEFT	set $1					;active low
+LCD_RIGHT	set $2					;active low
 LCD_DI		set $4
 LCD_E 		set $8
 LCD_RST		set $10
+POWER		set $20
+UART_TX		set $40
 
-LCD_D 		set $4
-LCD_I		set $0
+;Constants for command latch pins
+LCD_BOTH		set $0					;active low
+LCD_NEITHER		set LCD_LEFT|LCD_RIGHT	;active low
+LCD_LEFT_ON		set $FF-LCD_LEFT
+LCD_RIGHT_ON	set $FF-LCD_RIGHT
+LCD_D 			set LCD_DI
+LCD_I			set $0
+LCD_RST_LO  	set $0
+LCD_RST_HI		set LCD_RST
+POWER_ON		set POWER
+POWER_OFF		set $0
+UART_TX_ON		set UART_TX
+UART_TX_OFF		set $0
 
+;LCD commands
+LCD_ON		set $3F
 LCD_ROW		set $B8
 LCD_COL		set $40
+LCD_Z		set $C0
 
-RIOT_A		set $880
-RIOT_B		set $882
-
+;Addresses in RIOT
+PORT_A		set $880
+PORT_A_DIR	set $881
+PORT_B		set $882
+PORT_B_DIR	set $883
 
 	include ../src/emu.asm
 
@@ -35,7 +67,7 @@ DEBUG_MODE set "off"
 	;Reset vector
 	;ORG $FFFC
 	ORG $1FFC
-	FDB main
+	FDB Setup
 	
 	;Locals usage
 LOCALS_BEGIN set	$20
@@ -63,15 +95,39 @@ LOCALS_END set		$7F
 ;Variables in RIOT
 ;=================
 	ORG $800
+	TODO: consider moving into zero page
 	BYTE counter1, counter2
-	BYTE LCD_CS, LCD_X
+	BYTE LCD_X
+	
+	;State of Port A output pins
+	BYTE State_BANK
+	BYTE State_KEYPAD
+	BYTE State_PortA
+	
+	;State of control latch pins
+	BYTE State_LCD_CS		;set explicitly every time so not needed
+	BYTE State_LCD_RST
+	;BYTE State_POWER		;should always be on
+	BYTE State_UART_TX
+	BYTE State_Control
+	
 	TODO: remove after debugging
 	BYTE debug1, debug2, debug3
 
 ;Functions in ROM
 ;================
+	;Testing banking
+	ORG $0
+		FCB 'A'
+		FCB 'B'
+		
+	ORG $1000
+		FCB 'C'
+		FCB 'D'
+		
 	ORG $900
-	JMP main	;static entry address for emulator
+	;JMP main	;static entry address for emulator
+	JMP Setup
 	
 	font_table:
 	include ../src/font_5x8.asm
@@ -117,42 +173,99 @@ LOCALS_END set		$7F
 	
 	
 	;data in A
-	;put byte on LCD bus
-	FUNC LCD_Bus
-	
-		STA RIOT_B
-		;data is latch 2
-		LDA #2
-		STA RIOT_A
-		LDA #0
-		STA RIOT_A
+	;put byte on bus latch
+	FUNC LatchBus
+		
+		STA PORT_B
+		LDA State_PortA
+		STA PORT_A
+		ORA #BUS_CP
+		STA PORT_A
 		
 	END
 	
 	;data in A
-	;put byte out to control lines
-	FUNC LCD_Control
+	;put byte out to control latch
+	FUNC LatchControl
 		
-		STA RIOT_B
-		;control is latch 1
-		LDA #1
-		STA RIOT_A
-		LDA #0
-		STA RIOT_A
+		ORA State_Control
+		STA PORT_B
+		LDA State_PortA
+		STA PORT_A
+		ORA #CONTROL_CP
+		STA PORT_A
 		
+	END
+	
+	FUNC UpdatePortA
+	
+		LDA State_BANK
+		ORA State_KEYPAD
+		STA State_PortA
+	
+	END
+	
+	FUNC UpdateControl
+	
+		LDA State_LCD_CS
+		ORA State_LCD_RST
+		ORA State_UART_TX
+		TODO: make sure this isnt 0 after circuit is final
+		ORA #POWER_ON
+		STA State_Control
+	
+	END
+	
+	FUNC Setup
+		
+		SEI
+		CLD
+		
+		LDX #$FF
+		TXS
+		
+		;All outputs
+		;LDX #$FF
+		STX PORT_B_DIR
+		
+		;Load Port A with values before enabling to avoid glitch
+		LDA #BANK_1
+		STA State_BANK
+		LDA #KEYPAD_OFF
+		STA State_KEYPAD
+		JSR UpdateControl
+		STA PORT_A
+		
+		;Enable outputs on Port A
+		LDA #CONTROL_CP|BUS_CP|BANK|KEYPAD
+		STA PORT_A_DIR
+		
+		;Starting states for control latch
+		LDA #LCD_NEITHER
+		STA State_LCD_CS
+		LDA #LCD_RST_LO
+		STA State_LCD_RST
+		LDA #UART_TX_ON
+		STA State_UART_TX
+		JSR UpdateControl
+		JSR LatchControl
+		
+		JMP main
+		
+	TODO: wasted ret
 	END
 	
 	;signal in A
 	FUNC  LCD_Enable
 	
 		TAY
-		JSR LCD_Control
+		JSR LatchControl
 		TYA
 		ORA #LCD_E
-		JSR LCD_Control
+		JSR LatchControl
 		;min 500ns delay in datasheet!
 		TYA
-		JSR LCD_Control
+		JSR LatchControl
 		;LDA #1			;500ns in datahseet! also Tbusy - 1us?
 		;delay
 		TODO: necessary?
@@ -164,9 +277,8 @@ LOCALS_END set		$7F
 	;send byte of data to LCD
 	FUNC LCD_Data
 		
-		JSR LCD_Bus
-		LDA #LCD_RST|LCD_D
-		ORA LCD_CS
+		JSR LatchBus
+		LDA #LCD_D
 		JSR LCD_Enable
 		
 	END
@@ -175,18 +287,24 @@ LOCALS_END set		$7F
 	;send byte of instruction to LCD
 	FUNC LCD_Command
 		
-		JSR LCD_Bus
-		LDA #LCD_RST|LCD_I
-		ORA LCD_CS
+		JSR LatchBus
+		LDA #LCD_I
 		JSR LCD_Enable
 		
 	END
 
 	TODO: maybe not needed
 	FUNC LCD_Home
+		
+		LDA #0
+		STA LCD_X
+		
+		LDA #LCD_BOTH
+		STA State_LCD_CS
+		JSR UpdateControl
 	
-		LDA #LCD_COL	;Y address=0
-		JSR LCD_Command
+		;LDA #LCD_COL	;Y address=0
+		;JSR LCD_Command
 		
 		LDA #LCD_ROW|7	;X address=7 since screen upside down
 		JSR LCD_Command
@@ -197,27 +315,33 @@ LOCALS_END set		$7F
 		
 		;Enable both halves for resetting
 		LDA #LCD_BOTH
-		STA LCD_CS
-		;Pull LCD reset low	
-		JSR LCD_Control
+		STA State_LCD_CS
+		;Already on from Setup
+		;LDA #LCD_RST_LO
+		;STA State_LCD_RST
+		JSR UpdateControl
+		JSR LatchControl
 		
 		TODO: needed?
 		LDA #1			;<==1us/1000ns in datasheet!
 		JSR delay
 		
-		LDA #LCD_RST|LCD_BOTH
-		JSR LCD_Control
+		LDA #LCD_RST_HI
+		STA State_LCD_RST
+		JSR UpdateControl
+		JSR LatchControl
 		
 		LDA #10			;<==how long after reset???
 		JSR delay
 		
-		LDA #$3F	;LCD on
+		LDA #LCD_ON		;LCD on
 		JSR LCD_Command
 		
+		TODO: necessary?
 		LDA #10			;<==how long after power on???
 		JSR delay
 		
-		LDA #$C0	;Z address
+		LDA #LCD_Z
 		JSR LCD_Command
 		
 	END
@@ -227,12 +351,13 @@ LOCALS_END set		$7F
 		
 		;enable both halves at once
 		LDA #LCD_BOTH
-		STA LCD_CS
+		STA State_LCD_CS
+		JSR UpdateControl
 		
 		;doesn't matter where in line we start since wraps around
 		;JSR LCD_Home
 		
-		LDA #0
+		LDA #7	;top line of LCD is #7
 		STA counter1
 		
 		.loop1:
@@ -244,23 +369,19 @@ LOCALS_END set		$7F
 			
 			LDA #64			;64 pixels per half
 			STA counter2
+			
 			.loop2:
 				LDA #0
 				JSR LCD_Data
-				
 				DEC counter2
 				BNE .loop2
 				
-			INC counter1
+			DEC counter1
 			LDA counter1
-			CMP #8			;8 lines of text on LCD
-			BNE .loop1
+			BPL .loop1
 		
-		LDA #0
-		STA LCD_X
-		;Enable left half of LCD
-		LDA #LCD_LEFT
-		STA LCD_CS
+		;Move cursor to 0,0
+		JSR LCD_Home
 		
 	END
 	
@@ -275,14 +396,16 @@ LOCALS_END set		$7F
 		
 		LDA c_out
 		CMP #' '
-		BCS .char_good1
-			RTS
-		.char_good1:
+		BCC .char_invalid
 		
 		CMP #'e'+1
-		BCC .char_good2
-			RTS
-		.char_good2:
+		BCC .char_good
+		
+		.char_invalid:
+			TODO: constant for this
+			LDA #'!'
+			STA c_out
+		.char_good:
 		
 		;carry clear above
 		LDA LCD_X
@@ -294,7 +417,7 @@ LOCALS_END set		$7F
 		TODO: could save a few bytes by calculating in loop
 		TODO: could also save bytes by storing real X in LCD_X
 		SEC
-		LDA #LCD_WIDTH-1	;character is 6 wide
+		LDA #LCD_WIDTH-1
 		SBC LCD_X
 		STA pixel_counter
 		
@@ -302,14 +425,12 @@ LOCALS_END set		$7F
 		TODO: ie just spit out bytes
 		
 		TODO: optimize
+		LDA #0
+		STA pixel_ptr+1
 		LDA c_out
 		SEC
 		SBC #32
 		STA pixel_ptr
-		LDA #0
-		STA pixel_ptr+1
-	
-		LDA pixel_ptr
 		ASL pixel_ptr
 		;ROL pixel_ptr+1	;highest char <128
 		ASL pixel_ptr
@@ -340,8 +461,12 @@ LOCALS_END set		$7F
 			BCC .left_side
 				LDY #LCD_LEFT
 			.left_side:
-			STY LCD_CS
+			STY State_LCD_CS
+			TODO: faster to try to manipulate manually?
+			TODO: noticeably slower on display
+			JSR UpdateControl
 			
+			LDA pixel_counter
 			;AND #63	;bit set below so not needed
 			ORA #LCD_COL
 			JSR LCD_Command
@@ -367,91 +492,39 @@ TODO: set interrupt vector or reuse BRK
 	
 ;Main function
 ;=============
-	FUNC main, begin
-		;Setup
-		;=====
-		SEI
-		CLD
-		
-		LDX #$0
-		TXS
-		
-		LDA #5
-		PHA
-		
-		
-		LDA #$FF
-		STA $881		;DDRA
-		STA $883		;DDRB
-		;LDA #$A5
-		;STA $880		;DRA
-		;LDA #$96
-		;STA $882		;DRB
-		
-		;Latch write low in preparation
-		LDA #0
-		STA RIOT_A
+	FUNC main, begin		;start in Setup and jump here
 		
 		JSR LCD_Setup
+		JSR LCD_Clear
 		
-		.lcd_test:
-			JSR LCD_Clear
-			LDA #0
-			STA debug2
-			.lcd_rows:
-				LDA #LCD_BOTH
-				STA LCD_CS
-				LDA debug2
-				ORA #LCD_ROW
-				JSR LCD_Command
-				
-				LDA #0
-				STA debug1
-				STA LCD_X
-				.lcd_loop:
-					CLC
-					LDA debug1
-					ADC debug2
-					ADC #48
-					CALL LCD_Char, A
-					INC debug1
-					LDA debug1
-					CMP #21
-					BNE .lcd_loop
-				INC debug2
-				LDA debug2
-				AND #15
-				STA debug2
-				
-				LDA #200
-				JSR delay
-				
-			JMP .lcd_rows
-			
-		JMP .lcd_test
+		LDA #BANK_0
+		STA State_BANK
+		JSR UpdatePortA
+		STA PORT_A
 		
-		;.loop:
-		;	
-		;	LDA #$A5
-		;	LCD_Bus
-		;	LDA #$FF
-		;	LCD_Control
-		;	
-		;	LDA #250
-		;	JSR delay
-		;	
-		;	LDA #$5A
-		;	LCD_Bus
-		;	LDA #0
-		;	LCD_Control
-		;	
-		;	LDA #100
-		;	JSR delay
-		;	
-		;	JMP .loop
+		LDA $1000
+		CALL LCD_Char, A
+		LDA $1001
+		CALL LCD_Char, A
+		
+		LDA #BANK_1
+		STA State_BANK
+		JSR UpdatePortA
+		STA PORT_A		
+		
+		LDA $1000
+		CALL LCD_Char, A
+		LDA $1001
+		CALL LCD_Char, A
+		
+		.loop:
+			LDA #'.'
+			CALL LCD_Char, A
 			
-		;CALL LCD_setup
-		;CALL LCD_print, "Hello, World!"
+			LDA #200
+			JSR delay
+				
+			JMP .loop
 		
 		.done:		
 		JMP .done

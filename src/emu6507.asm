@@ -222,7 +222,7 @@
 		INC screen_ptr
 		INC screen_ptr
 		LDA screen_ptr+1
-		SEC
+		SEC 
 		SBC #16
 		STA screen_ptr+1
 	END

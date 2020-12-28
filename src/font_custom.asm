@@ -13,8 +13,8 @@
 ;c - minus sign (todo if needed)
   FCB $00, $00, $00, $00, $00
 
-;d - unassigned  
-  FCB $FF, $FF, $FF, $FF, $FF
+;d - unassigned character - out of range
+  FCB $FE, $82, $82, $82, $FE
   
 ;e - exponent
   FCB $18, $2a, $2a, $2a, $1c
