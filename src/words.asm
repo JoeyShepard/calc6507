@@ -308,8 +308,10 @@
 			CMP #OBJ_FLOAT
 			BNE mult_not_float
 				MULT_FLOAT:
-					TODO: multiplying floats
-					RTS
+					JSR TosR0R1
+					JSR BCD_Mult
+					JSR CODE_DROP+EXEC_HEADER
+					JMP RansTos
 			mult_not_float:
 			
 			;Multiplying hex objects
@@ -400,8 +402,11 @@
 			CMP #OBJ_FLOAT
 			BNE div_not_float
 				DIV_FLOAT:
-					TODO: dividing floats
-					RTS
+					JSR TosR0R1
+					JSR BCD_Div
+					;BCD_Div returns to caller! ie only returns if successful
+					JSR CODE_DROP+EXEC_HEADER
+					JMP RansTos
 			div_not_float:
 			
 			;Dividing hex objects

@@ -1,0 +1,2 @@
+convert SVG text to path in inkscape
+use import command in openscad

@@ -1,17 +1,23 @@
+;Macros
+;======
+	include macros.asm
+	include optimizer_nmos.asm
+
 ;Notes
 ;=====
-
 ;GPIO
 	;RIOT A
 		;2 latch enables
 		;1 RX
-		;1 low battery transistor
+		;1 low battery indicator from Vreg
 		;1 EEPROM bank
 		;0 EEPROM lock
 			;built into EEPROM
 		;1 keyboard buffer OE (74HCT244)
 			;can't be driven from latch!
-		;*2 free
+		;1 read ON button?
+			;should be easy if button is grounding pull-up
+		;*1 free
 	;RIOT B
 		;8 LCD data bus to latch 2
 		;also, 8 keyboard inputs
@@ -23,30 +29,24 @@
 		;1 LCD CS2
 		;1 LCD RST? may not be necessary
 		;1 power transistor
-			;must be driven by latch for MOSFET
+			;must be driven by latch for MOSFET for voltage level
+			TODO: latch not Z stated at beginning though! pull-up and ON grounds?
 		;1 TX
 			;4v min output, so must drive through latch
 			;alternative is level shift transistor on RIOT
 		;*1 free
 	;Latch 2
 		;8 LCD data bus out
-	;TODO:
-		;5.75k instead of 4k split in eeprom
-			;better would be fixed 1.75k and banked 4k
-			;lock one 256 byte page?
 	;Chips to add:
-		;UART
 		;keyboard buffer
 		;power transistor
 		;vreg?
+	
+	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
 
 ;Unlimited lines per page in listing
 	PAGE 0
-	
-;Macros
-;======
-	include macros.asm
-	include optimizer_nmos.asm
+
 
 ;Constants
 ;=========

@@ -883,6 +883,7 @@
 			ADC #0
 			STA exec_ptr+1
 			JMP ExecThread
+			
 		.exec_primitive:
 		
 		;Check flags
@@ -1035,6 +1036,7 @@
 				
 				.not_word:
 				
+				TODO: handle
 				;Unknown token!
 				halt
 			
@@ -1049,6 +1051,8 @@
 				INC exec_ptr+1
 			BNE .loop
 		
+		TODO: easier to just reset stack pointer? also saves memory
+		TODO: dont need types if numbers not on stack
 		.error:
 			;Something in the thread caused an error
 			;Dump all threads and return to top level

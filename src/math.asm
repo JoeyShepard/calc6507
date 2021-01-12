@@ -225,8 +225,6 @@
 		STA GR_OFFSET+(DEC_COUNT/2)-1,X
 	END
 	
-	
-	
 	;Which register in X
 	FUNC HalfShiftForward
 		LDY #4
@@ -883,6 +881,7 @@
 		LDA math_lo
 		STA R_ans+DEC_COUNT/2+1
 		
+		TODO: use NormRans instead?
 		;shift forward if necessary
 		LDA R_ans+DEC_COUNT/2
 		AND #$F0
@@ -922,6 +921,142 @@
 		PLP
 	END
 	
+	FUNC BCD_Div
+		
+		;check for division by zero
+		LDA R0+DEC_COUNT/2
+		BNE .no_zero_exit
+			;return to caller's caller
+			PLA
+			PLA
+			
+			LDA #ERROR_DIV_ZERO
+			STA ret_val
+			RTS
+		.no_zero_exit:
+		
+		PHP
+		SED
+		TXA
+		PHA
+		
+		;zero answer register
+		LDX #R_ans
+		JSR ZeroReg
+		LDA #0
+		STA R_ans
+		
+		TODO: check for div zero!
+		
+		TODO: abstract - same for BCD_Mult
+		;calculate exponent first
+		LDX #R0
+		JSR BCD_Unpack
+		LDX #R1
+		JSR BCD_Unpack
+				
+		LDA R0+SIGN_INFO
+		EOR R1+SIGN_INFO
+		AND #SIGN_BIT
+		STA R_ans+SIGN_INFO
+		
+		;calculate exponent
+		TODO: abstract
+		SEC
+		LDA R1+EXP_LO
+		SBC R0+EXP_LO
+		STA math_lo
+		LDA R1+EXP_HI
+		SBC R0+EXP_HI
+		STA R_ans+EXP_HI
+		
+		;reuse first byte of exponent data as decimal place
+		LDA #0
+		STA R0+EXP_LO
+		STA R1+EXP_LO
+		
+		LDA #DEC_COUNT+2	;extra decimal places for rounding
+		STA math_b
+		.loop_outer:
+			
+			;shift answer forward 
+			LDX #R_ans
+			JSR HalfShiftForward
+		
+			.loop:		
+				LDY #DEC_COUNT/2+1
+				LDX #1
+				SEC
+				.div_loop:
+					LDA R1,X
+					SBC R0,X
+					STA R1,X
+					INX
+					DEY
+					BNE .div_loop
+				
+				BCC .add_back
+				
+				;not done subtracting. increment answer
+				INC R_ans
+				BCS .loop
+				
+			.add_back:
+				;done subtracting
+				LDY #DEC_COUNT/2+1
+				LDX #1
+				CLC
+				.add_loop:
+					LDA R1,X
+					ADC R0,X
+					STA R1,X
+					INX
+					DEY
+					BNE .add_loop
+					
+				;shift R1 forward
+				LDX #R1+1
+				JSR HalfShiftForward
+								
+				DEC math_b
+				BNE .loop_outer
+		
+		;restore exponent since low byte no longer used for decimal place
+		LDA math_lo
+		STA R_ans+DEC_COUNT/2+1
+				
+		;done subtracting
+		JSR NormRans
+		
+		;halt
+		
+		;calculate sticky
+		LDY #7
+		LDA #0
+		.sticky_loop:
+			ORA R1,Y
+			DEY
+			BNE .sticky_loop
+		STA math_sticky
+		
+		;round
+		LDA #0
+		STA math_signs	;round as if same sign
+		JSR BCD_StickyRound
+		
+		;sign if positive or negative overflow
+		LDA R_ans+SIGN_INFO
+		STA math_max
+		
+		;pack sign bits into exponent
+		LDX #R_ans
+		JSR BCD_Pack
+		
+		.zero_exit:
+		PLA
+		TAX
+		PLP
+	END
 	
 	
 	

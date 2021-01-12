@@ -308,6 +308,27 @@
 		CALL TestsPassed
 	END
 	
+	FUNC DivTest
+		ARGS
+			STRING num1,num2,ans
+		END
+		
+		CALL CopyNew,num1
+		CALL NewToR, #R1
+		CALL CopyNew,num2
+		CALL NewToR, #R0
+		CALL BCD_Div
+		CALL RansToBuff
+		CALL CopyNew,ans
+		CALL CompareRans
+		
+		BCC .done
+			CALL TestFail, ans
+		.done:
+		CALL TestsPassed
+	END
+	
+	
 	FUNC tests
 		
 		;Number input
@@ -322,8 +343,6 @@
 		
 		;Floating point add
 		MOV.W #501,test_count
-		
-		;temp
 		
 		;CALL AddTest, "12345", "0", "12345"
     	;CALL AddTest, "100000000000", "-0.04", "100000000000"
@@ -340,8 +359,21 @@
 		;CALL MultTest, "12345", "0", "0"
 		;CALL MultTest, "0", "12345", "0"
 		;CALL MultTest, "1","1e-999","1e-999"
-		
 		CALL MultTest, "7.048764e59","5.711220186e848","4.02570432432e908"
+		
+		;Floating point div
+		MOV.W #701,test_count
+		
+		CALL DivTest, "123456789023e12","234567890134e5","5263158.09689"
+		CALL DivTest, "122.00000000","3","40.6666666667"
+		CALL DivTest, "422.00000000","3","140.666666667"
+		CALL DivTest, "200000000001","2","100000000000"
+		CALL DivTest, "200000000002","2","100000000001"
+		CALL DivTest, "200000000003","2","100000000002"
+		CALL DivTest, "-5000","49","-102.040816327"
+		CALL DivTest, "123e456","234e-645","9.99999999999e999"
+		CALL DivTest, "1e-999","2","0"
+		CALL DivTest, "9e999","9e-999","9.99999999999e999"
 		
 		CALL DebugText, "\\n\\gAll specific tests passed"
 		MOV.W #0,test_count
