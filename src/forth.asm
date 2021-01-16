@@ -1125,6 +1125,7 @@
 			.skip:
 		.no_end_token:
 		
+		TODO: abstract?
 		;Three byte empty header signifying end of dictionary
 		LDA #0
 		STA (dict_ptr),Y		;Length of name
@@ -1272,6 +1273,8 @@
 	
 	;Allocate room for word header
 	FUNC WriteHeader
+		TODO: stop relying on optimizer then?
+		TODO: or add functionality to optimizer? not trivial
 		;Optimizer doesn't work unless function called from function!
 		;VARS
 		;	BYTE count
@@ -1300,6 +1303,8 @@
 		BEQ .alloc_good
 			;Alloc failed - out of memory
 			;Skip caller and return to top level
+			TODO: test!
+			TODO: test STO->VAR->WriteHeader->Alloc. cant return to caller!!!
 			PLA
 			PLA
 			RTS

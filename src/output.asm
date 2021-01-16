@@ -268,8 +268,8 @@
 		
 		TODO: 6th line of stack or status??? (would save code space)
 		TODO: status=bytes free? auto complete? too much space :(
-		TODO: actually, this goes on the top line!
-		TODO: could use tiny font just for numbers
+		TODO: option 1: line on bottom, status on top
+		TODO: option 2: 6th line on top, status AND line on bottom
 		;LDA screen_ptr+1
 		;CLC
 		;ADC #CHAR_HEIGHT

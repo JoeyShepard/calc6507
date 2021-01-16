@@ -642,8 +642,14 @@
 			LDA ret_val
 			BEQ .word_not_found
 				;Word exists - error instead of redefining word
+				TODO: delete then redefine?
 				BNE .error_exit
 			.word_not_found:
+			
+			CALL CheckData
+			LDA R_ans
+			CMP #OBJ_ERROR
+			BNE .error_exit
 			
 			CALL WriteHeader
 			FCB 0					;Extra space
@@ -763,18 +769,28 @@
 				JMP CODE_DROP+EXEC_HEADER
 			.word_found:
 			
-			;Make sure variable name starts with character
-			LDA new_word_buff
-			CMP #'A'
-			BCC .error_exit
-			CMP #'Z'+1
-			BCS .error_exit
-			
 			;Check if name already exists
 			CALL FindWord
 			LDA ret_val
 			BNE .error_exit
-				
+			
+			TODO: standardize capitalization in comments			
+			;entry point for STO
+			.var_create:
+			
+			;;Make sure variable name starts with character
+			;LDA new_word_buff
+			;CMP #'A'
+			;BCC .error_exit
+			;CMP #'Z'+1
+			;BCS .error_exit
+			
+			;Allow any valid variable name even if doesn't start with character
+			CALL CheckData
+			LDA R_ans
+			CMP #OBJ_ERROR
+			BNE .error_exit
+			
 			CALL WriteHeader
 			FCB OBJ_SIZE			;Extra space to reserve
 			FDB 0					;Next address
@@ -788,6 +804,16 @@
 			ADC #WORD_HEADER_SIZE
 			CALL IncDictPtr
 			
+			;WORD_STO, which may call this, needs obj_address 
+			SEC
+			LDA dict_ptr
+			TODO: magic number. same 3 offset in STO
+			SBC #3	
+			STA obj_address
+			LDA dict_ptr+1
+			SBC #0
+			STA obj_address+1
+			
 			;Write variable data
 			LDA #OBJ_FLOAT
 			LDY #0
@@ -799,7 +825,7 @@
 				INY
 				CPY #OBJ_SIZE
 				BNE .loop
-			
+						
 			LDA #OBJ_SIZE
 			CALL IncDictPtr
 			
@@ -876,11 +902,22 @@
 				RTS
 			.word_found:
 			
-			TODO: create variable
 			CALL FindWord
+			;var not found, error
+			;LDA ret_val
+			;BEQ .error_exit
+			
+			;word not found. valid var name?
 			LDA ret_val
-			BEQ .error_exit
-				
+			BNE .word_exists
+				JSR CODE_VAR.var_create
+				TODO: abstract
+				LDA ret_val
+				BEQ .type_good
+				RTS
+			.word_exists:
+			
+			;word found. is it a variable?
 			LDY #0
 			LDA (obj_address),Y
 			CMP #OBJ_VAR
@@ -890,6 +927,7 @@
 				RTS
 			.type_good:
 			
+			;copy data to variable
 			LDY #3
 			TXA
 			PHA
@@ -898,7 +936,7 @@
 				STA (obj_address),Y
 				INX
 				INY
-				CPY #11
+				CPY #12
 				BNE .loop
 			PLA
 			TAX
@@ -919,6 +957,7 @@
 			JMP CODE_STO
 	
 	TODO: this is called UNUSED in forth
+	TODO: not needed if shown in interface
 	WORD_FREE:
 		FCB 4,"FREE"			;Name
 		FDB dict_begin			;Next word
@@ -948,8 +987,7 @@
 			FCB OBJ_PRIMITIVE		;Type
 			FCB MIN2|FLOATS|COMPILE	;Flags
 			
-			;any reason to put token in stream?
-			;need some way to know if DO IF LOOP THEN, but stack for this?
+			
 			
 			RTS
 			
@@ -1014,6 +1052,8 @@
 	;SEE
 	;EDIT
 	;addresses from ZP, dict, etc onto stack
+	;'STO or STO" or similar for indirection on stack
+		;hmm, now mismatched though :(
 	
 	JUMP_TABLE:
 		FDB CODE_DUP		;2
