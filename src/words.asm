@@ -626,6 +626,17 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB IMMED			;Flags
 			
+			halt
+			
+			LDA mode
+			CMP #MODE_COMPILE
+			BNE .not_compile
+				LDA #ERROR_IMMED_ONLY
+				STA ret_val
+				RTS
+			.not_compile:
+			
+			TODO: abstract - used for var as well
 			;Get next word in stream
 			CALL LineWord
 			LDA new_word_len
@@ -646,6 +657,7 @@
 				BNE .error_exit
 			.word_not_found:
 			
+			;Is word a value
 			CALL CheckData
 			LDA R_ans
 			CMP #OBJ_ERROR
@@ -673,7 +685,7 @@
 		FCB TOKEN_SEMI			;ID - 38
 		CODE_SEMI:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB COMPILE			;Flags
+			FCB IMMED|COMPILE	;Flags
 			
 			LDA #MODE_IMMEDIATE
 			STA mode
@@ -751,6 +763,8 @@
 			halt
 			RTS
 	
+	;needed? instead use 0 STO varname
+	TODO: remove to save space?
 	WORD_VAR:
 		FCB 3,"VAR"				;Name
 		FDB WORD_VAR_DATA		;Next word
@@ -907,7 +921,7 @@
 			;LDA ret_val
 			;BEQ .error_exit
 			
-			;word not found. valid var name?
+			;word not found. try to create variable
 			LDA ret_val
 			BNE .word_exists
 				JSR CODE_VAR.var_create
@@ -984,8 +998,8 @@
 		FDB dict_begin			;Next word
 		FCB TOKEN_DO			;ID - 58
 		CODE_DO:
-			FCB OBJ_PRIMITIVE		;Type
-			FCB MIN2|FLOATS|COMPILE	;Flags
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|FLOATS|IMMED|COMPILE	;Flags
 			
 			
 			
@@ -1036,6 +1050,8 @@
 		;may be useful even without CREATE
 	
 	;Optional:
+	;IMMED
+	;COMPILE
 	;PI
 	;RESET
 	;RDROP

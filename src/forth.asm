@@ -36,6 +36,7 @@
 		.loop:
 			LDA #0
 			STA arg
+			TODO: require shift for special characters
 			CALL ReadKey
 			BNE .key_read
 				JMP .no_key
@@ -81,33 +82,33 @@
 					JMP .no_key
 				.not_backspace:
 				
-				;Switch font (debug only!)
-				TODO: remove this and font data from ROM
-				CMP #'f'
-				BNE .not_font
-					LDY font_counter
-					LDA debug_fonts,Y
-					STA font_ptr
-					LDA debug_fonts+1,Y
-					STA font_ptr+1
-					INY
-					INY
-					CPY #DEBUG_FONT_COUNT*2
-					BNE .no_font_reset
-						LDY #0
-					.no_font_reset:
-					STY font_counter
-					CALL DrawStack
-					;Reset screen pointer after drawing
-					LDA #0
-					STA cursor
-					STA index
-					STA screen_ptr
-					LDA #INPUT_Y
-					STA screen_ptr+1
-					
-					JMP .no_key
-				.not_font:
+				TODO: remove this and extra font data from ROM
+				;;Switch font (debug only!)
+				;CMP #'f'
+				;BNE .not_font
+				;	LDY font_counter
+				;	LDA debug_fonts,Y
+				;	STA font_ptr
+				;	LDA debug_fonts+1,Y
+				;	STA font_ptr+1
+				;	INY
+				;	INY
+				;	CPY #DEBUG_FONT_COUNT*2
+				;	BNE .no_font_reset
+				;		LDY #0
+				;	.no_font_reset:
+				;	STY font_counter
+				;	CALL DrawStack
+				;	;Reset screen pointer after drawing
+				;	LDA #0
+				;	STA cursor
+				;	STA index
+				;	STA screen_ptr
+				;	LDA #INPUT_Y
+				;	STA screen_ptr+1
+				;	
+				;	JMP .no_key
+				;.not_font:
 				
 				;Special character
 				LDY #0
@@ -969,20 +970,17 @@
 				TAX
 			.type_check_done:
 			
-			;Check immediate or compile only
+			;check if compile only
 			LDA flags
-			AND #FLAG_MODE
+			AND #COMPILE
 			BEQ .mode_check_done
-				CMP mode
-				BEQ .mode_check_done
-					LDY #ERROR_IMMED_ONLY
-					CMP #MODE_IMMEDIATE
-					BEQ .immed
-						LDY #ERROR_COMPILE_ONLY
-					.immed:
-					STY ret_val
+				AND mode
+				BNE .mode_check_done
+					LDA #ERROR_COMPILE_ONLY
+					STA ret_val
 					RTS
 			.mode_check_done:
+			
 		.no_flags:
 		
 		LDA ret_address
@@ -1232,13 +1230,13 @@
 		STA flag_ptr+1
 		LDY #1
 		LDA (flag_ptr),Y
-		AND #FLAG_MODE
-		CMP #MODE_COMPILE
-		BNE .compile
-			;Execute if compile-mode word
+		AND #MODE_IMMEDIATE
+		BEQ .compile
+			;Execute if immediate word
 			LDA token
 			JMP ExecToken
 		.compile:
+		
 		LDA #1
 		
 		.alloc:

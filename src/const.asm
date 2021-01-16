@@ -145,7 +145,6 @@
 		;Flag masks
 		FLAG_MIN =			3
 		FLAG_TYPES =		$38
-		FLAG_MODE =			$C0
 		
 		;Stack
 		STACK_SIZE =		8

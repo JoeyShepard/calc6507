@@ -202,7 +202,7 @@ LOCALS_END set		$1F
 				LDA #ERROR_INPUT
 				JMP .error_sub
 			.mode_good:
-		
+			
 			;Reset dict_ptr in case anything went wrong below
 			MOV.W dict_save,dict_ptr
 			
@@ -294,6 +294,7 @@ LOCALS_END set		$1F
 				BEQ .value_compile
 				
 				;unknown type - something is very wrong
+				TODO: handle error
 				halt
 					
 				JMP .process_loop
