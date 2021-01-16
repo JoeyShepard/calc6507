@@ -50,6 +50,9 @@
 	new_word_buff:		DFS WORD_MAX_SIZE
 	;new_stack_item:		DFS OBJ_SIZE+GR_OFFSET
 	
+	AUX_STACK:
+		DFS AUX_STACK_SIZE
+	
 	RIOT_mem_end:
 	
 	ORG $880

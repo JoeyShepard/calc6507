@@ -122,7 +122,9 @@ LOCALS_END set		$1F
 	
 ;Variables in main RAM
 ;=====================
-	ORG $130
+	TODO: special handling of ORG for new version of NASM breaks this
+	R_STACK_ADDRESS = $100+R_STACK_SIZE
+	ORG R_STACK_ADDRESS
 	;Must come after include const.asm for constants
 	include globals.asm
 
@@ -173,7 +175,7 @@ LOCALS_END set		$1F
 		;May need a lot more for R stack
 		;Must come before any JSR
 		TODO: expand this - will need a lot of stack space
-		LDX #$2F
+		LDX #R_STACK_SIZE-1
 		TXS
 		
 		TODO: copyright

@@ -115,9 +115,9 @@
 			TAX
 			RTS
 	
-	TODO: could be smalled by rotating twice
+	TODO: could be smaller by rotating twice
 	WORD_MIN_ROT:
-		FCB 4, "cROT" 			;Name
+		FCB 4, "-ROT" 			;Name
 		FDB	WORD_CLEAR			;Next word
 		FCB TOKEN_MIN_ROT		;ID - 12
 		CODE_MIN_ROT:
@@ -861,7 +861,7 @@
 			
 	WORD_STO:
 		FCB 3,"STO"				;Name
-		FDB WORD_FREE			;Next word
+		FDB WORD_STO_CHAR		;Next word
 		FCB TOKEN_STO			;ID - 54
 		CODE_STO:
 			FCB OBJ_PRIMITIVE	;Type
@@ -876,6 +876,7 @@
 				RTS
 			.word_found:
 			
+			TODO: create variable
 			CALL FindWord
 			LDA ret_val
 			BEQ .error_exit
@@ -906,6 +907,17 @@
 			STA ret_val
 			JMP CODE_DROP+EXEC_HEADER
 	
+	;One character shortcut for STO
+	WORD_STO_CHAR:
+		FCB 1,CHAR_STO			;Name
+		FDB WORD_FREE			;Next word
+		FCB TOKEN_STO			;ID - 54
+		CODE_STO_CHAR:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB MIN1			;Flags
+			
+			JMP CODE_STO
+	
 	TODO: this is called UNUSED in forth
 	WORD_FREE:
 		FCB 4,"FREE"			;Name
@@ -927,7 +939,81 @@
 			LDA #0
 			STA HEX_TYPE,X
 			RTS
+			
+	WORD_DO:
+		FCB 2,"DO"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_DO			;ID - 58
+		CODE_DO:
+			FCB OBJ_PRIMITIVE		;Type
+			FCB MIN2|FLOATS|COMPILE	;Flags
+			
+			;any reason to put token in stream?
+			;need some way to know if DO IF LOOP THEN, but stack for this?
+			
+			RTS
+			
+	;LOOP			60
+	;+LOOP			62
+	;I				64
+	;J				66
+	;K				68
+	;IF				70
+	;ELSE			72
+	;THEN			74
+	;MOD			76
+	;EXIT WORD		78
+	;BEGIN			80
+	;WHILE			82
+	;UNTIL			84
+	;AGAIN			86
+	;=				88
+	;<>				90
+	;>				92
+	;<				94
+	;>=				96
+	;<=				98
+	;FORGET			100
+	;ABS			102
+	;SIN			104
+	;COS			106
+	;TAN			108
+	;ASIN			110
+	;ACOS			112
+	;ATAN			114
+	;^				116
+	;E^				118
+	;LN				120
+	;AND			122
+	;OR				124
+	;XOR			126
+	;NOT			128
+	;MAX			130
+	;MIN			132
+	;LSHIFT			134
+	;RSHIFT			136
+	;GRAPH			138
+	;DEPTH			140
+	;HERE			142
+		;may be useful even without CREATE
 	
+	;Optional:
+	;PI
+	;RESET
+	;RDROP
+	;R>
+	;R<
+	;R@
+	;RIGHT
+	;LEFT
+	;+ (string)
+	;CHR
+	;CREATE
+	;,
+	;C,
+	;SEE
+	;EDIT
+	;addresses from ZP, dict, etc onto stack
 	
 	JUMP_TABLE:
 		FDB CODE_DUP		;2
@@ -958,6 +1044,7 @@
 		FDB CODE_VAR_THREAD	;52
 		FDB CODE_STO		;54
 		FDB CODE_FREE		;56
+		FDB CODE_DO			;58
 		
 		
 		

@@ -7,10 +7,11 @@
 		STA new_word_len
 	END
 	
-	SPECIAL_CHARS_LEN = 15
+	SPECIAL_CHARS_LEN = 16	;2+13+1
 	special_chars:
 	FCB CHAR_EXP, CHAR_QUOTE			;2
-	FCB " .$m+-*/'!@:;"					;13
+	FCB " .$+-*/'!@:;"					;13
+	FCB "s"
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -119,6 +120,11 @@
 						;BNE .key_done
 						;	LDA #CHAR_MINUS
 						;	STA arg
+						;recode s for STO as d which is store arrow
+						CMP #'s'
+						BNE .key_done
+							LDA #CHAR_STO
+							STA arg
 						JMP .key_done
 					.special_next:
 					INY

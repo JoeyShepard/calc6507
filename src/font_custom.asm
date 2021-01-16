@@ -13,8 +13,10 @@
 ;c - minus sign (todo if needed)
   FCB $00, $00, $00, $00, $00
 
-;d - unassigned character - out of range
-  FCB $FE, $82, $82, $82, $FE
+;d - store arrow
+  ;FCB $10, $38, $7C, $FE, $00	;mirror of left arrow
+  ;FCB $10, $38, $7C, $FE, $38	;mirror of left arrow with stem
+  FCB $10, $38, $54, $92, $10	;single line outline
   
 ;e - exponent
   FCB $18, $2a, $2a, $2a, $1c

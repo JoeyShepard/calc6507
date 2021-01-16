@@ -1,6 +1,7 @@
 ;Constants
 ;=========
-
+	
+	;Screen
 	SCREEN_ADDRESS = 		$4000
 	SCREEN_WIDTH = 			256
 	SCREEN_HEIGHT =			128
@@ -10,10 +11,11 @@
 	CHAR_SCREEN_HEIGHT = 	8
 	
 	;Special characters
-	CHAR_ARROW =			'a'
-	CHAR_BOX =				'b'
+	CHAR_ARROW =			'a'	;cursor arrow
+	CHAR_BOX =				'b'	;box for drawing error message
 	;CHAR_MINUS =			'c'	;actually, better to use - for this
-	CHAR_EXP =				'e'
+	CHAR_STO =				'd'	;store arrow
+	CHAR_EXP =				'e'	;lowercase e exponent
 	CHAR_QUOTE = 			34	;double quote
 	
 	;Object types
@@ -126,6 +128,7 @@
 		TOKEN_VAR_THREAD =	52
 		TOKEN_STO =			54
 		TOKEN_FREE =		56
+		TOKEN_DO =			58
 		
 		;Odd tokens - no jump table entry
 		TOKEN_DONE =		1
@@ -147,6 +150,7 @@
 		;Stack
 		STACK_SIZE =		8
 		SYS_STACK_SIZE =	3
+		R_STACK_SIZE =		$30
 		
 		;Two byte header of each word
 		EXEC_HEADER =		2
@@ -161,6 +165,10 @@
 			;1 - token
 			;1 - type
 			;2 - old address
+			
+		AUX_STACK_ITEM_SIZE =	10	;1 type, 1 func ID, 8 data
+		AUX_STACK_COUNT =		8
+		AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
 			
 	
 	
