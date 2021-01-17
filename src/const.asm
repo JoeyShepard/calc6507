@@ -99,41 +99,40 @@
 		COMPILE =			128
 		
 		;Word tokens
-		;					0 - reserved
-		TOKEN_DUP =			2
-		TOKEN_SWAP =		4
-		TOKEN_DROP =		6
-		TOKEN_OVER =		8
-		TOKEN_ROT =			10
-		TOKEN_MIN_ROT =		12
-		TOKEN_CLEAR =		14
-		TOKEN_ADD =			16
-		TOKEN_SUB =			18
-		TOKEN_MULT =		20
-		TOKEN_DIV =			22
-		TOKEN_TICK =		24
-		TOKEN_EXEC =		26
-		TOKEN_STORE =		28
-		TOKEN_FETCH =		30
-		TOKEN_CSTORE =		32
-		TOKEN_CFETCH =		34
-		TOKEN_COLON =		36
-		TOKEN_SEMI =		38
-		TOKEN_FLOAT =		40
-		TOKEN_HEX =			42
-		TOKEN_STRING =		44
-		TOKEN_HALT =		46
-		TOKEN_VAR =			48
-		TOKEN_VAR_DATA =	50
-		TOKEN_VAR_THREAD =	52
-		TOKEN_STO =			54
-		TOKEN_FREE =		56
-		TOKEN_DO =			58
-		
-		;Odd tokens - no jump table entry
-		TOKEN_DONE =		1
-		TOKEN_WORD =		3
-		
+		;							0 - reserved
+		TOKEN_DUP =					2
+		TOKEN_SWAP =				4
+		TOKEN_DROP =				6
+		TOKEN_OVER =				8
+		TOKEN_ROT =					10
+		TOKEN_MIN_ROT =				12
+		TOKEN_CLEAR =				14
+		TOKEN_ADD =					16
+		TOKEN_SUB =					18
+		TOKEN_MULT =				20
+		TOKEN_DIV =					22
+		TOKEN_TICK =				24
+		TOKEN_EXEC =				26
+		TOKEN_STORE =				28
+		TOKEN_FETCH =				30
+		TOKEN_CSTORE =				32
+		TOKEN_CFETCH =				34
+		TOKEN_COLON =				36
+		TOKEN_SEMI =				38
+		TOKEN_FLOAT =				40
+		TOKEN_HEX =					42
+		TOKEN_STRING =				44
+		TOKEN_HALT =				46
+		TOKEN_VAR =					48
+		TOKEN_VAR_DATA =			50
+		TOKEN_VAR_THREAD =			52
+		TOKEN_STO =					54
+		TOKEN_FREE =				56
+		TOKEN_SECONDARY =			58
+		TOKEN_SECONDARY_THREAD =	60
+		TOKEN_DONE =				62
+		TOKEN_DO =					64
+				
 		;Execution modes
 		EXEC_INPUT =		0
 		EXEC_THREAD =		1

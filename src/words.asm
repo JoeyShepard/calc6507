@@ -11,6 +11,8 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|ADD1		;Flags
 			
+			halt
+			
 			LDY #OBJ_SIZE
 			TXA
 			PHA
@@ -492,6 +494,7 @@
 				.error_exit:
 				LDA #ERROR_INPUT
 				STA ret_val
+				TODO: leave on stack?
 				JMP CODE_DROP+EXEC_HEADER
 			.word_found:
 			
@@ -499,10 +502,12 @@
 			LDA ret_val
 			BEQ .error_exit
 			
-			LDA obj_address
+			;LDA obj_address
+			LDA ret_address
 			STA HEX_BASE,X
 			STA HEX_SUM,X
-			LDA obj_address+1
+			;LDA obj_address+1
+			LDA ret_address+1
 			STA HEX_BASE+1,X
 			STA HEX_SUM+1,X
 			LDA #0
@@ -526,13 +531,56 @@
 			FCB MIN1|HEX		;Flags
 			
 			LDA HEX_SUM,X
-			STA obj_address
+			STA ret_address
 			LDA HEX_SUM+1,X
-			STA obj_address+1
+			STA ret_address+1
 			JSR CODE_DROP+EXEC_HEADER
-			;Original return address still on stack, so no recursion problems
-			LDA #TOKEN_WORD
-			JMP ExecToken
+			
+			TODO: check token instead?
+			;primitve or word?
+			LDY #0
+			LDA (ret_address),Y
+			CLC
+			ADC #4
+			TAY
+			LDA (ret_address),Y
+			CMP #OBJ_PRIMITIVE
+			BEQ .primitive
+			CMP #OBJ_WORD
+			BEQ .word
+				LDA #ERROR_WRONG_TYPE
+				STA ret_val
+				RTS
+			.primitive:
+				TYA
+				CLC
+				ADC ret_address
+				STA ret_address
+				BCC .no_c
+					INC ret_address+1
+				.no_c:
+				JMP ExecToken.address_ready
+			.word:
+				halt
+				
+				TODO: doesnt work yet
+				TODO: immediate? two versions :(((
+				
+				INY
+				INY
+				INY
+				TYA
+				CLC
+				ADC ret_address
+				STA exec_ptr
+				LDA ret_address+1
+				ADC #0
+				STA exec_ptr+1
+				JMP ExecThread
+				
+	EXEC_STUB:
+		
+		
 	
 	WORD_STORE:
 		FCB 1,"!"				;Name
@@ -626,8 +674,8 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB IMMED			;Flags
 			
-			halt
-			
+			TODO: abstract
+			;immediate mode only
 			LDA mode
 			CMP #MODE_COMPILE
 			BNE .not_compile
@@ -664,10 +712,11 @@
 			BNE .error_exit
 			
 			CALL WriteHeader
-			FCB 0					;Extra space
+			FCB 0					;Extra space to reserve
 			FDB 0					;Next address
-			FCB TOKEN_WORD			;Token
+			FCB TOKEN_SECONDARY		;Token
 			FCB OBJ_WORD			;Type header
+			TODO: old address is always blank?
 			FDB 0					;Old address
 			
 			;Adjust dict pointer
@@ -767,108 +816,147 @@
 	TODO: remove to save space?
 	WORD_VAR:
 		FCB 3,"VAR"				;Name
-		FDB WORD_VAR_DATA		;Next word
+		;FDB WORD_VAR_DATA		;Next word
+		FDB WORD_VAR_THREAD		;Next word
 		FCB TOKEN_VAR			;ID - 48
 		CODE_VAR:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB 0				;Flags
+			FCB IMMED			;Flags
 			
-			TODO: Share this with TICK
-			CALL LineWord
-			LDA new_word_len
-			BNE .word_found
-				.error_exit:
-				LDA #ERROR_INPUT
-				STA ret_val
-				JMP CODE_DROP+EXEC_HEADER
-			.word_found:
+			LDA mode
+			CMP #MODE_COMPILE
+			BNE .immediate
+				
+				;compile mode
+				halt
+				TODO: VAR immediate
 			
-			;Check if name already exists
-			CALL FindWord
-			LDA ret_val
-			BNE .error_exit
-			
-			TODO: standardize capitalization in comments			
-			;entry point for STO
-			.var_create:
-			
-			;;Make sure variable name starts with character
-			;LDA new_word_buff
-			;CMP #'A'
-			;BCC .error_exit
-			;CMP #'Z'+1
-			;BCS .error_exit
-			
-			;Allow any valid variable name even if doesn't start with character
-			CALL CheckData
-			LDA R_ans
-			CMP #OBJ_ERROR
-			BNE .error_exit
-			
-			CALL WriteHeader
-			FCB OBJ_SIZE			;Extra space to reserve
-			FDB 0					;Next address
-			FCB TOKEN_VAR_DATA		;Token
-			FCB OBJ_VAR				;Type header
-			FDB 0					;Old address
-			
-			;Update dict ptr
-			LDA new_word_len
-			CLC
-			ADC #WORD_HEADER_SIZE
-			CALL IncDictPtr
-			
-			;WORD_STO, which may call this, needs obj_address 
-			SEC
-			LDA dict_ptr
-			TODO: magic number. same 3 offset in STO
-			SBC #3	
-			STA obj_address
-			LDA dict_ptr+1
-			SBC #0
-			STA obj_address+1
-			
-			;Write variable data
-			LDA #OBJ_FLOAT
-			LDY #0
-			STA (dict_ptr),Y
-			TYA
-			INY
-			.loop:
+			.immediate:
+				
+				;immediate mode
+				TODO: Share this with TICK
+				CALL LineWord
+				LDA new_word_len
+				BNE .word_found
+					.error_exit:
+					LDA #ERROR_INPUT
+					STA ret_val
+					JMP CODE_DROP+EXEC_HEADER
+				.word_found:
+				
+				TODO: overwrite instead
+				;Check if name already exists
+				CALL FindWord
+				LDA ret_val
+				BNE .error_exit
+				
+				TODO: standardize capitalization in comments			
+				;entry point for STO
+				.var_create:
+				
+				;;Make sure variable name starts with character
+				;LDA new_word_buff
+				;CMP #'A'
+				;BCC .error_exit
+				;CMP #'Z'+1
+				;BCS .error_exit
+				
+				;Allow any valid variable name even if doesn't start with character
+				CALL CheckData
+				LDA R_ans
+				CMP #OBJ_ERROR
+				BNE .error_exit
+				
+				CALL WriteHeader
+				FCB OBJ_SIZE			;Extra space to reserve
+				FDB 0					;Next address
+				FCB TOKEN_VAR_DATA		;Token
+				FCB OBJ_VAR				;Type header
+				FDB 0					;Old address
+				
+				;Update dict ptr
+				LDA new_word_len
+				CLC
+				ADC #WORD_HEADER_SIZE
+				CALL IncDictPtr
+				
+				;WORD_STO, which may call this, needs obj_address 
+				SEC
+				LDA dict_ptr
+				TODO: magic number. same 3 offset in STO
+				SBC #3	
+				STA obj_address
+				LDA dict_ptr+1
+				SBC #0
+				STA obj_address+1
+				
+				;Write variable data
+				LDA #OBJ_FLOAT
+				LDY #0
 				STA (dict_ptr),Y
+				TYA
 				INY
-				CPY #OBJ_SIZE
-				BNE .loop
-						
-			LDA #OBJ_SIZE
-			CALL IncDictPtr
+				.loop:
+					STA (dict_ptr),Y
+					INY
+					CPY #OBJ_SIZE
+					BNE .loop
+							
+				LDA #OBJ_SIZE
+				CALL IncDictPtr
+				
+				LDA #DICT_END_SIZE
+				JMP DictEnd
 			
-			LDA #DICT_END_SIZE
-			JMP DictEnd
-			
-			
+	;Copies from variable to stack
 	WORD_VAR_DATA:
 		FCB 0,""				;Name
 		FDB WORD_VAR_THREAD		;Next word
 		FCB TOKEN_VAR_DATA		;ID - 50
 		CODE_VAR_DATA:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB ADD1			;Flags
+			FCB ADD1|IMMED		;Flags
 			
-			TXA
-			PHA
-			LDY #3
-			.loop:
-				LDA (obj_address),Y
-				STA 0,X
-				INY
-				INX
-				CPY #OBJ_SIZE+3
-				BNE .loop
-			PLA
-			TAX
-			RTS
+			LDA mode
+			CMP #MODE_COMPILE
+			BNE .immediate
+				
+				;Compile mode
+				LDA #TOKEN_VAR_THREAD
+				CALL TokenArgThread
+				
+				;Adjust dict pointer
+				MOV.W new_dict_ptr,dict_ptr
+				RTS
+				
+			.immediate:
 			
+				;Immediate mode - ie variable executed
+				CLC
+				LDA obj_address
+				ADC #3
+				STA ret_address
+				LDA obj_address+1
+				ADC #0
+				STA ret_address+1
+				;Fall through to VAR_STUB
+				
+	VAR_STUB:
+		TXA
+		PHA
+		LDY #0
+		.loop:
+			LDA (ret_address),Y
+			STA 0,X
+			INX
+			INY
+			CPY #OBJ_SIZE
+			BNE .loop
+		PLA
+		TAX
+		RTS
+
+	;Copies var pointer from thread then var to stack
 	WORD_VAR_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_STO			;Next word
@@ -877,28 +965,17 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 			
-			TXA
-			PHA
 			LDY #1
 			LDA (exec_ptr),Y
 			STA ret_address
 			INY
 			LDA (exec_ptr),Y
 			STA ret_address+1
-			LDY #0
-			.loop:
-				LDA (ret_address),Y
-				STA 0,X
-				INX
-				INY
-				CPY #OBJ_SIZE
-				BNE .loop
-			PLA
-			TAX
+			JSR VAR_STUB
 			
 			LDA #2
 			JMP IncExecPtr
-			
+				
 	WORD_STO:
 		FCB 3,"STO"				;Name
 		FDB WORD_STO_CHAR		;Next word
@@ -950,7 +1027,7 @@
 				STA (obj_address),Y
 				INX
 				INY
-				CPY #12
+				CPY #OBJ_SIZE+3
 				BNE .loop
 			PLA
 			TAX
@@ -974,7 +1051,7 @@
 	TODO: not needed if shown in interface
 	WORD_FREE:
 		FCB 4,"FREE"			;Name
-		FDB dict_begin			;Next word
+		FDB WORD_SECONDARY		;Next word
 		FCB TOKEN_FREE			;ID - 56
 		CODE_FREE:
 			FCB OBJ_PRIMITIVE	;Type
@@ -992,18 +1069,126 @@
 			LDA #0
 			STA HEX_TYPE,X
 			RTS
+	
+	WORD_SECONDARY:
+		FCB 0,""					;Name
+		FDB WORD_SECONDARY_THREAD	;Next word
+		FCB TOKEN_SECONDARY			;ID - 58
+		CODE_SECONDARY:
+			FCB OBJ_PRIMITIVE		;Type
+			FCB IMMED				;Flags
+	
+			LDA mode
+			CMP #MODE_COMPILE
+			BNE .immediate
+				
+				;Compile mode
+				LDA #TOKEN_SECONDARY_THREAD
+				CALL TokenArgThread
+				
+				;Adjust dict pointer
+				MOV.W new_dict_ptr,dict_ptr
+				RTS
+				
+			.immediate:
 			
+				;Immediate mode
+				LDA #R_RAW
+				PHA
+				
+				;Advance past old pointer in header and copy to exec_ptr
+				LDA obj_address
+				CLC
+				ADC #3	;skip past type and old pointer
+				STA exec_ptr
+				LDA obj_address+1
+				ADC #0
+				STA exec_ptr+1
+				JMP ExecThread
+				
+			RTS
+			
+	WORD_SECONDARY_THREAD:
+		FCB 0,""					;Name
+		FDB WORD_DONE				;Next word
+		FCB TOKEN_SECONDARY_THREAD	;ID - 60
+		CODE_SECONDARY_THREAD:
+			FCB OBJ_PRIMITIVE		;Type
+			FCB 0					;Flags
+			
+			;Only get here from ExecThread. Don't need return value
+			PLA
+			PLA
+			
+			TODO: check stack space left to prevent underflow
+						
+			;Push current thread address to stack
+			LDA exec_ptr
+			CLC
+			ADC #3
+			TAY
+			LDA exec_ptr+1
+			ADC #0
+			PHA
+			TYA
+			PHA
+			LDA #R_THREAD
+			PHA
+			
+			;Load new thread address
+			LDY #1
+			LDA (exec_ptr),Y
+			PHA
+			INY
+			LDA (exec_ptr),Y
+			STA exec_ptr+1
+			PLA 
+			STA exec_ptr
+			JMP ExecThread
+			
+	WORD_DONE:
+		FCB 0,""				;Name
+		FDB WORD_DO				;Next word
+		FCB TOKEN_DONE			;ID - 62
+		CODE_DONE:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB 0							;Flags
+			
+			;Drop return address
+			PLA
+			PLA
+			
+			;Check what type of return address is on stack
+			PLA
+			CMP #R_RAW
+			BEQ .return
+			CMP #R_THREAD
+			BEQ .thread
+				TODO: unknown return address type!
+				halt
+			.thread:
+				;Restore thread
+				PLA
+				STA exec_ptr
+				PLA
+				STA exec_ptr+1
+				JMP ExecThread
+			.return:
+			
+			RTS
+	
 	WORD_DO:
 		FCB 2,"DO"				;Name
 		FDB dict_begin			;Next word
-		FCB TOKEN_DO			;ID - 58
+		FCB TOKEN_DO			;ID - 64
 		CODE_DO:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN2|FLOATS|IMMED|COMPILE	;Flags
 			
-			
-			
 			RTS
+			
+			
+		
 			
 	;LOOP			60
 	;+LOOP			62
@@ -1072,35 +1257,37 @@
 		;hmm, now mismatched though :(
 	
 	JUMP_TABLE:
-		FDB CODE_DUP		;2
-		FDB CODE_SWAP		;4
-		FDB CODE_DROP		;6
-		FDB CODE_OVER		;8
-		FDB CODE_ROT		;10
-		FDB CODE_MIN_ROT	;12
-		FDB CODE_CLEAR		;14
-		FDB CODE_ADD		;16
-		FDB CODE_SUB		;18
-		FDB CODE_MULT		;20
-		FDB CODE_DIV		;22
-		FDB CODE_TICK		;24
-		FDB CODE_EXEC		;26
-		FDB CODE_STORE		;28
-		FDB CODE_FETCH		;30
-		FDB CODE_CSTORE		;32
-		FDB CODE_CFETCH		;34
-		FDB CODE_COLON		;36
-		FDB CODE_SEMI		;38
-		FDB CODE_FLOAT		;40
-		FDB CODE_HEX		;42
-		FDB CODE_STRING		;44
-		FDB CODE_HALT		;46
-		FDB CODE_VAR		;48
-		FDB CODE_VAR_DATA	;50
-		FDB CODE_VAR_THREAD	;52
-		FDB CODE_STO		;54
-		FDB CODE_FREE		;56
-		FDB CODE_DO			;58
-		
+		FDB CODE_DUP				;2
+		FDB CODE_SWAP				;4
+		FDB CODE_DROP				;6
+		FDB CODE_OVER				;8
+		FDB CODE_ROT				;10
+		FDB CODE_MIN_ROT			;12
+		FDB CODE_CLEAR				;14
+		FDB CODE_ADD				;16
+		FDB CODE_SUB				;18
+		FDB CODE_MULT				;20
+		FDB CODE_DIV				;22
+		FDB CODE_TICK				;24
+		FDB CODE_EXEC				;26
+		FDB CODE_STORE				;28
+		FDB CODE_FETCH				;30
+		FDB CODE_CSTORE				;32
+		FDB CODE_CFETCH				;34
+		FDB CODE_COLON				;36
+		FDB CODE_SEMI				;38
+		FDB CODE_FLOAT				;40
+		FDB CODE_HEX				;42
+		FDB CODE_STRING				;44
+		FDB CODE_HALT				;46
+		FDB CODE_VAR				;48
+		FDB CODE_VAR_DATA			;50
+		FDB CODE_VAR_THREAD			;52
+		FDB CODE_STO				;54
+		FDB CODE_FREE				;56
+		FDB CODE_SECONDARY			;58
+		FDB CODE_SECONDARY_THREAD	;60
+		FDB CODE_DONE				;62
+		FDB CODE_DO					;64
 		
 		

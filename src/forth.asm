@@ -314,6 +314,7 @@
 			STA ret_val
 			RTS
 		.word_found:
+		
 		LDY #0
 		LDA (ret_address),Y
 		TAY
@@ -837,59 +838,44 @@
 	
 	;Token in A
 	FUNC ExecToken
-		VARS
-			BYTE flags
-			BYTE temp
-		END
-			
+		;VARS
+		;	BYTE flags
+		;	BYTE temp
+		;END
+		TODO: add support to optimizer. wont work since gets here from word
+		
+		flags = 		R0+0
+		temp =			R0+1
+
 		;No error unless set below
 		LDY #ERROR_NONE
 		STY ret_val
 		
-		CMP #TOKEN_WORD
-		BNE .primitive
-			;User-defined word
-			LDA obj_address
-			STA ret_address
-			LDA obj_address+1
-			STA ret_address+1
-			JMP .address_done
-		.primitive:
-			TAY
-			LDA JUMP_TABLE-2,Y
-			STA ret_address
-			LDA JUMP_TABLE-1,Y
-			STA ret_address+1
-		.address_done:
+		TAY
+		LDA JUMP_TABLE-2,Y
+		STA ret_address
+		LDA JUMP_TABLE-1,Y
+		STA ret_address+1
 		
+		;Entry point for EXEC which already has address
 		
+		.address_ready:
 		LDY #0
 		LDA (ret_address),Y
 		
+		TODO: probably not necessary
+		TODO: is primitve type marking even useful? at least for exec it is
 		;Check type
 		CMP #OBJ_PRIMITIVE
 		BEQ .exec_primitive
 		CMP #OBJ_WORD
 		BEQ .exec_word
+			TODO: how to get to here though? should be impossible
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
 		
 		.exec_word:
-			
-			;Mark return value as raw
-			LDA #R_RAW
-			PHA
-			
-			;Advance past old pointer in header and copy to exec_ptr
-			LDA ret_address
-			CLC
-			ADC #3	;skip past type and old pointer
-			STA exec_ptr
-			LDA ret_address+1
-			ADC #0
-			STA exec_ptr+1
-			JMP ExecThread
 			
 		.exec_primitive:
 		
@@ -1002,94 +988,34 @@
 		.loop:
 			LDY #0
 			LDA (exec_ptr),Y
-			
-			LSR
-			BCC .primitive
-				;Odd-numbered token - not in jump table
-				ROL
-				CMP #TOKEN_DONE
-				BEQ .done
-				CMP #TOKEN_WORD
-				BNE .not_word
-			
-					TODO: check stack space left to prevent underflow
-						
-					;Push current thread address to stack
-					LDA exec_ptr
-					CLC
-					ADC #3
-					TAY
-					LDA exec_ptr+1
-					ADC #0
-					PHA
-					TYA
-					PHA
-					LDA #R_THREAD
-					PHA
-					
-					;Load new thread address
-					LDY #1
-					LDA (exec_ptr),Y
-					PHA
-					INY
-					LDA (exec_ptr),Y
-					STA exec_ptr+1
-					PLA 
-					STA exec_ptr
-					JMP .loop
-				
-				.not_word:
-				
-				TODO: handle
-				;Unknown token!
-				halt
-			
-			.primitive:
-			ASL
 			CALL ExecToken
 			LDA ret_val
-			BNE .error
+			BEQ .no_error
+				
+				TODO: easier to just reset stack pointer? also saves memory
+				TODO: dont need types if numbers not on stack
+				;Something in the thread caused an error
+				;Dump all threads and return to top level
+				
+				.error_loop:
+					PLA
+					CMP #R_RAW
+					BNE .not_raw
+						;All threads popped, now return
+						RTS
+					.not_raw:
+					;Remove thread address
+					PLA
+					PLA
+					JMP .error_loop
+			.no_error:
+			
 			;Same size and faster than IncExecPtr
 			INC exec_ptr
 			BNE .loop
 				INC exec_ptr+1
 			BNE .loop
-		
-		TODO: easier to just reset stack pointer? also saves memory
-		TODO: dont need types if numbers not on stack
-		.error:
-			;Something in the thread caused an error
-			;Dump all threads and return to top level
-			.error_loop:
-				PLA
-				CMP #R_RAW
-				BNE .not_raw
-					;All threads popped, now return
-					RTS
-				.not_raw:
-				;Remove thread address
-				PLA
-				PLA
-				JMP .error_loop
 			
-		.done:
-		
-		;Check what type of return address is on stack
-		PLA
-		CMP #R_RAW
-		BEQ .return
-		CMP #R_THREAD
-		BEQ .thread
-			TODO: unknown return address type!
-			halt
-		.thread:
-			;Restore thread
-			PLA
-			STA exec_ptr
-			PLA
-			STA exec_ptr+1
-			JMP .loop
-		.return:
 	END
 	
 	FUNC StackAddItem
@@ -1204,25 +1130,8 @@
 			BYTE user_defined
 			WORD flag_ptr
 		END
-				
-		TODO: this sequence is repeated several times
-		LDY #0
-		STY user_defined
+		
 		STA token
-		CMP #TOKEN_WORD
-		BEQ .not_primitive
-		CMP #TOKEN_VAR_DATA
-		BNE .primitive
-			;Recode variable token
-			LDA #TOKEN_VAR_THREAD
-			STA token
-			.not_primitive:
-			LDA #$FF
-			STA user_defined
-			LDA #3
-			JMP .alloc
-		;Primitive token
-		.primitive:
 		TAY
 		LDA JUMP_TABLE-2,Y
 		STA flag_ptr
@@ -1238,8 +1147,6 @@
 		.compile:
 		
 		LDA #1
-		
-		.alloc:
 		CALL AllocMem
 		LDA ret_val
 		BEQ .success
@@ -1250,24 +1157,11 @@
 		LDA token
 		LDY #0
 		STA (dict_ptr),Y
-		
-		LDA user_defined 
-		BEQ .no_address
-			;Write address of user defined word
-			LDA obj_address
-			CLC
-			ADC #3	;Skip over type byte and old address pointer
-			INY
-			STA (dict_ptr),Y
-			LDA obj_address+1
-			ADC #0
-			INY
-			STA (dict_ptr),Y
-		.no_address:
 				
 		;Adjust dict pointer
 		MOV.W new_dict_ptr,dict_ptr
 	END
+	
 	
 	;Allocate room for word header
 	FUNC WriteHeader
@@ -1303,9 +1197,11 @@
 			;Skip caller and return to top level
 			TODO: test!
 			TODO: test STO->VAR->WriteHeader->Alloc. cant return to caller!!!
-			PLA
-			PLA
-			RTS
+			
+			halt
+			
+			TODO: return based on pointer
+			;RTS
 		.alloc_good:
 		
 		;Setup header for new word
@@ -1347,6 +1243,36 @@
 		
 	END
 	
-	
+	;Insert token and 16 bit arg into thread
+	;Token in A, obj_address points to arg base
+	FUNC TokenArgThread
+		
+		PHA
+		LDA #3	;token and 16 bit address
+		CALL AllocMem
+		LDA ret_val
+		BEQ .success
+			PLA
+			RTS
+		.success:
+		
+		;Store token
+		PLA
+		LDY #0
+		STA (dict_ptr),Y
+		
+		TODO: abstract?
+		;Write address of user defined word
+		LDA obj_address
+		CLC
+		ADC #3	;Skip over type byte and old address pointer
+		INY
+		STA (dict_ptr),Y
+		LDA obj_address+1
+		ADC #0
+		INY
+		STA (dict_ptr),Y
+			
+	END
 	
 	
