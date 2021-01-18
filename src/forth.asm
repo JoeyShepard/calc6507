@@ -5,6 +5,8 @@
 		STA input_buff_begin
 		STA input_buff_end
 		STA new_word_len
+		STA exec_ptr
+		STA exec_ptr+1
 	END
 	
 	SPECIAL_CHARS_LEN = 16	;2+13+1
@@ -838,11 +840,11 @@
 	
 	;Token in A
 	FUNC ExecToken
+		TODO: add support to optimizer. wont work since gets here from word
 		;VARS
 		;	BYTE flags
 		;	BYTE temp
 		;END
-		TODO: add support to optimizer. wont work since gets here from word
 		
 		flags = 		R0+0
 		temp =			R0+1
@@ -857,8 +859,7 @@
 		LDA JUMP_TABLE-1,Y
 		STA ret_address+1
 		
-		;Entry point for EXEC which already has address
-		
+		;Entry point for EXEC which sets ret_address
 		.address_ready:
 		LDY #0
 		LDA (ret_address),Y
@@ -868,15 +869,14 @@
 		;Check type
 		CMP #OBJ_PRIMITIVE
 		BEQ .exec_primitive
-		CMP #OBJ_WORD
+		CMP #OBJ_SECONDARY
 		BEQ .exec_word
-			TODO: how to get to here though? should be impossible
+			;ie try to EXEC variable or random address
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
 		
 		.exec_word:
-			
 		.exec_primitive:
 		
 		;Check flags
@@ -992,25 +992,16 @@
 			LDA ret_val
 			BEQ .no_error
 				
-				TODO: easier to just reset stack pointer? also saves memory
-				TODO: dont need types if numbers not on stack
 				;Something in the thread caused an error
 				;Dump all threads and return to top level
-				
-				.error_loop:
-					PLA
-					CMP #R_RAW
-					BNE .not_raw
-						;All threads popped, now return
-						RTS
-					.not_raw:
-					;Remove thread address
-					PLA
-					PLA
-					JMP .error_loop
+				TXA
+				LDX #R_STACK_SIZE-3
+				TXS
+				TAX
+				RTS
 			.no_error:
 			
-			;Same size and faster than IncExecPtr
+			;Same size and faster than IncExecPtr by 1
 			INC exec_ptr
 			BNE .loop
 				INC exec_ptr+1

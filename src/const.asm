@@ -25,7 +25,7 @@
 	OBJ_ERROR =				4
 	TODO: replace with code that isnt op code, so unlikely to crash on EXEC
 	OBJ_PRIMITIVE =			5
-	OBJ_WORD =				6
+	OBJ_SECONDARY =			6
 	OBJ_VAR =				7
 	
 	TYPE_SIZE =				1

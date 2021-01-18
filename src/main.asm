@@ -179,9 +179,7 @@ LOCALS_END set		$1F
 		TXS
 		
 		TODO: copyright
-		TODO: number entry wraps if backspace past beginning - cant reproduce!
 		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
-		TODO: tagging stack maybe not good idea - save first address then error calls function to clear r stack
 		
 		CALL setup
 		CALL tests
@@ -228,6 +226,8 @@ LOCALS_END set		$1F
 					CMP #MODE_IMMEDIATE
 					BNE .compile_word
 					
+						halt
+						
 						;Immediate mode - execute word
 						LDA ret_val
 						CALL ExecToken

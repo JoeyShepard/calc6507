@@ -546,8 +546,8 @@
 			LDA (ret_address),Y
 			CMP #OBJ_PRIMITIVE
 			BEQ .primitive
-			CMP #OBJ_WORD
-			BEQ .word
+			CMP #OBJ_SECONDARY
+			BEQ .secondary
 				LDA #ERROR_WRONG_TYPE
 				STA ret_val
 				RTS
@@ -560,15 +560,10 @@
 					INC ret_address+1
 				.no_c:
 				JMP ExecToken.address_ready
-			.word:
+			.secondary:
 				halt
 				
-				TODO: doesnt work yet
-				TODO: immediate? 
-				
-				;SOLUTION: stop tagging stack?
-				;needed to know when at bottom of stack
-				;only alternative is immediate :(
+				TODO: doesnt work yet 
 				
 				INY
 				INY
@@ -719,7 +714,7 @@
 			FCB 0					;Extra space to reserve
 			FDB 0					;Next address
 			FCB TOKEN_SECONDARY		;Token
-			FCB OBJ_WORD			;Type header
+			FCB OBJ_SECONDARY		;Type header
 			TODO: old address is always blank?
 			FDB 0					;Old address
 			
@@ -833,7 +828,7 @@
 				
 				;compile mode
 				halt
-				TODO: VAR immediate
+				TODO: VAR compile
 			
 			.immediate:
 				
@@ -857,14 +852,7 @@
 				TODO: standardize capitalization in comments			
 				;entry point for STO
 				.var_create:
-				
-				;;Make sure variable name starts with character
-				;LDA new_word_buff
-				;CMP #'A'
-				;BCC .error_exit
-				;CMP #'Z'+1
-				;BCS .error_exit
-				
+								
 				;Allow any valid variable name even if doesn't start with character
 				CALL CheckData
 				LDA R_ans
@@ -1097,7 +1085,12 @@
 			.immediate:
 			
 				;Immediate mode
-
+				
+				;Push current exec_ptr which should be 0
+				LDA #0
+				PHA
+				PHA
+				
 				;Advance past old pointer in header and copy to exec_ptr
 				TODO: abstract
 				LDA obj_address
@@ -1146,7 +1139,8 @@
 			PLA 
 			STA exec_ptr
 			JMP ExecThread
-			
+	
+	TODO: Get ride of word and check in ExecThread?
 	WORD_DONE:
 		FCB 0,""				;Name
 		FDB WORD_DO				;Next word
@@ -1159,24 +1153,35 @@
 			PLA
 			PLA
 						
+			;;Pop next address or return if no addresses left
+			;TXA
+			;TAY
+			;TSX
+			;TODO: is there always ONLY exactly one address on stack?
+			;CPX #R_STACK_SIZE-3
+			;BEQ .return
+			;	;Restore thread
+			;	PLA
+			;	STA exec_ptr
+			;	PLA
+			;	STA exec_ptr+1
+			;	TYA
+			;	TAX
+			;	JMP ExecThread
+			;.return:
+			;TYA
+			;TAX
+			;RTS
+			
 			;Pop next address or return if no addresses left
-			TXA
-			TAY
-			TSX
-			TODO: is there always ONLY exactly one address on stack?
-			CPX #R_STACK_SIZE-3
+			PLA
+			STA exec_ptr
+			PLA
+			STA exec_ptr+1
+			ORA exec_ptr
 			BEQ .return
-				;Restore thread
-				PLA
-				STA exec_ptr
-				PLA
-				STA exec_ptr+1
-				TYA
-				TAX
-				JMP ExecThread			
+				JMP ExecThread
 			.return:
-			TYA
-			TAX
 			RTS
 	
 	WORD_DO:
