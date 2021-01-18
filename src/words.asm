@@ -564,7 +564,11 @@
 				halt
 				
 				TODO: doesnt work yet
-				TODO: immediate? two versions :(((
+				TODO: immediate? 
+				
+				;SOLUTION: stop tagging stack?
+				;needed to know when at bottom of stack
+				;only alternative is immediate :(
 				
 				INY
 				INY
@@ -1093,10 +1097,9 @@
 			.immediate:
 			
 				;Immediate mode
-				LDA #R_RAW
-				PHA
-				
+
 				;Advance past old pointer in header and copy to exec_ptr
+				TODO: abstract
 				LDA obj_address
 				CLC
 				ADC #3	;skip past type and old pointer
@@ -1132,8 +1135,6 @@
 			PHA
 			TYA
 			PHA
-			LDA #R_THREAD
-			PHA
 			
 			;Load new thread address
 			LDY #1
@@ -1157,24 +1158,25 @@
 			;Drop return address
 			PLA
 			PLA
-			
-			;Check what type of return address is on stack
-			PLA
-			CMP #R_RAW
+						
+			;Pop next address or return if no addresses left
+			TXA
+			TAY
+			TSX
+			TODO: is there always ONLY exactly one address on stack?
+			CPX #R_STACK_SIZE-3
 			BEQ .return
-			CMP #R_THREAD
-			BEQ .thread
-				TODO: unknown return address type!
-				halt
-			.thread:
 				;Restore thread
 				PLA
 				STA exec_ptr
 				PLA
 				STA exec_ptr+1
-				JMP ExecThread
+				TYA
+				TAX
+				JMP ExecThread			
 			.return:
-			
+			TYA
+			TAX
 			RTS
 	
 	WORD_DO:
