@@ -727,6 +727,13 @@
 			CMP #OBJ_ERROR
 			BNE .error_exit
 			
+			TODO: abstract
+			;Reset aux stack
+			LDA #AUX_STACK_SIZE
+			STA aux_stack_ptr
+			LDA #0
+			STA aux_stack_count
+			
 			CALL WriteHeader
 			FCB 0					;Extra space to reserve
 			FDB 0					;Next address
@@ -1153,7 +1160,6 @@
 			TXS
 			TAX
 			
-			TODO: empty AUS_STACK
 			JMP main.process_loop
 			
 	WORD_QUIT:
@@ -1193,13 +1199,100 @@
 			
 	WORD_DO:
 		FCB 2,"DO"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_DO_THREAD		;Next word
 		FCB TOKEN_DO			;ID - 66
 		CODE_DO:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB MIN2|FLOATS|IMMED|COMPILE	;Flags
+			FCB IMMED|COMPILE				;Flags
+			
+			LDA #AUX_TYPE_DO
+			JSR AuxPushShort
+			TODO: change every function to LDA ret_val on exit?
+			LDA ret_val
+			BEQ .mem_good
+				RTS
+			.mem_good:
+			
+			;LDY aux_stack_ptr - Y set after AuxPushShort
+			;+1 to point to next byte though LOOP adds +3 so -2 here
+			SEC
+			LDA dict_ptr
+			SBC #2
+			STA AUX_STACK+1,Y
+			LDA dict_ptr+1
+			SBC #0
+			STA AUX_STACK+2,Y
+			
+			;Drop return address
+			PLA
+			PLA
+			
+			;Lay down DO_THREAD TOKEN
+			LDA #TOKEN_DO_THREAD
+			STA ret_val
+			JMP main.compile_word
+			
+	WORD_DO_THREAD:
+		FCB 0,""				;Name
+		FDB WORD_LOOP			;Next word
+		FCB TOKEN_DO_THREAD		;ID - 68
+		CODE_DO_THREAD:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|FLOATS					;Flags
+			
+			halt
 			
 			RTS
+			
+	WORD_LOOP:
+		FCB 4,"LOOP"			;Name
+		FDB WORD_LOOP_THREAD	;Next word
+		FCB TOKEN_LOOP			;ID - 70
+		CODE_LOOP:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB IMMED|COMPILE				;Flags
+			
+			;At least one address on aux stack?
+			JSR AuxPopShort
+			LDA ret_val
+			BEQ .pop_good
+				RTS
+			.pop_good:
+			
+			;Address right type?
+			LDY aux_stack_ptr
+			LDA AUX_STACK-3,Y
+			CMP #AUX_TYPE_DO
+			BEQ .type_good
+				LDA #ERROR_STRUCTURE
+				STA ret_val
+				RTS
+			.type_good:
+			
+			;Lay down LOOP_THREAD TOKEN
+			LDA AUX_STACK-2,Y
+			STA obj_address
+			LDA AUX_STACK-1,Y
+			STA obj_address+1
+			LDA #TOKEN_LOOP_THREAD
+			JMP TokenArgThread
+			
+			RTS
+	
+	WORD_LOOP_THREAD:
+		FCB 0,""				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_LOOP_THREAD	;ID - 72
+		CODE_LOOP_THREAD:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB 0							;Flags
+			
+			halt
+			
+			LDA #2
+			JMP IncExecPtr
+			
+			
 			
 	;LIT
 	;LOOP			60
@@ -1302,5 +1395,8 @@
 		FDB CODE_QUIT				;62
 		FDB CODE_STO_THREAD			;64
 		FDB CODE_DO					;66
+		FDB CODE_DO_THREAD			;68
+		FDB CODE_LOOP				;70
+		FDB CODE_LOOP_THREAD		;72
 		
 		

@@ -313,6 +313,9 @@
 	FCB " COMPILE ONLY ",0		;18
 	ERROR_MSG_OUT_OF_MEM:
 	FCB "OUT OF MEMORY ",0		;20
+	ERROR_MSG_STRUCTURE:
+	FCB "   MISMATCH   ",0		;22
+	
 	
 	TODO: table smaller than fixed length strings?
 	ERROR_TABLE:
@@ -326,6 +329,7 @@
 		FDB ERROR_MSG_IMMED_ONLY
 		FDB ERROR_MSG_COMPILE_ONLY
 		FDB ERROR_MSG_OUT_OF_MEM
+		FDB ERROR_MSG_STRUCTURE
 		
 	TODO: adjust display and messages for new 5x8 font
 	;error code in A

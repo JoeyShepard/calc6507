@@ -45,9 +45,10 @@
 	BYTE math_sticky
 	BYTE math_max
 	
-	;Locals for functions
-	;wasteful of memory but RIOT mem not used otherwise
+	;Locals for functions - wasteful but RIOT mem not used otherwise
 	BYTE shift_counter
+	BYTE fp_ptr1
+	BYTE fp_ptr2
 	
 	;Splitting input into words
 	new_word_len:		DFS 1
@@ -56,6 +57,8 @@
 	
 	AUX_STACK:
 		DFS AUX_STACK_SIZE
+		BYTE aux_stack_ptr
+		BYTE aux_stack_count
 	
 	RIOT_mem_end:
 	

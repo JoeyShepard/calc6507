@@ -160,6 +160,7 @@ LOCALS_END set		$1F
 	include system.asm
 	include math.asm
 	include output.asm
+	include aux_stack.asm
 	include forth.asm
 	include words.asm
 	

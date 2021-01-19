@@ -32,6 +32,7 @@
 	OBJ_SIZE =				9
 	
 	;Input
+	TODO: increase size?
 	BUFF_SIZE =				64
 	WORD_MAX_SIZE =			19	;-1.23456789012e-999
 	MAX_DIGITS =			12
@@ -77,6 +78,7 @@
 	ERROR_IMMED_ONLY =			16
 	ERROR_COMPILE_ONLY =		18
 	ERROR_OUT_OF_MEM =			20
+	ERROR_STRUCTURE =			22
 	
 	;Forth
 	;=====
@@ -133,6 +135,9 @@
 		TOKEN_QUIT =				62
 		TOKEN_STO_THREAD =			64
 		TOKEN_DO =					66
+		TOKEN_DO_THREAD =			68
+		TOKEN_LOOP =				70
+		TOKEN_LOOP_THREAD =			72
 		
 		;Execution modes
 		EXEC_INPUT =		0
@@ -164,10 +169,16 @@
 			;1 - token
 			;1 - type
 			;2 - old address
-			
+		
+		;Auxilliary stack for DO loops and IF addresses			
 		AUX_STACK_ITEM_SIZE =	10	;1 type, 1 func ID, 8 data
 		AUX_STACK_COUNT =		8
 		AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
+		;Reused at compile time to hold addresses
+		AUX_STACK_SHORT_SIZE =	AUX_STACK_SIZE / 3
+		
+		;Data types for auxilliary stack
+		AUX_TYPE_DO = 1
 			
 	
 	
