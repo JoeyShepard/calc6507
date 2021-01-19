@@ -5,9 +5,18 @@ X2
 5 STO V1
 : X3 v1 ;
 X3
-: T1 7e123 STO V1 ;
-T1 V1
 : FOO 0.3e7 ;
 : BAR 2e5 FOO ;
 : BAZ 10e3 BAR ;
-BAZ
+BAZ + +
+: T1 7e123 STO V1 ;
+T1 V1
+' SWAP STO VECTOR
+: S VECTOR EXEC ;
+S
+' BAZ STO VECTOR
+S * * *
+
+
+
+

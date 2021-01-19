@@ -495,7 +495,6 @@
 				.error_exit:
 				LDA #ERROR_INPUT
 				STA ret_val
-				TODO: leave on stack?
 				JMP CODE_DROP+EXEC_HEADER
 			.word_found:
 			
@@ -531,6 +530,8 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
 			
+			;Do not drop address!
+			
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
@@ -562,10 +563,28 @@
 				.no_c:
 				JMP ExecToken.address_ready
 			.secondary:
-				halt
 				
-				TODO: doesnt work yet 
+				;Save offset into word
+				STY R0
 				
+				;Drop return address
+				PLA
+				PLA
+				
+				TODO: abstract with WORD_SECONDARY
+				;Push current thread address to stack
+				LDA exec_ptr
+				CLC
+				ADC #1
+				TAY
+				LDA exec_ptr+1
+				ADC #0
+				PHA
+				TYA
+				PHA
+				
+				;Load new thread address
+				LDY R0
 				INY
 				INY
 				INY
@@ -576,12 +595,9 @@
 				LDA ret_address+1
 				ADC #0
 				STA exec_ptr+1
+				
 				JMP ExecThread
 				
-	EXEC_STUB:
-		
-		
-	
 	WORD_STORE:
 		FCB 1,"!"				;Name
 		FDB WORD_FETCH			;Next word
@@ -967,6 +983,8 @@
 				
 			.immediate:
 			
+				TODO: check stack size!!!
+			
 				CALL LineWord
 				LDA new_word_len
 				BNE .word_found
@@ -1176,7 +1194,7 @@
 			
 			RTS
 			
-			
+	;LIT
 	;LOOP			60
 	;+LOOP			62
 	;I				64

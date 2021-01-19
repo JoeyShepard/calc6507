@@ -853,6 +853,9 @@
 		LDY #ERROR_NONE
 		STY ret_val
 		
+		TODO: error on odd tokens
+		TODO: compare to max token
+		
 		TAY
 		LDA JUMP_TABLE-2,Y
 		STA ret_address
@@ -1072,7 +1075,7 @@
 		ADC exec_ptr
 		STA exec_ptr
 		BCC .done
-			INC exec_ptr
+			INC exec_ptr+1
 		.done:
 	END
 	
