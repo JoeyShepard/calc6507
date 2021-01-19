@@ -983,7 +983,14 @@
 				
 			.immediate:
 			
-				TODO: check stack size!!!
+				LDA stack_count
+				CMP #1
+				BCS .count_good
+					TODO: jump table for errors ie JMP RET_ERROR_STACK_UNDERFLOW
+					LDA #ERROR_STACK_UNDERFLOW
+					STA ret_val
+					RTS
+				.count_good:
 			
 				CALL LineWord
 				LDA new_word_len
