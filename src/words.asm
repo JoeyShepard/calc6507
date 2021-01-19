@@ -11,8 +11,6 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|ADD1		;Flags
 			
-			halt
-			
 			LDY #OBJ_SIZE
 			TXA
 			PHA
@@ -406,7 +404,10 @@
 				DIV_FLOAT:
 					JSR TosR0R1
 					JSR BCD_Div
-					;BCD_Div returns to caller! ie only returns if successful
+					LDA ret_val
+					BEQ .no_error
+						RTS
+					.no_error:
 					JSR CODE_DROP+EXEC_HEADER
 					JMP RansTos
 			div_not_float:
@@ -758,7 +759,8 @@
 		
 		LDA #OBJ_SIZE-1
 		JMP IncExecPtr
-			
+	
+	TODO: separate 6 and 12 digit floats?
 	WORD_FLOAT:
 		FCB 0,""				;Name
 		FDB WORD_HEX			;Next word
@@ -772,6 +774,7 @@
 			LDA #OBJ_FLOAT
 			JMP COPY_STUB
 	
+	TODO: shorter for raw_hex
 	TODO: more efficient way than sharing stub?
 	WORD_HEX:
 		FCB 0,""
@@ -813,146 +816,94 @@
 	
 	;needed? instead use 0 STO varname
 	TODO: remove to save space?
+	TODO: alternate behavior inside word?
 	WORD_VAR:
 		FCB 3,"VAR"				;Name
-		;FDB WORD_VAR_DATA		;Next word
 		FDB WORD_VAR_THREAD		;Next word
 		FCB TOKEN_VAR			;ID - 48
 		CODE_VAR:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB IMMED			;Flags
+			FCB 0				;Flags
 			
-			LDA mode
-			CMP #MODE_COMPILE
-			BNE .immediate
-				
-				;compile mode
-				halt
-				TODO: VAR compile
+			TODO: Share this with TICK
+			CALL LineWord
+			LDA new_word_len
+			BNE .word_found
+				.error_exit:
+				LDA #ERROR_INPUT
+				STA ret_val
+				JMP CODE_DROP+EXEC_HEADER
+			.word_found:
 			
-			.immediate:
-				
-				;immediate mode
-				TODO: Share this with TICK
-				CALL LineWord
-				LDA new_word_len
-				BNE .word_found
-					.error_exit:
-					LDA #ERROR_INPUT
-					STA ret_val
-					JMP CODE_DROP+EXEC_HEADER
-				.word_found:
-				
-				TODO: overwrite instead
-				;Check if name already exists
-				CALL FindWord
-				LDA ret_val
-				BNE .error_exit
-				
-				TODO: standardize capitalization in comments			
-				;entry point for STO
-				.var_create:
-								
-				;Allow any valid variable name even if doesn't start with character
-				CALL CheckData
-				LDA R_ans
-				CMP #OBJ_ERROR
-				BNE .error_exit
-				
-				CALL WriteHeader
-				FCB OBJ_SIZE			;Extra space to reserve
-				FDB 0					;Next address
-				FCB TOKEN_VAR_DATA		;Token
-				FCB OBJ_VAR				;Type header
-				FDB 0					;Old address
-				
-				;Update dict ptr
-				LDA new_word_len
-				CLC
-				ADC #WORD_HEADER_SIZE
-				CALL IncDictPtr
-				
-				;WORD_STO, which may call this, needs obj_address 
-				SEC
-				LDA dict_ptr
-				TODO: magic number. same 3 offset in STO
-				SBC #3	
-				STA obj_address
-				LDA dict_ptr+1
-				SBC #0
-				STA obj_address+1
-				
-				;Write variable data
-				LDA #OBJ_FLOAT
-				LDY #0
-				STA (dict_ptr),Y
-				TYA
-				INY
-				.loop:
-					STA (dict_ptr),Y
-					INY
-					CPY #OBJ_SIZE
-					BNE .loop
+			TODO: overwrite instead
+			;Check if name already exists
+			CALL FindWord
+			LDA ret_val
+			BNE .error_exit
+			
+			TODO: standardize capitalization in comments			
+			;Entry point for STO
+			.var_create:
 							
-				LDA #OBJ_SIZE
-				CALL IncDictPtr
-				
-				LDA #DICT_END_SIZE
-				JMP DictEnd
+			;Allow any valid variable name even if doesn't start with character
+			CALL CheckData
+			LDA R_ans
+			CMP #OBJ_ERROR
+			BNE .error_exit
 			
-	;Copies from variable to stack
-	WORD_VAR_DATA:
-		FCB 0,""				;Name
-		FDB WORD_VAR_THREAD		;Next word
-		FCB TOKEN_VAR_DATA		;ID - 50
-		CODE_VAR_DATA:
-			FCB OBJ_PRIMITIVE	;Type
-			FCB ADD1|IMMED		;Flags
+			CALL WriteHeader
+			FCB OBJ_SIZE			;Extra space to reserve
+			FDB 0					;Next address
+			FCB TOKEN_VAR_THREAD	;Token
+			FCB OBJ_VAR				;Type header
+			FDB 0					;Old address
 			
-			LDA mode
-			CMP #MODE_COMPILE
-			BNE .immediate
-				
-				;Compile mode
-				LDA #TOKEN_VAR_THREAD
-				CALL TokenArgThread
-				
-				;Adjust dict pointer
-				MOV.W new_dict_ptr,dict_ptr
+			;Check if WriteHeader ran out of memory
+			LDA ret_val
+			BEQ .no_error
 				RTS
-				
-			.immediate:
+			.no_error:
 			
-				;Immediate mode - ie variable executed
-				CLC
-				LDA obj_address
-				ADC #3
-				STA ret_address
-				LDA obj_address+1
-				ADC #0
-				STA ret_address+1
-				;Fall through to VAR_STUB
-				
-	VAR_STUB:
-		TXA
-		PHA
-		LDY #0
-		.loop:
-			LDA (ret_address),Y
-			STA 0,X
-			INX
+			;Update dict ptr
+			LDA new_word_len
+			CLC
+			ADC #WORD_HEADER_SIZE
+			CALL IncDictPtr
+			
+			TODO: still needed?
+			;WORD_STO, which may call this, needs obj_address 
+			SEC
+			LDA dict_ptr
+			TODO: magic number. same 3 offset in STO
+			SBC #3	
+			STA obj_address
+			LDA dict_ptr+1
+			SBC #0
+			STA obj_address+1
+			
+			;Write variable data
+			LDA #OBJ_FLOAT
+			LDY #0
+			STA (dict_ptr),Y
+			TYA
 			INY
-			CPY #OBJ_SIZE
-			BNE .loop
-		PLA
-		TAX
-		RTS
-
-	;Copies var pointer from thread then var to stack
+			.loop:
+				STA (dict_ptr),Y
+				INY
+				CPY #OBJ_SIZE
+				BNE .loop
+						
+			LDA #OBJ_SIZE
+			CALL IncDictPtr
+			
+			LDA #DICT_END_SIZE
+			JMP DictEnd
+				
+	;Copies data from variable to stack
 	WORD_VAR_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_STO			;Next word
-		FCB TOKEN_VAR_THREAD	;ID - 52
+		FCB TOKEN_VAR_THREAD	;ID - 50
 		CODE_VAR_THREAD:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
@@ -963,76 +914,118 @@
 			INY
 			LDA (exec_ptr),Y
 			STA ret_address+1
-			JSR VAR_STUB
 			
-			LDA #2
-			JMP IncExecPtr
-				
-	WORD_STO:
-		FCB 3,"STO"				;Name
-		FDB WORD_STO_CHAR		;Next word
-		FCB TOKEN_STO			;ID - 54
-		CODE_STO:
-			FCB OBJ_PRIMITIVE	;Type
-			FCB MIN1			;Flags
-			
-			CALL LineWord
-			LDA new_word_len
-			BNE .word_found
-				.error_exit:
-				LDA #ERROR_INPUT
-				STA ret_val
-				RTS
-			.word_found:
-			
-			CALL FindWord
-			;var not found, error
-			;LDA ret_val
-			;BEQ .error_exit
-			
-			;word not found. try to create variable
-			LDA ret_val
-			BNE .word_exists
-				JSR CODE_VAR.var_create
-				TODO: abstract
-				LDA ret_val
-				BEQ .type_good
-				RTS
-			.word_exists:
-			
-			;word found. is it a variable?
-			LDY #0
-			LDA (obj_address),Y
-			CMP #OBJ_VAR
-			BEQ .type_good
-				LDA #ERROR_WRONG_TYPE
-				STA ret_val
-				RTS
-			.type_good:
-			
-			;copy data to variable
-			LDY #3
 			TXA
 			PHA
+			LDY #0
 			.loop:
-				LDA 0,X
-				STA (obj_address),Y
+				LDA (ret_address),Y
+				STA 0,X
 				INX
 				INY
-				CPY #OBJ_SIZE+3
+				CPY #OBJ_SIZE
 				BNE .loop
 			PLA
 			TAX
 			
-			LDA #ERROR_NONE
-			STA ret_val
-			JMP CODE_DROP+EXEC_HEADER
+			LDA #2
+			JMP IncExecPtr
+
+	WORD_STO:
+		FCB 3,"STO"				;Name
+		FDB WORD_STO_CHAR		;Next word
+		FCB TOKEN_STO			;ID - 52
+		CODE_STO:
+			FCB OBJ_PRIMITIVE	;Type
+			;FCB MIN1			;Flags
+			FCB IMMED			;Flags
+			
+			LDA mode
+			CMP #MODE_IMMEDIATE
+			BEQ .immediate
+			
+				TODO: combine with below?
+				
+				;Compile mode
+				CALL LineWord
+				LDA new_word_len
+				BEQ .error_exit
+				
+				CALL FindWord
+				;var not found, error
+				LDA ret_val
+				BEQ .error_exit
+			
+				;word found. is it a variable?
+				LDY #0
+				LDA (obj_address),Y
+				CMP #OBJ_VAR
+				BNE .error_type
+				
+				LDA #TOKEN_STO_THREAD
+				JMP TokenArgThread
+				
+			.immediate:
+			
+				CALL LineWord
+				LDA new_word_len
+				BNE .word_found
+					.error_exit:
+					LDA #ERROR_INPUT
+					STA ret_val
+					RTS
+				.word_found:
+				
+				CALL FindWord
+				
+				;word not found. try to create variable
+				LDA ret_val
+				BNE .word_exists
+					JSR CODE_VAR.var_create
+					TODO: abstract
+					LDA ret_val
+					BEQ .type_good
+						;Could not create variable
+						RTS
+				.word_exists:
+				
+				;word found. is it a variable?
+				LDY #0
+				LDA (obj_address),Y
+				CMP #OBJ_VAR
+				BEQ .type_good
+					.error_type:
+					LDA #ERROR_WRONG_TYPE
+					STA ret_val
+					RTS
+				.type_good:
+				
+				LDY #3
+				;Entry point for STO_THREAD
+				.copy_data:
+				LDA #OBJ_SIZE
+				STA R0
+				TXA
+				PHA
+				.loop:
+					LDA 0,X
+					STA (obj_address),Y
+					INX
+					INY
+					DEC R0
+					BNE .loop
+				PLA
+				TAX
+				
+				LDA #ERROR_NONE
+				STA ret_val
+				JMP CODE_DROP+EXEC_HEADER
 	
 	;One character shortcut for STO
 	WORD_STO_CHAR:
 		FCB 1,CHAR_STO			;Name
 		FDB WORD_FREE			;Next word
-		FCB TOKEN_STO			;ID - 54
+		FCB TOKEN_STO			;ID - 52
 		CODE_STO_CHAR:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1			;Flags
@@ -1044,7 +1037,7 @@
 	WORD_FREE:
 		FCB 4,"FREE"			;Name
 		FDB WORD_SECONDARY		;Next word
-		FCB TOKEN_FREE			;ID - 56
+		FCB TOKEN_FREE			;ID - 54
 		CODE_FREE:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
@@ -1064,60 +1057,18 @@
 	
 	WORD_SECONDARY:
 		FCB 0,""					;Name
-		FDB WORD_SECONDARY_THREAD	;Next word
-		FCB TOKEN_SECONDARY			;ID - 58
-		CODE_SECONDARY:
-			FCB OBJ_PRIMITIVE		;Type
-			FCB IMMED				;Flags
-	
-			LDA mode
-			CMP #MODE_COMPILE
-			BNE .immediate
-				
-				;Compile mode
-				LDA #TOKEN_SECONDARY_THREAD
-				CALL TokenArgThread
-				
-				;Adjust dict pointer
-				MOV.W new_dict_ptr,dict_ptr
-				RTS
-				
-			.immediate:
-			
-				;Immediate mode
-				
-				;Push current exec_ptr which should be 0
-				LDA #0
-				PHA
-				PHA
-				
-				;Advance past old pointer in header and copy to exec_ptr
-				TODO: abstract
-				LDA obj_address
-				CLC
-				ADC #3	;skip past type and old pointer
-				STA exec_ptr
-				LDA obj_address+1
-				ADC #0
-				STA exec_ptr+1
-				JMP ExecThread
-				
-			RTS
-			
-	WORD_SECONDARY_THREAD:
-		FCB 0,""					;Name
 		FDB WORD_DONE				;Next word
-		FCB TOKEN_SECONDARY_THREAD	;ID - 60
-		CODE_SECONDARY_THREAD:
+		FCB TOKEN_SECONDARY			;ID - 56
+		CODE_SECONDARY:
 			FCB OBJ_PRIMITIVE		;Type
 			FCB 0					;Flags
 			
-			;Only get here from ExecThread. Don't need return value
+			TODO: check stack space left to prevent underflow
+			
+			;Drop return address
 			PLA
 			PLA
 			
-			TODO: check stack space left to prevent underflow
-						
 			;Push current thread address to stack
 			LDA exec_ptr
 			CLC
@@ -1138,13 +1089,14 @@
 			STA exec_ptr+1
 			PLA 
 			STA exec_ptr
+			
 			JMP ExecThread
-	
-	TODO: Get ride of word and check in ExecThread?
+			
+	TODO: Get rid of word and check in ExecThread?
 	WORD_DONE:
 		FCB 0,""				;Name
-		FDB WORD_DO				;Next word
-		FCB TOKEN_DONE			;ID - 62
+		FDB WORD_BREAK			;Next word
+		FCB TOKEN_DONE			;ID - 58
 		CODE_DONE:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB 0							;Flags
@@ -1152,50 +1104,78 @@
 			;Drop return address
 			PLA
 			PLA
-						
-			;;Pop next address or return if no addresses left
-			;TXA
-			;TAY
-			;TSX
-			;TODO: is there always ONLY exactly one address on stack?
-			;CPX #R_STACK_SIZE-3
-			;BEQ .return
-			;	;Restore thread
-			;	PLA
-			;	STA exec_ptr
-			;	PLA
-			;	STA exec_ptr+1
-			;	TYA
-			;	TAX
-			;	JMP ExecThread
-			;.return:
-			;TYA
-			;TAX
-			;RTS
 			
 			;Pop next address or return if no addresses left
 			PLA
 			STA exec_ptr
 			PLA
 			STA exec_ptr+1
-			ORA exec_ptr
-			BEQ .return
-				JMP ExecThread
-			.return:
-			RTS
+			JMP ExecThread
 	
+	TODO: necessary to reset stack?
+	;Break out of all threads but continue processing input
+	WORD_BREAK:
+		FCB 0,""				;Name
+		FDB WORD_QUIT			;Next word
+		FCB TOKEN_BREAK			;ID - 60
+		CODE_BREAK:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB 0							;Flags
+			
+			;Reset R stack
+			TXA
+			LDX #R_STACK_SIZE-1
+			TXS
+			TAX
+			
+			TODO: empty AUS_STACK
+			JMP main.process_loop
+			
+	WORD_QUIT:
+		FCB 4,"QUIT"			;Name
+		FDB WORD_STO_THREAD		;Next word
+		FCB TOKEN_QUIT			;ID - 62
+		CODE_QUIT:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB 0							;Flags
+			
+			;Clear input buffer
+			LDA input_buff_begin
+			STA input_buff_end
+			
+			JMP CODE_BREAK+EXEC_HEADER
+	
+	WORD_STO_THREAD:
+		FCB 0,""				;Name
+		FDB WORD_DO				;Next word
+		FCB TOKEN_STO_THREAD	;ID - 64
+		CODE_STO_THREAD:
+			FCB OBJ_PRIMITIVE	;Type
+			FCB 0				;Flags
+			
+			LDY #1
+			LDA (exec_ptr),Y
+			STA obj_address
+			INY
+			LDA (exec_ptr),Y
+			STA obj_address+1
+			
+			LDA #2
+			JSR IncExecPtr
+			
+			LDY #0
+			JMP CODE_STO.copy_data
+			
 	WORD_DO:
 		FCB 2,"DO"				;Name
 		FDB dict_begin			;Next word
-		FCB TOKEN_DO			;ID - 64
+		FCB TOKEN_DO			;ID - 66
 		CODE_DO:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN2|FLOATS|IMMED|COMPILE	;Flags
 			
 			RTS
 			
-			
-		
 			
 	;LOOP			60
 	;+LOOP			62
@@ -1288,13 +1268,14 @@
 		FDB CODE_STRING				;44
 		FDB CODE_HALT				;46
 		FDB CODE_VAR				;48
-		FDB CODE_VAR_DATA			;50
-		FDB CODE_VAR_THREAD			;52
-		FDB CODE_STO				;54
-		FDB CODE_FREE				;56
-		FDB CODE_SECONDARY			;58
-		FDB CODE_SECONDARY_THREAD	;60
-		FDB CODE_DONE				;62
-		FDB CODE_DO					;64
+		FDB CODE_VAR_THREAD			;50
+		FDB CODE_STO				;52
+		FDB CODE_FREE				;54
+		FDB CODE_SECONDARY			;56
+		FDB CODE_DONE				;58
+		FDB CODE_BREAK				;60
+		FDB CODE_QUIT				;62
+		FDB CODE_STO_THREAD			;64
+		FDB CODE_DO					;66
 		
 		

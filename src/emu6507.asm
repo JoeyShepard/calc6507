@@ -33,6 +33,12 @@
 		LDA 1
 		CMP #9
 		BNE .loop_begin
+		
+		;Only use bottom 48 bytes of stack
+		;May need a lot more for R stack
+		TODO: expand this - will need a lot of stack space
+		LDX #R_STACK_SIZE-1
+		TXS
 		LDA 3
 		PHA
 		LDA 2
@@ -69,7 +75,7 @@
 		
 	END
 
-	FUNC gfx_setup
+	FUNC GfxSetup
 		
 		;Emulator only!
 		MOV #BANK_GFX_RAM1,RAM_BANK2		

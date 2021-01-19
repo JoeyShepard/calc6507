@@ -5,8 +5,8 @@
 		STA input_buff_begin
 		STA input_buff_end
 		STA new_word_len
-		STA exec_ptr
-		STA exec_ptr+1
+		
+		LDX #0
 	END
 	
 	SPECIAL_CHARS_LEN = 16	;2+13+1
@@ -864,8 +864,6 @@
 		LDY #0
 		LDA (ret_address),Y
 		
-		TODO: probably not necessary
-		TODO: is primitve type marking even useful? at least for exec it is
 		;Check type
 		CMP #OBJ_PRIMITIVE
 		BEQ .exec_primitive
@@ -956,7 +954,7 @@
 				TAX
 			.type_check_done:
 			
-			;check if compile only
+			;Check if compile only
 			LDA flags
 			AND #COMPILE
 			BEQ .mode_check_done
@@ -991,14 +989,8 @@
 			CALL ExecToken
 			LDA ret_val
 			BEQ .no_error
-				
-				;Something in the thread caused an error
-				;Dump all threads and return to top level
-				TXA
-				LDX #R_STACK_SIZE-3
-				TXS
-				TAX
-				RTS
+				CALL ErrorMsg
+				JMP CODE_QUIT+EXEC_HEADER
 			.no_error:
 			
 			;Same size and faster than IncExecPtr by 1
@@ -1112,6 +1104,7 @@
 			LDA #ERROR_OUT_OF_MEM
 			STA ret_val
 		.mem_good:
+		
 	END
 	
 	;Token in A
@@ -1119,25 +1112,18 @@
 		VARS
 			BYTE token
 			BYTE user_defined
-			WORD flag_ptr
 		END
 		
 		STA token
 		TAY
-		LDA JUMP_TABLE-2,Y
-		STA flag_ptr
-		LDA JUMP_TABLE-1,Y
-		STA flag_ptr+1
-		LDY #1
-		LDA (flag_ptr),Y
-		AND #MODE_IMMEDIATE
-		BEQ .compile
-			;Execute if immediate word
-			LDA token
-			JMP ExecToken
-		.compile:
-		
-		LDA #1
+		LDA #3
+		CPY #TOKEN_SECONDARY
+		BEQ .add_address
+		CPY #TOKEN_VAR_THREAD
+		BEQ .add_address
+			LDA #1
+		.add_address:
+		STA user_defined
 		CALL AllocMem
 		LDA ret_val
 		BEQ .success
@@ -1148,9 +1134,25 @@
 		LDA token
 		LDY #0
 		STA (dict_ptr),Y
-				
+		
+		;Write address after token if necessary
+		LDA user_defined
+		CMP #1
+		BEQ .return
+			CLC 
+			LDA obj_address
+			ADC #3
+			INY
+			STA (dict_ptr),Y
+			LDA obj_address+1
+			ADC #0
+			INY
+			STA (dict_ptr),Y
+		.return:
+		
 		;Adjust dict pointer
 		MOV.W new_dict_ptr,dict_ptr
+		
 	END
 	
 	
@@ -1185,14 +1187,10 @@
 		LDA ret_val
 		BEQ .alloc_good
 			;Alloc failed - out of memory
-			;Skip caller and return to top level
 			TODO: test!
-			TODO: test STO->VAR->WriteHeader->Alloc. cant return to caller!!!
-			
-			halt
-			
-			TODO: return based on pointer
-			;RTS
+			LDA #ERROR_OUT_OF_MEM
+			STA ret_val
+			BNE .return
 		.alloc_good:
 		
 		;Setup header for new word
@@ -1221,9 +1219,10 @@
 			LDY src_index
 			DEC count
 			BNE .header_loop
-		LDA #WORD_HEADER_SIZE-1
-		SEC
-		;CLC
+		
+		.return:
+		LDA #WORD_HEADER_SIZE
+		CLC
 		ADC ptr
 		TAY
 		LDA ptr+1
@@ -1234,8 +1233,7 @@
 		
 	END
 	
-	;Insert token and 16 bit arg into thread
-	;Token in A, obj_address points to arg base
+	;Token in A
 	FUNC TokenArgThread
 		
 		PHA
@@ -1263,7 +1261,9 @@
 		ADC #0
 		INY
 		STA (dict_ptr),Y
+		
+		;May be better to do after call in some cases
+		MOV.W new_dict_ptr,dict_ptr
 			
 	END
-	
 	

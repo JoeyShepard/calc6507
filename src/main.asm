@@ -171,13 +171,6 @@ LOCALS_END set		$1F
 			BYTE arg,type
 		END
 		
-		;Only use bottom 48 bytes of stack
-		;May need a lot more for R stack
-		;Must come before any JSR
-		TODO: expand this - will need a lot of stack space
-		LDX #R_STACK_SIZE-1
-		TXS
-		
 		TODO: copyright
 		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
 		
@@ -185,10 +178,9 @@ LOCALS_END set		$1F
 		CALL tests
 		;CALL file_tests
 		CALL stats
-		CALL gfx_setup
+		CALL GfxSetup
 		
-		;Reset data stack pointer
-		LDX #0
+		CALL InitForth
 		
 		.input_loop:
 			;Colon definitions must fit on one line
@@ -200,7 +192,7 @@ LOCALS_END set		$1F
 				LDA #ERROR_INPUT
 				JMP .error_sub
 			.mode_good:
-			
+						
 			;Reset dict_ptr in case anything went wrong below
 			MOV.W dict_save,dict_ptr
 			
@@ -217,6 +209,7 @@ LOCALS_END set		$1F
 				LDA new_word_len
 				BEQ .input_loop
 				
+				TODO: need to copy obj_address to ret_address in new design?
 				CALL FindWord
 				LDA ret_val
 				BEQ .word_not_found
@@ -225,22 +218,51 @@ LOCALS_END set		$1F
 					LDA mode
 					CMP #MODE_IMMEDIATE
 					BNE .compile_word
-					
-						halt
 						
-						;Immediate mode - execute word
+						;Immediate mode - insert word into temp thread and execute
+						.immediate:
+						LDY #TOKEN_BREAK
 						LDA ret_val
-						CALL ExecToken
-						LDA ret_val
-						BEQ .no_exec_error
-							JMP .error_sub
-						.no_exec_error:
-						JMP .process_loop
+						STA temp_thread
+						CMP #TOKEN_SECONDARY
+						BEQ .insert_address
+						CMP #TOKEN_VAR_THREAD
+						BEQ .insert_address
+							STY temp_thread+1
+							JMP .jump_thread
+						.insert_address:
+						;Secondaries and variables need address in stream
+						CLC
+						LDA obj_address
+						ADC #3
+						STA temp_thread+1
+						LDA obj_address+1
+						ADC #0
+						STA temp_thread+2
+						STY temp_thread+3
+						.jump_thread:
+						LDA #temp_thread % 256
+						STA exec_ptr
+						LDA #temp_thread / 256
+						STA exec_ptr+1
+						JMP ExecThread
 					.compile_word:
 					
-					;Compile mode - compile word
+					;Compile mode
 					LDA ret_val
-					JSR WriteToken
+					TAY
+					LDA JUMP_TABLE-2,Y
+					TODO: sure ret_address isnt needed later?
+					STA ret_address
+					LDA JUMP_TABLE-1,Y
+					STA ret_address+1
+					LDY #1
+					LDA (ret_address),Y
+					AND #MODE_IMMEDIATE
+					BNE .immediate
+					;Not immediate so compile
+					LDA ret_val
+					CALL WriteToken
 					LDA ret_val
 					BEQ .no_compile_error
 						JMP .error_sub
@@ -261,7 +283,7 @@ LOCALS_END set		$1F
 				CMP #MODE_IMMEDIATE
 				BNE .compile_value
 				
-					;Immediate mode - add to stack
+					;Immediate mode - add value to stack
 					LDA #STACK_SIZE-1
 					CMP stack_count
 					BCS .no_overflow
@@ -322,9 +344,10 @@ LOCALS_END set		$1F
 				STA (dict_ptr),Y
 				CPY #8
 				BNE .loop
-				
+			
 			;Adjust dict pointer
 			MOV.W new_dict_ptr,dict_ptr
+			
 			JMP .process_loop
 	END
 	

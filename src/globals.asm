@@ -28,6 +28,9 @@
 	;extra RAM in RIOT - not preserved by backup battery
 	TODO: what else will fit in RIOT RAM?
 	
+	;Temporary Forth thread
+	temp_thread:		DFS 4
+	
 	;Math
 	TODO: move to zero page if room
 	TODO: rename these to something useful
@@ -36,6 +39,7 @@
 	BYTE math_a
 	BYTE math_b
 	BYTE math_c
+	TODO: double check that these are all used
 	BYTE math_d
 	BYTE math_signs
 	BYTE math_sticky

@@ -926,10 +926,6 @@
 		;check for division by zero
 		LDA R0+DEC_COUNT/2
 		BNE .no_zero_exit
-			;return to caller's caller
-			PLA
-			PLA
-			
 			LDA #ERROR_DIV_ZERO
 			STA ret_val
 			RTS
