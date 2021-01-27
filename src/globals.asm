@@ -21,6 +21,7 @@
 	;Rest of RAM for user dictionary
 	dict_begin:
 
+	TODO: magical number
 	ORG $800
 	dict_end:
 	
@@ -59,8 +60,10 @@
 		DFS AUX_STACK_SIZE
 		BYTE aux_stack_ptr
 		BYTE aux_stack_count
+		BYTE aux_word_counter
 	
 	RIOT_mem_end:
 	
+	TODO: magical number
 	ORG $880
 	

@@ -314,7 +314,7 @@
 	ERROR_MSG_OUT_OF_MEM:
 	FCB "OUT OF MEMORY ",0		;20
 	ERROR_MSG_STRUCTURE:
-	FCB "   MISMATCH   ",0		;22
+	FCB "  STRUCTURE   ",0		;22
 	
 	
 	TODO: table smaller than fixed length strings?

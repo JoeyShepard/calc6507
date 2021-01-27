@@ -6,14 +6,22 @@
 		STA input_buff_end
 		STA new_word_len
 		
+		;Auxiliary stack
+		TODO: abstract
+		STA aux_stack_count
+		STA aux_word_counter
+		LDA #AUX_STACK_SIZE-1
+		STA aux_stack_ptr
+		
+		;Data stack pointer
 		LDX #0
 	END
 	
-	SPECIAL_CHARS_LEN = 16	;2+13+1
+	SPECIAL_CHARS_LEN = 18	;2+15+1
 	special_chars:
-	FCB CHAR_EXP, CHAR_QUOTE			;2
-	FCB " .$+-*/'!@:;"					;13
-	FCB "s"
+	FCB CHAR_EXP, CHAR_QUOTE		;2
+	FCB " .$+-*/'!@:;=<>"			;15
+	FCB "s"							;1
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -1270,3 +1278,23 @@
 			
 	END
 	
+	;Overwrites current stack item!
+	FUNC HexFalse
+		LDA #0
+		JMP HEX_STUB
+	END
+	
+	FUNC HexTrue
+		LDA #$FF
+		JMP HEX_STUB
+	END
+	
+	HEX_STUB:
+		STA HEX_SUM+1,X
+		STA HEX_SUM,X
+		LDA #0
+		STA HEX_TYPE,X
+		LDA #OBJ_HEX
+		STA 0,X
+		RTS 
+		

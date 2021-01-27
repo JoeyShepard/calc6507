@@ -1,1 +1,2 @@
-: U DO LOOP ;
+: U 0 5 0 DO 10 5 DO I J * + LOOP LOOP ;
+

@@ -147,7 +147,8 @@
 			RTS
 	
 	WORD_CLEAR:
-		FCB 5,"CLEAR"			;Name
+		;FCB 5,"CLEAR"			;Name
+		FCB 3,"CLR"				;Name
 		FDB WORD_ADD			;Next word
 		FCB TOKEN_CLEAR			;ID - 14
 		CODE_CLEAR:
@@ -172,13 +173,13 @@
 			
 			;Adding floats
 			CMP #OBJ_FLOAT
-			BNE add_not_float
-				ADD_FLOAT:
+			BNE .not_float
+				.float:
 					JSR TosR0R1
 					JSR BCD_Add
 					JSR CODE_DROP+EXEC_HEADER
 					JMP RansTos
-			add_not_float:
+			.not_float:
 			
 			;Adding strings
 			CMP #OBJ_STR
@@ -253,13 +254,13 @@
 			
 			;Subtracting floats
 			CMP #OBJ_FLOAT
-			BNE sub_not_float
-				SUB_FLOAT:
+			BNE .not_float
+				.float:
 					LDA EXP_HI,X
 					EOR #SIGN_BIT
 					STA EXP_HI,X
-					JMP ADD_FLOAT
-			sub_not_float:
+					JMP CODE_ADD.float
+			.not_float:
 			
 			;Subtracting hex objects
 			LDA HEX_TYPE,X
@@ -267,6 +268,7 @@
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex
 				;Both raw hex
+				.hex:
 				SEC
 				LDA OBJ_SIZE+HEX_SUM,X
 				SBC HEX_SUM,X
@@ -759,6 +761,8 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB IMMED|COMPILE	;Flags
 			
+			TODO: check if addresses on aux stack
+			
 			LDA #MODE_IMMEDIATE
 			STA mode
 			
@@ -1161,7 +1165,8 @@
 			TAX
 			
 			JMP main.process_loop
-			
+	
+	TODO: only used on error?
 	WORD_QUIT:
 		FCB 4,"QUIT"			;Name
 		FDB WORD_STO_THREAD		;Next word
@@ -1173,6 +1178,10 @@
 			;Clear input buffer
 			LDA input_buff_begin
 			STA input_buff_end
+			
+			;Reset aux stack
+			LDA #0
+			STA aux_stack_count
 			
 			JMP CODE_BREAK+EXEC_HEADER
 	
@@ -1214,10 +1223,10 @@
 			.mem_good:
 			
 			;LDY aux_stack_ptr - Y set after AuxPushShort
-			;+1 to point to next byte though LOOP adds +3 so -2 here
+			;LOOP adds +3 so -3 here
 			SEC
 			LDA dict_ptr
-			SBC #2
+			SBC #3
 			STA AUX_STACK+1,Y
 			LDA dict_ptr+1
 			SBC #0
@@ -1240,9 +1249,46 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN2|FLOATS					;Flags
 			
-			halt
+			;Check if room on aux stack
+			LDA aux_stack_count
+			CMP #AUX_STACK_COUNT
+			BNE .mem_good
+				LDA #ERROR_OUT_OF_MEM
+				STA ret_val
+				RTS
+			.mem_good:
+			INC aux_stack_count
 			
-			RTS
+			;Decrease stack pointer
+			SEC
+			LDA aux_stack_ptr
+			SBC #AUX_STACK_ITEM_SIZE
+			STA aux_stack_ptr
+			TAY
+			LDA aux_word_counter
+			STA AUX_STACK,Y
+			
+			;Copy values from stack to aux stack
+			LDA #OBJ_SIZE-TYPE_SIZE
+			STA R0
+			.loop:
+				LDA TYPE_SIZE,X
+				STA AUX_STACK+AUX_ITER_OFFSET,Y
+				LDA TYPE_SIZE+OBJ_SIZE,X
+				STA AUX_STACK+AUX_LIMIT_OFFSET,Y
+				INX
+				INY
+				DEC R0
+				BNE .loop
+			
+			;Reset data stack pointer
+			TXA
+			SEC
+			SBC #8
+			TAX
+			
+			JSR CODE_DROP+EXEC_HEADER
+			JMP CODE_DROP+EXEC_HEADER
 			
 	WORD_LOOP:
 		FCB 4,"LOOP"			;Name
@@ -1259,6 +1305,7 @@
 				RTS
 			.pop_good:
 			
+			TODO: abstract?
 			;Address right type?
 			LDY aux_stack_ptr
 			LDA AUX_STACK-3,Y
@@ -1281,21 +1328,300 @@
 	
 	WORD_LOOP_THREAD:
 		FCB 0,""				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_EQUAL			;Next word
 		FCB TOKEN_LOOP_THREAD	;ID - 72
 		CODE_LOOP_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB 0							;Flags
 			
-			halt
+			TODO: abstract
+			;Copy aux stack item to temp register
+			LDY aux_stack_ptr
+			TXA
+			PHA
+			LDX #OBJ_SIZE-TYPE_SIZE
+			.loop:
+				;ie, end of pair which is last byte of iterator in limit/iterator pair
+				LDA AUX_STACK+AUX_ITER_OFFSET+OBJ_SIZE-TYPE_SIZE-1,Y
+				STA R0,X
+				LDA #0
+				STA R1,X
+				DEY
+				DEX
+				BNE .loop
+			PLA
+			TAX
+			
+			;Set leading digit of R1 to 1, ie 1e0
+			LDA #$10
+			STA R1+6
+			
+			;Increment iterator
+			JSR BCD_Add
+			
+			;Copy iterator back to aux stack and iterator and limit to temp regs
+			LDY aux_stack_ptr
+			TXA
+			PHA
+			LDX #OBJ_SIZE-TYPE_SIZE
+			.copy_loop:
+				LDA R_ans,X
+				STA AUX_STACK+AUX_ITER_OFFSET+OBJ_SIZE-TYPE_SIZE-1,Y
+				STA R0,X
+				LDA AUX_STACK+AUX_LIMIT_OFFSET+OBJ_SIZE-TYPE_SIZE-1,Y
+				STA R1,X
+				DEY
+				DEX
+				BNE .copy_loop
+			PLA
+			TAX
+			
+			;Compare iterator to limit
+			LDA R0+EXP_HI
+			EOR #SIGN_BIT
+			STA R0+EXP_HI
+			JSR BCD_Add
+			
+			;Iterator reached limit?
+			LDA R_ans+DEC_COUNT/2
+			BEQ .loop_done
+			
+			;Iterator overshot limit?
+			LDA R_ans+EXP_HI
+			AND #SIGN_BIT
+			BNE .loop_done
+			
+				;Haven't reached limit. Jump to head of loop
+				LDY #1
+				LDA (exec_ptr),Y
+				PHA
+				INY
+				LDA (exec_ptr),Y
+				STA exec_ptr+1
+				PLA 
+				STA exec_ptr
+				RTS
+			
+			.loop_done:
+			
+			;Pop limit and iterator off aux stack
+			CLC
+			LDA aux_stack_ptr
+			ADC #AUX_STACK_ITEM_SIZE
+			STA aux_stack_ptr
+			DEC aux_stack_count
 			
 			LDA #2
 			JMP IncExecPtr
+	
+	COMPARISON_STUB:
+		LDA 0,X
+		CMP #OBJ_FLOAT
+		BNE .not_float
+			;Float
+			JSR CODE_SUB.float
+			LDA #OBJ_FLOAT
+			RTS
+		.not_float:
+		CMP #OBJ_HEX
+		BNE .not_hex
+			;Hex 
+			JSR CODE_SUB.hex
+			LDA #OBJ_HEX
+			RTS
+		.not_hex:
+		
+		TODO: compare strings
+	
+		LDA #ERROR_WRONG_TYPE
+		STA ret_val
+		;Return to caller!
+		PLA
+		PLA
+		RTS
+	
+	WORD_EQUAL:
+		FCB 1,"="				;Name
+		FDB WORD_GT				;Next word
+		FCB TOKEN_EQUAL			;ID - 74
+		CODE_EQUAL:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|SAME					;Flags
+
+			JSR COMPARISON_STUB
 			
+			CMP #OBJ_FLOAT
+			BNE .not_float
 			
+				;Float
+				LDA DEC_COUNT/2,X
+				BNE .false
+					JMP HexTrue
+				.false:
+				JMP HexFalse
+			.not_float:
 			
-	;LIT
-	;LOOP			60
+			;Hex
+			LDA HEX_SUM,X
+			ORA HEX_SUM+1,X
+			BNE .false
+			JMP HexTrue
+			
+	WORD_GT:
+		FCB 1,">"				;Name
+		FDB WORD_LT				;Next word
+		FCB TOKEN_GT			;ID - 76
+		CODE_GT:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|SAME					;Flags
+			
+			LDA 0,X
+			CMP #OBJ_HEX
+			BNE .not_hex
+			
+				;Hex
+				;Must subtract here to observe sign
+				TODO: set sign in hex_sub?
+				SEC
+				LDA HEX_SUM+OBJ_SIZE,X
+				SBC HEX_SUM,X
+				STA R0
+				LDA HEX_SUM+OBJ_SIZE+1,X
+				SBC HEX_SUM+1,X
+				BCC .false
+				ORA R0
+				BEQ .false
+				JMP HexTrue
+			.not_hex:
+			
+			JSR COMPARISON_STUB
+			
+			;Float
+			LDA EXP_HI,X
+			AND #SIGN_BIT
+			BNE .false
+				LDA DEC_COUNT/2,X
+				BEQ .false
+				JMP HexTrue
+			.false:
+			JMP HexFalse
+			
+	WORD_LT:
+		FCB 1,"<"				;Name
+		FDB WORD_NEQ			;Next word
+		FCB TOKEN_LT			;ID - 78
+		CODE_LT:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|SAME					;Flags
+
+			JSR CODE_SWAP+EXEC_HEADER
+			JMP CODE_GT+EXEC_HEADER
+	
+	WORD_NEQ:
+		FCB 2,"<>"				;Name
+		FDB WORD_I				;Next word
+		FCB TOKEN_NEQ			;ID - 80
+		CODE_NEQ:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|SAME					;Flags
+			
+			JSR CODE_EQUAL+EXEC_HEADER
+			LDA ret_val
+			BEQ .no_error
+				RTS
+			.no_error:
+			
+			;Invert return value
+			LDA HEX_SUM,X
+			EOR #$FF
+			STA HEX_SUM,X
+			LDA HEX_SUM+1,X
+			EOR #$FF
+			STA HEX_SUM+1,X
+			
+			RTS
+			
+	WORD_I:
+		FCB 1,"I"				;Name
+		FDB WORD_J				;Next word
+		FCB TOKEN_I				;ID - 82
+		CODE_I:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB ADD1 						;Flags
+			
+			LDA aux_stack_count
+			BNE .count_good
+				.error_exit:
+				LDA #ERROR_STRUCTURE
+				STA ret_val
+				JMP CODE_DROP+EXEC_HEADER
+			.count_good:
+			
+			LDA aux_stack_ptr
+			
+			;Entry point for J and K
+			.push_stack:
+			TAY
+			LDA #OBJ_FLOAT
+			STA 0,X
+			LDA #OBJ_SIZE-TYPE_SIZE
+			STA R0
+			.loop:
+				LDA AUX_STACK+AUX_ITER_OFFSET,Y
+				STA 1,X
+				INX
+				INY
+				DEC R0
+				BNE .loop
+			
+			TODO: abstract
+			;Reset stack pointer
+			SEC
+			TXA
+			SBC #OBJ_SIZE-TYPE_SIZE
+			TAX
+			
+			RTS
+	
+	WORD_J:
+		FCB 1,"J"				;Name
+		FDB WORD_K				;Next word
+		FCB TOKEN_J				;ID - 82
+		CODE_J:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB ADD1 						;Flags
+			
+			LDA aux_stack_count
+			CMP #2
+			BCC CODE_I.error_exit
+			
+			LDA aux_stack_ptr
+			CLC
+			ADC #AUX_STACK_ITEM_SIZE
+			
+			JMP CODE_I.push_stack
+	
+	WORD_K:
+		FCB 1,"K"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_K				;ID - 82
+		CODE_K:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB ADD1 						;Flags
+			
+			TODO: test!
+			
+			LDA aux_stack_count
+			CMP #3
+			BCC CODE_I.error_exit
+			
+			LDA aux_stack_ptr
+			CLC
+			ADC #AUX_STACK_ITEM_SIZE*2
+			
+			JMP CODE_I.push_stack
+	
+	
 	;+LOOP			62
 	;I				64
 	;J				66
@@ -1309,13 +1635,9 @@
 	;WHILE			82
 	;UNTIL			84
 	;AGAIN			86
-	;=				88
-	;<>				90
-	;>				92
-	;<				94
-	;>=				96
-	;<=				98
-	;FORGET			100
+	;>=				96		;omit to save space
+	;<=				98		;omit to save space
+	;FORGET			100		;do in MEM window
 	;ABS			102
 	;SIN			104
 	;COS			106
@@ -1335,16 +1657,15 @@
 	;LSHIFT			134
 	;RSHIFT			136
 	;GRAPH			138
-	;DEPTH			140
-	;HERE			142
-		;may be useful even without CREATE
+	;LIT			144
+	;MEM			146
 	
 	;Optional:
 	;IMMED
 	;COMPILE
 	;PI
 	;RESET
-	;RDROP
+	;RDROP		;actually better not expose to user
 	;R>
 	;R<
 	;R@
@@ -1360,6 +1681,9 @@
 	;addresses from ZP, dict, etc onto stack
 	;'STO or STO" or similar for indirection on stack
 		;hmm, now mismatched though :(
+	;DEPTH
+	;HERE
+		;may be useful even without CREATE
 	
 	JUMP_TABLE:
 		FDB CODE_DUP				;2
@@ -1398,5 +1722,13 @@
 		FDB CODE_DO_THREAD			;68
 		FDB CODE_LOOP				;70
 		FDB CODE_LOOP_THREAD		;72
+		FDB CODE_EQUAL				;74
+		FDB CODE_GT					;76
+		FDB CODE_LT					;78
+		FDB CODE_NEQ				;80
+		FDB CODE_I					;82
+		FDB CODE_J					;84
+		FDB CODE_K					;86
+		
 		
 		

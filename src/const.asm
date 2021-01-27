@@ -138,6 +138,13 @@
 		TOKEN_DO_THREAD =			68
 		TOKEN_LOOP =				70
 		TOKEN_LOOP_THREAD =			72
+		TOKEN_EQUAL =				74
+		TOKEN_GT =					76
+		TOKEN_LT =					78
+		TOKEN_NEQ =					80
+		TOKEN_I =					82
+		TOKEN_J =					84
+		TOKEN_K =					86
 		
 		;Execution modes
 		EXEC_INPUT =		0
@@ -170,15 +177,32 @@
 			;1 - type
 			;2 - old address
 		
-		;Auxilliary stack for DO loops and IF addresses			
-		AUX_STACK_ITEM_SIZE =	10	;1 type, 1 func ID, 8 data
-		AUX_STACK_COUNT =		8
+		;Auxilliary stack for DO loops and IF addresses	in compile mode
+		
+		;v1
+		;AUX_STACK_ITEM_SIZE =	10		;1 type, 1 func ID, 8 data
+		;AUX_STACK_COUNT =		8
+		;AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
+		
+		;v2
+		;only LOOP values on stack so no type byte!
+		;AUX_STACK_ITEM_SIZE =	9		;1 func ID, 8 data
+		;AUX_STACK_COUNT =		8
+		;AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
+		
+		;v3
+		;LOOP values only need one type byte per pair
+		AUX_STACK_ITEM_SIZE =	(1+8+8)	;1 func ID, 8 for limit, 8 for iterator
+		AUX_STACK_COUNT =		4
 		AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
+		AUX_LIMIT_OFFSET =		1		;limit data begins after type byte
+		AUX_ITER_OFFSET =		9		;iterator data begins after limit data
+		
 		;Reused at compile time to hold addresses
 		AUX_STACK_SHORT_SIZE =	AUX_STACK_SIZE / 3
 		
 		;Data types for auxilliary stack
-		AUX_TYPE_DO = 1
+		AUX_TYPE_DO =					1
 			
 	
 	

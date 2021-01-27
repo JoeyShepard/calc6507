@@ -4,6 +4,7 @@
 ;Type in A
 FUNC AuxPushShort
 	
+	TODO: off by 1?
 	INC aux_stack_count
 	LDY aux_stack_count
 	CPY #AUX_STACK_SHORT_SIZE
@@ -28,7 +29,7 @@ FUNC AuxPopShort
 	BNE .stack_good
 		LDA #ERROR_STRUCTURE
 		STA ret_val
-		;RTS - doesnt matter
+		RTS 		;could omit
 	.stack_good:
 	DEC aux_stack_count
 	CLC
@@ -38,3 +39,5 @@ FUNC AuxPopShort
 	
 END
 
+
+TODO: reset aux stack on error
