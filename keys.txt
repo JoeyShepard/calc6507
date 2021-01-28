@@ -2,3 +2,6 @@
 : A X 1 DO X 1 DO I J K * * + LOOP LOOP ;
 : B X 1 DO X 1 DO A LOOP LOOP ;
 0 B
+: FOO 5 BEGIN 1 - DUP 0 = UNTIL ;
+FOO
+

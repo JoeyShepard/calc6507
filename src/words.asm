@@ -1408,16 +1408,18 @@
 			AND #SIGN_BIT
 			BNE .loop_done
 			
-				;Haven't reached limit. Jump to head of loop
-				LDY #1
-				LDA (exec_ptr),Y
-				PHA
-				INY
-				LDA (exec_ptr),Y
-				STA exec_ptr+1
-				PLA 
-				STA exec_ptr
-				RTS
+				;;Haven't reached limit. Jump to head of loop
+				;LDY #1
+				;LDA (exec_ptr),Y
+				;PHA
+				;INY
+				;LDA (exec_ptr),Y
+				;STA exec_ptr+1
+				;PLA 
+				;STA exec_ptr
+				;RTS
+			
+				JMP CODE_AGAIN_THREAD+EXEC_HEADER
 			
 			.loop_done:
 			
@@ -1728,9 +1730,9 @@
 			RTS
 			
 	WORD_AGAIN:
-		FCB 5,"AGAIN"		;Name
-		FDB dict_begin		;Next word
-		FCB TOKEN_AGAIN		;ID - 92
+		FCB 5,"AGAIN"			;Name
+		FDB WORD_AGAIN_THREAD	;Next word
+		FCB TOKEN_AGAIN			;ID - 92
 		CODE_AGAIN:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB IMMED|COMPILE				;Flags
@@ -1764,15 +1766,12 @@
 	TODO: remove all 0 length words from dictionary - dont need dict header
 	WORD_AGAIN_THREAD:
 		FCB 0,""				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_UNTIL			;Next word
 		FCB TOKEN_AGAIN_THREAD	;ID - 94
 		CODE_AGAIN_THREAD:
 			FCB OBJ_PRIMITIVE			;Type
 			FCB 0						;Flags
 			
-			halt
-			
-			TODO: reuse for LOOP_THREAD
 			LDY #1
 			LDA (exec_ptr),Y
 			PHA
@@ -1782,17 +1781,91 @@
 			PLA 
 			STA exec_ptr
 			RTS
-						
+	
+	WORD_UNTIL:
+		FCB 5,"UNTIL"			;Name
+		FDB WORD_UNTIL_THREAD	;Next word
+		FCB TOKEN_UNTIL			;ID - 96
+		CODE_UNTIL:
+			FCB OBJ_PRIMITIVE			;Type
+			FCB COMPILE|IMMED			;Flags
+			
+			;At least one address on aux stack?
+			JSR AuxPopShort
+			LDA ret_val
+			BEQ .pop_good
+				RTS
+			.pop_good:
+			
+			TODO: abstract?
+			;Address right type?
+			LDY aux_stack_ptr
+			LDA AUX_STACK-3,Y
+			CMP #AUX_TYPE_BEGIN
+			BEQ .type_good
+				LDA #ERROR_STRUCTURE
+				STA ret_val
+				RTS
+			.type_good:
+			
+			;Lay down UNTIL_THREAD TOKEN
+			LDA AUX_STACK-2,Y
+			STA obj_address
+			LDA AUX_STACK-1,Y
+			STA obj_address+1
+			LDA #TOKEN_UNTIL_THREAD
+			JMP TokenArgThread
+				
+	WORD_UNTIL_THREAD:
+		FCB 0,""				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_UNTIL_THREAD	;ID - 98
+		CODE_UNTIL_THREAD:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1						;Flags
+			
+			LDA 0,X
+			CMP #OBJ_FLOAT
+			BNE .not_float
+				
+				;Float
+				LDA DEC_COUNT/2,X
+				JMP .handle
+			.not_float:
+			CMP #OBJ_HEX
+			BNE .string
+				
+				;Hex
+				LDA HEX_SUM,X
+				ORA HEX_SUM+1,X
+				JMP .handle
+			.string:
+				
+				;String
+				LDA 1,X
+			
+			.handle:
+				BNE .done
+			
+				;Jump back to BEGIN
+				JSR CODE_DROP+EXEC_HEADER
+				JMP CODE_AGAIN_THREAD+EXEC_HEADER
+			.done:
+				
+				;Done with loop
+				JSR CODE_DROP+EXEC_HEADER
+				LDA #2
+				JMP IncExecPtr
+	
+				
+				
 					
 	;IF				70
 	;ELSE			72
 	;THEN			74
 	;MOD			76
-	;EXIT WORD		78
-	;BEGIN			80
 	;WHILE			82
 	;UNTIL			84
-	;AGAIN			86
 	;REPEAT
 	;>=				96		;omit to save space
 	;<=				98		;omit to save space
@@ -1893,6 +1966,9 @@
 		FDB CODE_BEGIN				;90
 		FDB CODE_AGAIN				;92
 		FDB CODE_AGAIN_THREAD		;94
+		FDB CODE_UNTIL				;96
+		FDB CODE_UNTIL_THREAD		;98
+		
 		
 		
 		

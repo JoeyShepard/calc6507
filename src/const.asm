@@ -149,6 +149,8 @@
 		TOKEN_BEGIN =				90
 		TOKEN_AGAIN =				92
 		TOKEN_AGAIN_THREAD =		94
+		TOKEN_UNTIL =				96
+		TOKEN_UNTIL_THREAD =		98
 		
 		;Execution modes
 		EXEC_INPUT =		0
