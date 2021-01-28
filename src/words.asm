@@ -1093,7 +1093,7 @@
 	
 	WORD_SECONDARY:
 		FCB 0,""					;Name
-		FDB WORD_DONE				;Next word
+		FDB WORD_EXIT				;Next word
 		FCB TOKEN_SECONDARY			;ID - 56
 		CODE_SECONDARY:
 			FCB OBJ_PRIMITIVE		;Type
@@ -1104,6 +1104,9 @@
 			;Drop return address
 			PLA
 			PLA
+			
+			;Increase word counter
+			INC aux_word_counter
 			
 			;Push current thread address to stack
 			LDA exec_ptr
@@ -1128,28 +1131,26 @@
 			
 			JMP ExecThread
 			
-	TODO: Get rid of word and check in ExecThread?
-	WORD_DONE:
-		FCB 0,""				;Name
+	WORD_EXIT:
+		FCB 4,"EXIT"			;Name
 		FDB WORD_BREAK			;Next word
-		FCB TOKEN_DONE			;ID - 58
-		CODE_DONE:
+		FCB TOKEN_EXIT			;ID - 58
+		CODE_EXIT:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB 0							;Flags
+			FCB COMPILE|IMMED				;Flags
 			
 			;Drop return address
 			PLA
 			PLA
 			
-			;Pop next address or return if no addresses left
-			PLA
-			STA exec_ptr
-			PLA
-			STA exec_ptr+1
-			JMP ExecThread
+			;Lay down DO_THREAD TOKEN
+			LDA #TOKEN_EXIT_THREAD
+			STA ret_val
+			JMP main.compile_word
 	
 	TODO: necessary to reset stack?
 	;Break out of all threads but continue processing input
+	;(ending token for top level thread)
 	WORD_BREAK:
 		FCB 0,""				;Name
 		FDB WORD_QUIT			;Next word
@@ -1166,7 +1167,7 @@
 			
 			JMP main.process_loop
 	
-	TODO: only used on error?
+	;Reset buffers and r and aux stacks
 	WORD_QUIT:
 		FCB 4,"QUIT"			;Name
 		FDB WORD_STO_THREAD		;Next word
@@ -1179,11 +1180,28 @@
 			LDA input_buff_begin
 			STA input_buff_end
 			
+			TODO: abstract
 			;Reset aux stack
 			LDA #0
 			STA aux_stack_count
+			STA aux_word_counter
+			LDA #AUX_STACK_SIZE-1
+			STA aux_stack_ptr
 			
-			JMP CODE_BREAK+EXEC_HEADER
+			;Continues processing input so can't use
+			;JMP CODE_BREAK+EXEC_HEADER
+			
+			TODO: combine with above?
+			;Reset R stack
+			TXA
+			LDX #R_STACK_SIZE-1
+			TXS
+			TAX
+			
+			LDA #MODE_IMMEDIATE
+			STA mode
+			
+			JMP main.mode_good
 	
 	WORD_STO_THREAD:
 		FCB 0,""				;Name
@@ -1232,6 +1250,7 @@
 			SBC #0
 			STA AUX_STACK+2,Y
 			
+			TODO: abstract next 5 lines?
 			;Drop return address
 			PLA
 			PLA
@@ -1324,8 +1343,6 @@
 			LDA #TOKEN_LOOP_THREAD
 			JMP TokenArgThread
 			
-			RTS
-	
 	WORD_LOOP_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_EQUAL			;Next word
@@ -1541,6 +1558,19 @@
 			
 			RTS
 			
+	TODO: abstract
+	TODO: move helper routines to forth.asm?
+	WITHIN_WORD:
+		LDA aux_word_counter
+		BNE .good
+			LDA #ERROR_COMPILE_ONLY
+			STA ret_val
+			PLA
+			PLA
+			RTS
+		.good:
+		RTS
+	
 	WORD_I:
 		FCB 1,"I"				;Name
 		FDB WORD_J				;Next word
@@ -1548,6 +1578,8 @@
 		CODE_I:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB ADD1 						;Flags
+			
+			JSR WITHIN_WORD
 			
 			LDA aux_stack_count
 			BNE .count_good
@@ -1586,10 +1618,12 @@
 	WORD_J:
 		FCB 1,"J"				;Name
 		FDB WORD_K				;Next word
-		FCB TOKEN_J				;ID - 82
+		FCB TOKEN_J				;ID - 84
 		CODE_J:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB ADD1 						;Flags
+			
+			JSR WITHIN_WORD
 			
 			LDA aux_stack_count
 			CMP #2
@@ -1603,13 +1637,13 @@
 	
 	WORD_K:
 		FCB 1,"K"				;Name
-		FDB dict_begin			;Next word
-		FCB TOKEN_K				;ID - 82
+		FDB WORD_EXIT_THREAD	;Next word
+		FCB TOKEN_K				;ID - 86
 		CODE_K:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB ADD1 						;Flags
 			
-			TODO: test!
+			JSR WITHIN_WORD
 			
 			LDA aux_stack_count
 			CMP #3
@@ -1621,11 +1655,135 @@
 			
 			JMP CODE_I.push_stack
 	
-	
-	;+LOOP			62
-	;I				64
-	;J				66
-	;K				68
+	WORD_EXIT_THREAD:
+		FCB 0,""				;Name
+		FDB WORD_BEGIN			;Next word
+		FCB TOKEN_EXIT_THREAD	;ID - 88
+		CODE_EXIT_THREAD:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB 0	 						;Flags
+			
+			;Dump any DO values
+			LDA aux_stack_count
+			BEQ .done
+			STA R0
+			.loop:
+				LDY aux_stack_ptr			
+				LDA AUX_STACK,Y
+				CMP aux_word_counter
+				BNE .done
+					TYA
+					CLC
+					ADC #AUX_STACK_ITEM_SIZE
+					STA aux_stack_ptr
+					DEC aux_stack_count
+					DEC R0
+					BNE .loop
+			.done:
+			
+			;Decrease word counter
+			LDA aux_word_counter
+			BEQ .no_dec
+				DEC aux_word_counter
+			.no_dec:
+			
+			;Drop return address
+			PLA
+			PLA
+			
+			;Pop next address or return if no addresses left
+			PLA
+			STA exec_ptr
+			PLA
+			STA exec_ptr+1
+			JMP ExecThread
+			
+	WORD_BEGIN:
+		FCB 5,"BEGIN"		;Name
+		FDB WORD_AGAIN		;Next word
+		FCB TOKEN_BEGIN		;ID - 90
+		CODE_BEGIN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB IMMED|COMPILE				;Flags
+			
+			LDA #AUX_TYPE_BEGIN
+			JSR AuxPushShort
+			LDA ret_val
+			BEQ .mem_good
+				RTS
+			.mem_good:
+			
+			TODO: abstract
+			;LDY aux_stack_ptr - Y set after AuxPushShort
+			;LOOP adds +3 so -3 here
+			SEC
+			LDA dict_ptr
+			;SBC #3		;LOOP skips DO_THREAD token
+			SBC #4		;no BEGIN_THREAD token to skip when jumping back
+			STA AUX_STACK+1,Y
+			LDA dict_ptr+1
+			SBC #0
+			STA AUX_STACK+2,Y
+			
+			RTS
+			
+	WORD_AGAIN:
+		FCB 5,"AGAIN"		;Name
+		FDB dict_begin		;Next word
+		FCB TOKEN_AGAIN		;ID - 92
+		CODE_AGAIN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB IMMED|COMPILE				;Flags
+			
+			;At least one address on aux stack?
+			JSR AuxPopShort
+			LDA ret_val
+			BEQ .pop_good
+				RTS
+			.pop_good:
+			
+			TODO: abstract?
+			;Address right type?
+			LDY aux_stack_ptr
+			LDA AUX_STACK-3,Y
+			CMP #AUX_TYPE_BEGIN
+			BEQ .type_good
+				LDA #ERROR_STRUCTURE
+				STA ret_val
+				RTS
+			.type_good:
+			
+			;Lay down AGAIN_THREAD TOKEN
+			LDA AUX_STACK-2,Y
+			STA obj_address
+			LDA AUX_STACK-1,Y
+			STA obj_address+1
+			LDA #TOKEN_AGAIN_THREAD
+			JMP TokenArgThread
+			
+	TODO: remove all 0 length words from dictionary - dont need dict header
+	WORD_AGAIN_THREAD:
+		FCB 0,""				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_AGAIN_THREAD	;ID - 94
+		CODE_AGAIN_THREAD:
+			FCB OBJ_PRIMITIVE			;Type
+			FCB 0						;Flags
+			
+			halt
+			
+			TODO: reuse for LOOP_THREAD
+			LDY #1
+			LDA (exec_ptr),Y
+			PHA
+			INY
+			LDA (exec_ptr),Y
+			STA exec_ptr+1
+			PLA 
+			STA exec_ptr
+			RTS
+						
+					
 	;IF				70
 	;ELSE			72
 	;THEN			74
@@ -1635,9 +1793,10 @@
 	;WHILE			82
 	;UNTIL			84
 	;AGAIN			86
+	;REPEAT
 	;>=				96		;omit to save space
 	;<=				98		;omit to save space
-	;FORGET			100		;do in MEM window
+	;FORGET			100		;do in MEM window instead
 	;ABS			102
 	;SIN			104
 	;COS			106
@@ -1661,6 +1820,7 @@
 	;MEM			146
 	
 	;Optional:
+	;+LOOP		;great if room
 	;IMMED
 	;COMPILE
 	;PI
@@ -1714,7 +1874,7 @@
 		FDB CODE_STO				;52
 		FDB CODE_FREE				;54
 		FDB CODE_SECONDARY			;56
-		FDB CODE_DONE				;58
+		FDB CODE_EXIT				;58
 		FDB CODE_BREAK				;60
 		FDB CODE_QUIT				;62
 		FDB CODE_STO_THREAD			;64
@@ -1729,6 +1889,11 @@
 		FDB CODE_I					;82
 		FDB CODE_J					;84
 		FDB CODE_K					;86
+		FDB CODE_EXIT_THREAD		;88
+		FDB CODE_BEGIN				;90
+		FDB CODE_AGAIN				;92
+		FDB CODE_AGAIN_THREAD		;94
+		
 		
 		
 		

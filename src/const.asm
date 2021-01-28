@@ -130,7 +130,7 @@
 		TOKEN_STO =					52
 		TOKEN_FREE =				54
 		TOKEN_SECONDARY =			56
-		TOKEN_DONE =				58
+		TOKEN_EXIT =				58
 		TOKEN_BREAK =				60
 		TOKEN_QUIT =				62
 		TOKEN_STO_THREAD =			64
@@ -145,6 +145,10 @@
 		TOKEN_I =					82
 		TOKEN_J =					84
 		TOKEN_K =					86
+		TOKEN_EXIT_THREAD =			88
+		TOKEN_BEGIN =				90
+		TOKEN_AGAIN =				92
+		TOKEN_AGAIN_THREAD =		94
 		
 		;Execution modes
 		EXEC_INPUT =		0
@@ -202,7 +206,8 @@
 		AUX_STACK_SHORT_SIZE =	AUX_STACK_SIZE / 3
 		
 		;Data types for auxilliary stack
-		AUX_TYPE_DO =					1
+		AUX_TYPE_DO =			1
+		AUX_TYPE_BEGIN =		2
 			
 	
 	

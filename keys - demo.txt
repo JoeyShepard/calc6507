@@ -17,6 +17,11 @@ S
 ' BAZ STO VECTOR
 S * * *
 
+: U 0 5 0 DO 10 5 DO 15 10 DO I J K * * + LOOP LOOP LOOP ;
+: V 0 7 4 DO U + LOOP ;
+V
 
-
+: A 99 0 DO 99 0 DO K + EXIT LOOP LOOP ;
+: B 2 1 DO 5 0 DO A LOOP LOOP ;
+0 B
 

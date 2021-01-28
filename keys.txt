@@ -1,2 +1,4 @@
-: U 0 5 0 DO 10 5 DO I J * + LOOP LOOP ;
-
+3 STO X
+: A X 1 DO X 1 DO I J K * * + LOOP LOOP ;
+: B X 1 DO X 1 DO A LOOP LOOP ;
+0 B

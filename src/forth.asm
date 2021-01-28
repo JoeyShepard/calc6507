@@ -1035,7 +1035,7 @@
 		PLA
 		CMP #4
 		BNE .no_end_token
-			LDA #TOKEN_DONE
+			LDA #TOKEN_EXIT_THREAD
 			STA (dict_ptr),Y
 			INC dict_ptr
 			BNE .skip
