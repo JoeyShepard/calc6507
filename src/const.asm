@@ -153,6 +153,10 @@
 		TOKEN_UNTIL_THREAD =		98
 		TOKEN_MAX =					100
 		TOKEN_MIN =					102
+		TOKEN_AND =					104
+		TOKEN_OR =					106
+		TOKEN_XOR =					108
+		TOKEN_NOT =					110
 		
 		;Execution modes
 		EXEC_INPUT =		0

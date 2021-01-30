@@ -1913,8 +1913,8 @@
 			
 	WORD_MIN:
 		FCB 3,"MIN"				;Name
-		FDB dict_begin			;Next word
-		FCB TOKEN_MIN			;ID - 101
+		FDB WORD_AND			;Next word
+		FCB TOKEN_MIN			;ID - 102
 		CODE_MIN:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN2|SAME					;Flags
@@ -1924,6 +1924,93 @@
 			LDA HEX_SUM,X
 			BEQ CODE_MAX.drop
 			BNE CODE_MAX.nip
+			
+	TODO: abstract? words above check for smart hex?
+	;Check if hex is type raw. Return to caller if not
+	LOGIC_STUB:
+		LDA HEX_TYPE,X
+		CMP #HEX_SMART
+		BNE .good
+			;Drop return address
+			PLA
+			PLA
+			LDA #ERROR_WRONG_TYPE
+			STA ret_val
+		.good:
+		LDA HEX_SUM,X
+		RTS
+			
+	WORD_AND:
+		FCB 3,"AND"				;Name
+		FDB WORD_OR				;Next word
+		FCB TOKEN_AND			;ID - 104
+		CODE_AND:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|HEX					;Flags
+			
+			JSR LOGIC_STUB
+			AND HEX_SUM+OBJ_SIZE,X
+			STA HEX_SUM+OBJ_SIZE,X
+			LDA HEX_SUM+1,X
+			AND HEX_SUM+OBJ_SIZE+1,X
+			STA HEX_SUM+OBJ_SIZE+1,X
+		
+			JMP CODE_DROP+EXEC_HEADER
+	
+	WORD_OR:
+		FCB 2,"OR"				;Name
+		FDB WORD_XOR			;Next word
+		FCB TOKEN_OR			;ID - 106
+		CODE_OR:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|HEX					;Flags
+			
+			JSR LOGIC_STUB
+			ORA HEX_SUM+OBJ_SIZE,X
+			STA HEX_SUM+OBJ_SIZE,X
+			LDA HEX_SUM+1,X
+			ORA HEX_SUM+OBJ_SIZE+1,X
+			STA HEX_SUM+OBJ_SIZE+1,X
+		
+			JMP CODE_DROP+EXEC_HEADER
+	
+	WORD_XOR:
+		FCB 3,"XOR"				;Name
+		FDB WORD_NOT			;Next word
+		FCB TOKEN_XOR			;ID - 108
+		CODE_XOR:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|HEX					;Flags
+		
+			JSR LOGIC_STUB
+			EOR HEX_SUM+OBJ_SIZE,X
+			STA HEX_SUM+OBJ_SIZE,X
+			LDA HEX_SUM+1,X
+			EOR HEX_SUM+OBJ_SIZE+1,X
+			STA HEX_SUM+OBJ_SIZE+1,X
+		
+			JMP CODE_DROP+EXEC_HEADER
+			
+	WORD_NOT:
+		FCB 3,"NOT"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_NOT			;ID - 110
+		CODE_NOT:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|HEX					;Flags
+		
+			JSR LOGIC_STUB
+			ORA HEX_SUM+1,X
+			BEQ .set_true
+				LDA #0
+				.set:
+				;True so set false
+				STA HEX_SUM,X
+				STA HEX_SUM+1,X
+				RTS
+			.set_true:
+			LDA #$FF
+			BNE .set
 					
 	;IF				70
 	;ELSE			72
@@ -1939,12 +2026,6 @@
 	;^				116
 	;E^				118
 	;LN				120
-	;AND			122
-	;OR				124
-	;XOR			126
-	;NOT			128
-	;MAX			130
-	;MIN			132
 	;LSHIFT			134
 	;RSHIFT			136
 	;GRAPH			138
@@ -2038,6 +2119,11 @@
 		FDB CODE_UNTIL_THREAD		;98
 		FDB CODE_MAX				;100
 		FDB CODE_MIN				;102
+		FDB CODE_AND				;104
+		FDB CODE_OR					;106
+		FDB CODE_XOR				;108
+		FDB CODE_NOT				;110
+		
 		
 		
 		
