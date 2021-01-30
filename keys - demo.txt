@@ -25,3 +25,19 @@ V
 : B 2 1 DO 5 0 DO A LOOP LOOP ;
 0 B
 
+3 STO X
+: A2 X 1 DO X 1 DO I J K * * + LOOP LOOP ;
+: B2 X 1 DO X 1 DO A2 LOOP LOOP ;
+0 B2
+
+: BAR BEGIN SWAP DUP UNTIL ;
+"" "ABC" BAR
+
+: A3 $5 BEGIN DUP $1 - DUP $0 = UNTIL DROP ;
+A3
+
+
+
+
+
+

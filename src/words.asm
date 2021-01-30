@@ -72,17 +72,19 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|ADD1		;Flags
 			
-			LDY #OBJ_SIZE
 			TXA
 			PHA
+			LDY #OBJ_SIZE
 			.over_loop:
 				LDA OBJ_SIZE*2,X
 				STA 0,X
 				INX
 				DEY
 				BNE .over_loop
+			
 			PLA
 			TAX
+			
 			RTS
 			
 	WORD_ROT:
@@ -1458,7 +1460,7 @@
 		PLA
 		PLA
 		RTS
-	
+		
 	WORD_EQUAL:
 		FCB 1,"="				;Name
 		FDB WORD_GT				;Next word
@@ -1507,10 +1509,15 @@
 				STA R0
 				LDA HEX_SUM+OBJ_SIZE+1,X
 				SBC HEX_SUM+1,X
-				BCC .false
+				BCC .hex_false
 				ORA R0
-				BEQ .false
+				BEQ .hex_false
+				;Could call once but then stack item doesn't exist! not safe for interrupts
+				JSR CODE_DROP+EXEC_HEADER
 				JMP HexTrue
+				.hex_false:
+				JSR CODE_DROP+EXEC_HEADER
+				JMP HexFalse
 			.not_hex:
 			
 			JSR COMPARISON_STUB
@@ -1818,7 +1825,7 @@
 				
 	WORD_UNTIL_THREAD:
 		FCB 0,""				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_MAX			;Next word
 		FCB TOKEN_UNTIL_THREAD	;ID - 98
 		CODE_UNTIL_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
@@ -1857,19 +1864,71 @@
 				LDA #2
 				JMP IncExecPtr
 	
-				
-				
+	;Compare and return to caller if error
+	MIN_MAX_STUB:
+		TODO: larger but faster to copy to R0 and R1 since copied there anyway?
+		;System has 3 extra stack levels, so still works even if user stack full
+		TODO: tokenize
+		;(token parser adds item, so must do here explicitly)
+		JSR StackAddItem
+		JSR CODE_OVER+EXEC_HEADER
+		JSR StackAddItem
+		JSR CODE_OVER+EXEC_HEADER
+		JSR CODE_GT+EXEC_HEADER
+		
+		LDA ret_val
+		BEQ .comparison_good
+			TODO: add string support
+			;Error - probably trying to compare strings
+			PLA
+			PLA
+			JSR CODE_DROP+EXEC_HEADER
+			JMP CODE_DROP+EXEC_HEADER
+		.comparison_good:
+		
+		RTS
+		
+	WORD_MAX:
+		FCB 3,"MAX"				;Name
+		FDB WORD_MIN			;Next word
+		FCB TOKEN_MAX			;ID - 100
+		CODE_MAX:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|SAME					;Flags
+			
+			JSR MIN_MAX_STUB
+			
+			LDA HEX_SUM,X
+			BEQ .nip
+				.drop:
+				;Top number larger, drop lower number
+				JSR CODE_DROP+EXEC_HEADER
+				JMP CODE_DROP+EXEC_HEADER
+			.nip:
+			
+			;Lower number larger, nip top number
+			JSR CODE_DROP+EXEC_HEADER
+			JSR CODE_SWAP+EXEC_HEADER
+			JMP CODE_DROP+EXEC_HEADER
+			
+	WORD_MIN:
+		FCB 3,"MIN"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_MIN			;ID - 101
+		CODE_MIN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|SAME					;Flags
+	
+			JSR MIN_MAX_STUB
+			
+			LDA HEX_SUM,X
+			BEQ CODE_MAX.drop
+			BNE CODE_MAX.nip
 					
 	;IF				70
 	;ELSE			72
 	;THEN			74
 	;MOD			76
-	;WHILE			82
-	;UNTIL			84
-	;REPEAT
-	;>=				96		;omit to save space
-	;<=				98		;omit to save space
-	;FORGET			100		;do in MEM window instead
 	;ABS			102
 	;SIN			104
 	;COS			106
@@ -1891,8 +1950,12 @@
 	;GRAPH			138
 	;LIT			144
 	;MEM			146
+	;[ ]
 	
 	;Optional:
+	;RAW - convert smart hex
+	;WHILE			82
+	;REPEAT
 	;+LOOP		;great if room
 	;IMMED
 	;COMPILE
@@ -1917,6 +1980,11 @@
 	;DEPTH
 	;HERE
 		;may be useful even without CREATE
+		
+	;Not needed:
+	;>=				96		;omit to save space
+	;<=				98		;omit to save space
+	;FORGET			100		;do in MEM window instead
 	
 	JUMP_TABLE:
 		FDB CODE_DUP				;2
@@ -1968,7 +2036,8 @@
 		FDB CODE_AGAIN_THREAD		;94
 		FDB CODE_UNTIL				;96
 		FDB CODE_UNTIL_THREAD		;98
-		
+		FDB CODE_MAX				;100
+		FDB CODE_MIN				;102
 		
 		
 		

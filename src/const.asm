@@ -151,6 +151,8 @@
 		TOKEN_AGAIN_THREAD =		94
 		TOKEN_UNTIL =				96
 		TOKEN_UNTIL_THREAD =		98
+		TOKEN_MAX =					100
+		TOKEN_MIN =					102
 		
 		;Execution modes
 		EXEC_INPUT =		0
