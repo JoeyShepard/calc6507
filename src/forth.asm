@@ -1132,6 +1132,8 @@
 		BEQ .add_address
 		CPY #TOKEN_VAR_THREAD
 		BEQ .add_address
+		CPY #TOKEN_LEAVE_THREAD
+		BEQ .add_address
 			LDA #1
 		.add_address:
 		STA user_defined
@@ -1150,6 +1152,7 @@
 		LDA user_defined
 		CMP #1
 		BEQ .return
+			TODO: add 3 here then sub 3 later. why? just for var?
 			CLC 
 			LDA obj_address
 			ADC #3

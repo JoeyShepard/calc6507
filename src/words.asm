@@ -1145,7 +1145,7 @@
 			PLA
 			PLA
 			
-			;Lay down DO_THREAD TOKEN
+			;Lay down EXIT_THREAD TOKEN
 			LDA #TOKEN_EXIT_THREAD
 			STA ret_val
 			JMP main.compile_word
@@ -1319,23 +1319,45 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB IMMED|COMPILE				;Flags
 			
-			;At least one address on aux stack?
-			JSR AuxPopShort
-			LDA ret_val
-			BEQ .pop_good
-				RTS
-			.pop_good:
+			.loop:
+				;At least one address on aux stack?
+				JSR AuxPopShort
+				LDA ret_val
+				BEQ .pop_good
+					RTS
+				.pop_good:
 			
-			TODO: abstract?
-			;Address right type?
-			LDY aux_stack_ptr
-			LDA AUX_STACK-3,Y
-			CMP #AUX_TYPE_DO
-			BEQ .type_good
-				LDA #ERROR_STRUCTURE
-				STA ret_val
-				RTS
-			.type_good:
+				TODO: abstract?
+				;Address right type?
+				LDY aux_stack_ptr
+				LDA AUX_STACK-3,Y
+				CMP #AUX_TYPE_DO
+				BEQ .loop_done
+				CMP #AUX_TYPE_LEAVE
+				BEQ .process_leave
+					LDA #ERROR_STRUCTURE
+					STA ret_val
+					RTS
+				.process_leave:
+					LDA AUX_STACK-2,Y
+					STA ret_address
+					LDA AUX_STACK-1,Y
+					STA ret_address+1
+					
+					;Increment by 2 to point past LOOP
+					CLC
+					LDA dict_ptr
+					ADC #2
+					LDY #1
+					STA (ret_address),Y
+					LDA dict_ptr+1
+					ADC #0
+					INY
+					STA (ret_address),Y
+					
+					JMP .loop
+					
+				.loop_done:
 			
 			;Lay down LOOP_THREAD TOKEN
 			LDA AUX_STACK-2,Y
@@ -1993,7 +2015,7 @@
 			
 	WORD_NOT:
 		FCB 3,"NOT"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_LEAVE			;Next word
 		FCB TOKEN_NOT			;ID - 110
 		CODE_NOT:
 			FCB OBJ_PRIMITIVE				;Type
@@ -2012,6 +2034,56 @@
 			LDA #$FF
 			BNE .set
 					
+	WORD_LEAVE:
+		FCB 5,"LEAVE"			;Name
+		FDB WORD_LEAVE_THREAD	;Next word
+		FCB TOKEN_LEAVE			;ID - 112
+		CODE_LEAVE:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB COMPILE|IMMED				;Flags
+			
+			TODO: abstract with DO?
+			LDA #AUX_TYPE_LEAVE
+			JSR AuxPushShort
+			LDA ret_val
+			BEQ .mem_good
+				RTS
+			.mem_good:
+			
+			LDA dict_ptr
+			STA AUX_STACK+1,Y
+			LDA dict_ptr+1
+			STA AUX_STACK+2,Y
+			
+			;Drop return address
+			PLA
+			PLA
+			
+			;Lay down DO_THREAD TOKEN
+			LDA #TOKEN_LEAVE_THREAD
+			STA ret_val
+			JMP main.compile_word
+			
+	;Waste of space, but need table entry unless add code for exception
+	WORD_LEAVE_THREAD:
+		FCB 0,""				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_LEAVE_THREAD	;ID - 114
+		CODE_LEAVE_THREAD:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB 0							;Flags
+			
+			halt
+			
+			JMP CODE_AGAIN_THREAD+EXEC_HEADER
+			
+			
+			
+	
+	
+					
+	;LEAVE
+	;JUMP
 	;IF				70
 	;ELSE			72
 	;THEN			74
@@ -2033,8 +2105,12 @@
 	;MEM			146
 	;[ ]
 	
+	;touchpad is shitty - 4ish zp pages also mapped to address range
+	
 	;Optional:
 	;RAW - convert smart hex
+	;DEC - dec from hex
+	;HEX - hex from dec
 	;WHILE			82
 	;REPEAT
 	;+LOOP		;great if room
@@ -2061,6 +2137,7 @@
 	;DEPTH
 	;HERE
 		;may be useful even without CREATE
+	;BETWEEN
 		
 	;Not needed:
 	;>=				96		;omit to save space
@@ -2123,6 +2200,8 @@
 		FDB CODE_OR					;106
 		FDB CODE_XOR				;108
 		FDB CODE_NOT				;110
+		FDB CODE_LEAVE				;112
+		FDB CODE_LEAVE_THREAD		;114
 		
 		
 		

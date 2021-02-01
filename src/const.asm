@@ -157,6 +157,8 @@
 		TOKEN_OR =					106
 		TOKEN_XOR =					108
 		TOKEN_NOT =					110
+		TOKEN_LEAVE =				112
+		TOKEN_LEAVE_THREAD =		114
 		
 		;Execution modes
 		EXEC_INPUT =		0
@@ -216,6 +218,7 @@
 		;Data types for auxilliary stack
 		AUX_TYPE_DO =			1
 		AUX_TYPE_BEGIN =		2
+		AUX_TYPE_LEAVE =		3
 			
 	
 	
