@@ -1976,9 +1976,7 @@
 		CODE_IF:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB COMPILE|IMMED				;Flags
-	
-			halt
-	
+			
 			LDA #AUX_TYPE_IF
 			JSR AuxPushShort
 			TODO: change every function to LDA ret_val on exit?
@@ -1999,26 +1997,17 @@
 			
 	WORD_THEN:
 		FCB 4,"THEN"			;Name
-		FDB dict_begin			;Next word
+		FDB WORD_ELSE			;Next word
 		FCB TOKEN_THEN			;ID - 118
 		CODE_THEN:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB COMPILE|IMMED				;Flags
 			
-			halt
-			
-			JSR .get_aux_address
-			CMP #AUX_TYPE_ELSE
-			BNE .not_else
-				
-				;Else
-				
-				JSR .get_aux_address
-			.not_else:
+			JSR AUX_STUB
 			CMP #AUX_TYPE_IF
 			BEQ .process_if
 				
-				;Error - not if or else
+				;Error - not if
 				LDA #ERROR_STRUCTURE
 				STA ret_val
 				RTS
@@ -2041,30 +2030,62 @@
 			STA (ret_address),Y
 			
 			RTS
-			
-		TODO: abstract with LOOP and AGAIN
-		.get_aux_address:
-			
-			;At least one address on aux stack?
-			JSR AuxPopShort
-			LDA ret_val
-			BEQ .pop_good
-				PLA
-				PLA
-				RTS
-			.pop_good:
-			
-			;Address right type?
-			LDY aux_stack_ptr
-			LDA AUX_STACK-3,Y
-			
-			RTS
 
+	WORD_ELSE:
+		FCB 4,"ELSE"			;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_ELSE			;ID - 120
+		CODE_ELSE:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB COMPILE|IMMED				;Flags
 			
-	;JUMP
-	;IF				70
-	;ELSE			72
-	;THEN			74
+			;Can't use AUX_STUB since reusing existing stack item
+			;At least one stack item?
+			LDA aux_stack_count
+			BEQ .error_exit
+			
+			TODO: change AUX_STACK offset to -3 to share code?
+			LDY aux_stack_ptr
+			LDA AUX_STACK,Y
+			CMP #AUX_TYPE_IF
+			BEQ .process_if
+				
+				;Error - not if
+				.error_exit:
+				LDA #ERROR_STRUCTURE
+				STA ret_val
+				RTS
+			.process_if:
+			
+			;Write IF address
+			LDA AUX_STACK+1,Y
+			STA ret_address
+			LDA AUX_STACK+2,Y
+			STA ret_address+1
+			
+			;Update existing IF address
+			LDA dict_ptr
+			STA AUX_STACK+1,Y
+			LDA dict_ptr+1
+			STA AUX_STACK+2,Y
+			
+			;Point past ELSE
+			CLC
+			LDA dict_ptr
+			ADC #2
+			LDY #1
+			STA (ret_address),Y
+			LDA dict_ptr+1
+			ADC #0
+			INY
+			STA (ret_address),Y
+			
+			;Lay down ELSE_THREAD TOKEN
+			LDA  #TOKEN_AGAIN_THREAD ;identical to ELSE_THREAD
+			JMP TokenArgThread
+			
+			
+	;TYPE	
 	;MOD			76
 	;ABS			102
 	;SIN			104
@@ -2080,10 +2101,11 @@
 	;RSHIFT			136
 	;GRAPH			138
 	;LIT			144
-	;MEM			146
+	;WORDS			146
 	;[ ]
+	;JUMP
 	
-	;touchpad is shitty - 4ish zp pages also mapped to address range
+	;4ish zp pages also mapped to address range
 	
 	;Optional:
 	;WHILE/REPEAT
@@ -2183,6 +2205,7 @@
 		FDB CODE_LEAVE_THREAD		;114
 		FDB CODE_IF					;116
 		FDB CODE_THEN				;118
+		FDB CODE_ELSE				;120
 		
 		
 		

@@ -39,6 +39,9 @@ A3
 : FOO 5 0 DO I + LEAVE LOOP 3 ; 
 0 FOO
 
+: FOO IF 2 ELSE 3 THEN ;
+: BAR FOO + ;
+: U IF 5 THEN ;
 
 
 

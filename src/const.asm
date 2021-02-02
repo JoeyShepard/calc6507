@@ -161,6 +161,7 @@
 		TOKEN_LEAVE_THREAD =		114
 		TOKEN_IF =					116
 		TOKEN_THEN =				118
+		TOKEN_ELSE =				120
 		
 		;Execution modes
 		EXEC_INPUT =		0

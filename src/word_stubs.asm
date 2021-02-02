@@ -108,5 +108,21 @@
 		.good:
 		LDA HEX_SUM,X
 		RTS
-		
 	
+	TODO: abstract with LOOP and AGAIN	
+	AUX_STUB:
+			
+		;At least one address on aux stack?
+		JSR AuxPopShort
+		LDA ret_val
+		BEQ .pop_good
+			PLA
+			PLA
+			RTS
+		.pop_good:
+		
+		;Address right type?
+		LDY aux_stack_ptr
+		LDA AUX_STACK-3,Y
+		
+		RTS
