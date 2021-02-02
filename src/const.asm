@@ -83,6 +83,7 @@
 	;Forth
 	;=====
 		;Word flags
+		NONE =				0
 		MIN1 =				1
 		MIN2 =				2
 		MIN3 =				3
@@ -162,6 +163,7 @@
 		TOKEN_IF =					116
 		TOKEN_THEN =				118
 		TOKEN_ELSE =				120
+		TOKEN_LSHIFT =				122
 		
 		;Execution modes
 		EXEC_INPUT =		0

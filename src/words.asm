@@ -155,7 +155,7 @@
 		FCB TOKEN_CLEAR			;ID - 14
 		CODE_CLEAR:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB 0				;Flags
+			FCB NONE				;Flags
 			
 			LDX #0
 			STX stack_count
@@ -308,10 +308,13 @@
 			
 			;Multiplying hex objects
 			LDA HEX_TYPE,X
+			TODO: why?
 			ASL
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex
 				;Both raw hex
+				
+				TODO: 16 bit multiply faster than bytes?
 				
 				TODO: smaller in loop? calculated high bytes wasted?
 				
@@ -809,7 +812,7 @@
 		FCB TOKEN_HALT			;ID - 46
 		CODE_HALT:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB 0				;Flags
+			FCB NONE			;Flags
 			
 			halt
 			RTS
@@ -823,7 +826,7 @@
 		FCB TOKEN_VAR			;ID - 48
 		CODE_VAR:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB 0				;Flags
+			FCB NONE			;Flags
 			
 			TODO: Share this with TICK
 			CALL LineWord
@@ -1070,7 +1073,7 @@
 		FCB TOKEN_SECONDARY			;ID - 56
 		CODE_SECONDARY:
 			FCB OBJ_PRIMITIVE		;Type
-			FCB 0					;Flags
+			FCB NONE				;Flags
 			
 			TODO: check stack space left to prevent underflow
 			
@@ -1130,7 +1133,7 @@
 		FCB TOKEN_BREAK			;ID - 60
 		CODE_BREAK:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB 0							;Flags
+			FCB NONE						;Flags
 			
 			;Reset R stack
 			TXA
@@ -1147,7 +1150,7 @@
 		FCB TOKEN_QUIT			;ID - 62
 		CODE_QUIT:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB 0							;Flags
+			FCB NONE						;Flags
 			
 			;Clear input buffer
 			LDA input_buff_begin
@@ -1182,7 +1185,7 @@
 		FCB TOKEN_STO_THREAD	;ID - 64
 		CODE_STO_THREAD:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB 0				;Flags
+			FCB NONE			;Flags
 			
 			LDY #1
 			LDA (exec_ptr),Y
@@ -1344,7 +1347,7 @@
 		FCB TOKEN_LOOP_THREAD	;ID - 72
 		CODE_LOOP_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB 0							;Flags
+			FCB NONE						;Flags
 			
 			TODO: abstract
 			;Copy aux stack item to temp register
@@ -1624,7 +1627,7 @@
 		FCB TOKEN_EXIT_THREAD	;ID - 88
 		CODE_EXIT_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB 0	 						;Flags
+			FCB NONE	 					;Flags
 			
 			;Dump any DO values
 			LDA aux_stack_count
@@ -1731,7 +1734,7 @@
 		FCB TOKEN_AGAIN_THREAD	;ID - 94
 		CODE_AGAIN_THREAD:
 			FCB OBJ_PRIMITIVE			;Type
-			FCB 0						;Flags
+			FCB NONE					;Flags
 			
 			LDY #1
 			LDA (exec_ptr),Y
@@ -1965,7 +1968,7 @@
 		FCB TOKEN_LEAVE_THREAD	;ID - 114
 		CODE_LEAVE_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB 0							;Flags
+			FCB NONE						;Flags
 			
 			JMP CODE_AGAIN_THREAD+EXEC_HEADER
 	
@@ -2033,7 +2036,7 @@
 
 	WORD_ELSE:
 		FCB 4,"ELSE"			;Name
-		FDB dict_begin			;Next word
+		FDB WORD_LSHIFT			;Next word
 		FCB TOKEN_ELSE			;ID - 120
 		CODE_ELSE:
 			FCB OBJ_PRIMITIVE				;Type
@@ -2084,7 +2087,52 @@
 			LDA  #TOKEN_AGAIN_THREAD ;identical to ELSE_THREAD
 			JMP TokenArgThread
 			
+	WORD_LSHIFT:
+		FCB 6,"LSHIFT"			;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_LSHIFT		;ID - 122
+		CODE_LSHIFT:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|HEX					;Flags	
 			
+			TODO: share with rshift
+			
+			;Smart
+			LDA HEX_TYPE,X
+			ORA HEX_TYPE+OBJ_SIZE,X
+			BEQ .hex_raw
+				;At least one smart hex, so can't shift
+				LDA #ERROR_WRONG_TYPE
+				STA ret_val
+				RTS
+			.hex_raw:
+			
+			;If >=16, return 0
+			SEC
+			LDA HEX_SUM,X
+			SBC #16
+			LDA HEX_SUM+1,X
+			SBC #0
+			BCC .zero_check
+				LDA #0
+				STA HEX_SUM+OBJ_SIZE,X
+				STA HEX_SUM+OBJ_SIZE+1,X
+				JMP CODE_DROP+EXEC_HEADER
+			
+			.zero_check:
+			LDA HEX_SUM,X
+			BEQ .done
+			
+			.shift:
+			ASL HEX_SUM+OBJ_SIZE,X
+			ROL HEX_SUM+OBJ_SIZE+1,X
+			DEC HEX_SUM,X
+			BNE .shift
+			
+			.done:
+			JMP CODE_DROP+EXEC_HEADER
+			
+	
 	;TYPE	
 	;MOD			76
 	;ABS			102
@@ -2206,6 +2254,7 @@
 		FDB CODE_IF					;116
 		FDB CODE_THEN				;118
 		FDB CODE_ELSE				;120
+		FDB CODE_LSHIFT				;122
 		
 		
 		
