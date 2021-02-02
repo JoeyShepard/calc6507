@@ -159,6 +159,8 @@
 		TOKEN_NOT =					110
 		TOKEN_LEAVE =				112
 		TOKEN_LEAVE_THREAD =		114
+		TOKEN_IF =					116
+		TOKEN_THEN =				118
 		
 		;Execution modes
 		EXEC_INPUT =		0
@@ -219,6 +221,8 @@
 		AUX_TYPE_DO =			1
 		AUX_TYPE_BEGIN =		2
 		AUX_TYPE_LEAVE =		3
+		AUX_TYPE_IF =			4
+		AUX_TYPE_ELSE =			5
 			
 	
 	

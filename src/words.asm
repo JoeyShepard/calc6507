@@ -149,8 +149,8 @@
 			RTS
 	
 	WORD_CLEAR:
-		;FCB 5,"CLEAR"			;Name
-		FCB 3,"CLR"				;Name
+		FCB 5,"CLEAR"			;Name
+		;FCB 3,"CLR"				;Name
 		FDB WORD_ADD			;Next word
 		FCB TOKEN_CLEAR			;ID - 14
 		CODE_CLEAR:
@@ -231,18 +231,6 @@
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
-			
-		;Helper function
-		HEX_RECALC:
-			CLC
-			LDA OBJ_SIZE+HEX_BASE,X
-			ADC OBJ_SIZE+HEX_OFFSET,X
-			STA OBJ_SIZE+HEX_SUM,X
-			LDA OBJ_SIZE+HEX_BASE+1,X
-			ADC OBJ_SIZE+HEX_OFFSET+1,X
-			STA OBJ_SIZE+HEX_SUM+1,X
-					
-			JMP CODE_DROP+EXEC_HEADER
 			
 	WORD_SUB:
 		FCB 1,"-"				;Name
@@ -772,23 +760,6 @@
 			LDA #DICT_END_SIZE+1
 			JMP DictEnd
 			
-	;Stub for copying data from word to stack
-	COPY_STUB:
-		STA 0,X
-		LDY #1
-		.loop:
-			INX
-			LDA (exec_ptr),Y
-			STA 0,X
-			INY
-			CPY #OBJ_SIZE
-			BNE .loop
-		PLA
-		TAX
-		
-		LDA #OBJ_SIZE-1
-		JMP IncExecPtr
-	
 	TODO: separate 6 and 12 digit floats?
 	WORD_FLOAT:
 		FCB 0,""				;Name
@@ -1456,33 +1427,7 @@
 			
 			LDA #2
 			JMP IncExecPtr
-	
-	COMPARISON_STUB:
-		LDA 0,X
-		CMP #OBJ_FLOAT
-		BNE .not_float
-			;Float
-			JSR CODE_SUB.float
-			LDA #OBJ_FLOAT
-			RTS
-		.not_float:
-		CMP #OBJ_HEX
-		BNE .not_hex
-			;Hex 
-			JSR CODE_SUB.hex
-			LDA #OBJ_HEX
-			RTS
-		.not_hex:
-		
-		TODO: compare strings
-	
-		LDA #ERROR_WRONG_TYPE
-		STA ret_val
-		;Return to caller!
-		PLA
-		PLA
-		RTS
-		
+			
 	WORD_EQUAL:
 		FCB 1,"="				;Name
 		FDB WORD_GT				;Next word
@@ -1588,20 +1533,7 @@
 			STA HEX_SUM+1,X
 			
 			RTS
-			
-	TODO: abstract
-	TODO: move helper routines to forth.asm?
-	WITHIN_WORD:
-		LDA aux_word_counter
-		BNE .good
-			LDA #ERROR_COMPILE_ONLY
-			STA ret_val
-			PLA
-			PLA
-			RTS
-		.good:
-		RTS
-	
+				
 	WORD_I:
 		FCB 1,"I"				;Name
 		FDB WORD_J				;Next word
@@ -1860,6 +1792,7 @@
 				;Float
 				LDA DEC_COUNT/2,X
 				JMP .handle
+				
 			.not_float:
 			CMP #OBJ_HEX
 			BNE .string
@@ -1868,6 +1801,7 @@
 				LDA HEX_SUM,X
 				ORA HEX_SUM+1,X
 				JMP .handle
+				
 			.string:
 				
 				;String
@@ -1885,30 +1819,6 @@
 				JSR CODE_DROP+EXEC_HEADER
 				LDA #2
 				JMP IncExecPtr
-	
-	;Compare and return to caller if error
-	MIN_MAX_STUB:
-		TODO: larger but faster to copy to R0 and R1 since copied there anyway?
-		;System has 3 extra stack levels, so still works even if user stack full
-		TODO: tokenize
-		;(token parser adds item, so must do here explicitly)
-		JSR StackAddItem
-		JSR CODE_OVER+EXEC_HEADER
-		JSR StackAddItem
-		JSR CODE_OVER+EXEC_HEADER
-		JSR CODE_GT+EXEC_HEADER
-		
-		LDA ret_val
-		BEQ .comparison_good
-			TODO: add string support
-			;Error - probably trying to compare strings
-			PLA
-			PLA
-			JSR CODE_DROP+EXEC_HEADER
-			JMP CODE_DROP+EXEC_HEADER
-		.comparison_good:
-		
-		RTS
 		
 	WORD_MAX:
 		FCB 3,"MAX"				;Name
@@ -1946,22 +1856,7 @@
 			LDA HEX_SUM,X
 			BEQ CODE_MAX.drop
 			BNE CODE_MAX.nip
-			
-	TODO: abstract? words above check for smart hex?
-	;Check if hex is type raw. Return to caller if not
-	LOGIC_STUB:
-		LDA HEX_TYPE,X
-		CMP #HEX_SMART
-		BNE .good
-			;Drop return address
-			PLA
-			PLA
-			LDA #ERROR_WRONG_TYPE
-			STA ret_val
-		.good:
-		LDA HEX_SUM,X
-		RTS
-			
+					
 	WORD_AND:
 		FCB 3,"AND"				;Name
 		FDB WORD_OR				;Next word
@@ -2059,30 +1954,113 @@
 			PLA
 			PLA
 			
-			;Lay down DO_THREAD TOKEN
+			;Lay down LEAVE_THREAD TOKEN
 			LDA #TOKEN_LEAVE_THREAD
-			STA ret_val
-			JMP main.compile_word
+			JMP TokenArgThread
 			
 	;Waste of space, but need table entry unless add code for exception
 	WORD_LEAVE_THREAD:
 		FCB 0,""				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_IF				;Next word
 		FCB TOKEN_LEAVE_THREAD	;ID - 114
 		CODE_LEAVE_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB 0							;Flags
 			
+			JMP CODE_AGAIN_THREAD+EXEC_HEADER
+	
+	WORD_IF:
+		FCB 2,"IF"				;Name
+		FDB WORD_THEN			;Next word
+		FCB TOKEN_IF			;ID - 116
+		CODE_IF:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB COMPILE|IMMED				;Flags
+	
+			halt
+	
+			LDA #AUX_TYPE_IF
+			JSR AuxPushShort
+			TODO: change every function to LDA ret_val on exit?
+			LDA ret_val
+			BEQ .mem_good
+				RTS
+			.mem_good:
+			
+			;LDY aux_stack_ptr - Y set after AuxPushShort
+			LDA dict_ptr
+			STA AUX_STACK+1,Y
+			LDA dict_ptr+1
+			STA AUX_STACK+2,Y
+			
+			;Lay down IF_THREAD TOKEN
+			LDA  #TOKEN_UNTIL_THREAD ;identical to IF_THREAD
+			JMP TokenArgThread
+			
+	WORD_THEN:
+		FCB 4,"THEN"			;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_THEN			;ID - 118
+		CODE_THEN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB COMPILE|IMMED				;Flags
+			
 			halt
 			
-			JMP CODE_AGAIN_THREAD+EXEC_HEADER
+			JSR .get_aux_address
+			CMP #AUX_TYPE_ELSE
+			BNE .not_else
+				
+				;Else
+				
+				JSR .get_aux_address
+			.not_else:
+			CMP #AUX_TYPE_IF
+			BEQ .process_if
+				
+				;Error - not if or else
+				LDA #ERROR_STRUCTURE
+				STA ret_val
+				RTS
+			.process_if:
 			
+			;Write IF address
+			LDA AUX_STACK-2,Y
+			STA ret_address
+			LDA AUX_STACK-1,Y
+			STA ret_address+1
 			
+			SEC
+			LDA dict_ptr
+			SBC #1
+			LDY #1
+			STA (ret_address),Y
+			LDA dict_ptr+1
+			SBC #0
+			INY
+			STA (ret_address),Y
 			
-	
-	
-					
-	;LEAVE
+			RTS
+			
+		TODO: abstract with LOOP and AGAIN
+		.get_aux_address:
+			
+			;At least one address on aux stack?
+			JSR AuxPopShort
+			LDA ret_val
+			BEQ .pop_good
+				PLA
+				PLA
+				RTS
+			.pop_good:
+			
+			;Address right type?
+			LDY aux_stack_ptr
+			LDA AUX_STACK-3,Y
+			
+			RTS
+
+			
 	;JUMP
 	;IF				70
 	;ELSE			72
@@ -2108,6 +2086,7 @@
 	;touchpad is shitty - 4ish zp pages also mapped to address range
 	
 	;Optional:
+	;WHILE/REPEAT
 	;RAW - convert smart hex
 	;DEC - dec from hex
 	;HEX - hex from dec
@@ -2202,6 +2181,9 @@
 		FDB CODE_NOT				;110
 		FDB CODE_LEAVE				;112
 		FDB CODE_LEAVE_THREAD		;114
+		FDB CODE_IF					;116
+		FDB CODE_THEN				;118
+		
 		
 		
 		

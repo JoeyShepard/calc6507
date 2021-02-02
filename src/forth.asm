@@ -1090,11 +1090,7 @@
 	TODO: return value in A too?
 	;Amount in A
 	FUNC AllocMem
-		VARS
-			BYTE bytes
-		END
 		
-		STA bytes
 		LDY #ERROR_NONE
 		STY ret_val
 		

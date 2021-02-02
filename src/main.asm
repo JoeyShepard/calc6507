@@ -163,6 +163,7 @@ LOCALS_END set		$1F
 	include aux_stack.asm
 	include forth.asm
 	include words.asm
+	include word_stubs.asm
 	
 ;Main function
 ;=============

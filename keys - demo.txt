@@ -36,7 +36,8 @@ V
 : A3 $5 BEGIN DUP $1 - DUP $0 = UNTIL DROP ;
 A3
 
-
+: FOO 5 0 DO I + LEAVE LOOP 3 ; 
+0 FOO
 
 
 
