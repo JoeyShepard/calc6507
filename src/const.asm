@@ -164,6 +164,8 @@
 		TOKEN_THEN =				118
 		TOKEN_ELSE =				120
 		TOKEN_LSHIFT =				122
+		TOKEN_RSHIFT =				124
+		TOKEN_ABS =					126
 		
 		;Execution modes
 		EXEC_INPUT =		0

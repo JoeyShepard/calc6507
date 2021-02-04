@@ -175,6 +175,7 @@ LOCALS_END set		$1F
 		
 		TODO: copyright
 		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
+		TODO: double check not relying on flags from BCD which are not valid for NMOS
 		
 		CALL setup
 		CALL tests

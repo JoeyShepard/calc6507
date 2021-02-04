@@ -2089,39 +2089,13 @@
 			
 	WORD_LSHIFT:
 		FCB 6,"LSHIFT"			;Name
-		FDB dict_begin			;Next word
+		FDB WORD_RSHIFT			;Next word
 		FCB TOKEN_LSHIFT		;ID - 122
 		CODE_LSHIFT:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN2|HEX					;Flags	
 			
-			TODO: share with rshift
-			
-			;Smart
-			LDA HEX_TYPE,X
-			ORA HEX_TYPE+OBJ_SIZE,X
-			BEQ .hex_raw
-				;At least one smart hex, so can't shift
-				LDA #ERROR_WRONG_TYPE
-				STA ret_val
-				RTS
-			.hex_raw:
-			
-			;If >=16, return 0
-			SEC
-			LDA HEX_SUM,X
-			SBC #16
-			LDA HEX_SUM+1,X
-			SBC #0
-			BCC .zero_check
-				LDA #0
-				STA HEX_SUM+OBJ_SIZE,X
-				STA HEX_SUM+OBJ_SIZE+1,X
-				JMP CODE_DROP+EXEC_HEADER
-			
-			.zero_check:
-			LDA HEX_SUM,X
-			BEQ .done
+			JSR SHIFT_STUB
 			
 			.shift:
 			ASL HEX_SUM+OBJ_SIZE,X
@@ -2129,13 +2103,45 @@
 			DEC HEX_SUM,X
 			BNE .shift
 			
-			.done:
 			JMP CODE_DROP+EXEC_HEADER
+	
+	WORD_RSHIFT:
+		FCB 6,"RSHIFT"			;Name
+		FDB WORD_ABS			;Next word
+		FCB TOKEN_RSHIFT		;ID - 124
+		CODE_RSHIFT:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN2|HEX					;Flags	
+			
+			JSR SHIFT_STUB
+			
+			.shift:
+			LSR HEX_SUM+OBJ_SIZE+1,X
+			ROR HEX_SUM+OBJ_SIZE,X
+			DEC HEX_SUM,X
+			BNE .shift
+			
+			JMP CODE_DROP+EXEC_HEADER
+
+	WORD_ABS:
+		FCB 3,"ABS"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_ABS			;ID - 126
+		CODE_ABS:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+	
+			halt
+			
+			LDA EXP_HI,X
+			AND #$7F	;zero sign bit
+			STA EXP_HI,X
+			
+			RTS
 			
 	
 	;TYPE	
 	;MOD			76
-	;ABS			102
 	;SIN			104
 	;COS			106
 	;TAN			108
@@ -2145,8 +2151,6 @@
 	;^				116
 	;E^				118
 	;LN				120
-	;LSHIFT			134
-	;RSHIFT			136
 	;GRAPH			138
 	;LIT			144
 	;WORDS			146
@@ -2255,9 +2259,7 @@
 		FDB CODE_THEN				;118
 		FDB CODE_ELSE				;120
 		FDB CODE_LSHIFT				;122
-		
-		
-		
-		
+		FDB CODE_RSHIFT				;124
+		FDB CODE_ABS				;126
 		
 		

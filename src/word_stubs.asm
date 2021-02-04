@@ -126,3 +126,42 @@
 		LDA AUX_STACK-3,Y
 		
 		RTS
+		
+	SHIFT_STUB:
+		
+		;Smart
+		LDA HEX_TYPE,X
+		ORA HEX_TYPE+OBJ_SIZE,X
+		BEQ .hex_raw
+			;At least one smart hex, so can't shift
+			LDA #ERROR_WRONG_TYPE
+			STA ret_val
+			;Return to caller
+			PLA
+			PLA
+			RTS
+		.hex_raw:
+		
+		;If >=16, return 0
+		SEC
+		LDA HEX_SUM,X
+		SBC #16
+		LDA HEX_SUM+1,X
+		SBC #0
+		BCC .zero_check
+			;Return 0
+			LDA #0
+			STA HEX_SUM+OBJ_SIZE,X
+			STA HEX_SUM+OBJ_SIZE+1,X
+			BEQ .done
+		
+		.zero_check:
+		LDA HEX_SUM,X
+		BEQ .done
+		RTS
+		
+		.done:
+		PLA
+		PLA
+		JMP CODE_DROP+EXEC_HEADER
+		
