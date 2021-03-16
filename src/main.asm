@@ -40,9 +40,11 @@
 	;Chips to add:
 		;keyboard buffer
 		;power transistor
-		;vreg?
 	
+	TODO: drive RDY with 6532 interrupt
 	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
+	TODO: separate engine and table for 16 bit forth?
+	TODO: more comments
 
 ;Unlimited lines per page in listing
 	PAGE 0
@@ -159,6 +161,7 @@ LOCALS_END set		$1F
 	
 	include system.asm
 	include math.asm
+	include cordic.asm
 	include output.asm
 	include aux_stack.asm
 	include forth.asm

@@ -57,7 +57,6 @@
 		PLA
 		RTS
 		
-	
 	;Check if executing from inside word
 	WITHIN_WORD:
 		LDA aux_word_counter
@@ -164,4 +163,41 @@
 		PLA
 		PLA
 		JMP CODE_DROP+EXEC_HEADER
+		
+	;Push literal value onto stack
+	PUSH_STUB:
+		
+		TODO: abstract?
+		PLA
+		STA ret_address
+		PLA
+		STA ret_address+1
+		
+		TXA
+		PHA
+		
+		LDY #1
+		.loop:
+			LDA (ret_address),Y
+			STA 0,X
+			INX
+			INY
+			CPY #OBJ_SIZE+1
+			BNE .loop
+		PLA
+		TAX
+		
+		CLC
+		LDA ret_address
+		ADC #OBJ_SIZE
+		TAY
+		LDA ret_address+1
+		ADC #0
+		PHA
+		TYA
+		PHA
+		
+		RTS
+		
+		
 		

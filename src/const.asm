@@ -166,6 +166,8 @@
 		TOKEN_LSHIFT =				122
 		TOKEN_RSHIFT =				124
 		TOKEN_ABS =					126
+		TOKEN_PI =					128
+		TOKEN_SIN =					130
 		
 		;Execution modes
 		EXEC_INPUT =		0

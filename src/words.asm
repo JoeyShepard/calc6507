@@ -2125,22 +2125,50 @@
 
 	WORD_ABS:
 		FCB 3,"ABS"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_PI				;Next word
 		FCB TOKEN_ABS			;ID - 126
 		CODE_ABS:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
-	
-			halt
 			
 			LDA EXP_HI,X
 			AND #$7F	;zero sign bit
 			STA EXP_HI,X
 			
 			RTS
-			
 	
-	;TYPE	
+	WORD_PI:
+		FCB 2,"PI"				;Name
+		FDB WORD_SIN			;Next word
+		FCB TOKEN_PI			;ID - 128
+		CODE_PI:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB ADD1						;Flags	
+			
+			JSR PUSH_STUB
+			;3.1 41 59 26 53 58 97
+			FCB OBJ_FLOAT, $59, $53, $26, $59, $41, $31, $00, $00
+			
+			;do not optimize out! PUSH_STB calculates return
+			RTS
+	
+	WORD_SIN:
+		FCB 3,"SIN"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_SIN			;ID - 130
+		CODE_SIN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+			
+			TODO: range checking
+			
+			
+			
+			RTS
+				
+	
+	
+	;TYPE			;dont remember now why. type of stack item?
 	;MOD			76
 	;SIN			104
 	;COS			106
@@ -2153,7 +2181,7 @@
 	;LN				120
 	;GRAPH			138
 	;LIT			144
-	;WORDS			146
+	;WORDS/MEM		146
 	;[ ]
 	;JUMP
 	
@@ -2261,5 +2289,7 @@
 		FDB CODE_LSHIFT				;122
 		FDB CODE_RSHIFT				;124
 		FDB CODE_ABS				;126
+		FDB CODE_PI					;128
+		FDB CODE_SIN				;130
 		
 		
