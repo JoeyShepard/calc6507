@@ -44,7 +44,7 @@ def cordic(r, m, x, y, z, d, A):
 
 #original
 #arg = 0.4
-#print(cordic(1/K, 0, arg, 1.0, ATAN))
+#print(cordic(0, 1, 1/K, 0, arg, 1.0, ATAN))
 #(0.9210609940028851, 0.38941834230865136, -2.986136694229353e-16)
 
 #arg = 30

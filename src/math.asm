@@ -126,7 +126,8 @@
 			CPX #GR_OFFSET+OBJ_SIZE
 			BNE .swap_loop
 	END
-		
+	
+	TODO: make sure every utility function is actually used
 	;A-source, Y-dest
 	FUNC CopyRegs
 		STA math_ptr1

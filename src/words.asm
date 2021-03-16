@@ -2149,7 +2149,7 @@
 			;3.1 41 59 26 53 58 97
 			FCB OBJ_FLOAT, $59, $53, $26, $59, $41, $31, $00, $00
 			
-			;do not optimize out! PUSH_STB calculates return
+			;do not optimize out! PUSH_STUB calculates return to here
 			RTS
 	
 	WORD_SIN:
@@ -2162,7 +2162,48 @@
 			
 			TODO: range checking
 			
+			TXA
+			PHA
 			
+			TODO: abstract to save space
+			
+			;Z=arg
+			TXA
+			LDY #R2-GR_OFFSET
+			JSR CopyRegs
+			
+			;Shift Z if necessary
+			PLA
+			TAX
+			PHA
+			LDA EXP_LO,X
+			BEQ .no_shift
+				LDA #0
+				LDX #R2-GR_OFFSET
+				LDY #1
+				JSR HalfShift
+			.no_shift:
+			
+			;X=1/K
+			LDX #R0
+			JSR R_COPY_STUB
+			FDB INV_K
+			
+			;Y=0
+			LDX #R1-1	;skip type byte
+			JSR ZeroReg
+			
+			;Zero byte after number
+			LDA #0
+			STA R0+DEC_COUNT/2
+			;STA R1+DEC_COUNT/2	;already zeroed
+			STA R2+DEC_COUNT/2
+			
+			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y
+			JSR BCD_CORDIC
+			
+			PLA
+			TAX
 			
 			RTS
 				

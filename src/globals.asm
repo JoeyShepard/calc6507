@@ -48,8 +48,8 @@
 	
 	;Locals for functions - wasteful but RIOT mem not used otherwise
 	BYTE shift_counter
-	BYTE fp_ptr1
-	BYTE fp_ptr2
+	;BYTE fp_ptr1
+	;BYTE fp_ptr2
 	
 	;Splitting input into words
 	new_word_len:		DFS 1

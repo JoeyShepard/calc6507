@@ -199,5 +199,45 @@
 		
 		RTS
 		
+	;Register in X
+	TODO: much smaller in forth
+	R_COPY_STUB:
+		
+		STA math_a
+		
+		TODO: abstract with PUSH_STUB?
+		PLA
+		STA ret_address
+		CLC
+		ADC #2
+		TAY
+		PLA
+		STA ret_address+1
+		ADC #0
+		PHA
+		TYA
+		PHA
+		LDY #1
+		LDA (ret_address),Y
+		PHA 
+		INY 
+		LDA (ret_address),Y
+		STA ret_address+1
+		PLA
+		STA ret_address
+		
+		LDY #0
+		.loop:
+			LDA (ret_address),Y
+			STA 0,X
+			INY
+			INX
+			TODO: magic number
+			CPY #6
+			BNE .loop
+		
+		RTS
+		
+		
 		
 		

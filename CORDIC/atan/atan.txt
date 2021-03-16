@@ -1,8 +1,8 @@
-scale=11;
+scale=12;
 
 ratio=1;
 
-while(ratio!=0)
+while(ratio>(10^(-scale)))
 {
    #ratio;
    a(ratio);
