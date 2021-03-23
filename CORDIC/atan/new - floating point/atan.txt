@@ -1,0 +1,13 @@
+scale=50;
+
+ratio=1;
+
+while(ratio>=(10^(-scale)))
+{
+   #ratio;
+   a(ratio);
+   #print "\n";
+   ratio=ratio/10;
+}
+
+quit;

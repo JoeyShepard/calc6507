@@ -2167,7 +2167,7 @@
 			
 			TODO: abstract to save space
 			
-			;Z=arg
+			;Z (R2)=arg
 			TXA
 			LDY #R2-GR_OFFSET
 			JSR CopyRegs
@@ -2182,14 +2182,15 @@
 				LDX #R2-GR_OFFSET
 				LDY #1
 				JSR HalfShift
+				TODO: round???
 			.no_shift:
 			
-			;X=1/K
+			;X(R0)=1/K
 			LDX #R0
 			JSR R_COPY_STUB
 			FDB INV_K
 			
-			;Y=0
+			;Y(R1)=0
 			LDX #R1-1	;skip type byte
 			JSR ZeroReg
 			

@@ -1,6 +1,9 @@
 import sys
 
+todo_count=0
+
 def process(filename):
+    global todo_count
     f=open(filename,"r")
     filename_printed=False
 
@@ -17,8 +20,12 @@ def process(filename):
                     output+="\n"+filename+":"
                     filename_printed=True
                 output+="\n - "+" ".join(split_line[1:])
+                todo_count+=1
 
     if output!="":
         print(output)
     
 process(sys.argv[1])
+
+print("")
+print("Total todo items: "+str(todo_count))

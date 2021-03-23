@@ -9,6 +9,7 @@
 
 ;For now, table assumes xx.yy yy yy yy yy fixed point
 ;ACTUALLY x.y if radians!!!
+TODO: using stack is slower but MUCH better precision
 
 ;limiting it to above xx.y10 is TINY table
 ;intermediates at least will need larger range, so need full precision
@@ -40,108 +41,155 @@
 		;1/k = 1/23.674377006269683 = 0.04223975987774335
 		FCB $88, $59, $97, $23, $42, $0
 	
+	TODO: more or less rows?
+	TODO: smaller to generate later rows of form 1E-X?
 	;Leading zero simplifies logic below
 	ATAN_TABLE:
-		FCB $40, $63, $81, $39, $85, $07, $00
-		FCB $49, $52, $86, $66, $99, $00, $00
-		FCB $69, $66, $96, $99, $09, $00, $00
-		FCB $67, $99, $99, $99, $00, $00, $00
-		FCB $00, $00, $00, $10, $00, $00, $00
-		FCB $00, $00, $00, $01, $00, $00, $00
-		FCB $00, $00, $10, $00, $00, $00, $00
-		FCB $00, $00, $01, $00, $00, $00, $00
-		FCB $00, $10, $00, $00, $00, $00, $00
-		FCB $00, $01, $00, $00, $00, $00, $00
-		FCB $10, $00, $00, $00, $00, $00, $00
-		FCB $01, $00, $00, $00, $00, $00, $00
+		FCB $97, $33, $16, $98, $53, $78, $99, $49
+		FCB $12, $49, $52, $86, $66, $99, $98, $49
+		FCB $67, $86, $66, $66, $99, $99, $97, $49
+		FCB $67, $66, $66, $99, $99, $99, $96, $49
+		FCB $67, $66, $99, $99, $99, $99, $95, $49
+		FCB $67, $99, $99, $99, $99, $99, $94, $49
+		FCB $00, $00, $00, $00, $00, $10, $94, $49
+		FCB $00, $00, $00, $00, $00, $10, $93, $49
+		FCB $00, $00, $00, $00, $00, $10, $92, $49
+		FCB $00, $00, $00, $00, $00, $10, $91, $49
+		FCB $00, $00, $00, $00, $00, $10, $90, $49
+		FCB $00, $00, $00, $00, $00, $10, $89, $49
+		FCB $00, $00, $00, $00, $00, $10, $88, $49
 	
-	ATAN_ROWS = 	12
-	ATAN_WIDTH =	7
+	ATAN_ROWS = 	13
 	
 	;Functions
 	;=========
 	
+	TODO: delete if not used
+	;Old version using registers - potentially faster though less precision
+	;Flags in A
+	;FUNC BCD_CORDIC
+	;	
+	;	TAY
+	;	AND #CORDIC_CMP_MASK
+	;	STA math_a
+	;	TYA
+	;	AND #CORDIC_ADD_MASK
+	;	STA math_signs
+	;	TYA
+	;	AND #CORDIC_HALF_MASK
+	;	STA math_b
+	;
+	;	TODO: push status word?
+	;	SED
+	;
+	;	halt
+	;	
+	;	MOV.W #ATAN_TABLE, ret_address
+	;	LDA #ATAN_ROWS
+	;	STA math_c
+	;	.loop_outer:
+	;		TODO: magic number
+	;		LDA #9
+	;		STA math_d
+	;		.loop_inner:
+	;			LDA math_a
+	;			BEQ .compare_y
+	;			.compare_z:
+	;			
+	;				halt
+	;			
+	;				TODO: remove after debugging
+	;				LDA R2+DEC_COUNT/2
+	;				STA DEBUG_HEX
+	;				LDA #' '
+	;				STA DEBUG
+	;				LDY #ATAN_WIDTH-1
+	;				.debug_loop:
+	;					LDA R2-1,Y
+	;					STA DEBUG_HEX
+	;					DEY
+	;					BNE .debug_loop
+	;				LDA #'\\'
+	;				STA DEBUG
+	;				LDA #'n'
+	;				STA DEBUG
+	;				
+	;				;if z positive, sub table from z
+	;				;if z negative, add table to z
+	;				LDX #ATAN_WIDTH
+	;				LDY #0
+	;				LDA R2+DEC_COUNT/2
+	;				BNE .z_negative
+	;				.z_positive:
+	;					SEC
+	;					.z_sub_loop:
+	;						LDA R2,Y
+	;						SBC (ret_address),Y
+	;						STA R2,Y
+	;						INY
+	;						DEX
+	;						BNE .z_sub_loop
+	;						TODO: check for underflow
+	;						BEQ .z_comp_done
+	;				.z_negative:
+	;					CLC
+	;					.z_add_loop:
+	;						LDA R2,Y
+	;						ADC (ret_address),Y
+	;						STA R2,Y
+	;						INY
+	;						DEX
+	;						BNE .z_add_loop
+	;					TODO: check for overflow
+	;				.z_comp_done:
+	;				
+	;				;calculate X and Y
+	;				LDA R2+DEC_COUNT/2	;sign of comparison
+	;				AND #1
+	;				XOR 
+	;				
+	;				DEC math_d
+	;				BNE .compare_z
+	;				BEQ .compare_done
+	;			.compare_y:
+	;				TODO: compare Y
+	;				halt
+	;			.compare_done:
+	;			
+	;		TODO: remove after debugging
+	;		LDA #'\\'
+	;		STA DEBUG
+	;		LDA #'n'
+	;		STA DEBUG
+	;		
+	;		LDA ret_address
+	;		CLC
+	;		CLD
+	;		ADC #ATAN_WIDTH
+	;		SED
+	;		STA ret_address
+	;		BCC .no_inc
+	;			INC ret_address+1
+	;		.no_inc:
+	;
+	;		DEC math_c
+	;		BNE .loop_outer
+	;		
+	;	CLD
+	;	RTS
+	;	
+	;	.calc_X:
+	;
+	;END
+	
+	;Stack based version - smaller and better precision though slower
 	;Flags in A
 	FUNC BCD_CORDIC
 		
-		TAY
-		AND #CORDIC_CMP_MASK
-		STA math_a
-		TYA
-		AND #CORDIC_ADD_MASK
-		STA math_signs
-		TYA
-		AND #CORDIC_HALF_MASK
-		STA math_b
-	
-		TODO: push status word?
-		SED
-	
-		halt
+		STA CORDIC_flags
 		
-		MOV.W #ATAN_TABLE, ret_address
-		LDA #ATAN_ROWS
-		STA math_c
-		.loop_outer:
-			TODO: magic number
-			LDA #9
-			STA math_d
-			.loop_inner:
-				LDA math_a
-				BEQ .compare_y
-				.compare_z:
-					;if z positive, sub table from z
-					;if z negative, add table to z
-					LDX #ATAN_WIDTH
-					LDY #0
-					LDA R2+DEC_COUNT/2
-					BNE .z_negative
-					.z_positive:
-						SEC
-						.z_sub_loop:
-							LDA R2,Y
-							SBC (ret_address),Y
-							STA R2,Y
-							INY
-							DEX
-							BNE .z_sub_loop
-							BEQ .z_comp_done
-					.z_negative:
-						CLC
-						.z_add_loop:
-							LDA R2,Y
-							ADC (ret_address),Y
-							STA R2,Y
-							INY
-							DEX
-							BNE .z_add_loop
-					.z_comp_done:
-					DEC math_d
-					BNE .compare_z
-					BEQ .compare_done
-				.compare_y:
-					TODO: compare Y
-					halt
-				.compare_done:
-				
-			halt
-				
-			LDA ret_address
-			CLC
-			CLD
-			ADC #ATAN_WIDTH
-			SED
-			STA ret_address
-			BCC .no_inc
-				INC ret_address+1
-			.no_inc:
-
-			DEC math_c
-			BNE .loop_outer
-			
-			halt
-			
-		CLD
-	
+		TODO: too awkward to keep all values on stack
+		TODO: keep values in registers and use float functions
+		
 	END
 	
