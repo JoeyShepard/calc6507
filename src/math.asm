@@ -11,6 +11,8 @@
 	;Functions
 	;=========
 	
+	TODO: see how many times each is used and how (ie args needed?)
+	
 	TODO: combine with below
 	FUNC BCD_Reverse
 		ARGS
@@ -613,7 +615,11 @@
 		.no_round:
 	END
 	
+	TODO: redo with pointers? would make CORDIC MUCH faster
+	;Add R0 to R1 and store in R_ans
 	FUNC BCD_Add
+		
+		TODO: necessary?
 		PHP
 		SED
 		TXA
@@ -685,6 +691,7 @@
 		EOR R1+SIGN_INFO
 		STA math_signs
 		BEQ .same_sign
+			TODO: use SBC loop instead of rev and ADC below?
 			LDX #R0
 			;A = #SIGN_BIT
 			AND R0+SIGN_INFO

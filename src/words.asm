@@ -2150,6 +2150,7 @@
 			FCB OBJ_FLOAT, $59, $53, $26, $59, $41, $31, $00, $00
 			
 			;do not optimize out! PUSH_STUB calculates return to here
+			TODO: where else is PUSH_STUB used? return to caller?
 			RTS
 	
 	WORD_SIN:
@@ -2162,45 +2163,32 @@
 			
 			TODO: range checking
 			
+			TODO: BCD_Add pushes X, redundant here?
 			TXA
 			PHA
 			
 			TODO: abstract to save space
-			
-			;Z (R2)=arg
+			;Z(R4)=arg
 			TXA
-			LDY #R2-GR_OFFSET
+			LDY #R4
 			JSR CopyRegs
 			
-			;Shift Z if necessary
-			PLA
-			TAX
-			PHA
-			LDA EXP_LO,X
-			BEQ .no_shift
-				LDA #0
-				LDX #R2-GR_OFFSET
-				LDY #1
-				JSR HalfShift
-				TODO: round???
-			.no_shift:
+			;X(R2)=1/K
+			LDX #R2
+			JSR BCD_CopyInvK
 			
-			;X(R0)=1/K
-			LDX #R0
-			JSR R_COPY_STUB
-			FDB INV_K
-			
-			;Y(R1)=0
-			LDX #R1-1	;skip type byte
+			;Y(R3)=0
+			LDX #R3		;skip type byte
 			JSR ZeroReg
 			
-			;Zero byte after number
-			LDA #0
-			STA R0+DEC_COUNT/2
-			;STA R1+DEC_COUNT/2	;already zeroed
-			STA R2+DEC_COUNT/2
 			
-			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y
+			;	;Zero byte after number
+			;	LDA #0
+			;	STA R0+DEC_COUNT/2
+			;	;STA R1+DEC_COUNT/2	;already zeroed
+			;	STA R2+DEC_COUNT/2
+			
+			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
 			JSR BCD_CORDIC
 			
 			PLA

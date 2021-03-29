@@ -48,9 +48,11 @@
 	
 	;Locals for functions - wasteful but RIOT mem not used otherwise
 	BYTE shift_counter
-	;BYTE fp_ptr1
-	;BYTE fp_ptr2
-	BYTE CORDIC_flags
+	BYTE CORDIC_compare
+	BYTE CORDIC_add
+	BYTE CORDIC_sign
+	BYTE CORDIC_digits
+	BYTE CORDIC_loops
 	
 	;Splitting input into words
 	new_word_len:		DFS 1

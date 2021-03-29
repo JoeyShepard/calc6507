@@ -45,7 +45,9 @@
 	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
 	TODO: separate engine and table for 16 bit forth?
 	TODO: more comments
-
+	TODO: replace calculated jump with JMP (addr)
+	
+	
 ;Unlimited lines per page in listing
 	PAGE 0
 
@@ -103,6 +105,7 @@ LOCALS_END set		$1F
 	;Math
 	WORD math_ptr1
 	WORD math_ptr2
+	WORD CORDIC_table
 	
 	;Don't need header byte, +1 for guard and round, +1 for exp sign
 	R0: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1

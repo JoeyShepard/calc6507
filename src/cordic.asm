@@ -36,36 +36,60 @@ TODO: using stack is slower but MUCH better precision
 	CORDIC_ADD_MASK =		2
 	CORDIC_HALF =			4
 	CORDIC_HALF_MASK =		4
+	CORDIC_ATAN =			0
+	CORDIC_ATANH =			8
+	CORDIC_ATAN_MASK =		8
 	
 	INV_K:
-		;1/k = 1/23.674377006269683 = 0.04223975987774335
-		FCB $88, $59, $97, $23, $42, $0
+		;1/k = 1/23.674377006269683 = 0.042 23 97 59 87 774 335
+		FCB $77, $87, $59, $97, $23, $42, $98, $49
 	
 	TODO: more or less rows?
 	TODO: smaller to generate later rows of form 1E-X?
-	;Leading zero simplifies logic below
 	ATAN_TABLE:
-		FCB $97, $33, $16, $98, $53, $78, $99, $49
-		FCB $12, $49, $52, $86, $66, $99, $98, $49
-		FCB $67, $86, $66, $66, $99, $99, $97, $49
-		FCB $67, $66, $66, $99, $99, $99, $96, $49
-		FCB $67, $66, $99, $99, $99, $99, $95, $49
-		FCB $67, $99, $99, $99, $99, $99, $94, $49
-		FCB $00, $00, $00, $00, $00, $10, $94, $49
-		FCB $00, $00, $00, $00, $00, $10, $93, $49
-		FCB $00, $00, $00, $00, $00, $10, $92, $49
-		FCB $00, $00, $00, $00, $00, $10, $91, $49
-		FCB $00, $00, $00, $00, $00, $10, $90, $49
-		FCB $00, $00, $00, $00, $00, $10, $89, $49
-		FCB $00, $00, $00, $00, $00, $10, $88, $49
+		FCB $97, $33, $16, $98, $53, $78, $01, $40
+		FCB $12, $49, $52, $86, $66, $99, $02, $40
+		FCB $67, $86, $66, $66, $99, $99, $03, $40
+		FCB $67, $66, $66, $99, $99, $99, $04, $40
+		FCB $67, $66, $99, $99, $99, $99, $05, $40
+		FCB $67, $99, $99, $99, $99, $99, $06, $40
+		FCB $00, $00, $00, $00, $00, $10, $06, $40
+		FCB $00, $00, $00, $00, $00, $10, $07, $40
+		FCB $00, $00, $00, $00, $00, $10, $08, $40
+		FCB $00, $00, $00, $00, $00, $10, $09, $40
+		FCB $00, $00, $00, $00, $00, $10, $10, $40
+		FCB $00, $00, $00, $00, $00, $10, $11, $40
+		FCB $00, $00, $00, $00, $00, $10, $12, $40
+	
+	ATANH_TABLE:
 	
 	ATAN_ROWS = 	13
 	
 	;Functions
 	;=========
 	
+	;Reg in X
+	;Source in ret_address
+	FUNC BCD_CopyConst
+		LDY #OBJ_SIZE-1
+		.loop:
+			LDA (ret_address),Y
+			STA 1,X
+			INX
+			DEY
+			BNE .loop
+	END
+	
+	;Strange to have function only for inserting constants but smaller than inserting pointer after function call
+	BCD_CopyInvK:
+		MOV.W #INV_K,ret_address
+		JMP BCD_CopyConst
+		
+	
+	
+	
 	TODO: delete if not used
-	;Old version using registers - potentially faster though less precision
+	;Old version - fixed point calculating in place
 	;Flags in A
 	;FUNC BCD_CORDIC
 	;	
@@ -182,14 +206,114 @@ TODO: using stack is slower but MUCH better precision
 	;
 	;END
 	
-	;Stack based version - smaller and better precision though slower
+	
+	;Version using BCD functions rather than explicit - smaller and better precision though much slower
 	;Flags in A
 	FUNC BCD_CORDIC
 		
-		STA CORDIC_flags
+		TAY
 		
-		TODO: too awkward to keep all values on stack
-		TODO: keep values in registers and use float functions
+		;Compare to Y or Z?
+		AND #CORDIC_CMP_MASK
+		STA CORDIC_compare
+		
+		;Add or sub Y each time through?
+		TYA
+		AND #CORDIC_ADD_MASK
+		STA CORDIC_add
+		
+		;Use ATAN or ATANH table?
+		TAY
+		AND #CORDIC_ATAN_MASK
+		BNE .use_ATANH
+			MOV.W #ATAN_TABLE,CORDIC_table
+			BNE .table_done
+		.use_ATANH:
+			MOV.W #ATANH_TABLE,CORDIC_table
+		.table_done:
+		
+		LDA #ATAN_ROWS
+		STA CORDIC_loops
+		.loop_outer:
+			;make copy of table entry in register for faster copying
+			LDY #7
+			.table_copy:
+				LDA (CORDIC_table),Y
+				STA R5+1,Y
+				DEY
+				BPL .table_copy
+				
+			TODO: magic number
+			LDA #9
+			STA CORDIC_digits
+			.loop_inner:
+				
+				;Z(R4) to R0 for adding
+				LDA #R4
+				LDY #R0
+				JSR CopyRegs
+				
+				;Copy table entry(R5) to R1 for adding to Z(R4)
+				LDA #R5
+				LDY #R1
+				JSR CopyRegs
+				
+				TODO: eliminate comparison on every iteration
+				LDA CORDIC_compare
+				BEQ .compare_Y
+				.compare_Z:
+					LDA R4+EXP_HI
+					AND #SIGN_BIT
+					STA CORDIC_sign
+					BNE .add_table
+					BEQ .sub_table
+				.compare_Y:
+					TODO: compare Y
+					halt
+				.compare_done:
+				
+				
+				.sub_table:
+					LDA R1+EXP_HI
+					EOR #SIGN_BIT
+					STA R1+EXP_HI
+				.add_table:
+				
+				JSR BCD_Add
+				
+				TODO: remove after debugging
+				MOV #BANK_GEN_RAM3,RAM_BANK3
+				CALL DebugRans
+				LDA #'\\'
+				STA DEBUG
+				LDA #'n'
+				STA DEBUG
+				MOV #BANK_GFX_RAM1,RAM_BANK3
+				halt
+		
+				;Save calculated Z to R4
+				LDA #R_ans
+				LDY #R4
+				JSR CopyRegs
+				
+			DEC CORDIC_digits
+			BNE .loop_inner
+			
+			CLC
+			LDA CORDIC_table
+			ADC #OBJ_SIZE-TYPE_SIZE
+			STA CORDIC_table
+			BCC .no_carry
+				INC CORDIC_table
+			.no_carry:
+		
+			START HERE: Z good through 5.8. non-BCD in 6.0
+		
+		DEC CORDIC_loops
+		BNE .loop_outer
+		
+		halt
+		halt
 		
 	END
 	

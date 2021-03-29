@@ -163,7 +163,9 @@
 		PLA
 		PLA
 		JMP CODE_DROP+EXEC_HEADER
-		
+	
+	TODO: delete and use function?
+	TODO: change to use pointer rather than embedded data?
 	;Push literal value onto stack
 	PUSH_STUB:
 		
@@ -187,56 +189,63 @@
 		PLA
 		TAX
 		
+		;One byte longer. Doesn't use stack
 		CLC
 		LDA ret_address
-		ADC #OBJ_SIZE
-		TAY
-		LDA ret_address+1
-		ADC #0
-		PHA
-		TYA
-		PHA
-		
-		RTS
-		
+		ADC #OBJ_SIZE+1
+		STA ret_address
+		BCC .skip
+			INC ret_address+1
+		.skip:
+		JMP (ret_address)
+			
+	
+	TODO: delete?
+	TODO: check that BCD_CopyConst is smaller than this - seems only 19 bytes
+	TODO: eliminate PUSH_STUB too?
 	;Register in X
+	;10 bytes smaller than JMP()
 	TODO: much smaller in forth
-	R_COPY_STUB:
+	;R_COPY_STUB:
+	;	TODO: abstract with PUSH_STUB?
+	;	PLA
+	;	STA ret_address
+	;	CLC
+	;	ADC #2
+	;	TAY
+	;	PLA
+	;	STA ret_address+1
+	;	ADC #0
+	;	PHA
+	;	TYA
+	;	PHA
+	;	LDY #1
+	;	LDA (ret_address),Y
+	;	PHA 
+	;	INY 
+	;	LDA (ret_address),Y
+	;	STA ret_address+1
+	;	PLA
+	;	STA ret_address
+	;	
+	;	LDY #0
+	;	.loop:
+	;		LDA (ret_address),Y
+	;		STA 0,X
+	;		INY
+	;		INX
+	;		TODO: magic number
+	;		CPY #8
+	;		BNE .loop
+	;	
+	;	RTS
 		
-		STA math_a
+
 		
-		TODO: abstract with PUSH_STUB?
-		PLA
-		STA ret_address
-		CLC
-		ADC #2
-		TAY
-		PLA
-		STA ret_address+1
-		ADC #0
-		PHA
-		TYA
-		PHA
-		LDY #1
-		LDA (ret_address),Y
-		PHA 
-		INY 
-		LDA (ret_address),Y
-		STA ret_address+1
-		PLA
-		STA ret_address
 		
-		LDY #0
-		.loop:
-			LDA (ret_address),Y
-			STA 0,X
-			INY
-			INX
-			TODO: magic number
-			CPY #6
-			BNE .loop
 		
-		RTS
+		
+		
 		
 		
 		

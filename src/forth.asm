@@ -477,7 +477,7 @@
 				.hex_done:
 				LDA #OBJ_HEX
 				STA R_ans
-				RTS
+				;RTS
 			.hex_error:
 			RTS
 		.not_hex:
@@ -978,16 +978,17 @@
 			
 		.no_flags:
 		
-		LDA ret_address
 		CLC
-		ADC #1
-		TAY
-		LDA ret_address+1
-		ADC #0
-		PHA
-		TYA
-		PHA
-	END					;calls calculated jump!
+		LDA ret_address
+		TODO: magic number
+		ADC #2
+		STA ret_address
+		BCC .skip
+			INC ret_address+1
+		.skip:
+		JMP (ret_address)
+		
+	END
 	
 	;Thread in exec_ptr
 	FUNC ExecThread
