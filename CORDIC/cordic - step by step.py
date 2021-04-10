@@ -27,6 +27,7 @@ def r2d(x):
     return 180*x/pi
 
 def cordic(r, m, x, y, z, d, A):
+    iterations=1
     for i,a in enumerate(A):
         for j in range(9):
             #s = cmp(z, 0)
@@ -35,10 +36,11 @@ def cordic(r, m, x, y, z, d, A):
             s = cmp(y, 0) if r else -cmp(z, 0)
             z += s * a
             x, y = x + m * y * s * d, y - x * s * d
-            print(i,'.',j,':')
+            print(iterations,"-",i,'.',j,':')
             print("   X: ",x)
             print("   Y: ",y)
             print("   Z: ",z,"\n")
+            iterations+=1
         d /= 10
     return x, y, z
 

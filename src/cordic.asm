@@ -272,7 +272,6 @@ TODO: using stack is slower but MUCH better precision
 					halt
 				.compare_done:
 				
-				
 				.sub_table:
 					LDA R1+EXP_HI
 					EOR #SIGN_BIT
@@ -284,30 +283,33 @@ TODO: using stack is slower but MUCH better precision
 				TODO: remove after debugging
 				MOV #BANK_GEN_RAM3,RAM_BANK3
 				CALL DebugRans
-				LDA #'\\'
-				STA DEBUG
-				LDA #'n'
-				STA DEBUG
 				MOV #BANK_GFX_RAM1,RAM_BANK3
-				halt
-		
+				JSR DEBUG_NL
+				
 				;Save calculated Z to R4
 				LDA #R_ans
 				LDY #R4
 				JSR CopyRegs
 				
+				
+				
+				
+				
+				
 			DEC CORDIC_digits
 			BNE .loop_inner
 			
+			TODO: remove after debugging
+			JSR DEBUG_NL
+			halt
+		
 			CLC
 			LDA CORDIC_table
 			ADC #OBJ_SIZE-TYPE_SIZE
 			STA CORDIC_table
 			BCC .no_carry
-				INC CORDIC_table
+				INC CORDIC_table+1
 			.no_carry:
-		
-			START HERE: Z good through 5.8. non-BCD in 6.0
 		
 		DEC CORDIC_loops
 		BNE .loop_outer
@@ -316,4 +318,13 @@ TODO: using stack is slower but MUCH better precision
 		halt
 		
 	END
+	
+	TODO: delete
+	DEBUG_NL:
+		LDA #'\\'
+		STA DEBUG
+		LDA #'n'
+		STA DEBUG
+		RTS
+		
 	
