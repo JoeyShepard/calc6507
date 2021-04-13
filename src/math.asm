@@ -307,7 +307,6 @@
 			BNE .half_loop
 	END
 	
-	
 	;Number in A
 	;ASSUMES X IS SAVED ON STACK!!!
 	FUNC ShiftR0

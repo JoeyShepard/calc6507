@@ -41,7 +41,8 @@
 	BYTE math_b
 	BYTE math_c
 	TODO: double check that these are all used
-	;BYTE math_d
+	BYTE math_d
+	
 	BYTE math_signs
 	BYTE math_sticky
 	BYTE math_max
@@ -53,6 +54,7 @@
 	BYTE CORDIC_sign
 	BYTE CORDIC_digits
 	BYTE CORDIC_loops
+	BYTE CORDIC_end_sign
 	
 	;Splitting input into words
 	new_word_len:		DFS 1

@@ -2153,6 +2153,54 @@
 			TODO: where else is PUSH_STUB used? return to caller?
 			RTS
 	
+	
+	;Floating point version - too slow
+	;WORD_SIN:
+	;	FCB 3,"SIN"				;Name
+	;	FDB dict_begin			;Next word
+	;	FCB TOKEN_SIN			;ID - 130
+	;	CODE_SIN:
+	;		FCB OBJ_PRIMITIVE				;Type
+	;		FCB MIN1|FLOATS					;Flags	
+	;		
+	;		TODO: range checking
+	;		
+	;		TODO: BCD_Add pushes X, redundant here?
+	;		TXA
+	;		PHA
+	;		
+	;		TODO: abstract to save space
+	;		;Z(R4)=arg
+	;		TXA
+	;		LDY #R4
+	;		JSR CopyRegs
+	;		
+	;		halt
+	;		
+	;		;X(R2)=1/K
+	;		LDX #R2
+	;		JSR BCD_CopyInvK
+	;		
+	;		;Y(R3)=0
+	;		LDX #R3		;skip type byte
+	;		JSR ZeroReg
+	;		
+	;		
+	;		;	;Zero byte after number
+	;		;	LDA #0
+	;		;	STA R0+DEC_COUNT/2
+	;		;	;STA R1+DEC_COUNT/2	;already zeroed
+	;		;	STA R2+DEC_COUNT/2
+	;		
+	;		LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
+	;		JSR BCD_CORDIC
+	;		
+	;		PLA
+	;		TAX
+	;		
+	;		RTS
+			
+	;Fixed point version
 	WORD_SIN:
 		FCB 3,"SIN"				;Name
 		FDB dict_begin			;Next word
@@ -2161,44 +2209,115 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			TODO: range checking
+			TODO: abstract
+			;Range checking
 			
-			TODO: BCD_Add pushes X, redundant here?
+			;sin(0)=0
+			LDA DEC_COUNT/2,X
+			BNE .not_zero
+				TODO: abstract!!!
+				TODO: test
+				;JSR StackAddItem
+				JMP PUSH_STUB
+				FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $00, $00, $00
+			.not_zero:
+			
+			;sign: sin(-x) = -sin(x)
+			LDY #0
+			LDA EXP_HI,X
+			AND #SIGN_BIT
+			BEQ .sign_pos
+				TODO: test!
+				EOR EXP_HI,X 
+				STA EXP_HI,X
+				LDY #SIGN_BIT
+			.sign_pos:
+			STY CORDIC_end_sign
+			
+			;x <= pi/2?
+			TODO: combine into one stub? used below too
+			JSR StackAddItem
+			JSR PUSH_STUB
+			;-pi/2 = 1.5 70 79 63 26 794 8966
+			FCB OBJ_FLOAT, $79, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
+			;JSR CODE_ADD.float	;smaller but copies back to stack
+			JSR TosR0R1
+			JSR BCD_Add
+			JSR CODE_DROP+EXEC_HEADER
+			
+			;sin(pi/2)=1
+			LDA R_ans+DEC_COUNT/2
+			BNE .not_one
+				TODO: abstract!!!
+				TODO: test
+				;JSR StackAddItem
+				JSR PUSH_STUB
+				FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00
+				JMP .set_sign
+			.not_one:
+			
+			;x > pi/2 - range error
+			LDA R_ans+EXP_HI
+			AND #SIGN_BIT
+			BNE .range_good
+				TODO: test!
+				LDA #ERROR_RANGE
+				STA ret_val
+				RTS
+			.range_good:
+					
 			TXA
 			PHA
 			
-			TODO: abstract to save space
-			;Z(R4)=arg
-			TXA
-			LDY #R4
-			JSR CopyRegs
+			LDY #0
+			LDA #ATAN_WIDTH
+			STA CORDIC_loops
+			.loop:
+				;X(R2)=1/K
+				LDA INV_K,Y
+				STA R2,Y
+				;Y(R3)=0
+				LDA #0
+				STA R3,Y
+				;Z(R0)=arg for shifting then R4
+				LDA TYPE_SIZE,X
+				STA R0,Y
+				
+				INY
+				INX
+				DEC CORDIC_loops
+				BNE .loop
 			
-			;X(R2)=1/K
-			LDX #R2
-			JSR BCD_CopyInvK
-			
-			;Y(R3)=0
-			LDX #R3		;skip type byte
-			JSR ZeroReg
+			;calculate exp difference (from BCD_Unpack - hard to abstract)
+			LDA 0,X
 			
 			
-			;	;Zero byte after number
-			;	LDA #0
-			;	STA R0+DEC_COUNT/2
-			;	;STA R1+DEC_COUNT/2	;already zeroed
-			;	STA R2+DEC_COUNT/2
+			;STA math_lo
+			;
+			;STA SIGN_INFO,X
+			;AND #$F
+			;STA EXP_HI,X
+			;LDA SIGN_INFO,X
+			;AND #E_SIGN_BIT
+			;BEQ .no_reverse
+			;	JSR BCD_RevExp
+			;.no_reverse:
+			
+			halt
 			
 			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
 			JSR BCD_CORDIC
+			
+			.set_sign:
+			TODO: 
 			
 			PLA
 			TAX
 			
 			RTS
-				
 	
 	
-	;TYPE			;dont remember now why. type of stack item?
+	;TYPE			;type of stack item?
 	;MOD			76
 	;SIN			104
 	;COS			106

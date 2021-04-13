@@ -9,12 +9,12 @@ f_output=open("output.txt","wt")
 
 for line in f_input:
     text=line[:-1]
-    print("\nRead: "+text)
+    print("\nRead:      "+text)
     num=Decimal(text)
     if int(text[-1])>=5:
         print("Rounding: "+str(num))
         num+=Decimal("0.00000000001")
-        print("Rounded: "+str(num))
+        print("Rounded:  "+str(num)[:-1])
         
     #Print all digits
     write_line=""
@@ -29,7 +29,8 @@ for line in f_input:
         num*=100
         print(num)
 
-    write_line+=", $00"
+    #tens and hundreds place not needed
+    #write_line+=", $00"
     
     print(write_line+"\n")
     f_output.write("    FCB "+write_line+"\n")

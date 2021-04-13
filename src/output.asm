@@ -315,7 +315,8 @@
 	FCB "OUT OF MEMORY ",0		;20
 	ERROR_MSG_STRUCTURE:
 	FCB "  STRUCTURE   ",0		;22
-	
+	ERROR_MSG_RANGE:
+	FCB " RANGE ERROR  ",0		;24
 	
 	TODO: table smaller than fixed length strings?
 	ERROR_TABLE:
@@ -330,6 +331,7 @@
 		FDB ERROR_MSG_COMPILE_ONLY
 		FDB ERROR_MSG_OUT_OF_MEM
 		FDB ERROR_MSG_STRUCTURE
+		FDB ERROR_MSG_RANGE
 		
 	TODO: adjust display and messages for new 5x8 font
 	;error code in A

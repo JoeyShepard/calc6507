@@ -79,6 +79,7 @@
 	ERROR_COMPILE_ONLY =		18
 	ERROR_OUT_OF_MEM =			20
 	ERROR_STRUCTURE =			22
+	ERROR_RANGE =				24
 	
 	;Forth
 	;=====
