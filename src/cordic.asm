@@ -290,8 +290,6 @@ TODO: actually, extremely slow
 		TODO: push status word?
 		SED
 	
-		halt
-		
 		MOV.W #ATAN_TABLE, ret_address
 		LDA #ATAN_ROWS
 		STA math_c
@@ -307,13 +305,13 @@ TODO: actually, extremely slow
 					halt
 				
 					TODO: remove after debugging
-					LDA R2+DEC_COUNT/2
+					LDA R4+DEC_COUNT/2
 					STA DEBUG_HEX
 					LDA #' '
 					STA DEBUG
 					LDY #ATAN_WIDTH-1
 					.debug_loop:
-						LDA R2-1,Y
+						LDA R4,Y
 						STA DEBUG_HEX
 						DEY
 						BNE .debug_loop
@@ -321,6 +319,8 @@ TODO: actually, extremely slow
 					STA DEBUG
 					LDA #'n'
 					STA DEBUG
+					
+					START HERE: comparison loop needs to be updated
 					
 					;if z positive, sub table from z
 					;if z negative, add table to z

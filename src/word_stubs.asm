@@ -198,7 +198,18 @@
 			INC ret_address+1
 		.skip:
 		JMP (ret_address)
+		
+	PUSH_STUB_0:
+		JSR PUSH_STUB
+		FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $00, $00, $00
+		RTS
 			
+	PUSH_STUB_1:
+		JSR PUSH_STUB
+		FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00
+		RTS
+			
+	
 	
 	TODO: delete?
 	TODO: check that BCD_CopyConst is smaller than this - seems only 19 bytes

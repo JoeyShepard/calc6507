@@ -2218,8 +2218,7 @@
 				TODO: abstract!!!
 				TODO: test
 				;JSR StackAddItem
-				JMP PUSH_STUB
-				FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $00, $00, $00
+				JMP PUSH_STUB_0
 			.not_zero:
 			
 			;sign: sin(-x) = -sin(x)
@@ -2251,8 +2250,7 @@
 				TODO: abstract!!!
 				TODO: test
 				;JSR StackAddItem
-				JSR PUSH_STUB
-				FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00
+				JSR PUSH_STUB_1
 				JMP .set_sign
 			.not_one:
 			
@@ -2281,29 +2279,54 @@
 				STA R3,Y
 				;Z(R0)=arg for shifting then R4
 				LDA TYPE_SIZE,X
-				STA R0,Y
+				STA R0+GR_OFFSET,Y
 				
 				INY
 				INX
 				DEC CORDIC_loops
 				BNE .loop
 			
-			;calculate exp difference (from BCD_Unpack - hard to abstract)
-			LDA 0,X
-			
-			
-			;STA math_lo
-			;
-			;STA SIGN_INFO,X
-			;AND #$F
-			;STA EXP_HI,X
-			;LDA SIGN_INFO,X
-			;AND #E_SIGN_BIT
-			;BEQ .no_reverse
-			;	JSR BCD_RevExp
-			;.no_reverse:
+			;calculate exp difference (seems hard to abstract)
+			;exp is 0 or negative
+			TODO: test!
+			LDA 2,X				;high byte of exponent
+			AND #$F
+			STA math_hi
+			ORA 1,X				;low byte of exponent
+			BEQ .no_shift
+				
+				TODO: test
+				;exponent <= -100, return sin(0)=0
+				LDA math_hi
+				BEQ .no_ret_zero
+					.ret_zero:
+					PLA
+					TAX
+					JMP PUSH_STUB_0
+				.no_ret_zero:
+				
+				TODO: test
+				;exponent <= -12,  return sin(0)=0
+				LDA 1,X
+				CMP #$12
+				BCS .ret_zero
+				
+				TODO: test
+				;shift arg
+				TAY
+				LDA hex_table,Y
+				STA math_a
+				JSR ShiftR0.no_sticky
+				TODO: GR not cleared before shift. also, not rounded
+				
+			.no_shift:
 			
 			halt
+			
+			;Z(R4)=arg
+			LDA #R0
+			LDY #R4
+			JSR CopyRegs
 			
 			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
 			JSR BCD_CORDIC
