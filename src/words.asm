@@ -2210,7 +2210,7 @@
 			FCB MIN1|FLOATS					;Flags	
 			
 			TODO: abstract
-			;Range checking
+			;Range checking	
 			
 			;sin(0)=0
 			LDA DEC_COUNT/2,X
@@ -2321,18 +2321,23 @@
 				
 			.no_shift:
 			
-			halt
+			;halt
 			
 			;Z(R4)=arg
 			LDA #R0
 			LDY #R4
 			JSR CopyRegs
 			
+			TODO: move to BCD_CORDIC?
+			;sign - always starts positive
+			LDA #0
+			STA R4+DEC_COUNT/2+1
+			
 			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
 			JSR BCD_CORDIC
 			
 			.set_sign:
-			TODO: 
+			TODO: set sign
 			
 			PLA
 			TAX

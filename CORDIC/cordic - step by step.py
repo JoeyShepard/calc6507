@@ -30,16 +30,22 @@ def cordic(r, m, x, y, z, d, A):
     iterations=1
     for i,a in enumerate(A):
         for j in range(9):
+
+            print(iterations,"-",i,'.',j,':')
+            print("   X: ",x)
+            print("   Y: ",y)
+            print("   Z: ",z,"\n")
+
             #s = cmp(z, 0)
             #z -= s * a
             #x, y = x - y * s * d, y + x * s * d
             s = cmp(y, 0) if r else -cmp(z, 0)
             z += s * a
             x, y = x + m * y * s * d, y - x * s * d
-            print(iterations,"-",i,'.',j,':')
-            print("   X: ",x)
-            print("   Y: ",y)
-            print("   Z: ",z,"\n")
+            #print(iterations,"-",i,'.',j,':')
+            #print("   X: ",x)
+            #print("   Y: ",y)
+            #print("   Z: ",z,"\n")
             iterations+=1
         d /= 10
     return x, y, z

@@ -275,6 +275,12 @@ TODO: actually, extremely slow
 	;=========
 	
 	;Flags in A
+	;R0 - shifting
+	;R1 - X'
+	;R2 - X
+	;R3 - Y
+	;R4 - Z
+	TODO: 
 	FUNC BCD_CORDIC
 		
 		TAY
@@ -302,8 +308,6 @@ TODO: actually, extremely slow
 				BEQ .compare_y
 				.compare_z:
 				
-					halt
-				
 					TODO: remove after debugging
 					LDA R4+DEC_COUNT/2
 					STA DEBUG_HEX
@@ -320,36 +324,54 @@ TODO: actually, extremely slow
 					LDA #'n'
 					STA DEBUG
 					
-					START HERE: comparison loop needs to be updated
+					;START HERE: comparison loop needs to be updated
 					
 					;if z positive, sub table from z
 					;if z negative, add table to z
 					LDX #ATAN_WIDTH
 					LDY #0
-					LDA R2+DEC_COUNT/2
+					TODO: true for sin/cos but true for others too?
+					;low byte of exp is 0 or negative
+					TODO: magic number
+					LDA R4+DEC_COUNT/2+1
 					BNE .z_negative
 					.z_positive:
 						SEC
 						.z_sub_loop:
-							LDA R2,Y
+							TODO: magic number
+							LDA R4+1,Y
 							SBC (ret_address),Y
-							STA R2,Y
+							STA R4+1,Y
 							INY
 							DEX
 							BNE .z_sub_loop
-							TODO: check for underflow
-							BEQ .z_comp_done
+							;Mark sign negative if necessary
+							BCS .not_neg
+								LDA #$99
+								TODO: magic number
+								STA R4+DEC_COUNT/2+1
+							.not_neg:
+							JMP .z_comp_done
 					.z_negative:
 						CLC
 						.z_add_loop:
-							LDA R2,Y
+							TODO: magic number
+							LDA R4+1,Y
 							ADC (ret_address),Y
-							STA R2,Y
+							STA R4+1,Y
 							INY
 							DEX
 							BNE .z_add_loop
-						TODO: check for overflow
+							;Mark sign positive if necessary
+							TODO: sure that overflow is always flipping sign?
+							BCC .not_pos
+								LDA #0
+								TODO: magic number
+								STA R4+DEC_COUNT/2+1
+							.not_pos:
 					.z_comp_done:
+					
+					START HERE: Z loop works. calculate X and Y
 					
 					;;calculate X and Y
 					;LDA R2+DEC_COUNT/2	;sign of comparison
@@ -381,7 +403,8 @@ TODO: actually, extremely slow
 			.no_inc:
 	
 			DEC math_c
-			BNE .loop_outer
+			;BNE .loop_outer
+			JNE .loop_outer
 			
 		CLD
 		RTS
