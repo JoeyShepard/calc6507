@@ -350,8 +350,8 @@ TODO: actually, extremely slow
 								TODO: magic number
 								STA R4+DEC_COUNT/2+1
 							.not_neg:
-							;JMP .z_comp_done
-							JMP .compare_done
+							TODO: JMP .compare_done?
+							JMP .z_comp_done
 					.z_negative:
 						CLC
 						.z_add_loop:
