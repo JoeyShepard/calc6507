@@ -32,13 +32,13 @@ TODO: actually, extremely slow
 	;Constants
 	;=========
 	;CORDIC_SIGN =			1
-	;
-	;CORDIC_CMP_Y =			0
-	;CORDIC_CMP_Z =			1
-	;CORDIC_CMP_MASK =		1
+	
 	;CORDIC_ADD_Y =			0
-	;CORDIC_SUB_Y =			2
-	;CORDIC_ADD_MASK =		2
+	;CORDIC_SUB_Y =			1
+	;CORDIC_ADD_MASK =		1
+	;CORDIC_CMP_Y =			0
+	;CORDIC_CMP_Z =			2
+	;CORDIC_CMP_MASK =		2
 	;CORDIC_HALF =			4
 	;CORDIC_HALF_MASK =		4
 	;CORDIC_ATAN =			0
@@ -235,12 +235,12 @@ TODO: actually, extremely slow
 	;=========
 	CORDIC_SIGN =			1
 	
-	CORDIC_CMP_Y =			0
-	CORDIC_CMP_Z =			1
-	CORDIC_CMP_MASK =		1
 	CORDIC_ADD_Y =			0
-	CORDIC_SUB_Y =			2
-	CORDIC_ADD_MASK =		2
+	CORDIC_SUB_Y =			1
+	CORDIC_ADD_MASK =		1
+	CORDIC_CMP_Y =			0
+	CORDIC_CMP_Z =			2
+	CORDIC_CMP_MASK =		2
 	CORDIC_HALF =			4
 	CORDIC_HALF_MASK =		4
 	CORDIC_ATAN =			0
@@ -323,7 +323,7 @@ TODO: actually, extremely slow
 					STA DEBUG
 					LDA #'n'
 					STA DEBUG
-					halt
+					;halt
 					
 					;if z positive, sub table from z
 					;if z negative, add table to z
@@ -350,7 +350,6 @@ TODO: actually, extremely slow
 								TODO: magic number
 								STA R4+DEC_COUNT/2+1
 							.not_neg:
-							TODO: JMP .compare_done?
 							JMP .z_comp_done
 					.z_negative:
 						CLC
@@ -370,18 +369,38 @@ TODO: actually, extremely slow
 								STA R4+DEC_COUNT/2+1
 							.not_pos:
 					.z_comp_done:
+					
+					;Load sign of comparison for computation of X and Y
+					LDA R4+DEC_COUNT/2+1
 					JMP .compare_done
-					
-					;;calculate X and Y
-					;LDA R2+DEC_COUNT/2	;sign of comparison
-					;AND #1
-					;XOR 
-					
 					
 				.compare_y:
 					TODO: compare Y
 					halt
 				.compare_done:
+				
+				halt
+				
+				;calculate X and Y
+				;=================
+				
+				;A - sign of comparison	of z or y
+				AND #1	;Convert $99 to 1
+				XOR	math_signs
+				
+				START HERE: finish this brainstorming
+				;Need to figure out how to optimize shifts
+				;1.
+					;1. copy Y
+					;2. shift Y (maybe combine with 1)
+					;3. add to X
+				;2.
+					;1. load, shift and add in one step
+					;2. GRS at end!
+					TODO: if this, then dont need R0 for shifting!
+				
+				
+				
 				
 				DEC math_d
 				BNE .loop_inner
