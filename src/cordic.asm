@@ -323,8 +323,7 @@ TODO: actually, extremely slow
 					STA DEBUG
 					LDA #'n'
 					STA DEBUG
-					
-					;START HERE: comparison loop needs to be updated
+					halt
 					
 					;if z positive, sub table from z
 					;if z negative, add table to z
@@ -351,7 +350,8 @@ TODO: actually, extremely slow
 								TODO: magic number
 								STA R4+DEC_COUNT/2+1
 							.not_neg:
-							JMP .z_comp_done
+							;JMP .z_comp_done
+							JMP .compare_done
 					.z_negative:
 						CLC
 						.z_add_loop:
@@ -370,21 +370,22 @@ TODO: actually, extremely slow
 								STA R4+DEC_COUNT/2+1
 							.not_pos:
 					.z_comp_done:
-					
-					START HERE: Z loop works. calculate X and Y
+					JMP .compare_done
 					
 					;;calculate X and Y
 					;LDA R2+DEC_COUNT/2	;sign of comparison
 					;AND #1
 					;XOR 
 					
-					DEC math_d
-					BNE .compare_z
-					BEQ .compare_done
+					
 				.compare_y:
 					TODO: compare Y
 					halt
 				.compare_done:
+				
+				DEC math_d
+				BNE .loop_inner
+				;BEQ .compare_done
 				
 			TODO: remove after debugging
 			LDA #'\\'

@@ -27,3 +27,6 @@ processed.p
 
 #randomized test data
 /decimal\ test/input*.txt
+
+#examples that I did not create myself
+"CORDIC example from HP forum/"
