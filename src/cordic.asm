@@ -387,9 +387,11 @@ TODO: actually, extremely slow
 				
 				;A - sign of comparison	of z or y
 				AND #1	;Convert $99 to 1
-				XOR	math_signs
+				EOR	math_signs
 				
-				START HERE: finish this brainstorming
+				
+				
+				;START HERE: finish this brainstorming
 				;Need to figure out how to optimize shifts
 				;1.
 					;1. copy Y
@@ -399,6 +401,9 @@ TODO: actually, extremely slow
 					;1. load, shift and add in one step
 					;2. GRS at end!
 					TODO: if this, then dont need R0 for shifting!
+				
+				TODO: reuse shift from addBCD
+				
 				
 				
 				
