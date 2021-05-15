@@ -1,6 +1,6 @@
 # html output from optimizer
 output/
-"/hardware version/output/"
+"hardware version/output/"
 
 # hex files for loading into emulator or ROM
 *.hex
@@ -16,17 +16,17 @@ processed.i
 processed.lst
 processed.map
 processed.p
-/src/*.err
+src/*.err
 
 #randomized tests - large file size
 #actually, randomized tests moved to node.js port
 #input.txt
 
 #documents downloaded from elsewhere
-/docs/
+docs/
 
 #randomized test data
-/decimal\ test/input*.txt
+decimal\ test/input*.txt
 
 #examples that I did not create myself
-"/CORDIC/examples from HP forum/"
+CORDIC/examples\ from\ HP\ forum/
