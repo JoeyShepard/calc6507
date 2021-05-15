@@ -1,6 +1,6 @@
 # html output from optimizer
 output/
-"hardware test/output/"
+"/hardware version/output/"
 
 # hex files for loading into emulator or ROM
 *.hex
@@ -29,4 +29,4 @@ processed.p
 /decimal\ test/input*.txt
 
 #examples that I did not create myself
-"CORDIC/examples from HP forum/"
+"/CORDIC/examples from HP forum/"
