@@ -1,6 +1,6 @@
 # html output from optimizer
 output/
-"hardware version/output/"
+hardware\ version/output/
 
 # hex files for loading into emulator or ROM
 *.hex

@@ -285,139 +285,206 @@ TODO: actually, extremely slow
 		
 		TAY
 		AND #CORDIC_CMP_MASK
-		STA math_a
+		;STA math_a
+		STA CORDIC_compare
 		TYA
 		AND #CORDIC_ADD_MASK
-		STA math_signs
+		;STA math_signs
+		STA CORDIC_sign
 		TYA
 		AND #CORDIC_HALF_MASK
-		STA math_b
+		;STA math_b
+		STA CORDIC_halve
 	
 		TODO: push status word?
 		SED
 	
 		MOV.W #ATAN_TABLE, ret_address
 		LDA #ATAN_ROWS
-		STA math_c
+		;STA math_c
+		STA CORDIC_loop_outer
+		LDA #0
+		STA CORDIC_shift_count
 		.loop_outer:
 			TODO: magic number
 			LDA #9
-			STA math_d
+			;STA math_d
+			STA CORDIC_loop_inner
 			.loop_inner:
-				LDA math_a
+			
+				TODO: remove after debugging
+				JSR CORDIC_DEBUG_STUB	
+			
+				halt
+			
+				;compare to Y or Z?
+				;LDA R4+DEC_COUNT/2+1 ;sign of Z
+				;LDX CORDIC_compare
+				;BNE .compare_z
+				;.compare_y:
+				;	LDA R3+DEC_COUNT/2+1 ;sign of Y
+				;	EOR #$99
+				;.compare_z:
+				LDA R3+DEC_COUNT/2+1 ;sign of Y
+				LDX CORDIC_compare
 				BEQ .compare_y
 				.compare_z:
-				
-					TODO: remove after debugging
-					LDA R4+DEC_COUNT/2
-					STA DEBUG_HEX
-					LDA #' '
-					STA DEBUG
-					LDY #ATAN_WIDTH-1
-					.debug_loop:
-						LDA R4,Y
-						STA DEBUG_HEX
-						DEY
-						BNE .debug_loop
-					LDA #'\\'
-					STA DEBUG
-					LDA #'n'
-					STA DEBUG
-					;halt
-					
-					;if z positive, sub table from z
-					;if z negative, add table to z
-					LDX #ATAN_WIDTH
-					LDY #0
-					TODO: true for sin/cos but true for others too?
-					;low byte of exp is 0 or negative
-					TODO: magic number
-					LDA R4+DEC_COUNT/2+1
-					BNE .z_negative
-					.z_positive:
-						SEC
-						.z_sub_loop:
-							TODO: magic number
-							LDA R4+1,Y
-							SBC (ret_address),Y
-							STA R4+1,Y
-							INY
-							DEX
-							BNE .z_sub_loop
-							;Mark sign negative if necessary
-							BCS .not_neg
-								LDA #$99
-								TODO: magic number
-								STA R4+DEC_COUNT/2+1
-							.not_neg:
-							JMP .z_comp_done
-					.z_negative:
-						CLC
-						.z_add_loop:
-							TODO: magic number
-							LDA R4+1,Y
-							ADC (ret_address),Y
-							STA R4+1,Y
-							INY
-							DEX
-							BNE .z_add_loop
-							;Mark sign positive if necessary
-							TODO: sure that overflow is always flipping sign?
-							BCC .not_pos
-								LDA #0
-								TODO: magic number
-								STA R4+DEC_COUNT/2+1
-							.not_pos:
-					.z_comp_done:
-					
-					;Load sign of comparison for computation of X and Y
-					LDA R4+DEC_COUNT/2+1
-					JMP .compare_done
-					
+					LDA R4+DEC_COUNT/2+1 ;sign of Z
+					EOR #$99
 				.compare_y:
-					TODO: compare Y
-					halt
-				.compare_done:
-				
-				halt
+				LDX #ATAN_WIDTH
+				LDY #0
+				AND #1	;Convert $99 to 1
+				STA CORDIC_sign_temp
+				BEQ .add_Z
+					.sub_Z:
+					SEC
+					.sub_Z_loop:
+						TODO: magic number
+						LDA R4+1,Y
+						SBC (ret_address),Y
+						STA R4+1,Y
+						INY
+						DEX
+						BNE .sub_Z_loop
+						
+						;;Mark sign negative if necessary
+						;BCS .not_neg
+						;	LDA #$99
+						;	TODO: magic number
+						;	STA R4+DEC_COUNT/2+1
+						;.not_neg:
+						LDA R4+DEC_COUNT/2+1
+						SBC #0
+						STA R4+DEC_COUNT/2+1
+						
+						JMP .z_done
+				.add_Z:
+					CLC
+					.add_Z_loop:
+						TODO: magic number
+						LDA R4+1,Y
+						ADC (ret_address),Y
+						STA R4+1,Y
+						INY
+						DEX
+						BNE .add_Z_loop
+						
+						;Mark sign positive if necessary
+						;TODO: sure that overflow is always flipping sign?
+						;BCC .not_pos
+						;	LDA #0
+						;	TODO: magic number
+						;	STA R4+DEC_COUNT/2+1
+						;.not_pos:
+						LDA R4+DEC_COUNT/2+1
+						ADC #0
+						STA R4+DEC_COUNT/2+1	
+				.z_done:
 				
 				
 				;calculate X and Y
 				;=================
 				
-				;A - sign of comparison	of z or y
-				AND #1	;Convert $99 to 1
-				EOR	math_signs
+				TODO: rough draft: improve
+				
+				;Add X to Y>> and store in X'
+				LDA #R3		;source - Y
+				LDY #R0		;dest - shifter
+				JSR CopyRegs
 				
 				
+				TODO: modify ShiftR0 so it uses correct fill byte, not just #0
 				
-				;START HERE: finish this brainstorming
-				;Need to figure out how to optimize shifts
-				;1.
-					;1. copy Y
-					;2. shift Y (maybe combine with 1)
-					;3. add to X
-				;2.
-					;1. load, shift and add in one step
-					;2. GRS at end!
-					TODO: if this, then dont need R0 for shifting!
+				;shift Y
+				LDA CORDIC_shift_count
+				JSR ShiftR0.no_sticky
 				
-				TODO: reuse shift from addBCD
+				TODO: using offset from setup in word - may change
+				LDX #GR_OFFSET
+				TODO: magic_number
+				LDY #DEC_COUNT/2+1	;+1 for sign byte
+				LDA CORDIC_sign_temp
+				EOR CORDIC_sign
+				BEQ .add_X
+				.sub_X:
+					TODO: abstract
+					SEC
+					.sub_X_loop:
+						LDA R2,X
+						SBC R0,X
+						STA R1,X
+						INX
+						DEY
+						BNE .sub_X_loop	
+					JMP .X_done
+				.add_X:
+					CLC
+					.add_X_loop:
+						LDA R2,X
+						ADC R0,X
+						STA R1,X
+						INX
+						DEY
+						BNE .add_X_loop
+				.X_done:
+
+				;Add Y to X/d and store in Y
+				LDA #R2		;source - X
+				LDY #R0		;dest - shifter
+				JSR CopyRegs
 				
+				;shift X
+				LDA CORDIC_shift_count
+				JSR ShiftR0.no_sticky
 				
+				TODO: using offset from setup in word - may change
+				LDX #GR_OFFSET
+				TODO: magic_number
+				LDY #DEC_COUNT/2+1	;+1 for sign byte
+				LDA CORDIC_sign_temp
+				BNE .add_Y
+				.sub_Y:
+					TODO: abstract
+					SEC
+					.sub_Y_loop:
+						LDA R3,X
+						SBC R0,X
+						STA R3,X
+						INX
+						DEY
+						BNE .sub_Y_loop	
+					JMP .Y_done
+				.add_Y:
+					CLC
+					.add_Y_loop:
+						LDA R3,X
+						ADC R0,X
+						STA R3,X
+						INX
+						DEY
+						BNE .add_Y_loop
+				.Y_done:
+
+				;Copy X' to X
+				LDA #R1		;source - X'
+				LDY #R2		;dest - X
+				JSR CopyRegs
 				
-				
-				
-				DEC math_d
-				BNE .loop_inner
+				;DEC math_d
+				DEC CORDIC_loop_inner
+				;BNE .loop_inner
+				JNE .loop_inner
 				;BEQ .compare_done
 				
-			TODO: remove after debugging
-			LDA #'\\'
-			STA DEBUG
-			LDA #'n'
-			STA DEBUG
-			
+				TODO: remove after debugging
+				LDA #'\\'
+				STA DEBUG
+				LDA #'n'
+				STA DEBUG
+				
+			INC CORDIC_shift_count
+				
 			LDA ret_address
 			CLC
 			CLD
@@ -428,7 +495,8 @@ TODO: actually, extremely slow
 				INC ret_address+1
 			.no_inc:
 	
-			DEC math_c
+			;DEC math_c
+			DEC CORDIC_loop_outer
 			;BNE .loop_outer
 			JNE .loop_outer
 			
@@ -439,3 +507,75 @@ TODO: actually, extremely slow
 	
 	END
 	
+	TODO: remove after debugging	
+	CORDIC_DEBUG_STUB:
+
+		LDA #'X'
+		STA DEBUG
+		LDA #':'
+		STA DEBUG
+		LDA #' '
+		STA DEBUG
+		LDA R2+DEC_COUNT/2+1
+		STA DEBUG_HEX
+		LDA #' '
+		STA DEBUG
+		LDY #ATAN_WIDTH
+		.debug_loop_X:
+			LDA R2,Y
+			STA DEBUG_HEX
+			DEY
+			BNE .debug_loop_X
+		LDA #'\\'
+		STA DEBUG
+		LDA #'n'
+		STA DEBUG
+
+		LDA #'Y'
+		STA DEBUG
+		LDA #':'
+		STA DEBUG
+		LDA #' '
+		STA DEBUG
+		LDA R3+DEC_COUNT/2+1
+		STA DEBUG_HEX
+		LDA #' '
+		STA DEBUG
+		LDY #ATAN_WIDTH
+		.debug_loop_Y:
+			LDA R3,Y
+			STA DEBUG_HEX
+			DEY
+			BNE .debug_loop_Y
+		LDA #'\\'
+		STA DEBUG
+		LDA #'n'
+		STA DEBUG
+		
+		LDA #'Z'
+		STA DEBUG
+		LDA #':'
+		STA DEBUG
+		LDA #' '
+		STA DEBUG
+		LDA R4+DEC_COUNT/2+1
+		STA DEBUG_HEX
+		LDA #' '
+		STA DEBUG
+		LDY #ATAN_WIDTH
+		.debug_loop_Z:
+			LDA R4,Y
+			STA DEBUG_HEX
+			DEY
+			BNE .debug_loop_Z
+		LDA #'\\'
+		STA DEBUG
+		LDA #'n'
+		STA DEBUG
+		LDA #'\\'
+		STA DEBUG
+		LDA #'n'
+		STA DEBUG
+		
+		RTS
+		

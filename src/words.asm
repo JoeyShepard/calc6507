@@ -2269,21 +2269,23 @@
 			
 			LDY #0
 			LDA #ATAN_WIDTH
-			STA CORDIC_loops
+			STA CORDIC_loop_inner
 			.loop:
+				TODO: why GR_OFFSET? seems from previous CORDIC version
+			
 				;X(R2)=1/K
 				LDA INV_K,Y
-				STA R2,Y
+				STA R2+GR_OFFSET,Y
 				;Y(R3)=0
 				LDA #0
-				STA R3,Y
+				STA R3+GR_OFFSET,Y
 				;Z(R0)=arg for shifting then R4
 				LDA TYPE_SIZE,X
 				STA R0+GR_OFFSET,Y
 				
 				INY
 				INX
-				DEC CORDIC_loops
+				DEC CORDIC_loop_inner
 				BNE .loop
 			
 			;calculate exp difference (seems hard to abstract)
@@ -2315,7 +2317,7 @@
 				;shift arg
 				TAY
 				LDA hex_table,Y
-				STA math_a
+				;STA math_a	;moved to ShiftR0
 				JSR ShiftR0.no_sticky
 				TODO: GR not cleared before shift. also, not rounded
 				
@@ -2332,6 +2334,8 @@
 			;sign - always starts positive
 			LDA #0
 			STA R4+DEC_COUNT/2+1
+			STA R3+DEC_COUNT/2+1
+			STA R2+DEC_COUNT/2+1
 			
 			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
 			JSR BCD_CORDIC

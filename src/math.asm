@@ -337,12 +337,14 @@
 				BPL .sticky_loop
 		.sticky_done:
 		
-		;entry point for CORDIC
-		.no_sticky:
-		
 		;shift by half byte?
 		TODO: abstract?
 		LDA math_a
+		
+		;entry point for CORDIC
+		.no_sticky:
+		STA math_a
+		
 		LSR
 		STA math_a
 		BCC .no_half_shift

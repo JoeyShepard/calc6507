@@ -47,13 +47,16 @@
 	BYTE math_sticky
 	BYTE math_max
 	
+	TODO: all used?
 	;Locals for functions - wasteful but RIOT mem not used otherwise
 	BYTE shift_counter
 	BYTE CORDIC_compare
-	BYTE CORDIC_add
 	BYTE CORDIC_sign
-	BYTE CORDIC_digits
-	BYTE CORDIC_loops
+	BYTE CORDIC_halve
+	BYTE CORDIC_loop_inner
+	BYTE CORDIC_loop_outer
+	BYTE CORDIC_shift_count
+	BYTE CORDIC_sign_temp
 	BYTE CORDIC_end_sign
 	
 	;Splitting input into words
