@@ -46,6 +46,8 @@
 	BYTE math_signs
 	BYTE math_sticky
 	BYTE math_max
+	TODO: switch to using this in some functions?
+	BYTE math_fill
 	
 	TODO: all used?
 	;Locals for functions - wasteful but RIOT mem not used otherwise

@@ -283,17 +283,23 @@ TODO: actually, extremely slow
 	TODO: 
 	FUNC BCD_CORDIC
 		
+		;START HERE:
+		;bc shows cos(pi/6) as 86602540 37844
+		;HP-48GX shows         86602540 3785
+		;without sticky:       86602540 418
+		;C64 shows             86602540 4
+		
+		
+		
+		
 		TAY
 		AND #CORDIC_CMP_MASK
-		;STA math_a
 		STA CORDIC_compare
 		TYA
 		AND #CORDIC_ADD_MASK
-		;STA math_signs
 		STA CORDIC_sign
 		TYA
 		AND #CORDIC_HALF_MASK
-		;STA math_b
 		STA CORDIC_halve
 	
 		TODO: push status word?
@@ -314,17 +320,7 @@ TODO: actually, extremely slow
 			
 				TODO: remove after debugging
 				JSR CORDIC_DEBUG_STUB	
-			
-				halt
-			
-				;compare to Y or Z?
-				;LDA R4+DEC_COUNT/2+1 ;sign of Z
-				;LDX CORDIC_compare
-				;BNE .compare_z
-				;.compare_y:
-				;	LDA R3+DEC_COUNT/2+1 ;sign of Y
-				;	EOR #$99
-				;.compare_z:
+				
 				LDA R3+DEC_COUNT/2+1 ;sign of Y
 				LDX CORDIC_compare
 				BEQ .compare_y
@@ -348,12 +344,6 @@ TODO: actually, extremely slow
 						DEX
 						BNE .sub_Z_loop
 						
-						;;Mark sign negative if necessary
-						;BCS .not_neg
-						;	LDA #$99
-						;	TODO: magic number
-						;	STA R4+DEC_COUNT/2+1
-						;.not_neg:
 						LDA R4+DEC_COUNT/2+1
 						SBC #0
 						STA R4+DEC_COUNT/2+1
@@ -370,13 +360,6 @@ TODO: actually, extremely slow
 						DEX
 						BNE .add_Z_loop
 						
-						;Mark sign positive if necessary
-						;TODO: sure that overflow is always flipping sign?
-						;BCC .not_pos
-						;	LDA #0
-						;	TODO: magic number
-						;	STA R4+DEC_COUNT/2+1
-						;.not_pos:
 						LDA R4+DEC_COUNT/2+1
 						ADC #0
 						STA R4+DEC_COUNT/2+1	
@@ -388,17 +371,22 @@ TODO: actually, extremely slow
 				
 				TODO: rough draft: improve
 				
+				START HERE: skips GR. adjust by -1?
+				Also, shift below shifts into unset GR
+				
 				;Add X to Y>> and store in X'
 				LDA #R3		;source - Y
 				LDY #R0		;dest - shifter
 				JSR CopyRegs
 				
-				
-				TODO: modify ShiftR0 so it uses correct fill byte, not just #0
-				
 				;shift Y
 				LDA CORDIC_shift_count
-				JSR ShiftR0.no_sticky
+				TODO: remove
+				BEQ .no_debug
+					halt
+				.no_debug:
+				LDX R3+DEC_COUNT/2+1	;sign of Y
+				JSR CORDIC_ShiftR0
 				
 				TODO: using offset from setup in word - may change
 				LDX #GR_OFFSET
@@ -436,7 +424,8 @@ TODO: actually, extremely slow
 				
 				;shift X
 				LDA CORDIC_shift_count
-				JSR ShiftR0.no_sticky
+				LDX R2+DEC_COUNT/2+1	;sign of X
+				JSR CORDIC_ShiftR0
 				
 				TODO: using offset from setup in word - may change
 				LDX #GR_OFFSET
@@ -506,6 +495,15 @@ TODO: actually, extremely slow
 		.calc_X:
 	
 	END
+	
+	;A - shift places
+	;X - fill byte
+	FUNC CORDIC_ShiftR0
+		STA math_a
+		STX math_fill
+		JMP ShiftR0.CORDIC
+	END
+	
 	
 	TODO: remove after debugging	
 	CORDIC_DEBUG_STUB:

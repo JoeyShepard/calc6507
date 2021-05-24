@@ -2317,8 +2317,8 @@
 				;shift arg
 				TAY
 				LDA hex_table,Y
-				;STA math_a	;moved to ShiftR0
-				JSR ShiftR0.no_sticky
+				LDX #0
+				JSR CORDIC_ShiftR0
 				TODO: GR not cleared before shift. also, not rounded
 				
 			.no_shift:
