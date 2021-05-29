@@ -283,13 +283,16 @@ TODO: actually, extremely slow
 	TODO: 
 	FUNC BCD_CORDIC
 		
-		;START HERE:
+		;STATS:
 		;bc shows cos(pi/6) as 86602540 37844
 		;HP-48GX shows         86602540 3785
 		;without sticky:       86602540 418
 		;C64 shows             86602540 4
 		
-		
+		;currently ~187,000 cycles
+			;copying for shift is probably big slow down
+			;add without copying if aligned?
+		;C64 can do for i=1 to 100: x+=sin(45) in 4 seconds ie ~40,000 cycles
 		
 		
 		TAY
@@ -307,14 +310,12 @@ TODO: actually, extremely slow
 	
 		MOV.W #ATAN_TABLE, ret_address
 		LDA #ATAN_ROWS
-		;STA math_c
 		STA CORDIC_loop_outer
 		LDA #0
 		STA CORDIC_shift_count
 		.loop_outer:
 			TODO: magic number
 			LDA #9
-			;STA math_d
 			STA CORDIC_loop_inner
 			.loop_inner:
 			
@@ -330,7 +331,7 @@ TODO: actually, extremely slow
 				.compare_y:
 				LDX #ATAN_WIDTH
 				LDY #0
-				AND #1	;Convert $99 to 1
+				AND #1	;Convert $99 sign of Y to 1
 				STA CORDIC_sign_temp
 				BEQ .add_Z
 					.sub_Z:
@@ -369,10 +370,13 @@ TODO: actually, extremely slow
 				;calculate X and Y
 				;=================
 				
-				TODO: rough draft: improve
+				TODO: below shifts into unset GR
 				
-				START HERE: skips GR. adjust by -1?
-				Also, shift below shifts into unset GR
+				LDA CORDIC_shift_count
+				TODO: remove
+				BEQ .no_debug2
+					halt
+				.no_debug2:
 				
 				;Add X to Y>> and store in X'
 				LDA #R3		;source - Y
@@ -460,7 +464,6 @@ TODO: actually, extremely slow
 				LDY #R2		;dest - X
 				JSR CopyRegs
 				
-				;DEC math_d
 				DEC CORDIC_loop_inner
 				;BNE .loop_inner
 				JNE .loop_inner
@@ -483,8 +486,7 @@ TODO: actually, extremely slow
 			BCC .no_inc
 				INC ret_address+1
 			.no_inc:
-	
-			;DEC math_c
+			
 			DEC CORDIC_loop_outer
 			;BNE .loop_outer
 			JNE .loop_outer
@@ -492,8 +494,6 @@ TODO: actually, extremely slow
 		CLD
 		RTS
 		
-		.calc_X:
-	
 	END
 	
 	;A - shift places
