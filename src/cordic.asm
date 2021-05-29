@@ -248,26 +248,31 @@ TODO: actually, extremely slow
 	CORDIC_ATAN_MASK =		8
 	
 	INV_K:
-		;1/k = 1/23.674377006269683 = 0.0 42 23 97 59 877 74 33 5
-		FCB $88, $59, $97, $23, $42, $00
+		;1/k = 1/23.674377006269683 = 0.0 42 23 97 59 87 | 77 43 35
+		;FCB $88, $59, $97, $23, $42, $00
+		;added decimal of precision
+		FCB $77, $87, $59, $97, $23, $42, $00
 	
-	;TODO: smaller to generate later rows of form 1E-X?	
+	TODO: add precision to match X and Y?
+	TODO: smaller to generate later rows of form 1E-X?	
 	ATAN_TABLE:
-		FCB $40, $63, $81, $39, $85, $07
-		FCB $49, $52, $86, $66, $99, $00
-		FCB $69, $66, $96, $99, $09, $00
-		FCB $67, $99, $99, $99, $00, $00
-		FCB $00, $00, $00, $10, $00, $00
-		FCB $00, $00, $00, $01, $00, $00
-		FCB $00, $00, $10, $00, $00, $00
-		FCB $00, $00, $01, $00, $00, $00
-		FCB $00, $10, $00, $00, $00, $00
-		FCB $00, $01, $00, $00, $00, $00
-		FCB $10, $00, $00, $00, $00, $00
-		FCB $01, $00, $00, $00, $00, $00
+		FCB $74, $39, $63, $81, $39, $85, $07
+		FCB $12, $49, $52, $86, $66, $99, $00
+		FCB $67, $68, $66, $96, $99, $09, $00
+		FCB $67, $66, $99, $99, $99, $00, $00
+		FCB $97, $99, $99, $99, $09, $00, $00
+		FCB $00, $00, $00, $00, $01, $00, $00
+		FCB $00, $00, $00, $10, $00, $00, $00
+		FCB $00, $00, $00, $01, $00, $00, $00
+		FCB $00, $00, $10, $00, $00, $00, $00
+		FCB $00, $00, $01, $00, $00, $00, $00
+		FCB $00, $10, $00, $00, $00, $00, $00
+		FCB $00, $01, $00, $00, $00, $00, $00
+		FCB $10, $00, $00, $00, $00, $00, $00
+		FCB $01, $00, $00, $00, $00, $00, $00
 
-	ATAN_ROWS = 	12
-	ATAN_WIDTH =	6
+	ATAN_ROWS = 	14
+	ATAN_WIDTH =	7
 	
 	ATANH_TABLE:
 	
@@ -288,7 +293,8 @@ TODO: actually, extremely slow
 		;HP-48GX shows         86602540 3785
 		;without sticky:       86602540 418
 		;with sticky (v1):     86602540 426 (worse)
-		;with sticky (v3):     86602540 469 (even worse)
+		;with sticky (v2):     86602540 469 (even worse)
+		;with sticky (v3):     86602540 378 68
 		;C64 shows             86602540 4
 		
 		;currently ~187,000 cycles
@@ -320,10 +326,13 @@ TODO: actually, extremely slow
 			LDA #9
 			STA CORDIC_loop_inner
 			.loop_inner:
-			
+				
 				TODO: remove after debugging
 				JSR CORDIC_DEBUG_STUB	
 				
+				halt
+				
+				TODO: need extra degree of precision for Z?
 				LDA R3+DEC_COUNT/2+1 ;sign of Y
 				LDX CORDIC_compare
 				BEQ .compare_y
@@ -331,6 +340,7 @@ TODO: actually, extremely slow
 					LDA R4+DEC_COUNT/2+1 ;sign of Z
 					EOR #$99
 				.compare_y:
+				TODO: magic number. new constant?
 				LDX #ATAN_WIDTH
 				LDY #0
 				AND #1	;Convert $99 sign of Y to 1
@@ -340,9 +350,9 @@ TODO: actually, extremely slow
 					SEC
 					.sub_Z_loop:
 						TODO: magic number
-						LDA R4+1,Y
+						LDA R4,Y
 						SBC (ret_address),Y
-						STA R4+1,Y
+						STA R4,Y
 						INY
 						DEX
 						BNE .sub_Z_loop
@@ -356,9 +366,9 @@ TODO: actually, extremely slow
 					CLC
 					.add_Z_loop:
 						TODO: magic number
-						LDA R4+1,Y
+						LDA R4,Y
 						ADC (ret_address),Y
-						STA R4+1,Y
+						STA R4,Y
 						INY
 						DEX
 						BNE .add_Z_loop
@@ -368,11 +378,8 @@ TODO: actually, extremely slow
 						STA R4+DEC_COUNT/2+1	
 				.z_done:
 				
-				
 				;calculate X and Y
 				;=================
-				
-				TODO: below shifts into unset GR
 				
 				TODO: remove
 				;LDA CORDIC_shift_count
@@ -381,8 +388,10 @@ TODO: actually, extremely slow
 				;.no_debug2:
 				
 				;Add X to Y>> and store in X'
-				LDA #R3		;source - Y
-				LDY #R0		;dest - shifter
+				TODO: magic number - GRS set to need to copy one byte earlier
+				TODO: swap CopyRegs for something general purpose
+				LDA #R3-1	;source - Y
+				LDY #R0-1	;dest - shifter
 				JSR CopyRegs
 				
 				;shift Y
@@ -399,11 +408,10 @@ TODO: actually, extremely slow
 				;NOTE: skips adding GRS since would be zero
 				
 				TODO: rename GR_OFFSET to FIRST_DIGIT?
-				
-				LDX #GR_OFFSET
+				LDX #0
 				TODO: magic_number
 				TODO: store elsewhere to reuse math functions?
-				LDY #DEC_COUNT/2+1	;+1 for sign byte
+				LDY #DEC_COUNT/2+2	;+1 for sign byte, +1 for extra precision byte
 				LDA CORDIC_sign_temp
 				EOR CORDIC_sign
 				BEQ .add_X
@@ -433,8 +441,8 @@ TODO: actually, extremely slow
 				JSR CORDIC_Round
 				
 				;Add Y to X/d and store in Y
-				LDA #R2		;source - X
-				LDY #R0		;dest - shifter
+				LDA #R2-1	;source - X
+				LDY #R0-1	;dest - shifter
 				JSR CopyRegs
 				
 				;shift X
@@ -442,10 +450,9 @@ TODO: actually, extremely slow
 				LDX R2+DEC_COUNT/2+1	;sign of X
 				JSR CORDIC_ShiftR0
 				
-				TODO: using offset from setup in word - may change
-				LDX #GR_OFFSET
+				LDX #0
 				TODO: magic_number
-				LDY #DEC_COUNT/2+1	;+1 for sign byte
+				LDY #DEC_COUNT/2+2	;+1 for sign byte, +1 for extra precision byte
 				LDA CORDIC_sign_temp
 				BNE .add_Y
 				.sub_Y:
@@ -474,8 +481,8 @@ TODO: actually, extremely slow
 				JSR CORDIC_Round
 				
 				;Copy X' to X
-				LDA #R1		;source - X'
-				LDY #R2		;dest - X
+				LDA #R1-1	;source - X'
+				LDY #R2-1	;dest - X
 				JSR CopyRegs
 				
 				DEC CORDIC_loop_inner
@@ -513,15 +520,17 @@ TODO: actually, extremely slow
 	;A - shift places
 	;X - fill byte
 	FUNC CORDIC_ShiftR0
-		LDY #0
-		STY R0
+		;LDY #0
+		;STY R0
 		STX math_fill
 		JMP ShiftR0.CORDIC
 	END
 	
 	;X - target register
 	FUNC CORDIC_Round
-		;halt
+	
+		RTS
+		
 		LDA R0
 		CMP #$50
 		BCC .done		;less than 50
@@ -534,6 +543,7 @@ TODO: actually, extremely slow
 		AND #1
 		BEQ .done	;next digit even - don't round
 		.round:
+		
 		SEC
 		LDY #ATAN_WIDTH+1
 		.loop:
@@ -559,12 +569,16 @@ TODO: actually, extremely slow
 		STA DEBUG_HEX
 		LDA #' '
 		STA DEBUG
-		LDY #ATAN_WIDTH
+		LDY #ATAN_WIDTH-1
 		.debug_loop_X:
 			LDA R2,Y
 			STA DEBUG_HEX
 			DEY
 			BNE .debug_loop_X
+		LDA #' '
+		STA DEBUG
+		LDA R2
+		STA DEBUG_HEX
 		LDA #'\\'
 		STA DEBUG
 		LDA #'n'
@@ -580,12 +594,16 @@ TODO: actually, extremely slow
 		STA DEBUG_HEX
 		LDA #' '
 		STA DEBUG
-		LDY #ATAN_WIDTH
+		LDY #ATAN_WIDTH-1
 		.debug_loop_Y:
 			LDA R3,Y
 			STA DEBUG_HEX
 			DEY
 			BNE .debug_loop_Y
+		LDA #' '
+		STA DEBUG
+		LDA R3
+		STA DEBUG_HEX
 		LDA #'\\'
 		STA DEBUG
 		LDA #'n'
@@ -601,12 +619,16 @@ TODO: actually, extremely slow
 		STA DEBUG_HEX
 		LDA #' '
 		STA DEBUG
-		LDY #ATAN_WIDTH
+		LDY #ATAN_WIDTH-1
 		.debug_loop_Z:
 			LDA R4,Y
 			STA DEBUG_HEX
 			DEY
 			BNE .debug_loop_Z
+		LDA #' '
+		STA DEBUG
+		LDA R4
+		STA DEBUG_HEX
 		LDA #'\\'
 		STA DEBUG
 		LDA #'n'

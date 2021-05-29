@@ -2267,7 +2267,10 @@
 			TXA
 			PHA
 			
+			DEX	;X and Y have one more byte of precision
+			
 			LDY #0
+			TODO: magic number. new constant? X and Y higher precision than Z which is ATAN table
 			LDA #ATAN_WIDTH
 			STA CORDIC_loop_inner
 			.loop:
@@ -2275,19 +2278,22 @@
 			
 				;X(R2)=1/K
 				LDA INV_K,Y
-				STA R2+GR_OFFSET,Y
+				STA R2,Y
+				
 				;Y(R3)=0
 				LDA #0
-				STA R3+GR_OFFSET,Y
+				STA R3,Y
+				
 				;Z(R0)=arg for shifting then R4
+				TODO: wait, why TYPE_SIZE?
 				LDA TYPE_SIZE,X
-				STA R0+GR_OFFSET,Y
+				STA R0,Y
 				
 				INY
 				INX
 				DEC CORDIC_loop_inner
 				BNE .loop
-			
+				
 			;calculate exp difference (seems hard to abstract)
 			;exp is 0 or negative
 			TODO: test!
@@ -2315,6 +2321,8 @@
 				
 				TODO: test
 				;shift arg
+				LDY #0
+				STY R0
 				TAY
 				LDA hex_table,Y
 				LDX #0
@@ -2323,11 +2331,9 @@
 				
 			.no_shift:
 			
-			;halt
-			
 			;Z(R4)=arg
-			LDA #R0
-			LDY #R4
+			LDA #R0-1
+			LDY #R4-1
 			JSR CopyRegs
 			
 			TODO: move to BCD_CORDIC?
