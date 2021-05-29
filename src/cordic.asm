@@ -287,6 +287,8 @@ TODO: actually, extremely slow
 		;bc shows cos(pi/6) as 86602540 37844
 		;HP-48GX shows         86602540 3785
 		;without sticky:       86602540 418
+		;with sticky (v1):     86602540 426 (worse)
+		;with sticky (v3):     86602540 469 (even worse)
 		;C64 shows             86602540 4
 		
 		;currently ~187,000 cycles
@@ -372,11 +374,11 @@ TODO: actually, extremely slow
 				
 				TODO: below shifts into unset GR
 				
-				LDA CORDIC_shift_count
 				TODO: remove
-				BEQ .no_debug2
-					halt
-				.no_debug2:
+				;LDA CORDIC_shift_count
+				;BEQ .no_debug2
+				;	halt
+				;.no_debug2:
 				
 				;Add X to Y>> and store in X'
 				LDA #R3		;source - Y
@@ -386,15 +388,21 @@ TODO: actually, extremely slow
 				;shift Y
 				LDA CORDIC_shift_count
 				TODO: remove
-				BEQ .no_debug
-					halt
-				.no_debug:
+				;BEQ .no_debug
+				;	halt
+				;.no_debug:
 				LDX R3+DEC_COUNT/2+1	;sign of Y
 				JSR CORDIC_ShiftR0
 				
-				TODO: using offset from setup in word - may change
+				TODO: replace GRS with guard, round, sticky in all comments
+				
+				;NOTE: skips adding GRS since would be zero
+				
+				TODO: rename GR_OFFSET to FIRST_DIGIT?
+				
 				LDX #GR_OFFSET
 				TODO: magic_number
+				TODO: store elsewhere to reuse math functions?
 				LDY #DEC_COUNT/2+1	;+1 for sign byte
 				LDA CORDIC_sign_temp
 				EOR CORDIC_sign
@@ -420,7 +428,10 @@ TODO: actually, extremely slow
 						DEY
 						BNE .add_X_loop
 				.X_done:
-
+				
+				LDX #R1
+				JSR CORDIC_Round
+				
 				;Add Y to X/d and store in Y
 				LDA #R2		;source - X
 				LDY #R0		;dest - shifter
@@ -458,7 +469,10 @@ TODO: actually, extremely slow
 						DEY
 						BNE .add_Y_loop
 				.Y_done:
-
+				
+				LDX #R3
+				JSR CORDIC_Round
+				
 				;Copy X' to X
 				LDA #R1		;source - X'
 				LDY #R2		;dest - X
@@ -495,15 +509,42 @@ TODO: actually, extremely slow
 		RTS
 		
 	END
-	
+		
 	;A - shift places
 	;X - fill byte
 	FUNC CORDIC_ShiftR0
-		STA math_a
+		LDY #0
+		STY R0
 		STX math_fill
 		JMP ShiftR0.CORDIC
 	END
 	
+	;X - target register
+	FUNC CORDIC_Round
+		;halt
+		LDA R0
+		CMP #$50
+		BCC .done		;less than 50
+		BNE .round		;more than 50
+		.equal_50:		;equal to 50 - check sticky
+		LDA math_sticky
+		BNE .round		;equal to 50, sticky set, round
+		.check_digit:	;equal to 50, no sticky, check next digit
+		LDA 1,X
+		AND #1
+		BEQ .done	;next digit even - don't round
+		.round:
+		SEC
+		LDY #ATAN_WIDTH+1
+		.loop:
+			LDA 1,X
+			ADC #0
+			STA 1,X
+			INX
+			DEY
+			BNE .loop
+		.done:
+	END
 	
 	TODO: remove after debugging	
 	CORDIC_DEBUG_STUB:

@@ -312,8 +312,16 @@
 	FUNC ShiftR0
 		TODO: consider byte by byte - slower but smaller
 		
+		;Fill 0 by default
+		LDY #0
+		STY math_fill
+		
 		TAY
 		LDA hex_table,Y
+		
+		;entry point for CORDIC
+		.CORDIC:
+		
 		STA math_a
 		
 		;calculate sticky first
@@ -337,13 +345,6 @@
 				BPL .sticky_loop
 		.sticky_done:
 		
-		;Fill 0 by default
-		LDA #0
-		STA math_fill
-		
-		;entry point for CORDIC
-		.CORDIC:
-		
 		;shift by half byte?
 		TODO: abstract?
 		LDA math_a
@@ -353,6 +354,8 @@
 			LDX #R0
 			;LDA #0
 			LDA math_fill
+			TODO: works for CORDIC but messes up addition?
+			AND #$F0	;$99 -> $90
 			JSR HalfShift
 		.no_half_shift:
 		

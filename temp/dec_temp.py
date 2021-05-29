@@ -1,5 +1,7 @@
 from decimal import *
 
+print("Multiplication tests")
+
 pairs=[["100000000001","1.5"],
        ["-100000000001","1.5"],
        ["100000000001","1.501"],
@@ -18,4 +20,23 @@ for pair in pairs:
     print(Decimal(pair[0])*Decimal(pair[1]))
     getcontext().prec=12
     print(Decimal(pair[0])*Decimal(pair[1]))
+    print()
+
+
+
+print("Addition tests")
+add_pairs=[["123456789012","0.5"],
+           ["123456789012","0.501"],
+           ["-123456789012","0.5"],
+           ["-123456789012","0.501"],
+           ["123456789013","0.5"],
+           ["123456789013","0.501"],
+           ["-123456789013","0.5"],
+           ["-123456789013","0.501"]
+           ]
+
+getcontext().prec=12
+for pair in add_pairs:
+    print(pair[0],"+",pair[1],"=",Decimal(pair[0])+Decimal(pair[1]))
+    print(pair[0],"-",pair[1],"=",Decimal(pair[0])-Decimal(pair[1]))
     print()
