@@ -30,6 +30,7 @@
 	
 	TYPE_SIZE =				1
 	OBJ_SIZE =				9
+	OBJ_TYPE =				0	;first bytes of stack item is type
 	
 	;Input
 	TODO: increase size?

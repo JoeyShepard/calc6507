@@ -130,7 +130,8 @@
 	END
 	
 	TODO: make sure every utility function is actually used
-	;A-source, Y-dest
+	;A - source
+	;Y - dest
 	FUNC CopyRegs
 		STA math_ptr1
 		STY math_ptr2
@@ -188,26 +189,7 @@
 		PLA
 		TAX
 	END
-	
-	;;which register in X
-	;;fill byte in A
-	;FUNC HalfShift
-	;	LDY #4
-	;	.half_loop:
-	;		LSR GR_OFFSET+(DEC_COUNT/2)-1,X
-	;		ROR GR_OFFSET+(DEC_COUNT/2)-2,X
-	;		ROR GR_OFFSET+(DEC_COUNT/2)-3,X
-	;		ROR GR_OFFSET+(DEC_COUNT/2)-4,X
-	;		ROR GR_OFFSET+(DEC_COUNT/2)-5,X
-	;		ROR GR_OFFSET+(DEC_COUNT/2)-6,X
-	;		;guard/round byte
-	;		ROR GR_OFFSET+(DEC_COUNT/2)-7,X
-	;		DEY
-	;		BNE .half_loop
-	;	ORA GR_OFFSET+(DEC_COUNT/2)-1,X
-	;	STA GR_OFFSET+(DEC_COUNT/2)-1,X
-	;END
-	
+		
 	;which register in X
 	;shift count in Y
 	;fill byte in A
@@ -317,11 +299,7 @@
 		STY math_fill
 		
 		TAY
-		LDA hex_table,Y
-		
-		;entry point for CORDIC
-		.CORDIC:
-		
+		LDA hex_table,Y		
 		STA math_a
 		
 		;calculate sticky first
@@ -345,9 +323,14 @@
 				BPL .sticky_loop
 		.sticky_done:
 		
+		
 		;shift by half byte?
 		TODO: abstract?
 		LDA math_a
+		
+		;entry point for CORDIC
+		.CORDIC:
+		
 		LSR
 		STA math_a
 		BCC .no_half_shift
@@ -533,7 +516,8 @@
 		STA SIGN_INFO,X
 	END
 	
-	;Register address in X
+	TODO: only ever used on R_ans?
+	;X - register
 	FUNC BCD_Pack
 		LDA EXP_HI,X
 		;addition ranges

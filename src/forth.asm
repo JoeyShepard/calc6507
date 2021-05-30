@@ -17,11 +17,11 @@
 		LDX #0
 	END
 	
-	SPECIAL_CHARS_LEN = 18	;2+15+1
+	SPECIAL_CHARS_LEN = 18	;1+15+2
 	special_chars:
-	FCB CHAR_EXP, CHAR_QUOTE		;2
+	FCB CHAR_QUOTE					;1
 	FCB " .$+-*/'!@:;=<>"			;15
-	FCB "s"							;1
+	FCB "SE"						;2
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -126,17 +126,28 @@
 					CMP special_chars,Y
 					BNE .special_next
 						STA arg
+						
 						;;recode m for minus as c since c assigned to minus sign
 						;CMP #'m'
 						;BNE .key_done
 						;	LDA #CHAR_MINUS
 						;	STA arg
-						;recode s for STO as d which is store arrow
-						CMP #'s'
-						BNE .key_done
+						
+						;recode uppercase S for STO as d which is store arrow. s is letter s
+						CMP #'S'
+						BNE .key_E
 							LDA #CHAR_STO
 							STA arg
-						JMP .key_done
+							BNE .key_done
+							
+						;recode uppercase E for exponent. e is letter e
+						.key_E:
+						CMP #'E'
+						BNE .key_done
+							LDA #CHAR_EXP
+							STA arg
+							BNE .key_done
+							
 					.special_next:
 					INY
 					CPY #SPECIAL_CHARS_LEN

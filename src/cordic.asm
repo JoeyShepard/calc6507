@@ -25,6 +25,9 @@ TODO: actually, extremely slow
 ;
 ;btw, figured out how to - then + division 
 	
+	TODO: more precision to X and Y below would probably give more accurat answer
+	
+	
 	;Fixed point version:
 	;====================
 
@@ -110,8 +113,9 @@ TODO: actually, extremely slow
 		AND #CORDIC_HALF_MASK
 		STA CORDIC_halve
 	
-		TODO: push status word?
-		SED
+		TODO: necessary?
+		;PHP
+		;SED
 	
 		MOV.W #ATAN_TABLE, ret_address
 		LDA #ATAN_ROWS
@@ -127,7 +131,7 @@ TODO: actually, extremely slow
 				TODO: remove after debugging
 				JSR CORDIC_DEBUG_STUB	
 				
-				halt
+				;halt
 				
 				TODO: need extra degree of precision for Z?
 				LDA R3+DEC_COUNT/2+1 ;sign of Y
@@ -234,9 +238,6 @@ TODO: actually, extremely slow
 						BNE .add_X_loop
 				.X_done:
 				
-				LDX #R1
-				JSR CORDIC_Round
-				
 				;Add Y to X/d and store in Y
 				LDA #R2-1	;source - X
 				LDY #R0-1	;dest - shifter
@@ -274,9 +275,6 @@ TODO: actually, extremely slow
 						BNE .add_Y_loop
 				.Y_done:
 				
-				LDX #R3
-				JSR CORDIC_Round
-				
 				;Copy X' to X
 				LDA #R1-1	;source - X'
 				LDY #R2-1	;dest - X
@@ -294,7 +292,7 @@ TODO: actually, extremely slow
 				STA DEBUG
 				
 			INC CORDIC_shift_count
-				
+			
 			LDA ret_address
 			CLC
 			CLD
@@ -309,49 +307,58 @@ TODO: actually, extremely slow
 			;BNE .loop_outer
 			JNE .loop_outer
 			
-		CLD
-		RTS
+		;PLP
 		
 	END
 		
 	;A - shift places
 	;X - fill byte
 	FUNC CORDIC_ShiftR0
-		;LDY #0
-		;STY R0
+		STA math_a
 		STX math_fill
 		JMP ShiftR0.CORDIC
 	END
 	
-	;X - target register
-	FUNC CORDIC_Round
-	
-		RTS
+	TODO: assumes result is positive since sign filtered out before CORDIC
+	;A - register
+	FUNC CORDIC_Push
 		
-		LDA R0
-		CMP #$50
-		BCC .done		;less than 50
-		BNE .round		;more than 50
-		.equal_50:		;equal to 50 - check sticky
-		LDA math_sticky
-		BNE .round		;equal to 50, sticky set, round
-		.check_digit:	;equal to 50, no sticky, check next digit
-		LDA 1,X
-		AND #1
-		BEQ .done	;next digit even - don't round
-		.round:
+		halt
 		
-		SEC
-		LDY #ATAN_WIDTH+1
-		.loop:
-			LDA 1,X
-			ADC #0
-			STA 1,X
-			INX
-			DEY
-			BNE .loop
-		.done:
+		TAX
+		TODO: magic number
+		LDA 0,X
+		STA R_ans
+		TXA
+		
+		LDY #R_ans
+		JSR CopyRegs
+		
+		;shift forward
+		LDA #0
+		STA R_ans+EXP_LO
+		STA R_ans+EXP_HI
+		JSR NormRans
+		
+		;round
+		
+		;set sign for BCD_Pack to use
+		LDA CORDIC_end_sign
+		STA R_ans+SIGN_INFO
+		LDX #R_ans
+		JSR BCD_Pack
+			
+		;restore stack pointer
+		PLA
+		TAX
+		CLD
+		
+		;Copy to stack
+		JMP RansTos
+		
+		
 	END
+	
 	
 	TODO: remove after debugging	
 	CORDIC_DEBUG_STUB:

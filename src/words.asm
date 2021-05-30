@@ -169,6 +169,7 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|SAME		;Flags
 			
+			TODO: 0 = OBJ_TYPE
 			LDA 0,X
 			
 			TODO: add flag for checking these types (room for 3 more flags)
@@ -2152,53 +2153,6 @@
 			;do not optimize out! PUSH_STUB calculates return to here
 			TODO: where else is PUSH_STUB used? return to caller?
 			RTS
-	
-	
-	;Floating point version - too slow
-	;WORD_SIN:
-	;	FCB 3,"SIN"				;Name
-	;	FDB dict_begin			;Next word
-	;	FCB TOKEN_SIN			;ID - 130
-	;	CODE_SIN:
-	;		FCB OBJ_PRIMITIVE				;Type
-	;		FCB MIN1|FLOATS					;Flags	
-	;		
-	;		TODO: range checking
-	;		
-	;		TODO: BCD_Add pushes X, redundant here?
-	;		TXA
-	;		PHA
-	;		
-	;		TODO: abstract to save space
-	;		;Z(R4)=arg
-	;		TXA
-	;		LDY #R4
-	;		JSR CopyRegs
-	;		
-	;		halt
-	;		
-	;		;X(R2)=1/K
-	;		LDX #R2
-	;		JSR BCD_CopyInvK
-	;		
-	;		;Y(R3)=0
-	;		LDX #R3		;skip type byte
-	;		JSR ZeroReg
-	;		
-	;		
-	;		;	;Zero byte after number
-	;		;	LDA #0
-	;		;	STA R0+DEC_COUNT/2
-	;		;	;STA R1+DEC_COUNT/2	;already zeroed
-	;		;	STA R2+DEC_COUNT/2
-	;		
-	;		LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
-	;		JSR BCD_CORDIC
-	;		
-	;		PLA
-	;		TAX
-	;		
-	;		RTS
 			
 	;Fixed point version
 	WORD_SIN:
@@ -2238,8 +2192,10 @@
 			JSR StackAddItem
 			JSR PUSH_STUB
 			;-pi/2 = 1.5 70 79 63 26 794 8966
-			FCB OBJ_FLOAT, $79, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
-			;JSR CODE_ADD.float	;smaller but copies back to stack
+			;FCB OBJ_FLOAT, $79, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
+			;pi/2 rounds up to the below. use this otherwise sin(pi/2) causes range error
+			FCB OBJ_FLOAT, $80, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
+			
 			JSR TosR0R1
 			JSR BCD_Add
 			JSR CODE_DROP+EXEC_HEADER
@@ -2251,7 +2207,9 @@
 				TODO: test
 				;JSR StackAddItem
 				JSR PUSH_STUB_1
-				JMP .set_sign
+				LDA CORDIC_end_sign
+				STA EXP_HI,X
+				RTS
 			.not_one:
 			
 			;x > pi/2 - range error
@@ -2266,11 +2224,11 @@
 					
 			TXA
 			PHA
+			SED
 			
 			DEX	;X and Y have one more byte of precision
 			
 			LDY #0
-			TODO: magic number. new constant? X and Y higher precision than Z which is ATAN table
 			LDA #ATAN_WIDTH
 			STA CORDIC_loop_inner
 			.loop:
@@ -2285,7 +2243,7 @@
 				STA R3,Y
 				
 				;Z(R0)=arg for shifting then R4
-				TODO: wait, why TYPE_SIZE?
+				TODO: wait, why TYPE_SIZE? need OBJ_TYPE then if have this?
 				LDA TYPE_SIZE,X
 				STA R0,Y
 				
@@ -2299,7 +2257,10 @@
 			TODO: test!
 			LDA 2,X				;high byte of exponent
 			AND #$F
-			STA math_hi
+			STA math_hi	
+			;LDA 1,X				;low byte of exponent
+			;STA math_lo
+			;ORA math_hi
 			ORA 1,X				;low byte of exponent
 			BEQ .no_shift
 				
@@ -2308,6 +2269,7 @@
 				LDA math_hi
 				BEQ .no_ret_zero
 					.ret_zero:
+					CLD
 					PLA
 					TAX
 					JMP PUSH_STUB_0
@@ -2327,7 +2289,6 @@
 				LDA hex_table,Y
 				LDX #0
 				JSR CORDIC_ShiftR0
-				TODO: GR not cleared before shift. also, not rounded
 				
 			.no_shift:
 			
@@ -2346,13 +2307,10 @@
 			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
 			JSR BCD_CORDIC
 			
-			.set_sign:
-			TODO: set sign
+			;push CORDIC Y reg (R3) to stack
+			LDA #R3
+			JMP CORDIC_Push
 			
-			PLA
-			TAX
-			
-			RTS
 	
 	
 	;TYPE			;type of stack item?
