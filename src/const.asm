@@ -49,6 +49,8 @@
 	DEC_COUNT =				12
 	SIGN_BIT =				$80
 	E_SIGN_BIT =			$40
+	FIRST_DIGIT =			1
+	LAST_DIGIT =			6
 	EXP_LO =				7
 	EXP_HI =				8
 	;Only in registers, not on stack

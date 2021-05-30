@@ -35,6 +35,7 @@ TODO: actually, extremely slow
 	;=========
 	CORDIC_SIGN =			1
 	
+	;Masks and flags
 	CORDIC_ADD_Y =			0
 	CORDIC_SUB_Y =			1
 	CORDIC_ADD_MASK =		1
@@ -46,6 +47,10 @@ TODO: actually, extremely slow
 	CORDIC_ATAN =			0
 	CORDIC_ATANH =			8
 	CORDIC_ATAN_MASK =		8
+	
+	;Return values
+	CORDIC_CLEANUP =			0
+	CORDIC_NO_CLEANUP =			1
 	
 	INV_K:
 		;1/k = 1/23.674377006269683 = 0.0 42 23 97 59 87 | 77 43 35
@@ -97,11 +102,13 @@ TODO: actually, extremely slow
 		;with sticky (v3):     86602540 378 68
 		;C64 shows             86602540 4
 		
-		;currently ~187,000 cycles
+		;currently (without sticky) ~187,000 cycles
 			;copying for shift is probably big slow down
 			;add without copying if aligned?
 		;C64 can do for i=1 to 100: x+=sin(45) in 4 seconds ie ~40,000 cycles
 		
+		TODO: replace halt here with code that will return if accidentally left in
+		TODO: halt assembling if halt ever invoked
 		
 		TAY
 		AND #CORDIC_CMP_MASK
@@ -112,11 +119,7 @@ TODO: actually, extremely slow
 		TYA
 		AND #CORDIC_HALF_MASK
 		STA CORDIC_halve
-	
-		TODO: necessary?
-		;PHP
-		;SED
-	
+		
 		TODO: remove after debugging
 		LDA #0
 		STA CORDIC_DEBUG_COUNTER
@@ -322,7 +325,7 @@ TODO: actually, extremely slow
 			;BNE .loop_outer
 			JNE .loop_outer
 			
-		;PLP
+		LDA #CORDIC_CLEANUP
 		
 	END
 		
@@ -334,57 +337,10 @@ TODO: actually, extremely slow
 		JMP ShiftR0.CORDIC
 	END
 	
-	TODO: assumes result is positive since sign filtered out before CORDIC
-	;A - register
-	FUNC CORDIC_Push
-		
-		TAX
-		TODO: magic number
-		LDA 0,X
-		STA R_ans
-		TXA
-		
-		LDY #R_ans
-		JSR CopyRegs
-		
-		;shift forward
-		LDA #0
-		STA R_ans+EXP_LO
-		STA R_ans+EXP_HI
-		JSR NormRans
-		
-		;clear sticky and round
-		LDA #0
-		STA math_sticky
-		JSR BCD_StickyRound
-		
-		;set sign for BCD_Pack to use
-		LDA CORDIC_end_sign
-		STA R_ans+SIGN_INFO
-		LDX #R_ans
-		JSR BCD_Pack
-			
-		;restore stack pointer
-		LDX stack_X
-		CLD
-		
-		;Copy to stack
-		JMP RansTos
-		
-	END
-	
 	FUNC CORDIC_SinCos
-	
-		TODO: copy to R2, not to stack!
-		;sin(0)=0
-		LDA DEC_COUNT/2,X
-		BNE .not_zero
-			TODO: abstract!!!
-			TODO: test
-			PLA
-			PLA
-			JMP PUSH_STUB_0
-		.not_zero:
+		
+		;save here and restore in cleanup
+		STX stack_X
 		
 		;sign: sin(-x) = -sin(x)
 		LDY #0
@@ -397,6 +353,29 @@ TODO: actually, extremely slow
 			LDY #SIGN_BIT
 		.sign_pos:
 		STY CORDIC_end_sign
+	
+		;sin(0)=0, cos(0)=1
+		LDA DEC_COUNT/2,X
+		BNE .not_zero
+			TODO: test
+			TODO: make sure this is used or remove
+			;JMP PUSH_STUB_0
+			
+			.return_0:
+			LDX #R2
+			JSR ZeroReg
+			LDX #R3
+			JSR ZeroReg
+			LDA #$10
+			STA R2+LAST_DIGIT
+			LDA #OBJ_FLOAT
+			STA R2
+			STA R3
+			
+			LDA #CORDIC_NO_CLEANUP
+			RTS
+			
+		.not_zero:
 		
 		;x <= pi/2?
 		TODO: combine into one stub? used below too
@@ -407,22 +386,34 @@ TODO: actually, extremely slow
 		;pi/2 rounds up to the below. use this otherwise sin(pi/2) causes range error
 		FCB OBJ_FLOAT, $80, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
 		
+		SED
+		
 		JSR TosR0R1
 		JSR BCD_Add
 		JSR CODE_DROP+EXEC_HEADER
 		
-		;sin(pi/2)=1
-		LDA R_ans+DEC_COUNT/2
+		;sin(pi/2)=1, cos(pi/2)=0
+		LDA R_ans+LAST_DIGIT
 		BNE .not_one
 			TODO: abstract!!!
 			TODO: test
-			;JSR StackAddItem
-			JSR PUSH_STUB_1
-			LDA CORDIC_end_sign
-			STA EXP_HI,X
-			PLA
-			PLA
+			
+			TODO: set sign here or in cleanup?
+			;LDA CORDIC_end_sign
+			
+			LDX #R2
+			JSR ZeroReg
+			LDX #R3
+			JSR ZeroReg
+			LDA #$10
+			STA R3+EXP_LO-1	;ie last digit
+			;LDA #OBJ_FLOAT	;also #1
+			STA R2
+			STA R3
+			
+			LDA #CORDIC_NO_CLEANUP
 			RTS
+			
 		.not_one:
 		
 		;x > pi/2 - range error
@@ -432,13 +423,17 @@ TODO: actually, extremely slow
 			TODO: test!
 			LDA #ERROR_RANGE
 			STA ret_val
+			
+			LDX stack_X
+			CLD
+			
+			PLA		;drop return to word
 			PLA
-			PLA
+			
 			RTS
 		.range_good:
-				
-		STX stack_X
-		SED
+		
+		LDX stack_X
 		
 		DEX	;X and Y have one more byte of precision
 		
@@ -485,7 +480,8 @@ TODO: actually, extremely slow
 				.ret_zero:
 				CLD
 				LDX stack_X
-				JMP PUSH_STUB_0
+				JMP .return_0
+				
 			.no_ret_zero:
 			
 			TODO: test
@@ -522,6 +518,66 @@ TODO: actually, extremely slow
 		
 	END
 	
+	TODO: assumes result is positive since sign filtered out before CORDIC
+	;A - flag whether to clean up
+	;X - register
+	FUNC CORDIC_Push
+		
+		CMP #CORDIC_CLEANUP
+		BNE .skip_cleanup
+			TODO: magic number
+			LDA 0,X
+			STA R_ans
+			TXA
+			
+			LDY #R_ans
+			JSR CopyRegs
+			
+			;shift forward
+			LDA #0
+			STA R_ans+EXP_LO
+			STA R_ans+EXP_HI
+			JSR NormRans
+			
+			;clear sticky and round
+			LDA #0
+			STA math_sticky
+			JSR BCD_StickyRound
+			
+			TODO: test with negative zero!
+			;set sign for BCD_Pack to use
+			LDA CORDIC_end_sign
+			STA R_ans+SIGN_INFO
+			LDX #R_ans
+			JSR BCD_Pack
+					
+			JMP .done
+					
+		.skip_cleanup:
+		
+		TXA
+		LDY #R_ans
+		JSR CopyRegs
+		
+		TODO: Replace all DEC_PLACE/2 with LAST_DIGIT
+		TODO: Replace all with new constant FIRST_DIGIT
+		LDA R_ans+LAST_DIGIT
+		BEQ .no_sign			;don't set sign if zero
+			LDA CORDIC_end_sign
+			;ORA R_ans+EXP_HI	;always zero?
+			STA R_ans+EXP_HI
+		.no_sign:
+		
+		.done:
+		
+		;restore stack pointer
+		LDX stack_X
+		CLD
+			
+		;Copy to stack
+		JMP RansTos
+		
+	END
 	
 	TODO: remove after debugging
 	CORDIC_DEBUG_COUNTER:
@@ -535,21 +591,21 @@ TODO: actually, extremely slow
 		LDA #':'
 		STA DEBUG
 		LDX #R2
-		JSR .debug_reg
+		JSR DEBUG_REG
 		
 		LDA #'Y'
 		STA DEBUG
 		LDA #':'
 		STA DEBUG
 		LDX #R3
-		JSR .debug_reg
+		JSR DEBUG_REG
 		
 		LDA #'Z'
 		STA DEBUG
 		LDA #':'
 		STA DEBUG
 		LDX #R4
-		JSR .debug_reg
+		JSR DEBUG_REG
 		
 		LDA #'\\'
 		STA DEBUG
@@ -558,9 +614,10 @@ TODO: actually, extremely slow
 		
 		RTS
 		
-		.debug_reg:
+	DEBUG_REG:
 		LDA DEC_COUNT/2+1,X
 		BNE .x1
+			.assume_positive:
 			LDA #' '
 			STA DEBUG
 			TXA
@@ -614,7 +671,7 @@ TODO: actually, extremely slow
 		.x_unknown:
 			LDA CORDIC_DEBUG_COUNTER
 			halt
-			JMP .x_unknown
+			JMP .assume_positive
 		.done:
 		
 		LDA #'\\'

@@ -2167,7 +2167,7 @@
 			JSR CORDIC_SinCos
 			
 			;push CORDIC Y reg (R3) to stack
-			LDA #R3
+			LDX #R3
 			JMP CORDIC_Push
 			
 	WORD_COS:
@@ -2180,8 +2180,8 @@
 			
 			JSR CORDIC_SinCos
 			
-			;push CORDIC Y reg (R3) to stack
-			LDA #R2
+			;push CORDIC X reg (R2) to stack
+			LDX #R2
 			JMP CORDIC_Push
 			
 	
