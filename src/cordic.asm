@@ -323,8 +323,6 @@ TODO: actually, extremely slow
 	;A - register
 	FUNC CORDIC_Push
 		
-		halt
-		
 		TAX
 		TODO: magic number
 		LDA 0,X
@@ -340,7 +338,10 @@ TODO: actually, extremely slow
 		STA R_ans+EXP_HI
 		JSR NormRans
 		
-		;round
+		;clear sticky and round
+		LDA #0
+		STA math_sticky
+		JSR BCD_StickyRound
 		
 		;set sign for BCD_Pack to use
 		LDA CORDIC_end_sign
