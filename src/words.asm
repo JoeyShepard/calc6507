@@ -2168,11 +2168,12 @@
 			
 			;push CORDIC Y reg (R3) to stack
 			LDX #R3
+			JSR CORDIC_Pack
 			JMP CORDIC_Push
 			
 	WORD_COS:
 		FCB 3,"COS"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_TAN			;Next word
 		FCB TOKEN_COS			;ID - 132
 		CODE_COS:
 			FCB OBJ_PRIMITIVE				;Type
@@ -2182,9 +2183,61 @@
 			
 			;push CORDIC X reg (R2) to stack
 			LDX #R2
+			JSR CORDIC_Pack
 			JMP CORDIC_Push
 			
-	
+	WORD_TAN:
+		FCB 3,"TAN"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_TAN			;ID - 134
+		CODE_TAN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+			
+			TODO: loses accuracy near pi/2
+			
+			JSR CORDIC_SinCos
+			CMP #CORDIC_CLEANUP
+			BEQ .divide
+			.const:
+				;X,Y is 1,0 or 0,1
+				LDY R3+LAST_DIGIT
+				BEQ .push0
+				.error:
+					;tan(pi/2)=infinity
+					LDX stack_X
+					CLD
+					TODO: set error and exit used consistantly throughout? ie JMP ErrRangeRet
+					LDA #ERROR_RANGE
+					STA ret_val
+					RTS
+				.push0:
+					;tan(0)=0
+					LDX #R3
+					JMP CORDIC_Push
+			.divide:
+			
+			;pack cosine and copy to R0 for dividing
+			LDX #R2
+			JSR CORDIC_Pack
+			LDA #R_ans
+			LDY #R0
+			JSR CopyRegs
+			
+			;pack sine and copy to R0 for dividing
+			LDA #CORDIC_CLEANUP
+			LDX #R3
+			JSR CORDIC_Pack
+			LDA #R_ans
+			LDY #R1
+			JSR CopyRegs
+			
+			;divide sine by cosine
+			JSR BCD_Div
+			TODO: check for div by 0 error?
+			JMP CORDIC_Push
+			
+			
 	;TYPE			;type of stack item?
 	;MOD			76
 	;SIN			104
@@ -2309,5 +2362,7 @@
 		FDB CODE_PI					;128
 		FDB CODE_SIN				;130
 		FDB CODE_COS				;132
+		FDB CODE_TAN				;134
+		
 		
 		

@@ -521,7 +521,7 @@ TODO: actually, extremely slow
 	TODO: assumes result is positive since sign filtered out before CORDIC
 	;A - flag whether to clean up
 	;X - register
-	FUNC CORDIC_Push
+	FUNC CORDIC_Pack
 		
 		CMP #CORDIC_CLEANUP
 		BNE .skip_cleanup
@@ -539,6 +539,7 @@ TODO: actually, extremely slow
 			STA R_ans+EXP_HI
 			JSR NormRans
 			
+			TODO: not BCD_Round?
 			;clear sticky and round
 			LDA #0
 			STA math_sticky
@@ -551,7 +552,7 @@ TODO: actually, extremely slow
 			LDX #R_ans
 			JSR BCD_Pack
 					
-			JMP .done
+			RTS
 					
 		.skip_cleanup:
 		
@@ -568,7 +569,9 @@ TODO: actually, extremely slow
 			STA R_ans+EXP_HI
 		.no_sign:
 		
-		.done:
+	END
+	
+	FUNC CORDIC_Push
 		
 		;restore stack pointer
 		LDX stack_X
@@ -576,7 +579,7 @@ TODO: actually, extremely slow
 			
 		;Copy to stack
 		JMP RansTos
-		
+	
 	END
 	
 	TODO: remove after debugging

@@ -173,6 +173,7 @@
 		TOKEN_PI =					128
 		TOKEN_SIN =					130
 		TOKEN_COS =					132
+		TOKEN_TAN =					134
 		
 		;Execution modes
 		EXEC_INPUT =		0

@@ -934,6 +934,7 @@
 			RTS
 		.no_zero_exit:
 		
+		TODO: replace with stack_X
 		PHP
 		SED
 		TXA
@@ -944,8 +945,6 @@
 		JSR ZeroReg
 		LDA #0
 		STA R_ans
-		
-		TODO: check for div zero!
 		
 		TODO: abstract - same for BCD_Mult
 		;calculate exponent first
@@ -1027,6 +1026,7 @@
 		;done subtracting
 		JSR NormRans
 		
+		TODO: get rid of ;halt everywhere
 		;halt
 		
 		;calculate sticky
