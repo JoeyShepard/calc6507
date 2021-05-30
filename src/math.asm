@@ -366,7 +366,7 @@
 		LDX math_b
 		PLA
 		TAY
-		LDA #0
+		LDA math_fill
 		.fill_loop:
 			STA R0,X
 			INX

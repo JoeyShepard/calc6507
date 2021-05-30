@@ -170,6 +170,7 @@
 		TOKEN_ABS =					126
 		TOKEN_PI =					128
 		TOKEN_SIN =					130
+		TOKEN_COS =					132
 		
 		;Execution modes
 		EXEC_INPUT =		0

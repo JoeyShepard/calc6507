@@ -25,7 +25,7 @@ TODO: actually, extremely slow
 ;
 ;btw, figured out how to - then + division 
 	
-	TODO: more precision to X and Y below would probably give more accurat answer
+	TODO: more precision to X and Y below would probably give more accurate answer
 	
 	
 	;Fixed point version:
@@ -117,19 +117,34 @@ TODO: actually, extremely slow
 		;PHP
 		;SED
 	
+		TODO: remove after debugging
+		LDA #0
+		STA CORDIC_DEBUG_COUNTER
+	
 		MOV.W #ATAN_TABLE, ret_address
 		LDA #ATAN_ROWS
 		STA CORDIC_loop_outer
 		LDA #0
 		STA CORDIC_shift_count
 		.loop_outer:
+		
 			TODO: magic number
 			LDA #9
 			STA CORDIC_loop_inner
 			.loop_inner:
 				
 				TODO: remove after debugging
+				INC CORDIC_DEBUG_COUNTER
+				
+				TODO: remove after debugging
 				JSR CORDIC_DEBUG_STUB	
+				
+				TODO: remove after debugging
+				;LDA CORDIC_DEBUG_COUNTER
+				;CMP #$1C
+				;BNE .debug_skip
+				;	halt
+				;.debug_skip:
 				
 				;halt
 				
@@ -350,94 +365,258 @@ TODO: actually, extremely slow
 		JSR BCD_Pack
 			
 		;restore stack pointer
-		PLA
-		TAX
+		LDX stack_X
 		CLD
 		
 		;Copy to stack
 		JMP RansTos
 		
+	END
+	
+	FUNC CORDIC_SinCos
+	
+		TODO: copy to R2, not to stack!
+		;sin(0)=0
+		LDA DEC_COUNT/2,X
+		BNE .not_zero
+			TODO: abstract!!!
+			TODO: test
+			PLA
+			PLA
+			JMP PUSH_STUB_0
+		.not_zero:
+		
+		;sign: sin(-x) = -sin(x)
+		LDY #0
+		LDA EXP_HI,X
+		AND #SIGN_BIT
+		BEQ .sign_pos
+			TODO: test!
+			EOR EXP_HI,X 
+			STA EXP_HI,X
+			LDY #SIGN_BIT
+		.sign_pos:
+		STY CORDIC_end_sign
+		
+		;x <= pi/2?
+		TODO: combine into one stub? used below too
+		JSR StackAddItem
+		JSR PUSH_STUB
+		;-pi/2 = 1.5 70 79 63 26 794 8966
+		;FCB OBJ_FLOAT, $79, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
+		;pi/2 rounds up to the below. use this otherwise sin(pi/2) causes range error
+		FCB OBJ_FLOAT, $80, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
+		
+		JSR TosR0R1
+		JSR BCD_Add
+		JSR CODE_DROP+EXEC_HEADER
+		
+		;sin(pi/2)=1
+		LDA R_ans+DEC_COUNT/2
+		BNE .not_one
+			TODO: abstract!!!
+			TODO: test
+			;JSR StackAddItem
+			JSR PUSH_STUB_1
+			LDA CORDIC_end_sign
+			STA EXP_HI,X
+			PLA
+			PLA
+			RTS
+		.not_one:
+		
+		;x > pi/2 - range error
+		LDA R_ans+EXP_HI
+		AND #SIGN_BIT
+		BNE .range_good
+			TODO: test!
+			LDA #ERROR_RANGE
+			STA ret_val
+			PLA
+			PLA
+			RTS
+		.range_good:
+				
+		STX stack_X
+		SED
+		
+		DEX	;X and Y have one more byte of precision
+		
+		LDY #0
+		LDA #ATAN_WIDTH
+		STA CORDIC_loop_inner
+		.loop:
+			TODO: why GR_OFFSET? seems from previous CORDIC version
+		
+			;X(R2)=1/K
+			LDA INV_K,Y
+			STA R2,Y
+			
+			;Y(R3)=0
+			LDA #0
+			STA R3,Y
+			
+			;Z(R0)=arg for shifting then R4
+			TODO: wait, why TYPE_SIZE? need OBJ_TYPE then if have this?
+			LDA TYPE_SIZE,X
+			STA R0,Y
+			
+			INY
+			INX
+			DEC CORDIC_loop_inner
+			BNE .loop
+			
+		;calculate exp difference (seems hard to abstract)
+		;exp is 0 or negative
+		TODO: test!
+		LDA 2,X				;high byte of exponent
+		AND #$F
+		STA math_hi	
+		;LDA 1,X				;low byte of exponent
+		;STA math_lo
+		;ORA math_hi
+		ORA 1,X				;low byte of exponent
+		BEQ .no_shift
+			
+			TODO: test
+			;exponent <= -100, return sin(0)=0
+			LDA math_hi
+			BEQ .no_ret_zero
+				.ret_zero:
+				CLD
+				LDX stack_X
+				JMP PUSH_STUB_0
+			.no_ret_zero:
+			
+			TODO: test
+			;exponent <= -12,  return sin(0)=0
+			LDA 1,X
+			CMP #$12
+			BCS .ret_zero
+			
+			TODO: test
+			;shift arg
+			LDY #0
+			STY R0
+			TAY
+			LDA hex_table,Y
+			LDX #0
+			JSR CORDIC_ShiftR0
+			
+		.no_shift:
+		
+		;Z(R4)=arg
+		LDA #R0-1
+		LDY #R4-1
+		JSR CopyRegs
+		
+		TODO: move to BCD_CORDIC?
+		;sign - always starts positive
+		LDA #0
+		STA R4+DEC_COUNT/2+1
+		STA R3+DEC_COUNT/2+1
+		STA R2+DEC_COUNT/2+1
+		
+		LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
+		JMP BCD_CORDIC
 		
 	END
 	
 	
-	TODO: remove after debugging	
+	TODO: remove after debugging
+	CORDIC_DEBUG_COUNTER:
+		DFS 1
+	CORDIC_DEBUG_BUFF:
+		DFS 12
 	CORDIC_DEBUG_STUB:
 
 		LDA #'X'
 		STA DEBUG
 		LDA #':'
 		STA DEBUG
-		LDA #' '
-		STA DEBUG
-		LDA R2+DEC_COUNT/2+1
-		STA DEBUG_HEX
-		LDA #' '
-		STA DEBUG
-		LDY #ATAN_WIDTH-1
-		.debug_loop_X:
-			LDA R2,Y
-			STA DEBUG_HEX
-			DEY
-			BNE .debug_loop_X
-		LDA #' '
-		STA DEBUG
-		LDA R2
-		STA DEBUG_HEX
-		LDA #'\\'
-		STA DEBUG
-		LDA #'n'
-		STA DEBUG
-
+		LDX #R2
+		JSR .debug_reg
+		
 		LDA #'Y'
 		STA DEBUG
 		LDA #':'
 		STA DEBUG
-		LDA #' '
-		STA DEBUG
-		LDA R3+DEC_COUNT/2+1
-		STA DEBUG_HEX
-		LDA #' '
-		STA DEBUG
-		LDY #ATAN_WIDTH-1
-		.debug_loop_Y:
-			LDA R3,Y
-			STA DEBUG_HEX
-			DEY
-			BNE .debug_loop_Y
-		LDA #' '
-		STA DEBUG
-		LDA R3
-		STA DEBUG_HEX
-		LDA #'\\'
-		STA DEBUG
-		LDA #'n'
-		STA DEBUG
+		LDX #R3
+		JSR .debug_reg
 		
 		LDA #'Z'
 		STA DEBUG
 		LDA #':'
 		STA DEBUG
-		LDA #' '
-		STA DEBUG
-		LDA R4+DEC_COUNT/2+1
-		STA DEBUG_HEX
-		LDA #' '
-		STA DEBUG
-		LDY #ATAN_WIDTH-1
-		.debug_loop_Z:
-			LDA R4,Y
-			STA DEBUG_HEX
-			DEY
-			BNE .debug_loop_Z
-		LDA #' '
-		STA DEBUG
-		LDA R4
-		STA DEBUG_HEX
+		LDX #R4
+		JSR .debug_reg
+		
 		LDA #'\\'
 		STA DEBUG
 		LDA #'n'
 		STA DEBUG
+		
+		RTS
+		
+		.debug_reg:
+		LDA DEC_COUNT/2+1,X
+		BNE .x1
+			LDA #' '
+			STA DEBUG
+			TXA
+			PHA
+			CLC
+			PHP
+			CLD
+			ADC #ATAN_WIDTH-1
+			PLP
+			TAX
+			LDY #ATAN_WIDTH-1
+			.debug_plus:
+				LDA 0,X
+				STA DEBUG_HEX
+				DEX
+				DEY
+				BNE .debug_plus
+			LDA #' '
+			STA DEBUG
+			PLA
+			TAX
+			LDA 0,X
+			STA DEBUG_HEX
+			JMP .done
+		.x1:
+		CMP #$99
+		BNE .x_unknown
+			LDA #'-'
+			STA DEBUG
+			LDY #ATAN_WIDTH
+			SEC
+			.debug_minus:
+				LDA #0
+				SBC 0,X
+				STA CORDIC_DEBUG_BUFF,Y
+				INX
+				DEY
+				BNE .debug_minus
+			LDY #1
+			.print:
+				LDA CORDIC_DEBUG_BUFF,Y
+				STA DEBUG_HEX
+				INY
+				CPY #ATAN_WIDTH
+				BNE .print
+			LDA #' '
+			STA DEBUG
+			LDA CORDIC_DEBUG_BUFF,Y
+			STA DEBUG_HEX
+			JMP .done
+		.x_unknown:
+			LDA CORDIC_DEBUG_COUNTER
+			halt
+			JMP .x_unknown
+		.done:
+		
 		LDA #'\\'
 		STA DEBUG
 		LDA #'n'

@@ -202,18 +202,33 @@
 			WORD address
 		END
 		
+		JSR StackAddItem
+		JSR CODE_FREE+EXEC_HEADER
+		
+		TXA
+		STA address
+		LDA #0
+		STA address+1
+		
+		TODO: shrink
+		CALL LCD_clrscr
+		LDA #(CHAR_SCREEN_WIDTH-12)*CHAR_WIDTH+6	;len("[$xxxx FREE]"=12, 4=align to right side
+		STA screen_ptr
+		CALL LCD_char, #'['
+		CALL DrawHex, address
+		CALL LCD_print, " FREE]"
+		
+		JSR CODE_DROP+EXEC_HEADER
+		
+		MOV #'5',character
+		MOV #5,counter
+		
 		TXA
 		CLC
 		ADC #(4*OBJ_SIZE)
 		STA address
 		LDA #0
 		STA address+1
-		
-		CALL LCD_clrscr
-		CALL LCD_print, "RAD"
-		
-		MOV #'5',character
-		MOV #5,counter
 		
 		.loop:
 			LDA #0

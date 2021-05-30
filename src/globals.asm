@@ -32,6 +32,10 @@
 	;Temporary Forth thread
 	temp_thread:		DFS 4
 	
+	TODO: find all occurences of storing X on stack and use this instead
+	;System
+	BYTE stack_X
+	
 	;Math
 	TODO: move to zero page if room
 	TODO: rename these to something useful

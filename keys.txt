@@ -1,4 +1,7 @@
-: test pi swap / sin ;
-6 test
+: ts pi swap / sin ;
+: tc pi swap / cos ;
+: deg 90 / pi 2 / * ;
+
+
 
 

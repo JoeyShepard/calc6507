@@ -2153,165 +2153,37 @@
 			;do not optimize out! PUSH_STUB calculates return to here
 			TODO: where else is PUSH_STUB used? return to caller?
 			RTS
-			
-	;Fixed point version
+				
 	WORD_SIN:
 		FCB 3,"SIN"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_COS			;Next word
 		FCB TOKEN_SIN			;ID - 130
 		CODE_SIN:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			TODO: abstract
-			;Range checking	
+			TODO: switch formula at ends of spectrum? sin(89.999) seems very good compared to sin(0.001)
 			
-			;sin(0)=0
-			LDA DEC_COUNT/2,X
-			BNE .not_zero
-				TODO: abstract!!!
-				TODO: test
-				;JSR StackAddItem
-				JMP PUSH_STUB_0
-			.not_zero:
-			
-			;sign: sin(-x) = -sin(x)
-			LDY #0
-			LDA EXP_HI,X
-			AND #SIGN_BIT
-			BEQ .sign_pos
-				TODO: test!
-				EOR EXP_HI,X 
-				STA EXP_HI,X
-				LDY #SIGN_BIT
-			.sign_pos:
-			STY CORDIC_end_sign
-			
-			;x <= pi/2?
-			TODO: combine into one stub? used below too
-			JSR StackAddItem
-			JSR PUSH_STUB
-			;-pi/2 = 1.5 70 79 63 26 794 8966
-			;FCB OBJ_FLOAT, $79, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
-			;pi/2 rounds up to the below. use this otherwise sin(pi/2) causes range error
-			FCB OBJ_FLOAT, $80, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
-			
-			JSR TosR0R1
-			JSR BCD_Add
-			JSR CODE_DROP+EXEC_HEADER
-			
-			;sin(pi/2)=1
-			LDA R_ans+DEC_COUNT/2
-			BNE .not_one
-				TODO: abstract!!!
-				TODO: test
-				;JSR StackAddItem
-				JSR PUSH_STUB_1
-				LDA CORDIC_end_sign
-				STA EXP_HI,X
-				RTS
-			.not_one:
-			
-			;x > pi/2 - range error
-			LDA R_ans+EXP_HI
-			AND #SIGN_BIT
-			BNE .range_good
-				TODO: test!
-				LDA #ERROR_RANGE
-				STA ret_val
-				RTS
-			.range_good:
-					
-			TXA
-			PHA
-			SED
-			
-			DEX	;X and Y have one more byte of precision
-			
-			LDY #0
-			LDA #ATAN_WIDTH
-			STA CORDIC_loop_inner
-			.loop:
-				TODO: why GR_OFFSET? seems from previous CORDIC version
-			
-				;X(R2)=1/K
-				LDA INV_K,Y
-				STA R2,Y
-				
-				;Y(R3)=0
-				LDA #0
-				STA R3,Y
-				
-				;Z(R0)=arg for shifting then R4
-				TODO: wait, why TYPE_SIZE? need OBJ_TYPE then if have this?
-				LDA TYPE_SIZE,X
-				STA R0,Y
-				
-				INY
-				INX
-				DEC CORDIC_loop_inner
-				BNE .loop
-				
-			;calculate exp difference (seems hard to abstract)
-			;exp is 0 or negative
-			TODO: test!
-			LDA 2,X				;high byte of exponent
-			AND #$F
-			STA math_hi	
-			;LDA 1,X				;low byte of exponent
-			;STA math_lo
-			;ORA math_hi
-			ORA 1,X				;low byte of exponent
-			BEQ .no_shift
-				
-				TODO: test
-				;exponent <= -100, return sin(0)=0
-				LDA math_hi
-				BEQ .no_ret_zero
-					.ret_zero:
-					CLD
-					PLA
-					TAX
-					JMP PUSH_STUB_0
-				.no_ret_zero:
-				
-				TODO: test
-				;exponent <= -12,  return sin(0)=0
-				LDA 1,X
-				CMP #$12
-				BCS .ret_zero
-				
-				TODO: test
-				;shift arg
-				LDY #0
-				STY R0
-				TAY
-				LDA hex_table,Y
-				LDX #0
-				JSR CORDIC_ShiftR0
-				
-			.no_shift:
-			
-			;Z(R4)=arg
-			LDA #R0-1
-			LDY #R4-1
-			JSR CopyRegs
-			
-			TODO: move to BCD_CORDIC?
-			;sign - always starts positive
-			LDA #0
-			STA R4+DEC_COUNT/2+1
-			STA R3+DEC_COUNT/2+1
-			STA R2+DEC_COUNT/2+1
-			
-			LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
-			JSR BCD_CORDIC
+			JSR CORDIC_SinCos
 			
 			;push CORDIC Y reg (R3) to stack
 			LDA #R3
 			JMP CORDIC_Push
 			
-	
+	WORD_COS:
+		FCB 3,"COS"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_COS			;ID - 132
+		CODE_COS:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+			
+			JSR CORDIC_SinCos
+			
+			;push CORDIC Y reg (R3) to stack
+			LDA #R2
+			JMP CORDIC_Push
+			
 	
 	;TYPE			;type of stack item?
 	;MOD			76
@@ -2329,6 +2201,7 @@
 	;WORDS/MEM		146
 	;[ ]
 	;JUMP
+	;***DEG
 	
 	;4ish zp pages also mapped to address range
 	
@@ -2342,7 +2215,6 @@
 	;+LOOP		;great if room
 	;IMMED
 	;COMPILE
-	;PI
 	;RESET
 	;RDROP		;actually better not expose to user
 	;R>
@@ -2436,5 +2308,6 @@
 		FDB CODE_ABS				;126
 		FDB CODE_PI					;128
 		FDB CODE_SIN				;130
+		FDB CODE_COS				;132
 		
 		
