@@ -155,7 +155,7 @@
 		FCB TOKEN_CLEAR			;ID - 14
 		CODE_CLEAR:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB NONE				;Flags
+			FCB NONE			;Flags
 			
 			LDX #0
 			STX stack_count
@@ -2188,20 +2188,20 @@
 			
 	WORD_TAN:
 		FCB 3,"TAN"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_ASIN			;Next word
 		FCB TOKEN_TAN			;ID - 134
 		CODE_TAN:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			TODO: loses accuracy near pi/2
+			TODO: loses accuracy near pi/2 - possible to calculate without division?
 			
 			JSR CORDIC_SinCos
 			CMP #CORDIC_CLEANUP
 			BEQ .divide
 			.const:
 				;X,Y is 1,0 or 0,1
-				LDY R3+LAST_DIGIT
+				LDY R3+FIRST_DIGIT
 				BEQ .push0
 				.error:
 					;tan(pi/2)=infinity
@@ -2237,15 +2237,79 @@
 			TODO: check for div by 0 error?
 			JMP CORDIC_Push
 			
+	WORD_ASIN:
+		FCB 4,"ASIN"			;Name
+		FDB WORD_ACOS			;Next word
+		FCB TOKEN_ASIN			;ID - 136
+		CODE_ASIN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+			
+			;JSR CORDIC_AsinAcos
+			;
+			;;push CORDIC X reg (R2) to stack
+			;LDX #R3
+			;JSR CORDIC_Pack
+			;JMP CORDIC_Push
+			
+			RTS
+			
+	WORD_ACOS:
+		FCB 4,"ACOS"			;Name
+		FDB WORD_ATAN			;Next word
+		FCB TOKEN_ACOS			;ID - 138
+		CODE_ACOS:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+			
+			RTS
+			
+	WORD_ATAN:
+		FCB 4,"ATAN"			;Name
+		FDB WORD_DEG			;Next word
+		FCB TOKEN_ATAN			;ID - 140
+		CODE_ATAN:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+			
+			RTS
+	
+	TODO: remove as last resort
+	WORD_DEG:
+		FCB 3,"DEG"				;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_DEG			;ID - 142
+		CODE_DEG:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB MIN1|FLOATS					;Flags	
+			
+			;divide by 90
+			JSR StackAddItem
+			JSR PUSH_STUB
+			FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $90, $01, $00
+			JSR TosR0R1
+			JSR BCD_Div
+			TODO: only error is divide by 0?
+			;LDA ret_val
+			;BEQ .no_error
+			;	RTS
+			;.no_error:
+			JSR CODE_DROP+EXEC_HEADER
+			JSR RansTos
+			
+			JSR StackAddItem
+			JSR PUSH_STUB
+			TODO: abstract with other calls to push this?
+			FCB OBJ_FLOAT, $80, $26, $63, $79, $70, $15, $00, $00
+			JSR TosR0R1
+			JSR BCD_Mult
+			JSR CODE_DROP+EXEC_HEADER
+			JMP RansTos
+						
+						
 			
 	;TYPE			;type of stack item?
 	;MOD			76
-	;SIN			104
-	;COS			106
-	;TAN			108
-	;ASIN			110
-	;ACOS			112
-	;ATAN			114
 	;^				116
 	;E^				118
 	;LN				120
@@ -2254,7 +2318,6 @@
 	;WORDS/MEM		146
 	;[ ]
 	;JUMP
-	;***DEG
 	
 	;4ish zp pages also mapped to address range
 	
@@ -2363,6 +2426,10 @@
 		FDB CODE_SIN				;130
 		FDB CODE_COS				;132
 		FDB CODE_TAN				;134
+		FDB CODE_ASIN				;136
+		FDB CODE_ACOS				;138
+		FDB CODE_ATAN				;140
+		FDB CODE_DEG				;142
 		
 		
 		

@@ -49,8 +49,8 @@
 	DEC_COUNT =				12
 	SIGN_BIT =				$80
 	E_SIGN_BIT =			$40
-	FIRST_DIGIT =			1
-	LAST_DIGIT =			6
+	FIRST_DIGIT =			6
+	LAST_DIGIT =			1
 	EXP_LO =				7
 	EXP_HI =				8
 	;Only in registers, not on stack
@@ -174,6 +174,10 @@
 		TOKEN_SIN =					130
 		TOKEN_COS =					132
 		TOKEN_TAN =					134
+		TOKEN_ASIN =				136
+		TOKEN_ACOS =				138
+		TOKEN_ATAN =				140
+		TOKEN_DEG =					142
 		
 		;Execution modes
 		EXEC_INPUT =		0

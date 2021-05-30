@@ -58,7 +58,6 @@ TODO: actually, extremely slow
 		;added decimal of precision
 		FCB $77, $87, $59, $97, $23, $42, $00
 	
-	TODO: add precision to match X and Y?
 	TODO: smaller to generate later rows of form 1E-X?	
 	ATAN_TABLE:
 		FCB $74, $39, $63, $81, $39, $85, $07
@@ -75,11 +74,26 @@ TODO: actually, extremely slow
 		FCB $00, $01, $00, $00, $00, $00, $00
 		FCB $10, $00, $00, $00, $00, $00, $00
 		FCB $01, $00, $00, $00, $00, $00, $00
-
-	ATAN_ROWS = 	14
-	ATAN_WIDTH =	7
 	
 	ATANH_TABLE:
+		FCB $11, $73, $47, $53, $33, $00, $01
+		FCB $33, $35, $33, $03, $00, $10, $00
+		FCB $33, $33, $00, $00, $00, $01, $00
+		FCB $03, $00, $00, $00, $10, $00, $00
+		FCB $00, $00, $00, $00, $01, $00, $00
+		FCB $00, $00, $00, $10, $00, $00, $00
+		FCB $00, $00, $00, $01, $00, $00, $00
+		FCB $00, $00, $10, $00, $00, $00, $00
+		FCB $00, $00, $01, $00, $00, $00, $00
+		FCB $00, $10, $00, $00, $00, $00, $00
+		FCB $00, $01, $00, $00, $00, $00, $00
+		FCB $10, $00, $00, $00, $00, $00, $00
+		FCB $01, $00, $00, $00, $00, $00, $00
+
+	ATAN_ROWS = 	14
+	ATANH_ROWS =	13
+	
+	CORDIC_WIDTH = 7
 	
 	;Functions
 	;=========
@@ -119,14 +133,31 @@ TODO: actually, extremely slow
 		TYA
 		AND #CORDIC_HALF_MASK
 		STA CORDIC_halve
+		TYA
+		AND #CORDIC_ATAN_MASK
+		;CMP #CORDIC_ATAN
+		BEQ .load_atan
+			MOV.W #ATANH_TABLE, ret_address
+			LDA #ATANH_ROWS
+			BNE .load_done
+		.load_atan:
+			MOV.W #ATAN_TABLE, ret_address
+			LDA #ATAN_ROWS
+			BNE .load_done
+		.load_done:
+		STA CORDIC_loop_outer
+		
+		;sign - always starts positive
+		;move outside of BCD_CORDIC if not always positive
+		LDA #0
+		STA R4+FIRST_DIGIT+1
+		STA R3+FIRST_DIGIT+1
+		STA R2+FIRST_DIGIT+1
 		
 		TODO: remove after debugging
 		LDA #0
 		STA CORDIC_DEBUG_COUNTER
-	
-		MOV.W #ATAN_TABLE, ret_address
-		LDA #ATAN_ROWS
-		STA CORDIC_loop_outer
+		
 		LDA #0
 		STA CORDIC_shift_count
 		.loop_outer:
@@ -160,7 +191,7 @@ TODO: actually, extremely slow
 					EOR #$99
 				.compare_y:
 				TODO: magic number. new constant?
-				LDX #ATAN_WIDTH
+				LDX #CORDIC_WIDTH
 				LDY #0
 				AND #1	;Convert $99 sign of Y to 1
 				STA CORDIC_sign_temp
@@ -226,11 +257,10 @@ TODO: actually, extremely slow
 				
 				;NOTE: skips adding GRS since would be zero
 				
-				TODO: rename GR_OFFSET to FIRST_DIGIT?
 				LDX #0
 				TODO: magic_number
 				TODO: store elsewhere to reuse math functions?
-				LDY #DEC_COUNT/2+2	;+1 for sign byte, +1 for extra precision byte
+				LDY #FIRST_DIGIT+2	;+1 for sign byte, +1 for extra precision byte
 				LDA CORDIC_sign_temp
 				EOR CORDIC_sign
 				BEQ .add_X
@@ -314,7 +344,7 @@ TODO: actually, extremely slow
 			LDA ret_address
 			CLC
 			CLD
-			ADC #ATAN_WIDTH
+			ADC #CORDIC_WIDTH
 			SED
 			STA ret_address
 			BCC .no_inc
@@ -337,12 +367,9 @@ TODO: actually, extremely slow
 		JMP ShiftR0.CORDIC
 	END
 	
-	FUNC CORDIC_SinCos
-		
-		;save here and restore in cleanup
-		STX stack_X
-		
-		;sign: sin(-x) = -sin(x)
+	;Expects stack pointer in X
+	FUNC CORDIC_MarkSign
+	
 		LDY #0
 		LDA EXP_HI,X
 		AND #SIGN_BIT
@@ -353,6 +380,16 @@ TODO: actually, extremely slow
 			LDY #SIGN_BIT
 		.sign_pos:
 		STY CORDIC_end_sign
+	
+	END
+	
+	FUNC CORDIC_SinCos
+		
+		;save stack pointer here and restore in cleanup
+		STX stack_X
+		
+		;sign: sin(-x) = -sin(x)
+		JSR CORDIC_MarkSign
 	
 		;sin(0)=0, cos(0)=1
 		LDA DEC_COUNT/2,X
@@ -367,10 +404,7 @@ TODO: actually, extremely slow
 			LDX #R3
 			JSR ZeroReg
 			LDA #$10
-			STA R2+LAST_DIGIT
-			LDA #OBJ_FLOAT
-			STA R2
-			STA R3
+			STA R2+FIRST_DIGIT
 			
 			LDA #CORDIC_NO_CLEANUP
 			RTS
@@ -393,23 +427,17 @@ TODO: actually, extremely slow
 		JSR CODE_DROP+EXEC_HEADER
 		
 		;sin(pi/2)=1, cos(pi/2)=0
-		LDA R_ans+LAST_DIGIT
+		LDA R_ans+FIRST_DIGIT
 		BNE .not_one
 			TODO: abstract!!!
 			TODO: test
-			
-			TODO: set sign here or in cleanup?
-			;LDA CORDIC_end_sign
 			
 			LDX #R2
 			JSR ZeroReg
 			LDX #R3
 			JSR ZeroReg
 			LDA #$10
-			STA R3+EXP_LO-1	;ie last digit
-			;LDA #OBJ_FLOAT	;also #1
-			STA R2
-			STA R3
+			STA R3+FIRST_DIGIT
 			
 			LDA #CORDIC_NO_CLEANUP
 			RTS
@@ -438,7 +466,7 @@ TODO: actually, extremely slow
 		DEX	;X and Y have one more byte of precision
 		
 		LDY #0
-		LDA #ATAN_WIDTH
+		LDA #CORDIC_WIDTH
 		STA CORDIC_loop_inner
 		.loop:
 			TODO: why GR_OFFSET? seems from previous CORDIC version
@@ -506,17 +534,166 @@ TODO: actually, extremely slow
 		LDY #R4-1
 		JSR CopyRegs
 		
-		TODO: move to BCD_CORDIC?
-		;sign - always starts positive
-		LDA #0
-		STA R4+DEC_COUNT/2+1
-		STA R3+DEC_COUNT/2+1
-		STA R2+DEC_COUNT/2+1
+		LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
+		JMP BCD_CORDIC
+		
+	END
+	
+	FUNC CORDIC_AsinAcos
+		
+		;save stack pointer here and restore in cleanup
+		STX stack_X
+		
+		;sign: sin(-x) = -sin(x)
+		JSR CORDIC_MarkSign
+	
+		TODO: check
+		;asin(0)=0, acos(0)=pi/2
+		LDA DEC_COUNT/2,X
+		BNE .not_zero
+						
+			TODO: CHANGE TO PI/2
+			.return_0:
+			LDX #R2
+			JSR ZeroReg
+			LDX #R3
+			JSR ZeroReg
+			LDA #$10
+			STA R2+FIRST_DIGIT
+			
+			LDA #CORDIC_NO_CLEANUP
+			RTS
+			
+		.not_zero:
+		
+		;x <= 1?
+		TODO: combine into one stub? used below too
+		JSR StackAddItem
+		JSR PUSH_STUB
+		FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00|SIGN_BIT
+		
+		SED
+		
+		JSR TosR0R1
+		JSR BCD_Add
+		JSR CODE_DROP+EXEC_HEADER
+		
+		;asin(1)=pi/2, acos(1)=0
+		LDA R_ans+FIRST_DIGIT
+		BNE .not_one
+			TODO: abstract!!!
+			TODO: test
+			
+			TODO: CHANGE TO PI/2!
+			LDX #R2
+			JSR ZeroReg
+			LDX #R3
+			JSR ZeroReg
+			LDA #$10
+			STA R3+FIRST_DIGIT
+			
+			LDA #CORDIC_NO_CLEANUP
+			RTS
+			
+		.not_one:
+		
+		;x > 1 - range error
+		LDA R_ans+EXP_HI
+		AND #SIGN_BIT
+		BNE .range_good
+			TODO: test!
+			LDA #ERROR_RANGE
+			STA ret_val
+			
+			LDX stack_X
+			CLD
+			
+			PLA		;drop return to word
+			PLA
+			
+			RTS
+		.range_good:
+		
+		LDX stack_X
+		
+		DEX	;X and Y have one more byte of precision
+		
+		halt
+		
+		LDY #0
+		LDA #CORDIC_WIDTH
+		STA CORDIC_loop_inner
+		.loop:
+		
+			;X(R2)=1/K
+			LDA INV_K,Y
+			STA R2,Y
+			
+			;Y(R3)=0
+			LDA #0
+			STA R3,Y
+			
+			;Z(R0)=arg for shifting then R4
+			TODO: wait, why TYPE_SIZE? need OBJ_TYPE then if have this?
+			LDA TYPE_SIZE,X
+			STA R0,Y
+			
+			INY
+			INX
+			DEC CORDIC_loop_inner
+			BNE .loop
+			
+		;calculate exp difference (seems hard to abstract)
+		;exp is 0 or negative
+		TODO: can abstract with above SinCos
+		TODO: test!
+		LDA 2,X				;high byte of exponent
+		AND #$F
+		STA math_hi	
+		;LDA 1,X				;low byte of exponent
+		;STA math_lo
+		;ORA math_hi
+		ORA 1,X				;low byte of exponent
+		BEQ .no_shift
+			
+			TODO: test
+			;exponent <= -100, return sin(0)=0
+			LDA math_hi
+			BEQ .no_ret_zero
+				.ret_zero:
+				CLD
+				LDX stack_X
+				JMP .return_0
+				
+			.no_ret_zero:
+			
+			TODO: test
+			;exponent <= -12,  return sin(0)=0
+			LDA 1,X
+			CMP #$12
+			BCS .ret_zero
+			
+			TODO: test
+			;shift arg
+			LDY #0
+			STY R0
+			TAY
+			LDA hex_table,Y
+			LDX #0
+			JSR CORDIC_ShiftR0
+			
+		.no_shift:
+		
+		;Z(R4)=arg
+		LDA #R0-1
+		LDY #R4-1
+		JSR CopyRegs
 		
 		LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
 		JMP BCD_CORDIC
 		
 	END
+	
 	
 	TODO: assumes result is positive since sign filtered out before CORDIC
 	;A - flag whether to clean up
@@ -562,7 +739,7 @@ TODO: actually, extremely slow
 		
 		TODO: Replace all DEC_PLACE/2 with LAST_DIGIT
 		TODO: Replace all with new constant FIRST_DIGIT
-		LDA R_ans+LAST_DIGIT
+		LDA R_ans+FIRST_DIGIT
 		BEQ .no_sign			;don't set sign if zero
 			LDA CORDIC_end_sign
 			;ORA R_ans+EXP_HI	;always zero?
@@ -577,7 +754,7 @@ TODO: actually, extremely slow
 		LDX stack_X
 		CLD
 			
-		;Copy to stack
+		;copy answer to stack
 		JMP RansTos
 	
 	END
@@ -628,10 +805,10 @@ TODO: actually, extremely slow
 			CLC
 			PHP
 			CLD
-			ADC #ATAN_WIDTH-1
+			ADC #CORDIC_WIDTH-1
 			PLP
 			TAX
-			LDY #ATAN_WIDTH-1
+			LDY #CORDIC_WIDTH-1
 			.debug_plus:
 				LDA 0,X
 				STA DEBUG_HEX
@@ -650,7 +827,7 @@ TODO: actually, extremely slow
 		BNE .x_unknown
 			LDA #'-'
 			STA DEBUG
-			LDY #ATAN_WIDTH
+			LDY #CORDIC_WIDTH
 			SEC
 			.debug_minus:
 				LDA #0
@@ -664,7 +841,7 @@ TODO: actually, extremely slow
 				LDA CORDIC_DEBUG_BUFF,Y
 				STA DEBUG_HEX
 				INY
-				CPY #ATAN_WIDTH
+				CPY #CORDIC_WIDTH
 				BNE .print
 			LDA #' '
 			STA DEBUG

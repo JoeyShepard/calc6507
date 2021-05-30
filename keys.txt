@@ -1,8 +1,5 @@
 : ts pi swap / sin ;
 : tc pi swap / cos ;
-: deg 90 / pi 2 / * ;
-
-pi 3 / tan
 
 
 
