@@ -56,7 +56,6 @@
 	TODO: all used?
 	;Locals for functions - wasteful but RIOT mem not used otherwise
 	BYTE shift_counter
-	BYTE CORDIC_compare
 	BYTE CORDIC_sign
 	BYTE CORDIC_halve
 	BYTE CORDIC_loop_inner
@@ -64,6 +63,7 @@
 	BYTE CORDIC_shift_count
 	BYTE CORDIC_sign_temp
 	BYTE CORDIC_end_sign
+	WORD CORDIC_comparator
 	
 	;Splitting input into words
 	new_word_len:		DFS 1

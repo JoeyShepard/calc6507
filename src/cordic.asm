@@ -1,31 +1,23 @@
 ;CORDIC routines for transcendentals
 ;===================================
 
+;Links
+;=====
+;https://www.hpmuseum.org/forum/thread-12180.html
+;https://archived.hpcalc.org/laporte/Trigonometry.htm
+;https://archived.hpcalc.org/laporte/TheSecretOfTheAlgorithms.htm
+;http://www.voidware.com/cordic.htm
+;https://people.sc.fsu.edu/~jburkardt/c_src/cordic/cordic.c
+
 TODO: clear up these notes
-;for atan, f(x)=x at some point
-;what size table? seems tiny numbers could need huge table
-;could also do fixed point but code larger?
-;no need for GR if not shifting
-;interesting that sin(0.01) and sin(0.001) on HP-48 produces 12 digits. sin(0.000001)=0.000001
 
-;For now, table assumes xx.yy yy yy yy yy fixed point
-;ACTUALLY x.y if radians!!!
-TODO: using stack is slower but MUCH better precision
-TODO: actually, extremely slow
+TODO: at some point, sin(x)=x so escape?
 
-;limiting it to above xx.y10 is TINY table
-;intermediates at least will need larger range, so need full precision
-;also, see if above tiny format will work for atan as well as tan
-;	TWO DIFFERENT TABLES!
-;	tan 89.999 is 57k :(
-;	tan 89.9999999999 is 12 digit integer - doesn't matter - calculate sin/cos
-;	could use large table of floats then determine what can be cut
-;	actually, look at algorithm since may be possible to generate huge tan with shifts
-;	look at hp-35 page - example table seems especially large tbh
-;
+TODO: improve division then?
 ;btw, figured out how to - then + division 
 	
-	TODO: more precision to X and Y below would probably give more accurate answer
+TODO: more precision to X and Y below would probably give more accurate answer
+;at cost of added complexity
 	
 	
 	;Fixed point version:
@@ -39,14 +31,15 @@ TODO: actually, extremely slow
 	CORDIC_ADD_Y =			0
 	CORDIC_SUB_Y =			1
 	CORDIC_ADD_MASK =		1
-	CORDIC_CMP_Y =			0
-	CORDIC_CMP_Z =			2
-	CORDIC_CMP_MASK =		2
-	CORDIC_HALF =			4
-	CORDIC_HALF_MASK =		4
+	CORDIC_CMP_Z =			0
+	CORDIC_CMP_Y =			2
+	CORDIC_CMP_Y_R5 =		4
+	CORDIC_CMP_MASK =		2|4
+	CORDIC_HALF =			8
+	CORDIC_HALF_MASK =		8
 	CORDIC_ATAN =			0
-	CORDIC_ATANH =			8
-	CORDIC_ATAN_MASK =		8
+	CORDIC_ATANH =			16
+	CORDIC_ATAN_MASK =		16
 	
 	;Return values
 	CORDIC_CLEANUP =			0
@@ -98,6 +91,27 @@ TODO: actually, extremely slow
 	;Functions
 	;=========
 	
+	;Comparison routines for BCD_CORDIC
+	;(reached by JMP (xxxx) so don't end in RTS)
+	CORDIC_Compare_Z:
+		LDA R4+FIRST_DIGIT+1 ;sign of Z
+		EOR #$99
+		JMP BCD_CORDIC.compare_done
+		
+	CORDIC_Compare_Y:
+		LDA R3+FIRST_DIGIT+1 ;sign of Y
+		JMP BCD_CORDIC.compare_done
+	
+	TODO: could store in globals instead of R5 in ZP
+	CORDIC_Compare_Y_R5:
+		halt
+		JMP BCD_CORDIC.compare_done
+	
+	CORDIC_COMPARE_TABLE:
+		FDB CORDIC_Compare_Z
+		FDB CORDIC_Compare_Y
+		FDB CORDIC_Compare_Y_R5
+	
 	;Flags in A
 	;R0 - shifting
 	;R1 - X'
@@ -124,15 +138,27 @@ TODO: actually, extremely slow
 		TODO: replace halt here with code that will return if accidentally left in
 		TODO: halt assembling if halt ever invoked
 		
-		TAY
+		TAY	;save flags
+		
+		;Compare mode
 		AND #CORDIC_CMP_MASK
-		STA CORDIC_compare
+		TAX
+		LDA CORDIC_COMPARE_TABLE,X
+		STA CORDIC_comparator
+		LDA CORDIC_COMPARE_TABLE+1,X
+		STA CORDIC_comparator+1
+		
+		;Add mode
 		TYA
 		AND #CORDIC_ADD_MASK
 		STA CORDIC_sign
+		
+		;Halving
 		TYA
 		AND #CORDIC_HALF_MASK
 		STA CORDIC_halve
+		
+		;Table selection
 		TYA
 		AND #CORDIC_ATAN_MASK
 		;CMP #CORDIC_ATAN
@@ -143,7 +169,6 @@ TODO: actually, extremely slow
 		.load_atan:
 			MOV.W #ATAN_TABLE, ret_address
 			LDA #ATAN_ROWS
-			BNE .load_done
 		.load_done:
 		STA CORDIC_loop_outer
 		
@@ -182,18 +207,14 @@ TODO: actually, extremely slow
 				
 				;halt
 				
-				TODO: need extra degree of precision for Z?
-				LDA R3+DEC_COUNT/2+1 ;sign of Y
-				LDX CORDIC_compare
-				BEQ .compare_y
-				.compare_z:
-					LDA R4+DEC_COUNT/2+1 ;sign of Z
-					EOR #$99
-				.compare_y:
-				TODO: magic number. new constant?
+				TODO: shortcut to recognize flip flopping?
+				
+				JMP (CORDIC_comparator)
+				;CORDIC_comparator returns here:
+				.compare_done:
 				LDX #CORDIC_WIDTH
 				LDY #0
-				AND #1	;Convert $99 sign of Y to 1
+				AND #1	;Convert $99 sign to 1
 				STA CORDIC_sign_temp
 				BEQ .add_Z
 					.sub_Z:
@@ -383,16 +404,16 @@ TODO: actually, extremely slow
 	
 	END
 	
-	FUNC CORDIC_SinCos
+	FUNC CORDIC_Trig
 		
 		;save stack pointer here and restore in cleanup
 		STX stack_X
 		
-		;sign: sin(-x) = -sin(x)
+		;sign: sin(-x) = -sin(x) though cos(-x) = cos(x)
 		JSR CORDIC_MarkSign
-	
+		
 		;sin(0)=0, cos(0)=1
-		LDA DEC_COUNT/2,X
+		LDA FIRST_DIGIT,X
 		BNE .not_zero
 			TODO: test
 			TODO: make sure this is used or remove
@@ -539,14 +560,14 @@ TODO: actually, extremely slow
 		
 	END
 	
-	FUNC CORDIC_AsinAcos
+	FUNC CORDIC_ArcTrig
 		
 		;save stack pointer here and restore in cleanup
 		STX stack_X
 		
-		;sign: sin(-x) = -sin(x)
+		;sign: asin(-x) = -asin(x), acos(-x) = pi-arccos(x)
 		JSR CORDIC_MarkSign
-	
+		
 		TODO: check
 		;asin(0)=0, acos(0)=pi/2
 		LDA DEC_COUNT/2,X
@@ -617,8 +638,6 @@ TODO: actually, extremely slow
 		LDX stack_X
 		
 		DEX	;X and Y have one more byte of precision
-		
-		halt
 		
 		LDY #0
 		LDA #CORDIC_WIDTH
@@ -695,7 +714,6 @@ TODO: actually, extremely slow
 	END
 	
 	
-	TODO: assumes result is positive since sign filtered out before CORDIC
 	;A - flag whether to clean up
 	;X - register
 	FUNC CORDIC_Pack

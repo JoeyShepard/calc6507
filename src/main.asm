@@ -77,9 +77,13 @@ DEBUG_MODE set "off"
 ;======================
 	ORG $0000
 	
+	TODO: assign unused locals space
+	
 	;Locals usage
 LOCALS_BEGIN set	$0
 LOCALS_END set		$1F
+	
+	TODO: double check all used and move variables out of globals to here
 	
 	ORG $20
 	;For macros
@@ -105,7 +109,6 @@ LOCALS_END set		$1F
 	;Math
 	WORD math_ptr1
 	WORD math_ptr2
-	WORD CORDIC_table
 	
 	;Don't need header byte, +1 for guard and round, +1 for exp sign
 	R0: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1

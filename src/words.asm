@@ -2164,7 +2164,7 @@
 			
 			TODO: switch formula at ends of spectrum? sin(89.999) seems very good compared to sin(0.001)
 			
-			JSR CORDIC_SinCos
+			JSR CORDIC_Trig
 			
 			;push CORDIC Y reg (R3) to stack
 			LDX #R3
@@ -2179,11 +2179,16 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			JSR CORDIC_SinCos
+			JSR CORDIC_Trig
+			
+			;clear sign if set since cos(-x) = cos(x)
+			LDX #0
+			STX CORDIC_end_sign
 			
 			;push CORDIC X reg (R2) to stack
 			LDX #R2
 			JSR CORDIC_Pack
+			;clear sign if set since cos(-x) = cos(x)
 			JMP CORDIC_Push
 			
 	WORD_TAN:
@@ -2196,7 +2201,7 @@
 			
 			TODO: loses accuracy near pi/2 - possible to calculate without division?
 			
-			JSR CORDIC_SinCos
+			JSR CORDIC_Trig
 			CMP #CORDIC_CLEANUP
 			BEQ .divide
 			.const:
@@ -2245,7 +2250,7 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			;JSR CORDIC_AsinAcos
+			;JSR CORDIC_ArcTrig
 			;
 			;;push CORDIC X reg (R2) to stack
 			;LDX #R3
@@ -2271,6 +2276,8 @@
 		CODE_ATAN:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
+			
+			
 			
 			RTS
 	
