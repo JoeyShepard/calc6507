@@ -118,7 +118,6 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	;R2 - X
 	;R3 - Y
 	;R4 - Z
-	TODO: 
 	FUNC BCD_CORDIC
 		
 		;STATS:
@@ -562,6 +561,8 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	
 	FUNC CORDIC_ArcTrig
 		
+		TODO: lim x->inf atan(x)=pi
+		
 		;save stack pointer here and restore in cleanup
 		STX stack_X
 		
@@ -587,7 +588,7 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			
 		.not_zero:
 		
-		;x <= 1?
+		;x <= 1? for asin and acos but not atan
 		TODO: combine into one stub? used below too
 		JSR StackAddItem
 		JSR PUSH_STUB
@@ -644,27 +645,30 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		STA CORDIC_loop_inner
 		.loop:
 		
-			;X(R2)=1/K
-			LDA INV_K,Y
+			;X(R2)=1
+			LDA #0
 			STA R2,Y
 			
-			;Y(R3)=0
-			LDA #0
-			STA R3,Y
-			
-			;Z(R0)=arg for shifting then R4
+			;Y(R0)=arg for shifting then R3
 			TODO: wait, why TYPE_SIZE? need OBJ_TYPE then if have this?
 			LDA TYPE_SIZE,X
 			STA R0,Y
+			
+			;Z(R4)=0
+			LDA #0
+			STA R4,Y
 			
 			INY
 			INX
 			DEC CORDIC_loop_inner
 			BNE .loop
 			
+		LDA #$10
+		STA R2+FIRST_DIGIT
+			
 		;calculate exp difference (seems hard to abstract)
 		;exp is 0 or negative
-		TODO: can abstract with above SinCos
+		TODO: can abstract with above CORDIC_Trig
 		TODO: test!
 		LDA 2,X				;high byte of exponent
 		AND #$F
@@ -676,14 +680,13 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		BEQ .no_shift
 			
 			TODO: test
-			;exponent <= -100, return sin(0)=0
+			;exponent <= -100, return asin(0)=0
 			LDA math_hi
 			BEQ .no_ret_zero
 				.ret_zero:
 				CLD
 				LDX stack_X
 				JMP .return_0
-				
 			.no_ret_zero:
 			
 			TODO: test
@@ -703,12 +706,12 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			
 		.no_shift:
 		
-		;Z(R4)=arg
+		;Y(R3)=arg
 		LDA #R0-1
-		LDY #R4-1
+		LDY #R3-1
 		JSR CopyRegs
 		
-		LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
+		LDA #CORDIC_CMP_Y|CORDIC_ADD_Y|CORDIC_ATAN
 		JMP BCD_CORDIC
 		
 	END

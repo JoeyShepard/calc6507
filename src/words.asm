@@ -2277,7 +2277,10 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
+			START HERE: make sure Y<=0.1<1 and it wont overflow!!!
+			-good news is atan tends to pi/2
 			
+			JSR CORDIC_ArcTrig
 			
 			RTS
 	
