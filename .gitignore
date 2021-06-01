@@ -23,7 +23,7 @@ src/*.err
 #input.txt
 
 #documents downloaded from elsewhere
-docs/
+ref\ docs/
 
 #randomized test data
 decimal\ test/input*.txt

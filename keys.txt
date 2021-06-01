@@ -1,5 +1,4 @@
-: ts pi swap / sin ;
-: tc pi swap / cos ;
+
 
 
 

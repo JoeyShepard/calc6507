@@ -1209,6 +1209,8 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB IMMED|COMPILE				;Flags
 			
+			TODO: test DO without loop and mismatch like DO THEN
+			
 			LDA #AUX_TYPE_DO
 			JSR AuxPushShort
 			TODO: change every function to LDA ret_val on exit?
@@ -2179,6 +2181,8 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
+			TODO: smaller to convert cos to sin with identity?
+			
 			JSR CORDIC_Trig
 			
 			;clear sign if set since cos(-x) = cos(x)
@@ -2277,10 +2281,11 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			START HERE: make sure Y<=0.1<1 and it wont overflow!!!
-			-good news is atan tends to pi/2
+			;START HERE: make sure 0.1<=Y<1 and it wont overflow!!!
+			;-actually 0.01-0.09 in testing - see Python version
+			;-good news is atan tends to pi/2
 			
-			JSR CORDIC_ArcTrig
+			JSR CORDIC_Atan
 			
 			RTS
 	
@@ -2319,6 +2324,7 @@
 						
 			
 	;TYPE			;type of stack item?
+	;NEG			;change sign of float
 	;MOD			76
 	;^				116
 	;E^				118

@@ -179,8 +179,10 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		STA R2+FIRST_DIGIT+1
 		
 		TODO: remove after debugging
-		LDA #0
-		STA CORDIC_DEBUG_COUNTER
+		;LDA #0
+		;STA CORDIC_DEBUG_COUNTER
+		
+		;halt
 		
 		LDA #0
 		STA CORDIC_shift_count
@@ -192,10 +194,10 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			.loop_inner:
 				
 				TODO: remove after debugging
-				INC CORDIC_DEBUG_COUNTER
+				;INC CORDIC_DEBUG_COUNTER
 				
 				TODO: remove after debugging
-				JSR CORDIC_DEBUG_STUB	
+				;JSR CORDIC_DEBUG_STUB	
 				
 				TODO: remove after debugging
 				;LDA CORDIC_DEBUG_COUNTER
@@ -489,7 +491,6 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		LDA #CORDIC_WIDTH
 		STA CORDIC_loop_inner
 		.loop:
-			TODO: why GR_OFFSET? seems from previous CORDIC version
 		
 			;X(R2)=1/K
 			LDA INV_K,Y
@@ -559,19 +560,183 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		
 	END
 	
-	FUNC CORDIC_ArcTrig
-		
-		TODO: lim x->inf atan(x)=pi
+	TODO: share with CORDIC_Trig?
+	FUNC CORDIC_Atrig1
 		
 		;save stack pointer here and restore in cleanup
 		STX stack_X
 		
-		;sign: asin(-x) = -asin(x), acos(-x) = pi-arccos(x)
-		JSR CORDIC_MarkSign
+		;sign: asin(-x) = -asin(x), acos(-x) = pi-arccos(x), atan(-x) = -atan(x)
+		JMP CORDIC_MarkSign
+		
+	END
+	
+	FUNC CORDIC_Atan
+		
+		RTS
+		
+		JSR CORDIC_Atrig1
+		
+		TODO: check
+		;atan(0)=0
+		LDA FIRST_DIGIT,X
+		BNE .not_zero
+			
+			.return_0:
+			LDX #R_ans
+			JSR ZeroReg
+			
+			halt
+			
+			LDA #CORDIC_NO_CLEANUP
+			RTS
+			
+		.not_zero:
+		
+		;TODO: combine into one stub? used below too
+		;JSR StackAddItem
+		;JSR PUSH_STUB
+		;FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00|SIGN_BIT
+		
+		SED
+		
+		;JSR TosR0R1
+		;JSR BCD_Add
+		;JSR CODE_DROP+EXEC_HEADER
+		
+		;;asin(1)=pi/2, acos(1)=0
+		;LDA R_ans+FIRST_DIGIT
+		;BNE .not_one
+		;	TODO: abstract!!!
+		;	TODO: test
+		;	
+		;	TODO: CHANGE TO PI/2!
+		;	LDX #R2
+		;	JSR ZeroReg
+		;	LDX #R3
+		;	JSR ZeroReg
+		;	LDA #$10
+		;	STA R3+FIRST_DIGIT
+		;	
+		;	LDA #CORDIC_NO_CLEANUP
+		;	RTS
+		;	
+		;.not_one:
+		
+		;;x > 1 - range error
+		;LDA R_ans+EXP_HI
+		;AND #SIGN_BIT
+		;BNE .range_good
+		;	TODO: test!
+		;	LDA #ERROR_RANGE
+		;	STA ret_val
+		;	
+		;	LDX stack_X
+		;	CLD
+		;	
+		;	PLA		;drop return to word
+		;	PLA
+		;	
+		;	RTS
+		;.range_good:
+		
+		;if exp 0:
+		;	x=0.01, y=0.0999
+		;if exp neg:
+		;	if too small, return 0
+		;	x=0.01, y=0.0000999
+		;if exp pos:
+		;	if too large, return pi/2
+		;	x=0.00001, y=0.0999
+		
+		
+		LDX stack_X
+		
+		DEX	;X and Y have one more byte of precision
+		
+		LDY #0
+		LDA #CORDIC_WIDTH
+		STA CORDIC_loop_inner
+		.loop:
+		
+			;X(R2)=1
+			LDA #0
+			STA R2,Y
+			
+			;Y(R0)=arg for shifting then R3
+			TODO: wait, why TYPE_SIZE? need OBJ_TYPE then if have this?
+			LDA TYPE_SIZE,X
+			STA R0,Y
+			
+			;Z(R4)=0
+			LDA #0
+			STA R4,Y
+			
+			INY
+			INX
+			DEC CORDIC_loop_inner
+			BNE .loop
+			
+		LDA #$10
+		STA R2+FIRST_DIGIT
+			
+		;calculate exp difference (seems hard to abstract)
+		;exp is 0 or negative
+		TODO: can abstract with above CORDIC_Trig
+		TODO: test!
+		LDA 2,X				;high byte of exponent
+		AND #$F
+		STA math_hi	
+		;LDA 1,X				;low byte of exponent
+		;STA math_lo
+		;ORA math_hi
+		ORA 1,X				;low byte of exponent
+		BEQ .no_shift
+			
+			TODO: test
+			;exponent <= -100, return asin(0)=0
+			LDA math_hi
+			BEQ .no_ret_zero
+				.ret_zero:
+				CLD
+				LDX stack_X
+				JMP .return_0
+			.no_ret_zero:
+			
+			TODO: test
+			;exponent <= -12,  return sin(0)=0
+			LDA 1,X
+			CMP #$12
+			BCS .ret_zero
+			
+			TODO: test
+			;shift arg
+			LDY #0
+			STY R0
+			TAY
+			LDA hex_table,Y
+			LDX #0
+			JSR CORDIC_ShiftR0
+			
+		.no_shift:
+		
+		;Y(R3)=arg
+		LDA #R0-1
+		LDY #R3-1
+		JSR CopyRegs
+		
+		LDA #CORDIC_CMP_Y|CORDIC_ADD_Y|CORDIC_ATAN
+		JMP BCD_CORDIC
+		
+	END
+	
+	FUNC CORDIC_AsinAcos
+		
+		JSR CORDIC_Atrig1
 		
 		TODO: check
 		;asin(0)=0, acos(0)=pi/2
-		LDA DEC_COUNT/2,X
+		LDA FIRST_DIGIT,X
 		BNE .not_zero
 						
 			TODO: CHANGE TO PI/2

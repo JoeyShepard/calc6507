@@ -210,9 +210,11 @@
 		LDA #0
 		STA address+1
 		
+		TODO: stack usage in status? battery? takes up more room though
+		
 		TODO: shrink
 		CALL LCD_clrscr
-		LDA #(CHAR_SCREEN_WIDTH-12)*CHAR_WIDTH+6	;len("[$xxxx FREE]"=12, 4=align to right side
+		LDA #CHAR_WIDTH*8
 		STA screen_ptr
 		CALL LCD_char, #'['
 		CALL DrawHex, address
@@ -366,21 +368,23 @@
 		STA screen_ptr
 		LDA #ERROR_Y
 		STA screen_ptr+1
-		CALL LCD_print, "bbbbbbbbbbbbbb"
+		MOV.B #$FF,font_inverted
+		CALL LCD_print, "               "
 		LDA #ERROR_X
 		STA screen_ptr
 		LDA #ERROR_Y+CHAR_HEIGHT
 		STA screen_ptr+1
 		MOV.B #$FF,font_inverted
+		CALL LCD_char,#' '
 		CALL LCD_print, msg
 		LDA #ERROR_X
 		STA screen_ptr
 		LDA #ERROR_Y+CHAR_HEIGHT*2
 		STA screen_ptr+1
-		CALL LCD_print, "bbbbbbbbbbbbbb"
+		CALL LCD_print, "           [OK]"
 		MOV.B #0,font_inverted
 		
-		halt
+		;halt
 		
 		.loop:
 			CALL ReadKey
