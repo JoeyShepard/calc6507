@@ -1210,6 +1210,7 @@
 			FCB IMMED|COMPILE				;Flags
 			
 			TODO: test DO without loop and mismatch like DO THEN
+			TODO: only DO values on aux stack? test with other things inside loop	
 			
 			LDA #AUX_TYPE_DO
 			JSR AuxPushShort
@@ -2197,7 +2198,8 @@
 			
 	WORD_TAN:
 		FCB 3,"TAN"				;Name
-		FDB WORD_ASIN			;Next word
+		;FDB WORD_ASIN			;Next word
+		FDB WORD_DEG			;Next word
 		FCB TOKEN_TAN			;ID - 134
 		CODE_TAN:
 			FCB OBJ_PRIMITIVE				;Type
@@ -2245,7 +2247,8 @@
 			JSR BCD_Div
 			TODO: check for div by 0 error?
 			JMP CORDIC_Push
-			
+	
+	TODO: re-enable by setting next word in header of TAN
 	WORD_ASIN:
 		FCB 4,"ASIN"			;Name
 		FDB WORD_ACOS			;Next word

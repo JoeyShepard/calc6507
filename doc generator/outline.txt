@@ -1,0 +1,14 @@
+known bugs
+-recursion
+-DO/LOOP
+
+pages:
+-intro
+--e and sto
+-types
+-word list
+-bugs/limitations
+-planned features
+--atrig, ln, graph, mem/words, neg
+-errors and explanations
+-vars/words

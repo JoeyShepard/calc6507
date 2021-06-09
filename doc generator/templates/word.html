@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" href="words.css">
+	</head>
+	<body>
+		<span class="word_show">
+			%word_show
+		</span>
+		<div class="word_comment">
+			%word_comment
+		</div>
+		
+		%word_type_begin
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Accepted types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					%word_type_args
+				</div>
+				<div style="overflow:hidden;">
+					%word_types
+				</div>
+				%word_type_note
+			</div>
+		</div>
+		%word_type_end
+		
+		<div class="word_description">
+			%word_description
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			%word_example
+		</div>
+		
+		<br><br>
+		
+		<div class="word_see_also">
+			Related words:
+			%word_see_also
+		</div>
+	</body>
+</html>

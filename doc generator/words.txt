@@ -1,0 +1,100 @@
+#SYMBOL foo
+#	foo is a global symbol
+#	it's separated by br not p
+#END
+
+#BLOCK bar
+#	bar is a global symbol
+#	each line is its own paragraph
+#END
+
+SYMBOL same_type
+	a and b must be of the same type
+END
+
+#PIC global_pic global.png
+
+WORD DUP
+	
+	PIC 1 DUP_1.png Before
+	PIC 2 DUP_2.png After
+	
+	COMMENT
+		( a -- a a )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Duplicates the item on the top of the stack.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		Other related words on one line
+	END
+END
+
+
+#WORD SWAP
+#WORD DROP
+#WORD OVER
+#WORD ROT
+#WORD MIN_ROT
+#WORD CLEAR
+#WORD ADD
+#WORD SUB
+#WORD MULT
+#WORD DIV
+#WORD TICK
+#WORD EXEC
+#WORD STORE
+#WORD FETCH
+#WORD CSTORE
+#WORD CFETCH
+#WORD COLON
+#WORD SEMI
+#WORD HALT
+#WORD VAR
+#WORD STO
+#WORD FREE
+#WORD EXIT
+#WORD QUIT
+#WORD DO
+#WORD LOOP
+#WORD EQUAL
+#WORD GT
+#WORD LT
+#WORD NEQ
+#WORD I
+#WORD J
+#WORD K
+#WORD BEGIN
+#WORD AGAIN
+#WORD UNTIL
+#WORD MAX
+#WORD MIN
+#WORD AND
+#WORD OR
+#WORD XOR
+#WORD NOT
+#WORD LEAVE
+#WORD IF
+#WORD THEN
+#WORD ELSE
+#WORD LSHIFT
+#WORD RSHIFT
+#WORD ABS
+#WORD PI
+#WORD SIN
+#WORD COS
+#WORD TAN
+#WORD DEG
