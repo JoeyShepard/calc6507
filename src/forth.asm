@@ -1120,6 +1120,7 @@
 		SBC new_dict_ptr+1
 		
 		BCS .mem_good
+			TODO: adjust dict ptr?
 			LDA #ERROR_OUT_OF_MEM
 			STA ret_val
 		.mem_good:

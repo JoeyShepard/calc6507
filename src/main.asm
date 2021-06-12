@@ -195,6 +195,7 @@ LOCALS_END set		$1F
 		CALL InitForth
 		
 		.input_loop:
+			
 			;Colon definitions must fit on one line
 			LDA mode
 			CMP #MODE_IMMEDIATE

@@ -11,6 +11,10 @@ STATE_EXAMPLE=5
 STATE_SEE_ALSO=6
 STATE_SYMBOL=7
 STATE_BLOCK=8
+STATE_LIST=9
+
+PIC_PATH="../images/resized/"
+HTML_PATH="./generated/"
 
 TYPE_FLOAT='<span class="word_type_generic {}">float</span>'
 TYPE_RAW_HEX='<span class="word_type_generic {}">raw hex</span>'
@@ -19,7 +23,8 @@ TYPE_STRING='<span class="word_type_generic {}">string</span>'
 TYPE_ARG='<span class="word_type_arg">{}</span>'
 TYPE_NOTE='<span class="word_type_note">{}</span>'
 
-PIC_PATH="../images/resized/"
+SEE_ALSO_LINK='<a href="'+HTML_PATH+'{}.html">{}</a>'
+
 
 #Functions
 #=========
@@ -36,8 +41,13 @@ def len_check(line,length,line_num):
 
 def gen_pages():
 
+    #Initialize variables
     running=True
     reset_word=True
+    output_html=False
+    
+    processed_words={}
+    expected_words=[]
 
     state=STATE_GLOBAL
 
@@ -47,11 +57,14 @@ def gen_pages():
     os.system("del generated\\* /Q")
     os.system("copy templates\\words.css generated\\words.css")
 
+    #Regenerate image files
+    os.system("images\\resize.bat")
+
     #Read in word HTML template
-    f=open("templates/word.html")
+    f=open("templates/word_template.html")
     template_word=f.readlines()
     f.close()
-
+            
     #Process markup file
     f=open("words.txt")
     file_line_num=0
@@ -74,6 +87,7 @@ def gen_pages():
             word_type_name_list=""
             word_type_note=""
             word_type_none=False
+            word_see_also_none=True
             symbol_name=""
             symbol_content=""
             local_objs={}
@@ -84,6 +98,7 @@ def gen_pages():
         file_line=f.readline()
         file_line_num+=1
         if not file_line:
+            output_html=True
             running=False
         line=[]
 
@@ -110,6 +125,9 @@ def gen_pages():
         if state==STATE_GLOBAL:
             if line[0]=="WORD":
                 running=len_check(line,2,file_line_num)
+                if line[1] not in expected_words:
+                    print_error("Word not in expected list:"+line[1]+".",file_line_num)
+                    running=False
                 if running:
                     word_name=line[1]
                     word_show=word_name
@@ -131,9 +149,11 @@ def gen_pages():
                 if running:
                     temp_obj='<img src="'+PIC_PATH+line[2]+'">'
                     if len(line)>3:
-                        temp_obj="<figure>"+temp_obj+'<figcaption class="word_img_caption">'
+                        temp_obj='<figure class="word_img_figure">'+temp_obj+'<figcaption class="word_img_caption">'
                         temp_obj+=" ".join(line[3:])+"</figcaption></figure>"
                     global_objs[line[1]]=temp_obj      
+            elif line[0]=="LIST":
+                state=STATE_LIST   
             else:
                 print_error("Unknown symbol in global scope: "+line[0]+".",file_line_num)
                 running=False
@@ -162,39 +182,48 @@ def gen_pages():
                 state=STATE_SEE_ALSO
             elif line[0]=="END":
 
-                gen_file=open("./generated/"+word_name+".html","wt")
+                gen_html=""
                 skip_line=False
                 for template_line in template_word:
-
+                    
                     if skip_line:
                         if template_line.strip()=="%word_type_end":
                             skip_line=False
+                        elif template_line.strip()=="%word_see_also_end":
+                            skip_line=False
                     else:                              
                         if template_line.strip()=="%word_show":
-                            gen_file.write("\t\t\t"+word_show+"\n")
+                            gen_html+="\t\t\t"+word_show+"\n"
                         elif template_line.strip()=="%word_comment":
-                            gen_file.write("\t\t\t"+word_comment+"\n")
+                            gen_html+=f"\t\t\t"+word_comment+"\n"
                         elif template_line.strip()=="%word_type_begin":
                             if word_type_none:
                                 skip_line=True
                         elif template_line.strip()=="%word_type_args":
-                            gen_file.write(word_type_name_list+"\n")
+                            gen_html+=word_type_name_list+"\n"
                         elif template_line.strip()=="%word_types":
-                            gen_file.write(word_types+"\n")
+                            gen_html+=word_types+"\n"
                         elif template_line.strip()=="%word_type_end":
                             #signal to stop filtering though not filtering if reach here
                             pass
                         elif template_line.strip()=="%word_type_note":
-                            gen_file.write(word_type_note+"\n")          
+                            gen_html+=word_type_note+"\n"
                         elif template_line.strip()=="%word_description":
-                            gen_file.write(word_description+"\n")
+                            gen_html+=word_description+"\n"
                         elif template_line.strip()=="%word_example":
-                            gen_file.write(word_example+"\n")
+                            gen_html+=word_example+"\n"
+                        elif template_line.strip()=="%word_see_also_begin":
+                            if word_see_also_none:
+                                skip_line=True
                         elif template_line.strip()=="%word_see_also":
-                            gen_file.write("\t\t\t"+word_see_also+"\n")
+                            gen_html+=word_see_also+"\n"
+                        elif template_line.strip()=="%word_see_also_end":
+                            #signal to stop filtering though not filtering if reach here
+                            pass
                         else:
-                            gen_file.write(template_line)
-                gen_file.close()
+                            gen_html+=template_line
+                            
+                processed_words[word_name]=gen_html
                 
                 reset_word=True
                 
@@ -251,7 +280,7 @@ def gen_pages():
                 if running:
                     word_type_note="\t\t\t\t"+TYPE_ARG.format(" ".join(line[1:]))
             else:
-                print_error("Unknown type: "+line[0],file_line_num)
+                print_error("Unknown type: "+line[0]+".",file_line_num)
                 running=False
         elif state==STATE_DESCRIPTION:
             if line[0]=="END":
@@ -271,9 +300,17 @@ def gen_pages():
             if line[0]=="END":
                 state=STATE_LOCAL
             else:
-                if word_see_also!="":
-                    word_see_also+="\n"
-                word_see_also+=" ".join(line)+" "
+                if line[0] not in expected_words:
+                    print_error("Word not found in expected words: "+line[0]+".",file_line_num)
+                    running=False
+                if running:
+                    if word_see_also!="":
+                        word_see_also+="\n"
+                    if len(line)==1:
+                        word_see_also+="\t\t\t"+SEE_ALSO_LINK.format(line[0],line[0])
+                    else:
+                        word_see_also+="\t\t\t"+SEE_ALSO_LINK.format(line[0],line[1])
+                    word_see_also_none=False
         elif state==STATE_SYMBOL:
             if line[0]=="END":
                 local_objs[symbol_name]=symbol_content
@@ -290,8 +327,65 @@ def gen_pages():
                 if symbol_content!="":
                     symbol_content+="\n\t\t\t"
                 symbol_content+="<p>"+" ".join(line)+"</p>"
+        elif state==STATE_LIST:
+            if line[0]=="END":
+                state=STATE_GLOBAL
+            elif line[0] in expected_words:
+                print_error("Word found twice in list of expected words: "+line[0]+".", file_line_num)
+                running=False
+            else:
+                expected_words+=[line[0]]
                 
     f.close()
+
+    #Output generated html to files if finished without error
+    if output_html:
+
+        #Read in body HTML template
+        template_body_head=""
+        template_body_tail=""
+        f=open("templates/body_template.html")
+        processing_head=True
+        for line in f:
+            if processing_head:
+                if line.strip()=="%word":
+                    processing_head=False
+                else:
+                    template_body_head+=line
+            else:
+                template_body_tail+=line
+        
+        #Check for missing definitions before outputting html
+        missing_words=[]
+        for word in expected_words:
+            if word not in processed_words.keys():
+                missing_words+=[word]
+                
+        if missing_words!=[]:
+            print("\nError: Definition missing for "+str(len(missing_words))+" of "+str(len(expected_words))+" expected words: ")
+            print(*missing_words,sep=", ")
+
+        #Output html to individual files and to one collected file
+        combined_file=open(HTML_PATH+"ALL.html","wt")
+        combined_file.write(template_body_head)
+        for k,v in processed_words.items():
+            gen_file=open(HTML_PATH+k+".html","wt")
+            gen_file.write(template_body_head)
+            gen_file.write(v)
+            gen_file.write(template_body_tail)
+            gen_file.close()
+
+            combined_file.write(f"\t\t<!--{k}-->\n")
+            combined_file.write(v)
+            combined_file.write("<br><br><br>\n\n")
+
+        combined_file.write(template_body_tail)
+        combined_file.close()
+        
+        
+        
+
+    print()
 
 #Main
 #====

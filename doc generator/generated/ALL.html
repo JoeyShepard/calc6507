@@ -1,0 +1,646 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" href="words.css">
+	</head>
+	<body>
+		
+		<!--DUP-->
+		<span class="word_show">
+			DUP
+		</span>
+		<div class="word_comment">
+			( a -- a a )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Duplicates the first item on the stack.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/DUP_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DUP_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/OVER.html">OVER</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--DROP-->
+		<span class="word_show">
+			DROP
+		</span>
+		<div class="word_comment">
+			( a -- )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Removes the first item on the stack.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/DROP_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DROP_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/CLEAR.html">CLEAR</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--OVER-->
+		<span class="word_show">
+			OVER
+		</span>
+		<div class="word_comment">
+			( a b -- a b a )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Duplicates the second item on the stack.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/OVER_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/OVER_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/DUP.html">DUP</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--ROT-->
+		<span class="word_show">
+			ROT
+		</span>
+		<div class="word_comment">
+			( a b c -- b c a )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Rotates first three stack items so that the third item is first on the stack.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/ROT_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/ROT_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/MIN_ROT.html">-ROT</a>
+			<a href="./generated/SWAP.html">SWAP</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--MIN_ROT-->
+		<span class="word_show">
+			-ROT
+		</span>
+		<div class="word_comment">
+			( a b c -- c a b )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Rotates first three stack items so that the first item is third on the stack.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/MIN_ROT_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/MIN_ROT_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/ROT.html">ROT</a>
+			<a href="./generated/SWAP.html">SWAP</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--CLEAR-->
+		<span class="word_show">
+			CLEAR
+		</span>
+		<div class="word_comment">
+			( a -- )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+				<span class="word_type_arg">Works on any number of stack items.</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Removes all items from the stack.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/CLEAR_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/CLEAR_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/DROP.html">DROP</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--ADD-->
+		<span class="word_show">
+			+
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">Float can be added to float, and raw hex to raw hex or smart hex, but two smart hex can't be added.</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Adds the top two stack items together.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/ADD_3.png"><figcaption class="word_img_caption">Before adding floats</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/ADD_4.png"><figcaption class="word_img_caption">After adding floats</figcaption></figure> <br><br>
+			<figure class="word_img_figure"><img src="../images/resized/ADD_1.png"><figcaption class="word_img_caption">Before adding hex</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/ADD_2.png"><figcaption class="word_img_caption">After adding hex</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/SUB.html">-</a>
+			<a href="./generated/MULT.html">*</a>
+			<a href="./generated/DIV.html">/</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--SUB-->
+		<span class="word_show">
+			-
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">Float can be subtracted from float, and raw hex from raw hex or smart hex, but smart hex can't be subtracted from raw hex.</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Subtracts the first stack item from the second one.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/SUB_3.png"><figcaption class="word_img_caption">Before subtracting floats</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/SUB_4.png"><figcaption class="word_img_caption">After subtracting floats</figcaption></figure> <br><br>
+			<figure class="word_img_figure"><img src="../images/resized/SUB_1.png"><figcaption class="word_img_caption">Before subtracting hex</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/SUB_2.png"><figcaption class="word_img_caption">After subtracting hex</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/ADD.html">+</a>
+			<a href="./generated/MULT.html">*</a>
+			<a href="./generated/DIV.html">/</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--MULT-->
+		<span class="word_show">
+			*
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">Float can be multipled with float, and raw hex with raw hex.</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Multiplies the top two numbers on the stack.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/MULT_3.png"><figcaption class="word_img_caption">Before multiplying floats</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/MULT_4.png"><figcaption class="word_img_caption">After multiplying floats</figcaption></figure> <br><br>
+			<figure class="word_img_figure"><img src="../images/resized/MULT_1.png"><figcaption class="word_img_caption">Before multiplying hex</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/MULT_2.png"><figcaption class="word_img_caption">After multiplying hex</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/ADD.html">+</a>
+			<a href="./generated/SUB.html">-</a>
+			<a href="./generated/DIV.html">/</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--DIV-->
+		<span class="word_show">
+			/
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">Float can be divided by float, or raw hex by raw hex.</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Divides the second stack item by the first one.</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/DIV_3.png"><figcaption class="word_img_caption">Before dividing floats</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DIV_4.png"><figcaption class="word_img_caption">After dividing floats</figcaption></figure> <br><br>
+			<figure class="word_img_figure"><img src="../images/resized/DIV_1.png"><figcaption class="word_img_caption">Before dividing hex</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DIV_2.png"><figcaption class="word_img_caption">After dividing hex</figcaption></figure> <br><br>
+			<figure class="word_img_figure"><img src="../images/resized/DIV_5.png"><figcaption class="word_img_caption">Dividing by zero results in an error.</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/ADD.html">+</a>
+			<a href="./generated/SUB.html">-</a>
+			<a href="./generated/MULT.html">*</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--TICK-->
+		<span class="word_show">
+			'
+		</span>
+		<div class="word_comment">
+			( -- a )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Fetches the address of the following word, which can be built-in (ie primitive) or user-defined (ie secondary).</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/TICK_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/TICK_2.png"><figcaption class="word_img_caption">After - address of DUP</figcaption></figure> <br><br>
+			<figure class="word_img_figure"><img src="../images/resized/TICK_3.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/TICK_4.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/EXEC.html">EXEC</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--EXEC-->
+		<span class="word_show">
+			EXEC
+		</span>
+		<div class="word_comment">
+			( a -- )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">Executes the word at the address on top of the stack. The word an be built-in (ie primitve) or user-defined (ie secondary).</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/TICK_3.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/TICK_4.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/TICK.html">'</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		
+	</body>
+</html>

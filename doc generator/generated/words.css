@@ -58,17 +58,18 @@
 	
 	.word_type_disabled {
 		background-color: #C0C0C0;
-		color: #808080;
+		/*color: #808080;*/
+		color: #404040;
 	}
 	
 	.word_type_float {
 		background-color: #C0FFC0;
-		color: #400040;
+		color: #004000;
 	}
 	
 	.word_type_raw_hex {
 		background-color: #C0C0FF;
-		color: #400040;
+		color: #000040;
 	}
 	
 	.word_type_smart_hex {
@@ -78,7 +79,7 @@
 	
 	.word_type_string {
 		background-color: #FFC0C0;
-		color: #400040;
+		color: #400000;
 	}
 	
 	.word_type_note {
@@ -86,13 +87,11 @@
 	}
 	
 	.word_description {
-		/* background-color: #C0C0FF; */
 		/* margin-top: 5px; */
-		
 	}
 	
 	.word_description_p {
-		/* margin-top: 0px; */
+		margin-top: 5px;
 	}
 	
 	.word_example {
@@ -102,8 +101,6 @@
 	}
 	
 	.word_see_also {
-		background-color: #C0C0FF;
-		color: #400040;
 		display: inline-block;
 	}
 	

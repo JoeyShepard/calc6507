@@ -8,11 +8,97 @@
 #	each line is its own paragraph
 #END
 
-SYMBOL same_type
-	a and b must be of the same type
+SYMBOL compile_only
+	Compile-only word
 END
 
-#PIC global_pic global.png
+PIC EXEC/TICK_1 TICK_3.png Before
+PIC EXEC/TICK_2 TICK_4.png After
+
+#List of all words. Checks against this that every word is defined
+LIST
+	DUP
+	SWAP
+	DROP
+	OVER
+	ROT
+	MIN_ROT
+	CLEAR
+	ADD
+	SUB
+	MULT
+	DIV
+	TICK
+	EXEC
+	STORE
+	FETCH
+	CSTORE
+	CFETCH
+	COLON
+	SEMI
+	HALT
+	VAR
+	STO
+	FREE
+	EXIT
+	QUIT
+	DO
+	LOOP
+	EQUAL
+	GT
+	LT
+	NEQ
+	I
+	J
+	K
+	BEGIN
+	AGAIN
+	UNTIL
+	MAX
+	MIN
+	AND
+	OR
+	XOR
+	NOT
+	LEAVE
+	IF
+	THEN
+	ELSE
+	LSHIFT
+	RSHIFT
+	ABS
+	PI
+	SIN
+	COS
+	TAN
+	DEG
+END
+
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
 
 WORD DUP
 	
@@ -31,7 +117,7 @@ WORD DUP
 	END
 
 	DESCRIPTION
-		Duplicates the item on the top of the stack.
+		Duplicates the first item on the stack.
 	END
 
 	EXAMPLE
@@ -39,62 +125,1693 @@ WORD DUP
 	END
 
 	SEE ALSO
-		Other related words on one line
+		OVER
 	END
+	
 END
 
+WORD DROP
 
-#WORD SWAP
-#WORD DROP
-#WORD OVER
-#WORD ROT
-#WORD MIN_ROT
-#WORD CLEAR
-#WORD ADD
-#WORD SUB
-#WORD MULT
-#WORD DIV
-#WORD TICK
-#WORD EXEC
-#WORD STORE
+	PIC 1 DROP_1.png Before
+	PIC 2 DROP_2.png After
+	
+	COMMENT
+		( a -- )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Removes the first item on the stack.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		CLEAR
+	END
+
+END
+
+WORD OVER
+
+	PIC 1 OVER_1.png Before
+	PIC 2 OVER_2.png After
+	
+	COMMENT
+		( a b -- a b a )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		ARG b
+		ANY
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Duplicates the second item on the stack.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		DUP
+	END
+
+END
+
+WORD ROT
+
+	PIC 1 ROT_1.png Before
+	PIC 2 ROT_2.png After
+	
+	COMMENT
+		( a b c -- b c a )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		ARG b
+		ANY
+		
+		ARG c
+		ANY
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Rotates first three stack items so that the third item is first on the stack.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		MIN_ROT -ROT
+		SWAP
+	END
+
+END
+
+WORD MIN_ROT
+
+	SHOW -ROT
+
+	PIC 1 MIN_ROT_1.png Before
+	PIC 2 MIN_ROT_2.png After
+	
+	COMMENT
+		( a b c -- c a b )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+
+		ARG b
+		ANY
+
+		ARG c
+		ANY
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Rotates first three stack items so that the first item is third on the stack.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		ROT
+		SWAP
+	END
+
+END
+
+WORD CLEAR
+
+	PIC 1 CLEAR_1.png Before
+	PIC 2 CLEAR_2.png After
+	
+	COMMENT
+		( a -- )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		NOTE Works on any number of stack items.
+	END
+
+	DESCRIPTION
+		Removes all items from the stack.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		DROP
+	END
+
+END
+
+WORD ADD
+
+	SHOW +
+
+	PIC 1 ADD_1.png Before adding hex
+	PIC 2 ADD_2.png After adding hex
+	PIC 3 ADD_3.png Before adding floats
+	PIC 4 ADD_4.png After adding floats
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG b
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG c
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		NOTE Float can be added to float, and raw hex to raw hex or smart hex, but two smart hex can't be added.
+	END
+
+	DESCRIPTION
+		Adds the first two stack items together.
+	END
+
+	EXAMPLE
+		%3 %4 <br>
+		%1 %2
+	END
+
+	SEE ALSO
+		SUB -
+		MULT *
+		DIV /
+	END
+
+END
+
+WORD SUB
+
+	SHOW -
+
+	PIC 1 SUB_1.png Before subtracting hex
+	PIC 2 SUB_2.png After subtracting hex
+	PIC 3 SUB_3.png Before subtracting floats
+	PIC 4 SUB_4.png After subtracting floats
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG b
+		FLOAT
+		RAW_HEX
+		
+		ARG c
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		NOTE Float can be subtracted from float, and raw hex from raw hex or smart hex, but smart hex can't be subtracted from raw hex.
+	END
+
+	DESCRIPTION
+		Subtracts the first stack item from the second one.
+	END
+
+	EXAMPLE
+		%3 %4 <br>
+		%1 %2
+	END
+
+	SEE ALSO
+		ADD +
+		MULT *
+		DIV /
+	END
+
+END
+
+WORD MULT
+
+	SHOW *
+
+	PIC 1 MULT_1.png Before multiplying hex
+	PIC 2 MULT_2.png After multiplying hex
+	PIC 3 MULT_3.png Before multiplying floats
+	PIC 4 MULT_4.png After multiplying floats
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		
+		ARG b
+		FLOAT
+		RAW_HEX
+		
+		ARG c
+		FLOAT
+		RAW_HEX
+		
+		NOTE Float can be multipled with float, and raw hex with raw hex.
+	END
+
+	DESCRIPTION
+		Multiplies the first two numbers on the stack.
+	END
+
+	EXAMPLE
+		%3 %4 <br>
+		%1 %2
+	END
+
+	SEE ALSO
+		ADD +
+		SUB -
+		DIV /
+	END
+
+END
+
+WORD DIV
+
+	SHOW /
+
+	PIC 1 DIV_1.png Before dividing hex
+	PIC 2 DIV_2.png After dividing hex
+	PIC 3 DIV_3.png Before dividing floats
+	PIC 4 DIV_4.png After dividing floats
+	PIC 5 DIV_5.png Dividing by zero results in an error.
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		
+		ARG b
+		FLOAT
+		RAW_HEX
+		
+		ARG c
+		FLOAT
+		RAW_HEX
+		
+		NOTE Float can be divided by float, or raw hex by raw hex.
+	END
+
+	DESCRIPTION
+		Divides the second stack item by the first one.
+	END
+
+	EXAMPLE
+		%3 %4 <br>
+		%1 %2 <br>
+		%5
+	END
+
+	SEE ALSO
+		ADD +
+		SUB -
+		MULT *
+	END
+
+END
+
+WORD TICK
+
+	SHOW '
+
+	PIC 1 TICK_1.png Before
+	PIC 2 TICK_2.png After - address of DUP
+	
+	COMMENT
+		( -- a )
+	END
+	
+	TYPES
+		ARG a
+		SMART_HEX
+	END
+
+	DESCRIPTION
+		Fetches the address of the following word, which can be built-in (ie primitive) or user-defined (ie secondary). 
+	END
+
+	EXAMPLE
+		%1 %2 <br>
+		%EXEC/TICK_1 %EXEC/TICK_2
+	END
+
+	SEE ALSO
+		EXEC
+	END
+
+END
+
+WORD EXEC
+	
+	COMMENT
+		( a -- )
+	END
+	
+	TYPES
+		ARG a
+		RAW_HEX
+		SMART_HEX
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Executes the word at the address on top of the stack. The word an be built-in (ie primitve) or user-defined (ie secondary).
+	END
+
+	EXAMPLE
+		%EXEC/TICK_1 %EXEC/TICK_2
+	END
+
+	SEE ALSO
+		TICK '
+	END
+
+END
+
+WORD STORE
+
+	SHOW !
+
+	PIC 1 STORE_1.png Before
+	PIC 2 STORE_2.png After
+	
+	COMMENT
+		( a b -- )
+	END
+	
+	TYPES
+		ARG a
+		RAW_HEX
+		SMART_HEX
+		
+		ARG b
+		RAW_HEX
+		SMART_HEX
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Stores the second item at the address pointed to by 
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		
+	END
+
+END
+
 #WORD FETCH
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD CSTORE
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD CFETCH
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD COLON
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD SEMI
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD HALT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD VAR
-#WORD STO
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
+WORD STO
+
+	PIC 1 STO_1.png Before
+	PIC 2 STO_2.png After
+	
+	COMMENT
+		( a -- )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Stores the first item on the stack in the following variable. If the variable doesn't exist, it's created.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		
+	END
+
+END
+
 #WORD FREE
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD EXIT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD QUIT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD DO
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD LOOP
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD EQUAL
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD GT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD LT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD NEQ
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD I
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD J
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD K
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD BEGIN
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD AGAIN
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD UNTIL
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD MAX
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD MIN
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD AND
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD OR
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD XOR
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD NOT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD LEAVE
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD IF
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD THEN
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD ELSE
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD LSHIFT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD RSHIFT
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD ABS
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD PI
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD SIN
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD COS
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD TAN
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END
+
 #WORD DEG
+#
+#	PIC 1 _1.png Before
+#	PIC 2 _2.png After
+#	
+#	COMMENT
+#		( -- )
+#	END
+#	
+#	TYPES
+#		ARG a
+#		ANY
+#		
+#		#NOTE
+#	END
+#
+#	DESCRIPTION
+#		
+#	END
+#
+#	EXAMPLE
+#		%1 %2
+#	END
+#
+#	SEE ALSO
+#		
+#	END
+#
+#END

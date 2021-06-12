@@ -8,10 +8,10 @@
 	<body>
 		
 		<span class="word_show">
-			DUP
+			OVER
 		</span>
 		<div class="word_comment">
-			( a -- a a )
+			( a b -- a b a )
 		</div>
 		
 		<div class="word_type_container">			
@@ -20,9 +20,15 @@
 			</div>
 			<div class="word_type_container" style="overflow:hidden;">
 				<div style="float:left;">
-					<span class="word_type_arg">a</span>
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
 				</div>
 				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span><br>
+
 -					<span class="word_type_generic word_type_float">float</span>
 					<span class="word_type_generic word_type_raw_hex">raw hex</span>
 					<span class="word_type_generic word_type_smart_hex">smart hex</span>
@@ -33,12 +39,12 @@
 		</div>
 		
 		<div class="word_description">
-			<p class="word_description_p">Duplicates the first item on the stack.</p>
+			<p class="word_description_p">Duplicates the second item on the stack.</p>
 		</div>
 		
 		<div class="word_example">
 			Example:<br>
-			<figure class="word_img_figure"><img src="../images/resized/DUP_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DUP_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+			<figure class="word_img_figure"><img src="../images/resized/OVER_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/OVER_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
 		</div>
 		
 		<br>
@@ -46,7 +52,7 @@
 		<br>
 		<div class="word_see_also">
 			Related words:
-			<a href="./generated/OVER.html">OVER</a>
+			<a href="./generated/DUP.html">DUP</a>
 		</div>
 		<br>
 				
