@@ -101,6 +101,7 @@ LOCALS_END set		$1F
 	;Forth
 	WORD dict_ptr
 	WORD new_dict_ptr
+	TODO: has to be in zero page?
 	WORD dict_save
 	WORD exec_ptr
 	TODO: share with ret_address?
@@ -196,6 +197,8 @@ LOCALS_END set		$1F
 		
 		.input_loop:
 			
+			TODO: double error if unknown word AND ; left off definition?
+			
 			;Colon definitions must fit on one line
 			LDA mode
 			CMP #MODE_IMMEDIATE
@@ -205,7 +208,9 @@ LOCALS_END set		$1F
 				LDA #ERROR_INPUT
 				JMP .error_sub
 			.mode_good:
-						
+			
+			halt
+			
 			;Reset dict_ptr in case anything went wrong below
 			MOV.W dict_save,dict_ptr
 			

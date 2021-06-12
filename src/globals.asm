@@ -1,5 +1,8 @@
 ;Global variables in RAM
 ;=======================
+
+	;Address set in main.asm after stack which doesnt use all 256 bytes
+
 	TODO: move these to zp if room
 	global_error:		DFS 1
 	
@@ -29,6 +32,7 @@
 	;extra RAM in RIOT - not preserved by backup battery
 	TODO: what else will fit in RIOT RAM?
 	
+	TODO: if stored here, must exit thread to sleep
 	;Temporary Forth thread
 	temp_thread:		DFS 4
 	

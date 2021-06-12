@@ -364,7 +364,7 @@ def gen_pages():
         if missing_words!=[]:
             print("\nError: Definition missing for "+str(len(missing_words))+" of "+str(len(expected_words))+" expected words: ")
             print(*missing_words,sep=", ")
-
+    
         #Output html to individual files and to one collected file
         combined_file=open(HTML_PATH+"ALL.html","wt")
         combined_file.write(template_body_head)
