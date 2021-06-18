@@ -294,7 +294,7 @@ def gen_pages():
                 state=STATE_LOCAL
             else:
                 if word_example!="":
-                    word_example+="<br>\n"
+                    word_example+="<br><br>\n"
                 word_example+="\t\t\t"+" ".join(line)
         elif state==STATE_SEE_ALSO:
             if line[0]=="END":

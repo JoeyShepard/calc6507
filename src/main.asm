@@ -209,8 +209,6 @@ LOCALS_END set		$1F
 				JMP .error_sub
 			.mode_good:
 			
-			halt
-			
 			;Reset dict_ptr in case anything went wrong below
 			MOV.W dict_save,dict_ptr
 			

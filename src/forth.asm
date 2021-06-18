@@ -343,13 +343,13 @@
 			TODO: remove
 			STA DEBUG_HEX
 			
-			START HERE: : M X
-			-starts writing M at dict_ptr (0x178). Errors but then finds M after failed define
-			-Double Input Error since doesnt find X and then checks separately for ending line in compile mode
-			-Solution is to set very first byte to 0 since it is length then next two to 0 to signify end of dictionary
-			-Do so in main loop when copy dict_save?
+			;START HERE: : M X
+			;-starts writing M at dict_ptr (0x178). Errors but then finds M after failed define
+			;-Double Input Error since doesnt find X and then checks separately for ending line in compile mode
+			;-Solution is to set very first byte to 0 since it is length then next two to 0 to signify end of dictionary
+			;-Do so in main loop when copy dict_save?
 			
-			halt
+			;halt
 			
 			ORA ret_address+1
 			BNE .loop

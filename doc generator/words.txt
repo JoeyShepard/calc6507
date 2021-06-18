@@ -336,7 +336,7 @@ WORD ADD
 	END
 
 	EXAMPLE
-		%3 %4 <br>
+		%3 %4
 		%1 %2
 	END
 
@@ -384,7 +384,7 @@ WORD SUB
 	END
 
 	EXAMPLE
-		%3 %4 <br>
+		%3 %4
 		%1 %2
 	END
 
@@ -430,7 +430,7 @@ WORD MULT
 	END
 
 	EXAMPLE
-		%3 %4 <br>
+		%3 %4
 		%1 %2
 	END
 
@@ -477,8 +477,8 @@ WORD DIV
 	END
 
 	EXAMPLE
-		%3 %4 <br>
-		%1 %2 <br>
+		%3 %4
+		%1 %2
 		%5
 	END
 
@@ -511,7 +511,7 @@ WORD TICK
 	END
 
 	EXAMPLE
-		%1 %2 <br>
+		%1 %2
 		%EXEC/TICK_1 %EXEC/TICK_2
 	END
 
@@ -536,7 +536,7 @@ WORD EXEC
 	END
 
 	DESCRIPTION
-		Executes the word at the address on top of the stack. The word an be built-in (ie primitve) or user-defined (ie secondary).
+		Executes the word pointed to by the first stack item. The word can be built-in (ie primitve) or user-defined (ie secondary).
 	END
 
 	EXAMPLE
@@ -553,8 +553,85 @@ WORD STORE
 
 	SHOW !
 
-	PIC 1 STORE_1.png Before
-	PIC 2 STORE_2.png After
+	PIC 1 STORE_1.png Drawing pixels to the screen 
+		
+	COMMENT
+		( a b -- )
+	END
+	
+	TYPES
+		ARG a
+		RAW_HEX
+		SMART_HEX
+		
+		ARG b
+		RAW_HEX
+		SMART_HEX
+		
+		NOTE <ul style="margin:0"><li><span style="color:red">To store values in variables, use STO instead. Only use ! for low-level system access.</span></li><li><span style="color:red">If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written!</span></li></ul>
+	END
+
+	DESCRIPTION
+		Stores the second stack item at the address pointed to by the first stack item.
+	END
+
+	EXAMPLE
+		%1
+		
+		In this example, ! stores the 16-bit value $2003 at address $8080, which is mapped to two pixels at the center of the screen in the simulator. Since each pixel is mapped to one byte, storing $2003 writes $03 (the code for red) to the first pixel and $20 (the code for dark blue) to the following pixel. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn. 
+	END
+
+	SEE ALSO
+		FETCH @
+		CFETCH C@
+		CSTORE C!
+	END
+
+END
+
+WORD FETCH
+
+	SHOW @
+
+	PIC 1 FETCH_1.png Before
+	PIC 2 FETCH_2.png After
+	
+	COMMENT
+		( a -- b )
+	END
+	
+	TYPES
+		ARG a
+		RAW_HEX
+		SMART_HEX
+		
+		ARG b
+		RAW_HEX
+		
+		NOTE <span style="color:red">To fetch values from variables, just use the name of the variable instead of @. Only use @ for low-level system access.</span>
+	END
+
+	DESCRIPTION
+		Fetches the 16-bit value pointed to by the first stack item.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		STORE !
+		CFETCH C@
+		CSTORE C!
+	END
+
+END
+
+WORD CSTORE
+
+	SHOW C!
+
+	PIC 1 CSTORE_1.png Drawing a red pixel to the screen 
 	
 	COMMENT
 		( a b -- )
@@ -569,11 +646,51 @@ WORD STORE
 		RAW_HEX
 		SMART_HEX
 		
-		#NOTE
+		NOTE <ul style="margin:0"><li><span style="color:red">To store values in variables, use STO instead. Only use C! for low-level system access.</span></li><li><span style="color:red">If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written!</span></li></ul>
 	END
 
 	DESCRIPTION
-		Stores the second item at the address pointed to by 
+		Stores the low byte of the second stack item at the address pointed to by the first stack item.
+	END
+
+	EXAMPLE
+		%1
+		
+		In this example, C! stores the 8-bit value $03 (the code for red) at address $8080, which is mapped to the pixel at the center of the screen in the simulator. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn. 
+	END
+
+	SEE ALSO
+		CFETCH C@
+		FETCH @
+		STORE !
+	END
+
+END
+
+WORD CFETCH
+	
+	SHOW C@
+	
+	PIC 1 CFETCH_1.png Before
+	PIC 2 CFETCH_2.png After
+	
+	COMMENT
+		( a -- b )
+	END
+	
+	TYPES
+		ARG a
+		RAW_HEX
+		SMART_HEX
+		
+		ARG b
+		RAW_HEX
+		
+		NOTE <span style="color:red">To fetch values from variables, just use the name of the variable instead of C@. Only use C@ for low-level system access.</span>
+	END
+
+	DESCRIPTION
+		Fetches the 8-bit value pointed to by the first stack item.
 	END
 
 	EXAMPLE
@@ -581,160 +698,73 @@ WORD STORE
 	END
 
 	SEE ALSO
-		
+		CSTORE C!
+		FETCH @
+		STORE !
 	END
 
 END
 
-#WORD FETCH
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+WORD COLON
 
-#WORD CSTORE
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	SHOW :
 
-#WORD CFETCH
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	PIC 1 COLON_1.png Defining a new word foo
+	PIC 2 COLON_2.png Before running foo
+	PIC 3 COLON_3.png After running foo
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+	
+	DESCRIPTION
+		Defines a new word.
+	END
 
-#WORD COLON
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	EXAMPLE
+		%1 %2
+		%3
+	END
 
-#WORD SEMI
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	SEE ALSO
+		SEMI ;
+	END
+
+END
+
+WORD SEMI
+
+	SHOW ;
+
+	PIC 1 COLON_1.png Defining a new word foo
+	PIC 2 COLON_2.png Before running foo
+	PIC 3 COLON_3.png After running foo
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+	
+	DESCRIPTION
+		Concludes the definition of a new word.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		COLON :
+	END
+END
 
 #WORD HALT
 #
