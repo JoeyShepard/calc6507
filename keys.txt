@@ -1,7 +1,1 @@
-
-
-
-
-
-
-
+: foo 10 0 do i dup 3 = if leave then loop ;

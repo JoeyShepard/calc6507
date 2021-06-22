@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" href="words.css">
+	</head>
+	<body>
+		
+		<span class="word_show">
+			J
+		</span>
+		<div class="word_comment">
+			( -- )
+		</div>
+		
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Pushes the loop value of a second-level DO loop onto the stack.<br>
+				<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO with two nested DO loops: <span class="word_code">: FOO 9 7 DO 5 3 DO I J * LOOP LOOP ;</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/J_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			The outer DO loop iterates from 7 to 8 and the inner loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 7. * multiplies the two values together and leaves 21 on the stack. The next iterations push the results of 4*7, 3*8, and 4*8.<br><br>
+			<img src="../images/resized/J_2.png">
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/DO.html">DO</a>
+			<a href="./generated/LOOP.html">LOOP</a>
+			<a href="./generated/I.html">I</a>
+			<a href="./generated/K.html">K</a>
+			<a href="./generated/LEAVE.html">LEAVE</a>
+		</div>
+		<br>
+				
+	</body>
+</html>

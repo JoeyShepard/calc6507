@@ -8,4 +8,6 @@ TODO: move somewhere else for final version
 TODO: this might help reduce size a lot
 ;fp register based VM (see google doc)
 
+TODO: separate table for two header bytes for primaries
+
 	

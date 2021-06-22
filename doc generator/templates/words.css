@@ -104,4 +104,11 @@
 		display: inline-block;
 	}
 	
+	.word_code {
+		font-family: 'Courier New', monospace;
+		font-size: 16px;
+		background-color: #E0E0E0
+		/* font-weight: bold; */
+	}
+	
 	

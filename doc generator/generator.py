@@ -52,6 +52,7 @@ def gen_pages():
     state=STATE_GLOBAL
 
     global_objs={}
+    local_objs={}
    
     #Clear output directory
     os.system("del generated\\* /Q")
@@ -114,6 +115,17 @@ def gen_pages():
                         i=global_objs[i[1:]]
                     else:
                         print_error("Replacement symbol "+i+" not found.",file_line_num)
+                        if global_objs!={}:
+                            print("Global symbols: ")
+                            for k,v in global_objs.items():
+                                #print("  ",k,"=",v)
+                                print("  ",k)
+                            print()
+                        if local_objs!={}:
+                            print("Local symbols: ")
+                            for k,v in local_objs.items():
+                                #print("  ",k,"=",v)
+                                print("  ",k)
                         running=False
                 line+=[i]
                     
@@ -209,7 +221,10 @@ def gen_pages():
                         elif template_line.strip()=="%word_type_note":
                             gen_html+=word_type_note+"\n"
                         elif template_line.strip()=="%word_description":
-                            gen_html+=word_description+"\n"
+                            #gen_html+=word_description+"\n"
+                            gen_html+='\t\t\t<p class="word_description_p">\n'+word_description+"\n"
+                            gen_html+="\t\t\t</p>\n"
+                            
                         elif template_line.strip()=="%word_example":
                             gen_html+=word_example+"\n"
                         elif template_line.strip()=="%word_see_also_begin":
@@ -287,8 +302,10 @@ def gen_pages():
                 state=STATE_LOCAL
             else:
                 if word_description!="":
-                    word_description+="\n"
-                word_description+='\t\t\t<p class="word_description_p">'+" ".join(line)+"</p>"
+                    #word_description+="\n"
+                    word_description+="<br>\n"
+                #word_description+='\t\t\t<p class="word_description_p">'+" ".join(line)+"</p>"
+                word_description+='\t\t\t\t'+" ".join(line)
         elif state==STATE_EXAMPLE:
             if line[0]=="END":
                 state=STATE_LOCAL
@@ -313,7 +330,7 @@ def gen_pages():
                     word_see_also_none=False
         elif state==STATE_SYMBOL:
             if line[0]=="END":
-                local_objs[symbol_name]=symbol_content
+                global_objs[symbol_name]=symbol_content
                 state=STATE_GLOBAL
             else:
                 if symbol_content!="":

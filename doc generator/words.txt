@@ -9,7 +9,7 @@
 #END
 
 SYMBOL compile_only
-	Compile-only word
+	<span style="font-style: italic;">Compile-only word</span>
 END
 
 PIC EXEC/TICK_1 TICK_3.png Before
@@ -73,32 +73,6 @@ LIST
 	TAN
 	DEG
 END
-
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
 
 WORD DUP
 	
@@ -594,7 +568,7 @@ WORD FETCH
 	SHOW @
 
 	PIC 1 FETCH_1.png Before
-	PIC 2 FETCH_2.png After
+	PIC 2 FETCH_2.png After - 16-bit value fetched from $1234
 	
 	COMMENT
 		( a -- b )
@@ -608,7 +582,7 @@ WORD FETCH
 		ARG b
 		RAW_HEX
 		
-		NOTE <span style="color:red">To fetch values from variables, just use the name of the variable instead of @. Only use @ for low-level system access.</span>
+		NOTE <span style="color:red">To fetch values from variables, use the name of the variable instead of @. Only use @ for low-level system access.</span>
 	END
 
 	DESCRIPTION
@@ -672,7 +646,7 @@ WORD CFETCH
 	SHOW C@
 	
 	PIC 1 CFETCH_1.png Before
-	PIC 2 CFETCH_2.png After
+	PIC 2 CFETCH_2.png After - 8-bit value fetched from $1234
 	
 	COMMENT
 		( a -- b )
@@ -686,7 +660,7 @@ WORD CFETCH
 		ARG b
 		RAW_HEX
 		
-		NOTE <span style="color:red">To fetch values from variables, just use the name of the variable instead of C@. Only use C@ for low-level system access.</span>
+		NOTE <span style="color:red">To fetch values from variables, use the name of the variable instead of C@. Only use C@ for low-level system access.</span>
 	END
 
 	DESCRIPTION
@@ -709,9 +683,9 @@ WORD COLON
 
 	SHOW :
 
-	PIC 1 COLON_1.png Defining a new word foo
-	PIC 2 COLON_2.png Before running foo
-	PIC 3 COLON_3.png After running foo
+	PIC 1 COLON_1.png Defining a new word FOO
+	PIC 2 COLON_2.png Before running FOO
+	PIC 3 COLON_3.png After running FOO
 	
 	COMMENT
 		( -- )
@@ -740,9 +714,9 @@ WORD SEMI
 
 	SHOW ;
 
-	PIC 1 COLON_1.png Defining a new word foo
-	PIC 2 COLON_2.png Before running foo
-	PIC 3 COLON_3.png After running foo
+	PIC 1 COLON_1.png Defining a new word FOO
+	PIC 2 COLON_2.png Before running FOO
+	PIC 3 COLON_3.png After running FOO
 	
 	COMMENT
 		( -- )
@@ -766,70 +740,63 @@ WORD SEMI
 	END
 END
 
-#WORD HALT
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+WORD HALT
+	
+	PIC 1 HALT_1.png Halting simulation
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
 
-#WORD VAR
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	DESCRIPTION
+		Halts the simulation.
+	END
+
+	EXAMPLE
+		%1
+	END
+
+END
+
+WORD VAR
+
+	PIC 1 VAR_1.png Creating the variable X
+	PIC 2 VAR_2.png Fetching the value of X
+	PIC 3 VAR_3.png Value of X
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Creates a new variable. STO also creates a new variable if it doesn't exist. 
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		STO
+	END
+
+END
 
 WORD STO
 
-	PIC 1 STO_1.png Before
-	PIC 2 STO_2.png After
+	PIC 1 STO_1.png Storing 5 in X
+	PIC 2 STO_2.png Fetching the value of X
+	PIC 3 STO_3.png Value of X
+	PIC 4 STO_4.png Shift+S for 🡪 is also STO
 	
 	COMMENT
 		( a -- )
@@ -844,6 +811,38 @@ WORD STO
 
 	DESCRIPTION
 		Stores the first item on the stack in the following variable. If the variable doesn't exist, it's created.
+		Pressing Shift+S produces the symbol 🡪 which is a shortcut for STO.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		VAR
+	END
+
+END
+
+WORD FREE
+
+	PIC 1 FREE_1.png Before
+	PIC 2 FREE_2.png After
+	
+	COMMENT
+		( -- a )
+	END
+	
+	TYPES
+		ARG a
+		RAW_HEX
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Puts the number of free bytes of RAM on the stack.
 	END
 
 	EXAMPLE
@@ -856,395 +855,480 @@ WORD STO
 
 END
 
-#WORD FREE
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+WORD EXIT
 
-#WORD EXIT
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	PIC 1 EXIT_1.png Defining a new word FOO
+	PIC 2 EXIT_2.png Defining a word containing FOO
+	PIC 3 EXIT_3.png Running bar
+	PIC 4 EXIT_4.png FOO exits early. Bar continues running.
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
 
-#WORD QUIT
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	DESCRIPTION
+		Exits the currently executing word. Continues execution of calling word if it exists.
+		%compile_only
+	END
 
-#WORD DO
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
 
-#WORD LOOP
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	SEE ALSO
+		QUIT
+	END
 
-#WORD EQUAL
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+END
 
-#WORD GT
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+WORD QUIT
 
-#WORD LT
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	PIC 1 QUIT_1.png Defining a new word FOO
+	PIC 2 QUIT_2.png Defining a word containing FOO
+	PIC 3 QUIT_3.png Running bar
+	PIC 4 QUIT_4.png FOO quits, stopping all execution
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
 
-#WORD NEQ
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	DESCRIPTION
+		Exits the currently executing word and halts all execution.
+		%compile_only
+	END
 
-#WORD I
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
 
-#WORD J
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+	SEE ALSO
+		
+	END
 
-#WORD K
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+END
 
-#WORD BEGIN
-#
-#	PIC 1 _1.png Before
-#	PIC 2 _2.png After
-#	
-#	COMMENT
-#		( -- )
-#	END
-#	
-#	TYPES
-#		ARG a
-#		ANY
-#		
-#		#NOTE
-#	END
-#
-#	DESCRIPTION
-#		
-#	END
-#
-#	EXAMPLE
-#		%1 %2
-#	END
-#
-#	SEE ALSO
-#		
-#	END
-#
-#END
+WORD DO
+
+	PIC 1 DO_1.png A word with a do loop
+	PIC 2 DO_2.png Before
+	PIC 3 DO_3.png After
+	
+	COMMENT
+		( a b -- )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		
+		ARG a
+		FLOAT
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Loops from the first value on the stack up to but not including the second value on the stack.
+		%compile_only
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		LOOP
+		I
+		J
+		K
+		LEAVE
+	END
+
+END
+
+WORD LOOP
+
+	PIC 1 DO_1.png A word with a do loop
+	PIC 2 DO_2.png Before
+	PIC 3 DO_3.png After
+	
+	COMMENT
+		( a b -- )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		
+		ARG a
+		FLOAT
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Marks the end of a loop begun with DO.
+		%compile_only
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		DO
+		I
+		J
+		K
+		LEAVE
+	END
+	
+END
+
+WORD EQUAL
+
+	SHOW =
+
+	PIC 1 EQUAL_1.png Before comparing floats
+	PIC 2 EQUAL_2.png After comparing floats
+	PIC 3 EQUAL_3.png Before comparing hex
+	PIC 4 EQUAL_4.png After comparing hex
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG c 
+		RAW_HEX
+		
+		NOTE Float can be compared to float, and hex can be compared to hex.
+	END
+
+	DESCRIPTION
+		Compares the first item on the stack to the second item. Returns $FFFF if they are equal and $0000 if they aren't.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		NEQ <>
+		GT >
+		LT <
+		IF
+		ELSE
+		THEN
+	END
+
+END
+
+WORD GT
+
+	SHOW >
+
+	PIC 1 GT_1.png Before comparing floats
+	PIC 2 GT_2.png After comparing floats
+	PIC 3 GT_3.png Before comparing hex
+	PIC 4 GT_4.png After comparing hex
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG c 
+		RAW_HEX
+		
+		NOTE Float can be compared to float, and hex can be compared to hex.
+	END
+
+	DESCRIPTION
+		Compares the first item on the stack to the second item. Returns $FFFF if the second is greater and $0000 if the first is greater.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		EQUAL =
+		NEQ <>
+		LT <
+		IF
+		ELSE
+		THEN
+	END
+	
+END
+
+WORD LT
+
+	SHOW <
+
+	PIC 1 LT_1.png Before comparing floats
+	PIC 2 LT_2.png After comparing floats
+	PIC 3 LT_3.png Before comparing hex
+	PIC 4 LT_4.png After comparing hex
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG c 
+		RAW_HEX
+		
+		NOTE Float can be compared to float, and hex can be compared to hex.
+	END
+
+	DESCRIPTION
+		Compares the first item on the stack to the second item. Returns $FFFF if the second is less and $0000 if the first is less.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		EQUAL =
+		NEQ <>
+		GT >
+		IF
+		ELSE
+		THEN
+	END
+	
+END
+
+WORD NEQ
+
+	SHOW <>
+
+	PIC 1 NEQ_1.png Before comparing floats
+	PIC 2 NEQ_2.png After comparing floats
+	PIC 3 NEQ_3.png Before comparing hex
+	PIC 4 NEQ_4.png After comparing hex
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG c 
+		RAW_HEX
+		
+		NOTE Float can be compared to float, and hex can be compared to hex.
+	END
+
+	DESCRIPTION
+		Compares the first item on the stack to the second item. Returns $FFFF if they are not equal and $0000 if they are.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		EQUAL =
+		GT >
+		LT <
+		IF
+		ELSE
+		THEN
+	END
+	
+END
+
+WORD I
+
+	PIC 1 DO_1.png A word with a do loop
+	PIC 2 DO_2.png Before - looping from 0 to 3
+	PIC 3 DO_3.png After
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Pushes the loop value of the innermost DO loop onto the stack.
+		%compile_only
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		DO
+		LOOP
+		J
+		K
+		LEAVE
+	END
+
+END
+
+WORD J
+
+	PIC 1 J_1.png Defining FOO (partial view)
+	PIC 2 J_2.png 
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Pushes the loop value of a second-level DO loop onto the stack.
+		%compile_only
+	END
+
+	EXAMPLE
+		First, define a new word FOO with two nested DO loops: <span class="word_code">: FOO 9 7 DO 5 3 DO I J * LOOP LOOP ;</span> 
+		%1
+		The outer DO loop iterates from 7 to 8 and the inner loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 7. * multiplies the two values together and leaves 21 on the stack. The next iterations push the results of 4*7, 3*8, and 4*8.
+		%2
+	END
+
+	SEE ALSO
+		DO
+		LOOP
+		I
+		K
+		LEAVE
+	END
+
+END
+
+WORD K
+	
+	PIC 1 K_1.png Defining FOO (partial view)
+	PIC 2 K_2.png 
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Pushes the loop value of a third-level DO loop onto the stack.
+	END
+
+	EXAMPLE
+		First, define a new word FOO with three nested DO loops: <span class="word_code">: FOO 9 8 DO 7 6 DO 5 3 DO I J * K + LOOP LOOP LOOP ;</span> 
+		%1
+		The outer DO loop iterates only once with the value of 8 and the second-level loop iterates once with the value 6. (Loops usually iterate more than once, but these are kept short for example's sake.) The innermost loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 6. * multiplies the two values together yielding 18. K pushes 8 onto the stack and + adds 8 to 18 leaving 26 on the stack. The next iteration pushes the result of 4*6+8.
+		%2
+	END
+
+	SEE ALSO
+		DO
+		LOOP
+		I
+		J
+		LEAVE
+	END
+
+END
+
+WORD BEGIN
+
+	PIC 1 _1.png Before
+	PIC 2 _2.png After
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		
+	END
+
+END
 
 #WORD AGAIN
 #

@@ -1563,6 +1563,7 @@
 			
 			;Entry point for J and K
 			.push_stack:
+			
 			TAY
 			LDA #OBJ_FLOAT
 			STA 0,X
@@ -1582,7 +1583,6 @@
 			TXA
 			SBC #OBJ_SIZE-TYPE_SIZE
 			TAX
-			
 			RTS
 	
 	WORD_J:
@@ -1711,6 +1711,8 @@
 			BEQ .pop_good
 				RTS
 			.pop_good:
+			
+			TODO: add support for LEAVE
 			
 			TODO: abstract?
 			;Address right type?
@@ -1935,7 +1937,7 @@
 			.set_true:
 			LDA #$FF
 			BNE .set
-					
+	
 	WORD_LEAVE:
 		FCB 5,"LEAVE"			;Name
 		FDB WORD_LEAVE_THREAD	;Next word
@@ -1957,9 +1959,7 @@
 			LDA dict_ptr+1
 			STA AUX_STACK+2,Y
 			
-			;Drop return address
-			PLA
-			PLA
+			TODO: was dropping return value here
 			
 			;Lay down LEAVE_THREAD TOKEN
 			LDA #TOKEN_LEAVE_THREAD
@@ -2009,6 +2009,8 @@
 		CODE_THEN:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB COMPILE|IMMED				;Flags
+			
+			halt
 			
 			JSR AUX_STUB
 			CMP #AUX_TYPE_IF
