@@ -23,6 +23,7 @@ FUNC AuxPushShort
 	
 END
 
+TODO: still used after change in THEN?
 FUNC AuxPopShort
 	
 	LDA aux_stack_count

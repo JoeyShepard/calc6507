@@ -239,8 +239,8 @@
 		AUX_TYPE_BEGIN =		2
 		AUX_TYPE_LEAVE =		3
 		AUX_TYPE_IF =			4
-		AUX_TYPE_ELSE =			5
-			
+		;AUX_TYPE_ELSE =		5	;reuse AUX_TYPE_IF since behavior is the same
+		AUX_TYPE_CLEARED =		6	;set AUX_TYPE_IF to CLEARED instead of popping
 	
 	
 	

@@ -1304,7 +1304,7 @@
 				BEQ .pop_good
 					RTS
 				.pop_good:
-			
+				
 				TODO: abstract?
 				;Address right type?
 				LDY aux_stack_ptr
@@ -1313,6 +1313,8 @@
 				BEQ .loop_done
 				CMP #AUX_TYPE_LEAVE
 				BEQ .process_leave
+				CMP #AUX_TYPE_CLEARED
+				BEQ .loop
 					LDA #ERROR_STRUCTURE
 					STA ret_val
 					RTS
@@ -1651,6 +1653,7 @@
 					BNE .loop
 			.done:
 			
+			TODO: shouldnt this always be non-zero?
 			;Decrease word counter
 			LDA aux_word_counter
 			BEQ .no_dec
@@ -2010,22 +2013,72 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB COMPILE|IMMED				;Flags
 			
-			halt
+			TODO: delete
+			;v1 - does not work with LEAVE
+			;JSR AUX_STUB
+			;CMP #AUX_TYPE_IF
+			;BEQ .process_if
+			;	
+			;	;Error - not if
+			;	LDA #ERROR_STRUCTURE
+			;	STA ret_val
+			;	RTS
+			;.process_if:
+			;
+			;;Write IF address
+			;LDA AUX_STACK-2,Y
+			;STA ret_address
+			;LDA AUX_STACK-1,Y
+			;STA ret_address+1
+			;
+			;SEC
+			;LDA dict_ptr
+			;SBC #1
+			;LDY #1
+			;STA (ret_address),Y
+			;LDA dict_ptr+1
+			;SBC #0
+			;INY
+			;STA (ret_address),Y
+			;
+			;RTS
+
+			;v2 - changes address type from IF to NONE and leaves in place
+			TODO: abstract? as above maybe
+			LDY aux_stack_ptr
+			.loop:
+				CPY #AUX_STACK_SIZE
+				BNE .stack_good
+					.error_exit:
+					LDA #ERROR_STRUCTURE
+					STA ret_val
+					RTS
+				.stack_good:
+				LDA AUX_STACK,Y
+				CMP #AUX_TYPE_CLEARED
+				BEQ .process_skip
+				CMP #AUX_TYPE_LEAVE
+				BEQ .process_skip
+				CMP #AUX_TYPE_IF
+				BEQ .process_if
+					;Error - not if	
+					BNE .error_exit
+				.process_skip:
+					INY
+					INY
+					INY
+					JMP .loop
 			
-			JSR AUX_STUB
-			CMP #AUX_TYPE_IF
-			BEQ .process_if
-				
-				;Error - not if
-				LDA #ERROR_STRUCTURE
-				STA ret_val
-				RTS
 			.process_if:
 			
+			;Change address type from IF to CLEARED
+			LDA #AUX_TYPE_CLEARED
+			STA AUX_STACK,Y
+			
 			;Write IF address
-			LDA AUX_STACK-2,Y
+			LDA AUX_STACK+1,Y
 			STA ret_address
-			LDA AUX_STACK-1,Y
+			LDA AUX_STACK+2,Y
 			STA ret_address+1
 			
 			SEC
@@ -2039,7 +2092,7 @@
 			STA (ret_address),Y
 			
 			RTS
-
+	
 	WORD_ELSE:
 		FCB 4,"ELSE"			;Name
 		FDB WORD_LSHIFT			;Next word

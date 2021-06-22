@@ -872,6 +872,7 @@ WORD EXIT
 
 	DESCRIPTION
 		Exits the currently executing word. Continues execution of calling word if it exists.
+		Calling EXIT from inside a DO loop doesn't require UNLOOP.
 		%compile_only
 	END
 
@@ -939,6 +940,7 @@ WORD DO
 
 	DESCRIPTION
 		Loops from the first value on the stack up to but not including the second value on the stack.
+		Calling EXIT from inside a DO loop doesn't require UNLOOP.
 		%compile_only
 	END
 
