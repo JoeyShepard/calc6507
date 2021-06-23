@@ -3,12 +3,14 @@ known bugs
 -DO/LOOP
 
 pages:
+-quick start
+   Add two numbers: 2 3 +
 -intro
---e and sto
+   e and sto
 -types
 -word list
 -bugs/limitations
 -planned features
---atrig, ln, graph, mem/words, neg
+   atrig, ln, graph, mem/words, neg
 -errors and explanations
 -vars/words

@@ -1708,25 +1708,28 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB IMMED|COMPILE				;Flags
 			
-			;At least one address on aux stack?
-			JSR AuxPopShort
-			LDA ret_val
-			BEQ .pop_good
-				RTS
-			.pop_good:
+			.loop:
+				;At least one address on aux stack?
+				JSR AuxPopShort
+				LDA ret_val
+				BEQ .pop_good
+					RTS
+				.pop_good:
+				
+				TODO: add support for LEAVE
 			
-			TODO: add support for LEAVE
-			
-			TODO: abstract?
-			;Address right type?
-			LDY aux_stack_ptr
-			LDA AUX_STACK-3,Y
-			CMP #AUX_TYPE_BEGIN
-			BEQ .type_good
-				LDA #ERROR_STRUCTURE
-				STA ret_val
-				RTS
-			.type_good:
+				TODO: abstract?
+				;Address right type?
+				LDY aux_stack_ptr
+				LDA AUX_STACK-3,Y
+				CMP #AUX_TYPE_BEGIN
+				BEQ .type_good
+				CMP #AUX_TYPE_CLEARED
+				BEQ .loop
+					LDA #ERROR_STRUCTURE
+					STA ret_val
+					RTS
+				.type_good:
 			
 			;Lay down AGAIN_THREAD TOKEN
 			LDA AUX_STACK-2,Y
@@ -1744,6 +1747,13 @@
 		CODE_AGAIN_THREAD:
 			FCB OBJ_PRIMITIVE			;Type
 			FCB NONE					;Flags
+			
+			;Check if Escape was pressed
+			JSR ReadKey
+			CMP #KEY_ESCAPE
+			BNE .no_exit_early
+				JMP CODE_QUIT+EXEC_HEADER
+			.no_exit_early:
 			
 			LDY #1
 			LDA (exec_ptr),Y
@@ -1763,23 +1773,26 @@
 			FCB OBJ_PRIMITIVE			;Type
 			FCB COMPILE|IMMED			;Flags
 			
-			;At least one address on aux stack?
-			JSR AuxPopShort
-			LDA ret_val
-			BEQ .pop_good
-				RTS
-			.pop_good:
-			
-			TODO: abstract?
-			;Address right type?
-			LDY aux_stack_ptr
-			LDA AUX_STACK-3,Y
-			CMP #AUX_TYPE_BEGIN
-			BEQ .type_good
-				LDA #ERROR_STRUCTURE
-				STA ret_val
-				RTS
-			.type_good:
+			.loop:
+				;At least one address on aux stack?
+				JSR AuxPopShort
+				LDA ret_val
+				BEQ .pop_good
+					RTS
+				.pop_good:
+					
+				TODO: abstract?
+				;Address right type?
+				LDY aux_stack_ptr
+				LDA AUX_STACK-3,Y
+				CMP #AUX_TYPE_BEGIN
+				BEQ .type_good
+				CMP #AUX_TYPE_CLEARED
+				BEQ .loop
+					LDA #ERROR_STRUCTURE
+					STA ret_val
+					RTS
+				.type_good:
 			
 			;Lay down UNTIL_THREAD TOKEN
 			LDA AUX_STACK-2,Y
@@ -1796,6 +1809,14 @@
 		CODE_UNTIL_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1						;Flags
+			
+			TODO: abstract?
+			;Check if Escape was pressed
+			JSR ReadKey
+			CMP #KEY_ESCAPE
+			BNE .no_exit_early
+				JMP CODE_QUIT+EXEC_HEADER
+			.no_exit_early:
 			
 			LDA 0,X
 			CMP #OBJ_FLOAT

@@ -47,6 +47,10 @@
 	TODO: more comments
 	TODO: replace calculated jump with JMP (addr)
 	
+	;To finish before website upload
+	TODO: fix aborted word definition
+	TODO: add aux stack check to semi colon
+	TODO: BRK 0 is halt, others are vectored
 	
 ;Unlimited lines per page in listing
 	PAGE 0
