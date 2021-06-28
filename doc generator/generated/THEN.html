@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<link rel="stylesheet" href="words.css">
+	</head>
+	<body>
+		
+		<span class="word_show">
+			THEN
+		</span>
+		<div class="word_comment">
+			( -- )
+		</div>
+		
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Marks the end of a conditional block begun by IF.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO:<br><br>
+						<span class="word_code"> : FOO DUP 20 > IF 1.1 * THEN ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/IF_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			DUP makes a copy of the first item on the stack. 20 > compares it to 20. If larger than 20, the value is multiplied by 1.1. If not, the steps between IF and THEN are skipped and the value is not multiplied.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/IF_2.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/IF_3.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/EQUAL.html">=</a>
+			<a href="./generated/NEQ.html"><></a>
+			<a href="./generated/GT.html">></a>
+			<a href="./generated/LT.html"><</a>
+			<a href="./generated/IF.html">IF</a>
+			<a href="./generated/ELSE.html">ELSE</a>
+		</div>
+		<br>
+				
+	</body>
+</html>

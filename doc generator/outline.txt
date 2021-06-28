@@ -5,6 +5,10 @@ known bugs
 pages:
 -quick start
    Add two numbers: 2 3 +
+   enter numbers on stack
+   define word
+   learn more about RPN
+   learn more about forth
 -intro
    e and sto
 -types

@@ -54,6 +54,60 @@
 		<br>
 		<br><br><br>
 
+		<!--SWAP-->
+		<span class="word_show">
+			SWAP
+		</span>
+		<div class="word_comment">
+			( a b -- b a )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Swaps the first two items on the stack.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/SWAP_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/SWAP_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/ROT.html">ROT</a>
+			<a href="./generated/MIN_ROT.html">-ROT</a>
+		</div>
+		<br>
+		<br><br><br>
+
 		<!--DROP-->
 		<span class="word_show">
 			DROP
@@ -485,7 +539,7 @@
 		
 		<div class="word_description">
 			<p class="word_description_p">
-				Multiplies the first two numbers on the stack.
+				Multiplies the first two items on the stack.
 			</p>
 		</div>
 		
@@ -555,7 +609,7 @@
 			Example:<br>
 			<figure class="word_img_figure"><img src="../images/resized/DIV_3.png"><figcaption class="word_img_caption">Before dividing floats</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DIV_4.png"><figcaption class="word_img_caption">After dividing floats</figcaption></figure><br><br>
 			<figure class="word_img_figure"><img src="../images/resized/DIV_1.png"><figcaption class="word_img_caption">Before dividing hex</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DIV_2.png"><figcaption class="word_img_caption">After dividing hex</figcaption></figure><br><br>
-			<figure class="word_img_figure"><img src="../images/resized/DIV_5.png"><figcaption class="word_img_caption">Dividing by zero results in an error.</figcaption></figure>
+			<figure class="word_img_figure"><img src="../images/resized/DIV_5.png"><figcaption class="word_img_caption">Dividing by zero results in an error</figcaption></figure>
 		</div>
 		
 		<br>
@@ -693,7 +747,7 @@
 					<span class="word_type_generic word_type_smart_hex">smart hex</span>
 					<span class="word_type_generic word_type_disabled">string</span>
 				</div>
-				<span class="word_type_arg"><ul style="margin:0"><li><span style="color:red">To store values in variables, use STO instead. Only use ! for low-level system access.</span></li><li><span style="color:red">If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written!</span></li></ul></span>
+				<span class="word_type_arg"><ul style="margin:0"> 			<span style="color:red"> To store values in variables, use STO instead. Only use ! for low-level system access. 			</span> </li><li> 			<span style="color:red"> If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written! 			</span> </li></ul></span>
 			</div>
 		</div>
 		
@@ -706,7 +760,7 @@
 		<div class="word_example">
 			Example:<br>
 			<figure class="word_img_figure"><img src="../images/resized/STORE_1.png"><figcaption class="word_img_caption">Drawing pixels to the screen</figcaption></figure><br><br>
-			In this example, ! stores the 16-bit value $2003 at address $8080, which is mapped to two pixels at the center of the screen in the simulator. Since each pixel is mapped to one byte, storing $2003 writes $03 (the code for red) to the first pixel and $20 (the code for dark blue) to the following pixel. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn.
+			In this example, ! stores the 16-bit value $2003 at address $8080, which is mapped to two pixels at the center of the screen in the simulator as shown above. Since each pixel is mapped to one byte, storing $2003 writes $03 (the code for red) to the first pixel and $20 (the code for dark blue) to the following pixel. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn.
 		</div>
 		
 		<br>
@@ -749,7 +803,7 @@
 					<span class="word_type_generic word_type_disabled">smart hex</span>
 					<span class="word_type_generic word_type_disabled">string</span>
 				</div>
-				<span class="word_type_arg"><span style="color:red">To fetch values from variables, use the name of the variable instead of @. Only use @ for low-level system access.</span></span>
+				<span class="word_type_arg">			<span style="color:red"> To fetch values from variables, use the name of the variable instead of @. Only use @ for low-level system access. 			</span></span>
 			</div>
 		</div>
 		
@@ -804,7 +858,7 @@
 					<span class="word_type_generic word_type_smart_hex">smart hex</span>
 					<span class="word_type_generic word_type_disabled">string</span>
 				</div>
-				<span class="word_type_arg"><ul style="margin:0"><li><span style="color:red">To store values in variables, use STO instead. Only use C! for low-level system access.</span></li><li><span style="color:red">If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written!</span></li></ul></span>
+				<span class="word_type_arg"><ul style="margin:0"><li> 			<span style="color:red"> To store values in variables, use STO instead. Only use C! for low-level system access. 			</span> </li><li> 			<span style="color:red"> If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written! 			</span> </li></ul></span>
 			</div>
 		</div>
 		
@@ -817,7 +871,7 @@
 		<div class="word_example">
 			Example:<br>
 			<figure class="word_img_figure"><img src="../images/resized/CSTORE_1.png"><figcaption class="word_img_caption">Drawing a red pixel to the screen</figcaption></figure><br><br>
-			In this example, C! stores the 8-bit value $03 (the code for red) at address $8080, which is mapped to the pixel at the center of the screen in the simulator. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn.
+			In this example, C! stores the 8-bit value $03 (the code for red) at address $8080, which is mapped to the pixel at the center of the screen in the simulator as shown above. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn.
 		</div>
 		
 		<br>
@@ -860,7 +914,7 @@
 					<span class="word_type_generic word_type_disabled">smart hex</span>
 					<span class="word_type_generic word_type_disabled">string</span>
 				</div>
-				<span class="word_type_arg"><span style="color:red">To fetch values from variables, use the name of the variable instead of C@. Only use C@ for low-level system access.</span></span>
+				<span class="word_type_arg">			<span style="color:red"> To fetch values from variables, use the name of the variable instead of C@. Only use C@ for low-level system access. 			</span></span>
 			</div>
 		</div>
 		
@@ -1106,7 +1160,8 @@
 		<div class="word_description">
 			<p class="word_description_p">
 				Exits the currently executing word. Continues execution of calling word if it exists.<br>
-				<span style="font-style: italic;">Compile-only word</span>
+				Calling EXIT from inside a DO loop doesn't require UNLOOP.<br>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
@@ -1138,7 +1193,7 @@
 		<div class="word_description">
 			<p class="word_description_p">
 				Exits the currently executing word and halts all execution.<br>
-				<span style="font-style: italic;">Compile-only word</span>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
@@ -1187,7 +1242,10 @@
 		<div class="word_description">
 			<p class="word_description_p">
 				Loops from the first value on the stack up to but not including the second value on the stack.<br>
-				<span style="font-style: italic;">Compile-only word</span>
+				Four levels of nested DO loops are supported.<br>
+				Calling EXIT from inside a DO loop doesn't require UNLOOP.<br>
+							Press ESC to exit the loop early and halt execution.<br>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
@@ -1246,7 +1304,10 @@
 		<div class="word_description">
 			<p class="word_description_p">
 				Marks the end of a loop begun with DO.<br>
-				<span style="font-style: italic;">Compile-only word</span>
+				Four levels of nested DO loops are supported.<br>
+				Calling EXIT from inside a DO loop doesn't require UNLOOP.<br>
+							Press ESC to exit the loop early and halt execution.<br>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
@@ -1542,7 +1603,7 @@
 		<div class="word_description">
 			<p class="word_description_p">
 				Pushes the loop value of the innermost DO loop onto the stack.<br>
-				<span style="font-style: italic;">Compile-only word</span>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
@@ -1578,13 +1639,14 @@
 		<div class="word_description">
 			<p class="word_description_p">
 				Pushes the loop value of a second-level DO loop onto the stack.<br>
-				<span style="font-style: italic;">Compile-only word</span>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
 		<div class="word_example">
 			Example:<br>
-			First, define a new word FOO with two nested DO loops: <span class="word_code">: FOO 9 7 DO 5 3 DO I J * LOOP LOOP ;</span><br><br>
+			First, define a new word FOO with two nested DO loops:<br><br>
+						<span class="word_code"> : FOO 9 7 DO 5 3 DO I J * LOOP LOOP ; 			</span><br><br>
 			<figure class="word_img_figure"><img src="../images/resized/J_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
 			The outer DO loop iterates from 7 to 8 and the inner loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 7. * multiplies the two values together and leaves 21 on the stack. The next iterations push the results of 4*7, 3*8, and 4*8.<br><br>
 			<img src="../images/resized/J_2.png">
@@ -1615,15 +1677,17 @@
 		
 		<div class="word_description">
 			<p class="word_description_p">
-				Pushes the loop value of a third-level DO loop onto the stack.
+				Pushes the loop value of a third-level DO loop onto the stack.<br>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
 		<div class="word_example">
 			Example:<br>
-			First, define a new word FOO with three nested DO loops: <span class="word_code">: FOO 9 8 DO 7 6 DO 5 3 DO I J * K + LOOP LOOP LOOP ;</span><br><br>
+			First, define a new word FOO with three nested DO loops:<br><br>
+						<span class="word_code"> : FOO 9 8 DO 7 6 DO 5 3 DO I J * K + LOOP LOOP LOOP ;</span><br><br>
 			<figure class="word_img_figure"><img src="../images/resized/K_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
-			The outer DO loop iterates only once with the value of 8 and the second-level loop iterates iterates once with the value 6. (Loops usually iterate more than once, but these are kept short for example's sake.) The innermost loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 6. * multiplies the two values together yielding 18. K pushes 8 onto the stack and + adds 8 to 18 leaving 26 on the stack. The next iteration pushes the result of 4*6+8.<br><br>
+			The outer DO loop iterates only once with the value of 8 and the second-level loop iterates once with the value 6. (Loops usually iterate more than once, but these are kept short for example's sake.) The innermost loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 6. * multiplies the two values together yielding 18. K pushes 8 onto the stack and + adds 8 to 18 leaving 26 on the stack. The next iteration pushes the result of 4*6+8.<br><br>
 			<img src="../images/resized/K_2.png">
 		</div>
 		
@@ -1637,6 +1701,1116 @@
 			<a href="./generated/I.html">I</a>
 			<a href="./generated/J.html">J</a>
 			<a href="./generated/LEAVE.html">LEAVE</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--BEGIN-->
+		<span class="word_show">
+			BEGIN
+		</span>
+		<div class="word_comment">
+			( -- )
+		</div>
+		
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Marks the beginning of a BEGIN/AGAIN infinite loop or the beginning of a BEGIN/UNTIL conditional loop.<br>
+							Press ESC to exit the loop early and halt execution.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO with an infinite BEGIN/AGAIN loop:<br><br>
+									<span class="word_code"> : FOO BEGIN 1 + AGAIN ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			Running FOO will add one to the first item on the stack continuously until ESC is pressed halting execution. EXIT and QUIT will also exit a BEGIN/AGAIN loop.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_2.png"><figcaption class="word_img_caption">Before running FOO</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/BEGIN_3.png"><figcaption class="word_img_caption">After running FOO then pressing ESC</figcaption></figure><br><br>
+			Next, define a new word BAR with a conditional BEGIN/UNTIL loop:<br><br>
+									<span class="word_code"> : BAR BEGIN $1 + DUP $50 = UNTIL ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_4.png"><figcaption class="word_img_caption">Defining BAR (partial view)</figcaption></figure><br><br>
+			Running BAR will add $1 to the first item on the stack until it's equal to $50. Pressing ESC or executing EXIT or QUIT will exit a BEGIN/UNTIL loop early.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_5.png"><figcaption class="word_img_caption">Before running BAR</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/BEGIN_6.png"><figcaption class="word_img_caption">After running BAR</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/AGAIN.html">AGAIN</a>
+			<a href="./generated/UNTIL.html">UNTIL</a>
+			<a href="./generated/EXIT.html">EXIT</a>
+			<a href="./generated/QUIT.html">QUIT</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--AGAIN-->
+		<span class="word_show">
+			AGAIN
+		</span>
+		<div class="word_comment">
+			( -- )
+		</div>
+		
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Marks the end of an infinite loop begun with BEGIN.<br>
+							Press ESC to exit the loop early and halt execution.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO with a BEGIN/AGAIN loop:<br><br>
+									<span class="word_code"> : FOO BEGIN 1 + AGAIN ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			Running FOO will add one to the first item on the stack continuously until ESC is pressed halting execution. EXIT and QUIT will also exit a BEGIN/AGAIN loop.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_2.png"><figcaption class="word_img_caption">Before running FOO</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/BEGIN_3.png"><figcaption class="word_img_caption">After running FOO then pressing ESC</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/BEGIN.html">BEGIN</a>
+			<a href="./generated/UNTIL.html">UNTIL</a>
+			<a href="./generated/EXIT.html">EXIT</a>
+			<a href="./generated/QUIT.html">QUIT</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--UNTIL-->
+		<span class="word_show">
+			UNTIL
+		</span>
+		<div class="word_comment">
+			( a -- )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Marks the end of a conditional loop begun with BEGIN.<br>
+							Press ESC to exit the loop early and halt execution.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word BAR with a conditional BEGIN/UNTIL loop:<br><br>
+									<span class="word_code"> : BAR BEGIN $1 + DUP $50 = UNTIL ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_4.png"><figcaption class="word_img_caption">Defining BAR (partial view)</figcaption></figure><br><br>
+			Running BAR will add $1 to the first item on the stack until it's equal to $50. Pressing ESC or executing EXIT or QUIT will exit a BEGIN/UNTIL loop early.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/BEGIN_5.png"><figcaption class="word_img_caption">Before running BAR</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/BEGIN_6.png"><figcaption class="word_img_caption">After running BAR</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/BEGIN.html">BEGIN</a>
+			<a href="./generated/AGAIN.html">AGAIN</a>
+			<a href="./generated/EXIT.html">EXIT</a>
+			<a href="./generated/QUIT.html">QUIT</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--MAX-->
+		<span class="word_show">
+			MAX
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">Float can be compared to float, and hex can be compared to hex.</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Compares the first two items on the stack and leaves the larger one.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/MAX_1.png"><figcaption class="word_img_caption">Before finding max of floats</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/MAX_2.png"><figcaption class="word_img_caption">After finding max of floats</figcaption></figure><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/MAX_3.png"><figcaption class="word_img_caption">Before finding max of hex</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/MAX_4.png"><figcaption class="word_img_caption">After finding max of hex</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/MIN.html">MIN</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--MIN-->
+		<span class="word_show">
+			MIN
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">Float can be compared to float, and hex can be compared to hex.</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Compares the first two items on the stack and leaves the smaller one.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/MIN_1.png"><figcaption class="word_img_caption">Before finding min of floats</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/MIN_2.png"><figcaption class="word_img_caption">After finding min of floats</figcaption></figure><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/MIN_3.png"><figcaption class="word_img_caption">Before finding min of hex</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/MIN_4.png"><figcaption class="word_img_caption">After finding min of hex</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/MAX.html">MAX</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--AND-->
+		<span class="word_show">
+			AND
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Bitwise AND of the first two stack items.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/AND_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/AND_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/NOT.html">NOT</a>
+			<a href="./generated/OR.html">OR</a>
+			<a href="./generated/XOR.html">XOR</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--OR-->
+		<span class="word_show">
+			OR
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Bitwise OR of the first two stack items.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/OR_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/OR_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/NOT.html">NOT</a>
+			<a href="./generated/AND.html">AND</a>
+			<a href="./generated/XOR.html">XOR</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--XOR-->
+		<span class="word_show">
+			XOR
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Bitwise XOR of the first two stack items.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/XOR_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/XOR_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/NOT.html">NOT</a>
+			<a href="./generated/AND.html">AND</a>
+			<a href="./generated/OR.html">OR</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--NOT-->
+		<span class="word_show">
+			NOT
+		</span>
+		<div class="word_comment">
+			( a -- b )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Returns $FFFF if the first stack item is $0 and returns $0 if it's non-zero.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/NOT_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/NOT_2.png"><figcaption class="word_img_caption">After</figcaption></figure><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/NOT_3.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/NOT_4.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/IF.html">IF</a>
+			<a href="./generated/THEN.html">THEN</a>
+			<a href="./generated/AND.html">AND</a>
+			<a href="./generated/OR.html">OR</a>
+			<a href="./generated/XOR.html">XOR</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--LEAVE-->
+		<span class="word_show">
+			LEAVE
+		</span>
+		<div class="word_comment">
+			( -- )
+		</div>
+		
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Breaks out of a DO loop.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO with a DO loop:<br><br>
+						<span class="word_code"> : FOO 0 8 1 DO I + I 4 = IF LEAVE THEN LOOP ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/LEAVE_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			FOO pushes a 0 on the stack to use as a counter. DO iterates from 1 to 7. I + adds the loop value to the counter on the stack. I 4 = compares the loop value to 4, and when it's equal, LEAVE exits the loop. As a result, FOO sums the values from 1 to 4 and exits the loop without summing 5, 6, or 7.<br><br>
+			<img src="../images/resized/LEAVE_2.png">
+		</div>
+		
+		<br>
+		
+		<br><br><br>
+
+		<!--IF-->
+		<span class="word_show">
+			IF
+		</span>
+		<div class="word_comment">
+			( a -- )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_smart_hex">smart hex</span>
+					<span class="word_type_generic word_type_string">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Tests the first item on the stack and skips to THEN if false.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO:<br><br>
+						<span class="word_code"> : FOO DUP 20 > IF 1.1 * THEN ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/IF_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			DUP makes a copy of the first item on the stack. 20 > compares the item to 20. If larger than 20, the value is multiplied by 1.1. If not, the steps between IF and THEN are skipped.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/IF_2.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/IF_3.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/EQUAL.html">=</a>
+			<a href="./generated/NEQ.html"><></a>
+			<a href="./generated/GT.html">></a>
+			<a href="./generated/LT.html"><</a>
+			<a href="./generated/ELSE.html">ELSE</a>
+			<a href="./generated/THEN.html">THEN</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--THEN-->
+		<span class="word_show">
+			THEN
+		</span>
+		<div class="word_comment">
+			( -- )
+		</div>
+		
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Marks the end of a conditional block begun by IF.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO:<br><br>
+						<span class="word_code"> : FOO DUP 20 > IF 1.1 * THEN ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/IF_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			DUP makes a copy of the first item on the stack. 20 > compares it to 20. If larger than 20, the value is multiplied by 1.1. If not, the steps between IF and THEN are skipped and the value is not multiplied.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/IF_2.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/IF_3.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/EQUAL.html">=</a>
+			<a href="./generated/NEQ.html"><></a>
+			<a href="./generated/GT.html">></a>
+			<a href="./generated/LT.html"><</a>
+			<a href="./generated/IF.html">IF</a>
+			<a href="./generated/ELSE.html">ELSE</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--ELSE-->
+		<span class="word_show">
+			ELSE
+		</span>
+		<div class="word_comment">
+			( -- )
+		</div>
+		
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Marks an alternative block to be executed if an IF statement is false.<br>
+				Must come between IF and THEN.<br>
+							<span style="font-style: italic;">Compile-only word</span>
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			First, define a new word FOO:<br><br>
+						<span class="word_code"> : FOO 18 < IF "CHILD" ELSE "ADULT" THEN ; 			</span><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/ELSE_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
+			FOO compares the first item on the stack to 18. If it's less, the string "CHILD" is pushed onto the stack. Otherwise, "ADULT" is pushed onto the stack.<br><br>
+			<figure class="word_img_figure"><img src="../images/resized/ELSE_2.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/ELSE_3.png"><figcaption class="word_img_caption">After</figcaption></figure><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/ELSE_4.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/ELSE_5.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/EQUAL.html">=</a>
+			<a href="./generated/NEQ.html"><></a>
+			<a href="./generated/GT.html">></a>
+			<a href="./generated/LT.html"><</a>
+			<a href="./generated/IF.html">IF</a>
+			<a href="./generated/THEN.html">THEN</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--LSHIFT-->
+		<span class="word_show">
+			LS
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Shifts the second item on the stack left by the number of bits given in the first item.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/LSHIFT_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/LSHIFT_2.png"><figcaption class="word_img_caption">After - $123 shifted left by 5 bits</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/RSHIFT.html">RS</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--RSHIFT-->
+		<span class="word_show">
+			RS
+		</span>
+		<div class="word_comment">
+			( a b -- c )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span><br>
+					<span class="word_type_arg">c</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_disabled">float</span>
+					<span class="word_type_generic word_type_raw_hex">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Shifts the second item on the stack right by the number of bits given in the first item.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/RSHIFT_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/RSHIFT_2.png"><figcaption class="word_img_caption">After - $2460 shifted right by 5 bits</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/LSHIFT.html">LS</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--ABS-->
+		<span class="word_show">
+			ABS
+		</span>
+		<div class="word_comment">
+			( a -- b )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Absolute value.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/ABS_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/ABS_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br><br><br>
+
+		<!--PI-->
+		<span class="word_show">
+			PI
+		</span>
+		<div class="word_comment">
+			( -- a )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Pushes the value of pi onto the stack.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/PI_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/PI_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/COS.html">COS</a>
+			<a href="./generated/SIN.html">SIN</a>
+			<a href="./generated/TAN.html">TAN</a>
+			<a href="./generated/DEG.html">DEG</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--SIN-->
+		<span class="word_show">
+			SIN
+		</span>
+		<div class="word_comment">
+			( a -- b )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">a is an angle in radians</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Sine. Argument must be between -PI/2 and PI/2 inclusive.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/SIN_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/SIN_2.png"><figcaption class="word_img_caption">After</figcaption></figure><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/SIN_3.png"><figcaption class="word_img_caption">Valid range: -PI/2 to PI/2</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/COS.html">COS</a>
+			<a href="./generated/TAN.html">TAN</a>
+			<a href="./generated/PI.html">PI</a>
+			<a href="./generated/DEG.html">DEG</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--COS-->
+		<span class="word_show">
+			COS
+		</span>
+		<div class="word_comment">
+			( a -- b )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">a is an angle in radians</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Cosine. Argument must be between -PI/2 and PI/2 inclusive.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/COS_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/COS_2.png"><figcaption class="word_img_caption">After</figcaption></figure><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/COS_3.png"><figcaption class="word_img_caption">Valid range: -PI/2 to PI/2</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/SIN.html">SIN</a>
+			<a href="./generated/TAN.html">TAN</a>
+			<a href="./generated/PI.html">PI</a>
+			<a href="./generated/DEG.html">DEG</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--TAN-->
+		<span class="word_show">
+			TAN
+		</span>
+		<div class="word_comment">
+			( a -- b )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+				<span class="word_type_arg">a is an angle in radians</span>
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Tangent. Argument must be between -PI/2 and PI/2.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/COS_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/COS_2.png"><figcaption class="word_img_caption">After</figcaption></figure><br><br>
+			<figure class="word_img_figure"><img src="../images/resized/COS_3.png"><figcaption class="word_img_caption">Valid range: between -PI/2 to PI/2</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/COS.html">COS</a>
+			<a href="./generated/SIN.html">SIN</a>
+			<a href="./generated/PI.html">PI</a>
+			<a href="./generated/DEG.html">DEG</a>
+		</div>
+		<br>
+		<br><br><br>
+
+		<!--DEG-->
+		<span class="word_show">
+			DEG
+		</span>
+		<div class="word_comment">
+			( a -- b )
+		</div>
+		
+		<div class="word_type_container">			
+			<div style="float:left;">
+				<span class="word_type_title">Types:</span>
+			</div>
+			<div class="word_type_container" style="overflow:hidden;">
+				<div style="float:left;">
+					<span class="word_type_arg">a</span><br>
+					<span class="word_type_arg">b</span>
+				</div>
+				<div style="overflow:hidden;">
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span><br>
+
+-					<span class="word_type_generic word_type_float">float</span>
+					<span class="word_type_generic word_type_disabled">raw hex</span>
+					<span class="word_type_generic word_type_disabled">smart hex</span>
+					<span class="word_type_generic word_type_disabled">string</span>
+				</div>
+
+			</div>
+		</div>
+		
+		<div class="word_description">
+			<p class="word_description_p">
+				Converts an angle in degrees to radians.
+			</p>
+		</div>
+		
+		<div class="word_example">
+			Example:<br>
+			<figure class="word_img_figure"><img src="../images/resized/DEG_1.png"><figcaption class="word_img_caption">Before</figcaption></figure> <figure class="word_img_figure"><img src="../images/resized/DEG_2.png"><figcaption class="word_img_caption">After</figcaption></figure>
+		</div>
+		
+		<br>
+		
+		<br>
+		<div class="word_see_also">
+			Related words:
+			<a href="./generated/COS.html">COS</a>
+			<a href="./generated/SIN.html">SIN</a>
+			<a href="./generated/TAN.html">TAN</a>
+			<a href="./generated/PI.html">PI</a>
 		</div>
 		<br>
 		<br><br><br>

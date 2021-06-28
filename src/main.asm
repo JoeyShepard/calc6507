@@ -51,6 +51,8 @@
 	TODO: fix aborted word definition
 	TODO: add aux stack check to semi colon
 	TODO: BRK 0 is halt, others are vectored
+	TODO: esc breaking in DO/LOOP
+	TODO: use registers for text input also somehow?
 	
 ;Unlimited lines per page in listing
 	PAGE 0
@@ -157,6 +159,7 @@ LOCALS_END set		$1F
 	;but banked out after all tests pass
 	include tests.asm
 	include file_tests.asm
+	TODO: remove or add to emu6507
 	include stats.asm
 	
 	ORG $900
@@ -194,6 +197,7 @@ LOCALS_END set		$1F
 		CALL setup
 		CALL tests
 		;CALL file_tests
+		TODO: remove
 		CALL stats
 		CALL GfxSetup
 		
@@ -358,6 +362,9 @@ LOCALS_END set		$1F
 			STA (dict_ptr),Y
 			
 			TODO: smaller than calling MemCopy here?
+			TODO: compare this to MemCpy to MemCpy passing in A to VM with 16 bit address following to...
+			TODO: ...to final: two 4 bit address indexes in byte then counter byte and count in second byte
+			TODO: actually, not 16 bit addresses here, hmm
 			.loop:
 				INY
 				LDA R_ans,Y

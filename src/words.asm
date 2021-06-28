@@ -2166,9 +2166,11 @@
 			;Lay down ELSE_THREAD TOKEN
 			LDA  #TOKEN_AGAIN_THREAD ;identical to ELSE_THREAD
 			JMP TokenArgThread
-			
+	
 	WORD_LSHIFT:
-		FCB 6,"LSHIFT"			;Name
+		TODO: delete
+		;FCB 6,"LSHIFT"			;Name
+		FCB 2,"LS"				;Name
 		FDB WORD_RSHIFT			;Next word
 		FCB TOKEN_LSHIFT		;ID - 122
 		CODE_LSHIFT:
@@ -2186,7 +2188,9 @@
 			JMP CODE_DROP+EXEC_HEADER
 	
 	WORD_RSHIFT:
-		FCB 6,"RSHIFT"			;Name
+		TODO: delete
+		;FCB 6,"RSHIFT"			;Name
+		FCB 2,"RS"				;Name
 		FDB WORD_ABS			;Next word
 		FCB TOKEN_RSHIFT		;ID - 124
 		CODE_RSHIFT:
@@ -2402,27 +2406,29 @@
 						
 						
 			
-	;TYPE			;type of stack item?
+
 	;NEG			;change sign of float
 	;MOD			76
 	;^				116
 	;E^				118
 	;LN				120
 	;GRAPH			138
-	;LIT			144
+
 	;WORDS/MEM		146
-	;[ ]
-	;JUMP
 	
 	;4ish zp pages also mapped to address range
 	
 	;Optional:
+	;LIT			144
+	;[ ]
+	;JUMP
+	;TYPE			;type of stack item?
+	;RAD - convert ASIN
 	;WHILE/REPEAT
 	;RAW - convert smart hex
 	;DEC - dec from hex
 	;HEX - hex from dec
 	;WHILE			82
-	;REPEAT
 	;+LOOP		;great if room
 	;IMMED
 	;COMPILE
@@ -2434,6 +2440,7 @@
 	;RIGHT
 	;LEFT
 	;+ (string)
+	;= (string)
 	;CHR
 	;CREATE
 	;,

@@ -334,8 +334,8 @@ def gen_pages():
                 state=STATE_GLOBAL
             else:
                 if symbol_content!="":
-                    symbol_content+="<br>\n\t\t\t"
-                symbol_content+=" ".join(line)
+                    symbol_content+="<br><br>\n"
+                symbol_content+="\t\t\t"+" ".join(line)
         elif state==STATE_BLOCK:
             if line[0]=="END":
                 local_objs[symbol_name]=symbol_content

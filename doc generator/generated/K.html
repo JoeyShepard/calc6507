@@ -17,15 +17,17 @@
 		
 		<div class="word_description">
 			<p class="word_description_p">
-				Pushes the loop value of a third-level DO loop onto the stack.
+				Pushes the loop value of a third-level DO loop onto the stack.<br>
+							<span style="font-style: italic;">Compile-only word</span>
 			</p>
 		</div>
 		
 		<div class="word_example">
 			Example:<br>
-			First, define a new word FOO with three nested DO loops: <span class="word_code">: FOO 9 8 DO 7 6 DO 5 3 DO I J * K + LOOP LOOP LOOP ;</span><br><br>
+			First, define a new word FOO with three nested DO loops:<br><br>
+						<span class="word_code"> : FOO 9 8 DO 7 6 DO 5 3 DO I J * K + LOOP LOOP LOOP ;</span><br><br>
 			<figure class="word_img_figure"><img src="../images/resized/K_1.png"><figcaption class="word_img_caption">Defining FOO (partial view)</figcaption></figure><br><br>
-			The outer DO loop iterates only once with the value of 8 and the second-level loop iterates iterates once with the value 6. (Loops usually iterate more than once, but these are kept short for example's sake.) The innermost loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 6. * multiplies the two values together yielding 18. K pushes 8 onto the stack and + adds 8 to 18 leaving 26 on the stack. The next iteration pushes the result of 4*6+8.<br><br>
+			The outer DO loop iterates only once with the value of 8 and the second-level loop iterates once with the value 6. (Loops usually iterate more than once, but these are kept short for example's sake.) The innermost loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 6. * multiplies the two values together yielding 18. K pushes 8 onto the stack and + adds 8 to 18 leaving 26 on the stack. The next iteration pushes the result of 4*6+8.<br><br>
 			<img src="../images/resized/K_2.png">
 		</div>
 		
