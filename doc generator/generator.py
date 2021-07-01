@@ -1,4 +1,5 @@
 import os,sys
+from collections import namedtuple
 
 #Constants
 #=========
@@ -12,8 +13,11 @@ STATE_SEE_ALSO=6
 STATE_SYMBOL=7
 STATE_BLOCK=8
 STATE_LIST=9
+STATE_SECTION=10
 
-PIC_PATH="../images/resized/"
+#For debugging
+#PIC_PATH="../images/resized/"
+PIC_PATH="images/"
 HTML_PATH="./generated/"
 
 TYPE_FLOAT='<span class="word_type_generic {}">float</span>'
@@ -23,8 +27,13 @@ TYPE_STRING='<span class="word_type_generic {}">string</span>'
 TYPE_ARG='<span class="word_type_arg">{}</span>'
 TYPE_NOTE='<span class="word_type_note">{}</span>'
 
-SEE_ALSO_LINK='<a href="'+HTML_PATH+'{}.html">{}</a>'
+SEE_ALSO_LINK='<a href="#{}">{}</a>'
 
+CONVERT_IMAGES=False
+
+#Factories
+#=========
+word_type=namedtuple("word_type","html show section")
 
 #Functions
 #=========
@@ -53,16 +62,24 @@ def gen_pages():
 
     global_objs={}
     local_objs={}
-   
+
+    section_name=""
+    section_description=""
+    section_list={}
+    
     #Clear output directory
+    print("Clearing output directory...")
     os.system("del generated\\* /Q")
     os.system("copy templates\\words.css generated\\words.css")
-
+    
     #Regenerate image files
-    os.system("images\\resize.bat")
+    if CONVERT_IMAGES:
+        os.system("images\\resize.bat")
+
+    print("Generating pages...")
 
     #Read in word HTML template
-    f=open("templates/word_template.html")
+    f=open("templates\\word_template.html")
     template_word=f.readlines()
     f.close()
             
@@ -104,12 +121,25 @@ def gen_pages():
         line=[]
 
         #Filter out comments and do replacements
+        link_step=0
         for i in file_line.split():
             if i[0]=="#":
                 break
             else:
                 if i[0]=="%":
-                    if i[1:] in local_objs.keys():
+                    if i=="%link":
+                        if link_step!=0:
+                            print_error("%link within %link not allowed",file_line_num)
+                            running=False
+                        else:
+                            link_name=""
+                            link_show=""
+                            link_step=1
+                            continue
+                    elif i=="%unlink":
+                        i=SEE_ALSO_LINK.format(link_name,link_show)
+                        link_step=0
+                    elif i[1:] in local_objs.keys():
                         i=local_objs[i[1:]]
                     elif i[1:] in global_objs.keys():
                         i=global_objs[i[1:]]
@@ -127,6 +157,16 @@ def gen_pages():
                                 #print("  ",k,"=",v)
                                 print("  ",k)
                         running=False
+                else:
+                    if link_step==1:
+                        link_name=i
+                        link_show=i
+                        link_step=2
+                        continue
+                    elif link_step==2:
+                        link_show=i
+                        continue
+                
                 line+=[i]
                     
         #Skip empty lines
@@ -165,7 +205,13 @@ def gen_pages():
                         temp_obj+=" ".join(line[3:])+"</figcaption></figure>"
                     global_objs[line[1]]=temp_obj      
             elif line[0]=="LIST":
-                state=STATE_LIST   
+                state=STATE_LIST
+            elif line[0]=="SECTION":
+                running=len_check(line,2,file_line_num)
+                if running:
+                    section_name=line[1]
+                    section_description=""
+                    state=STATE_SECTION
             else:
                 print_error("Unknown symbol in global scope: "+line[0]+".",file_line_num)
                 running=False
@@ -205,7 +251,7 @@ def gen_pages():
                             skip_line=False
                     else:                              
                         if template_line.strip()=="%word_show":
-                            gen_html+="\t\t\t"+word_show+"\n"
+                            gen_html+=f'\t\t\t<a name="{word_name}">'+word_show+"</a>\n"
                         elif template_line.strip()=="%word_comment":
                             gen_html+=f"\t\t\t"+word_comment+"\n"
                         elif template_line.strip()=="%word_type_begin":
@@ -238,7 +284,7 @@ def gen_pages():
                         else:
                             gen_html+=template_line
                             
-                processed_words[word_name]=gen_html
+                processed_words[word_name]=word_type(gen_html,word_show,section_name)
                 
                 reset_word=True
                 
@@ -352,7 +398,15 @@ def gen_pages():
                 running=False
             else:
                 expected_words+=[line[0]]
-                
+        elif state==STATE_SECTION:
+            if line[0]=="END":
+                section_list[section_name]=section_description
+                state=STATE_GLOBAL
+            else:
+                if section_description!="":
+                    section_description+="<br>"
+            section_description+=" ".join(line)
+                            
     f.close()
 
     #Output generated html to files if finished without error
@@ -371,6 +425,12 @@ def gen_pages():
                     template_body_head+=line
             else:
                 template_body_tail+=line
+        f.close()
+
+        #Read in section HTML template
+        f=open("templates/section_template.html")
+        template_section=f.readlines()
+        f.close()
         
         #Check for missing definitions before outputting html
         missing_words=[]
@@ -385,23 +445,44 @@ def gen_pages():
         #Output html to individual files and to one collected file
         combined_file=open(HTML_PATH+"ALL.html","wt")
         combined_file.write(template_body_head)
+        current_section=""
         for k,v in processed_words.items():
-            gen_file=open(HTML_PATH+k+".html","wt")
-            gen_file.write(template_body_head)
-            gen_file.write(v)
-            gen_file.write(template_body_tail)
-            gen_file.close()
+            
+##            individual_file=open(HTML_PATH+k+".html","wt")
+##            individual_file.write(template_body_head)
+##            individual_file.write(v.html)
+##            individual_file.write(template_body_tail)
+##            individual_file.close()
 
+            #Output section heading if necessary
+            if current_section!=v.section:
+                for line in template_section:
+                    if line.strip()=="%section_name":
+                        combined_file.write(f'\t\t<a name="section_{v.section}">{v.section}</a>\n')
+                    elif line.strip()=="%section_description":
+                        combined_file.write("\t\t"+section_list[v.section]+"\n")
+                    elif line.strip()=="%section_words":
+                        for key,val in processed_words.items():
+                            if val.section==v.section:
+                                combined_file.write(f'\t\t<a href="#{key}">{val.show}</a>\n')
+                    elif line.strip()=="%section_list":
+                        for section in section_list.keys():
+                            if section==v.section:
+                                combined_file.write(f'\t\t<b>{section}</b>\n')
+                            else:
+                                combined_file.write(f'\t\t<a href="#section_{section}">{section}</a>\n')
+                    else:
+                        combined_file.write("\t\t"+line)
+                current_section=v.section
+
+            #Output html to combined file
             combined_file.write(f"\t\t<!--{k}-->\n")
-            combined_file.write(v)
+            combined_file.write(v.html)
             combined_file.write("<br><br><br>\n\n")
 
         combined_file.write(template_body_tail)
         combined_file.close()
         
-        
-        
-
     print()
 
 #Main

@@ -1,8 +1,3 @@
-#TODO
-#-link to other words within text
-#-colored sections for word type: math, system, program, structure, control, etc
-#   links should all be anchors since this needs to be one page
-
 
 #SYMBOL foo
 #	foo is a global symbol
@@ -44,26 +39,43 @@ PIC again3 BEGIN_3.png After running FOO then pressing ESC
 PIC until1 BEGIN_4.png Defining BAR (partial view)
 PIC until2 BEGIN_5.png Before running BAR
 PIC until3 BEGIN_6.png After running BAR
-
+PIC if1 IF_1.png Defining FOO (partial view)
+PIC if2 IF_2.png Before
+PIC if3 IF_3.png After
 
 SYMBOL example_again
 	%code : FOO BEGIN 1 + AGAIN ; %done
 	%again1 
-	Running FOO will add one to the first item on the stack continuously until ESC is pressed halting execution. EXIT and QUIT will also exit a BEGIN/AGAIN loop.
+	Running FOO will add one to the first item on the stack continuously until ESC is pressed halting execution. %link EXIT %unlink and %link QUIT %unlink will also exit a %link AGAIN BEGIN/AGAIN %unlink loop.
 	%again2 %again3
 END
 
 SYMBOL example_until
 	%code : BAR BEGIN $1 + DUP $50 = UNTIL ; %done
 	%until1	
-	Running BAR will add $1 to the first item on the stack until it's equal to $50. Pressing ESC or executing EXIT or QUIT will exit a BEGIN/UNTIL loop early.
+	Running BAR will add $1 to the first item on the stack until it's equal to $50. Pressing ESC or executing %link EXIT %unlink or %link QUIT %unlink will exit a %link AGAIN BEGIN/UNTIL %unlink loop early.
 	%until2 %until3
+END
+
+SYMBOL example_if
+	First, define a new word FOO:
+	%code : FOO DUP 20 > IF 1.1 * THEN ; %done 
+	%if1
+	%link DUP %unlink makes a copy of the first item on the stack. %link GT > %unlink compares the item to 20. If larger than 20, it's multiplied by 1.1. If not, the steps between %link IF %unlink and %link THEN %unlink are skipped.
+	%if2 %if3
+END
+
+SYMBOL do_levels
+	Four levels of nested %link DO %unlink loops are supported.
 END
 
 SYMBOL esc_loop
 	Press ESC to exit the loop early and halt execution.
 END
 
+SYMBOL no_unloop
+	Calling %link EXIT %unlink from inside a %link DO %unlink loop is safe. There is no UNLOOP word required before exiting a loop.
+END
 
 
 #List of all words. Checks against this that every word is defined
@@ -125,61 +137,31 @@ LIST
 	DEG
 END
 
-WORD DUP
-	
-	CLASS Stack
-	
-	PIC 1 DUP_1.png Before
-	PIC 2 DUP_2.png After
-	
-	COMMENT
-		( a -- a a )
-	END
-	
-	TYPES
-		ARG a
-		ANY
-		
-		#NOTE
-	END
 
-	DESCRIPTION
-		Duplicates the first item on the stack.
-	END
-
-	EXAMPLE
-		%1 %2
-	END
-
-	SEE ALSO
-		OVER
-	END
-	
+####################################
+SECTION Stack
+	Words for manipulating the stack
 END
+####################################
 
-WORD SWAP
-	
-	CLASS Stack
-	
-	PIC 1 SWAP_1.png Before
-	PIC 2 SWAP_2.png After
+WORD CLEAR
+
+	PIC 1 CLEAR_1.png Before
+	PIC 2 CLEAR_2.png After
 	
 	COMMENT
-		( a b -- b a )
+		( a -- )
 	END
 	
 	TYPES
 		ARG a
 		ANY
 		
-		ARG b
-		ANY
-		
-		#NOTE
+		NOTE Works on any number of stack items.
 	END
 
 	DESCRIPTION
-		Swaps the first two items on the stack.
+		Removes all items from the stack.
 	END
 
 	EXAMPLE
@@ -187,15 +169,12 @@ WORD SWAP
 	END
 
 	SEE ALSO
-		ROT
-		MIN_ROT -ROT
+		DROP
 	END
-	
+
 END
 
 WORD DROP
-
-	CLASS Stack
 
 	PIC 1 DROP_1.png Before
 	PIC 2 DROP_2.png After
@@ -225,9 +204,37 @@ WORD DROP
 
 END
 
-WORD OVER
+WORD DUP
+	
+	PIC 1 DUP_1.png Before
+	PIC 2 DUP_2.png After
+	
+	COMMENT
+		( a -- a a )
+	END
+	
+	TYPES
+		ARG a
+		ANY
+		
+		#NOTE
+	END
 
-	CLASS Stack
+	DESCRIPTION
+		Duplicates the first item on the stack.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		OVER
+	END
+	
+END
+
+WORD OVER
 
 	PIC 1 OVER_1.png Before
 	PIC 2 OVER_2.png After
@@ -261,8 +268,6 @@ WORD OVER
 END
 
 WORD ROT
-
-	CLASS Stack
 
 	PIC 1 ROT_1.png Before
 	PIC 2 ROT_2.png After
@@ -301,8 +306,6 @@ END
 
 WORD MIN_ROT
 
-	CLASS Stack
-
 	SHOW -ROT
 
 	PIC 1 MIN_ROT_1.png Before
@@ -340,26 +343,27 @@ WORD MIN_ROT
 
 END
 
-WORD CLEAR
-
-	CLASS Stack
-
-	PIC 1 CLEAR_1.png Before
-	PIC 2 CLEAR_2.png After
+WORD SWAP
+	
+	PIC 1 SWAP_1.png Before
+	PIC 2 SWAP_2.png After
 	
 	COMMENT
-		( a -- )
+		( a b -- b a )
 	END
 	
 	TYPES
 		ARG a
 		ANY
 		
-		NOTE Works on any number of stack items.
+		ARG b
+		ANY
+		
+		#NOTE
 	END
 
 	DESCRIPTION
-		Removes all items from the stack.
+		Swaps the first two stack items.
 	END
 
 	EXAMPLE
@@ -367,17 +371,23 @@ WORD CLEAR
 	END
 
 	SEE ALSO
-		DROP
+		ROT
+		MIN_ROT -ROT
 	END
-
+	
 END
+
+
+################################
+SECTION Math 
+	Words for mathematical calculations
+END
+################################
 
 WORD ADD
 
 	SHOW +
 	
-	CLASS Math
-
 	PIC 1 ADD_1.png Before adding hex
 	PIC 2 ADD_2.png After adding hex
 	PIC 3 ADD_3.png Before adding floats
@@ -427,8 +437,6 @@ WORD SUB
 	
 	SHOW -
 
-	CLASS Math
-
 	PIC 1 SUB_1.png Before subtracting hex
 	PIC 2 SUB_2.png After subtracting hex
 	PIC 3 SUB_3.png Before subtracting floats
@@ -477,8 +485,6 @@ WORD MULT
 
 	SHOW *
 	
-	CLASS Math
-
 	PIC 1 MULT_1.png Before multiplying hex
 	PIC 2 MULT_2.png After multiplying hex
 	PIC 3 MULT_3.png Before multiplying floats
@@ -505,7 +511,7 @@ WORD MULT
 	END
 
 	DESCRIPTION
-		Multiplies the first two items on the stack.
+		Multiplies the first two stack items.
 	END
 
 	EXAMPLE
@@ -524,8 +530,6 @@ END
 WORD DIV
 
 	SHOW /
-
-	CLASS Math
 
 	PIC 1 DIV_1.png Before dividing hex
 	PIC 2 DIV_2.png After dividing hex
@@ -550,7 +554,7 @@ WORD DIV
 		FLOAT
 		RAW_HEX
 		
-		NOTE Float can be divided by float, or raw hex by raw hex.
+		NOTE Float can be divided by float, and raw hex by raw hex.
 	END
 
 	DESCRIPTION
@@ -571,14 +575,283 @@ WORD DIV
 
 END
 
-WORD TICK
+WORD ABS
 
-	SHOW '
+	PIC 1 ABS_1.png Before
+	PIC 2 ABS_2.png After
 	
-	CLASS System
+	COMMENT
+		( a -- b )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		
+		ARG b
+		FLOAT
+		
+		#NOTE
+	END
 
-	PIC 1 TICK_1.png Before
-	PIC 2 TICK_2.png After - address of DUP
+	DESCRIPTION
+		Absolute value.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		
+	END
+
+END
+
+WORD MAX
+
+	PIC 1 MAX_1.png Before finding max of floats
+	PIC 2 MAX_2.png After finding max of floats
+	PIC 3 MAX_3.png Before finding max of hex
+	PIC 4 MAX_4.png After finding max of hex
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+
+		ARG b
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG c
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		NOTE Float can be compared to float, and hex can be compared to hex.
+	END
+
+	DESCRIPTION
+		Compares the first two stack items and leaves the larger one.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		MIN
+	END
+
+END
+
+WORD MIN
+
+	PIC 1 MIN_1.png Before finding min of floats
+	PIC 2 MIN_2.png After finding min of floats
+	PIC 3 MIN_3.png Before finding min of hex
+	PIC 4 MIN_4.png After finding min of hex
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+
+		ARG b
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG b
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		NOTE Float can be compared to float, and hex can be compared to hex.
+	END
+
+	DESCRIPTION
+		Compares the first two stack items and leaves the smaller one.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		MAX
+	END
+
+END
+
+WORD COS
+
+	PIC 1 COS_1.png Before
+	PIC 2 COS_2.png After
+	PIC 3 COS_3.png Valid range: -PI/2 to PI/2
+	
+	COMMENT
+		( a -- b )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+
+		ARG b
+		FLOAT
+		
+		NOTE a is an angle in radians
+	END
+
+	DESCRIPTION
+		Cosine. Argument must be between -PI/2 and PI/2 inclusive.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		SIN
+		TAN
+		DEG
+		PI
+	END
+
+END
+
+WORD SIN
+
+	PIC 1 SIN_1.png Before
+	PIC 2 SIN_2.png After
+	PIC 3 SIN_3.png Valid range: -PI/2 to PI/2
+	
+	COMMENT
+		( a -- b )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+
+		ARG b
+		FLOAT
+		
+		NOTE a is an angle in radians
+	END
+
+	DESCRIPTION
+		Sine. Argument must be between -PI/2 and PI/2 inclusive.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		COS
+		TAN
+		DEG
+		PI
+	END
+
+END
+
+WORD TAN
+
+	PIC 1 COS_1.png Before
+	PIC 2 COS_2.png After
+	PIC 3 COS_3.png Valid range: between -PI/2 to PI/2
+	
+	COMMENT
+		( a -- b )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+
+		ARG b
+		FLOAT
+		
+		NOTE a is an angle in radians
+	END
+
+	DESCRIPTION
+		Tangent. Argument must be between -PI/2 and PI/2.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		COS
+		SIN
+		DEG
+		PI
+	END
+
+END
+
+WORD DEG
+
+	PIC 1 DEG_1.png Before
+	PIC 2 DEG_2.png After
+	
+	COMMENT
+		( a -- b )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		
+		ARG b
+		FLOAT
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Converts an angle in degrees to radians.
+	END
+
+	EXAMPLE
+		%1 %2
+	END
+
+	SEE ALSO
+		COS
+		SIN
+		TAN
+		PI
+	END
+
+END
+
+WORD PI
+
+	PIC 1 PI_1.png Before
+	PIC 2 PI_2.png After
 	
 	COMMENT
 		( -- a )
@@ -586,104 +859,79 @@ WORD TICK
 	
 	TYPES
 		ARG a
-		SMART_HEX
-	END
-
-	DESCRIPTION
-		Fetches the address of the following word, which can be built-in (ie primitive) or user-defined (ie secondary). 
-	END
-
-	EXAMPLE
-		%1 %2
-		%EXEC/TICK_1 %EXEC/TICK_2
-	END
-
-	SEE ALSO
-		EXEC
-	END
-
-END
-
-WORD EXEC
-	
-	CLASS System
-	
-	COMMENT
-		( a -- )
-	END
-	
-	TYPES
-		ARG a
-		RAW_HEX
-		SMART_HEX
+		FLOAT
 		
 		#NOTE
 	END
 
 	DESCRIPTION
-		Executes the word pointed to by the first stack item. The word can be built-in (ie primitve) or user-defined (ie secondary).
+		Pushes the value of pi onto the stack.
 	END
 
 	EXAMPLE
-		%EXEC/TICK_1 %EXEC/TICK_2
+		%1 %2
 	END
 
 	SEE ALSO
-		TICK '
+		COS
+		SIN
+		TAN
+		DEG
 	END
 
 END
 
-WORD STORE
 
-	SHOW !
+######################################
+SECTION Logic
+	Words for bitwise logic operations
+END
+######################################
+
+WORD AND
+
+	PIC 1 AND_1.png Before
+	PIC 2 AND_2.png After
 	
-	CLASS System
-
-	PIC 1 STORE_1.png Drawing pixels to the screen 
-		
 	COMMENT
-		( a b -- )
+		( a b -- c )
 	END
 	
 	TYPES
 		ARG a
 		RAW_HEX
-		SMART_HEX
 		
 		ARG b
 		RAW_HEX
-		SMART_HEX
 		
-		NOTE <ul style="margin:0"> %warning To store values in variables, use STO instead. Only use ! for low-level system access. %done </li><li> %warning If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written! %done </li></ul>
+		ARG c
+		RAW_HEX
+		
+		#NOTE
 	END
 
 	DESCRIPTION
-		Stores the second stack item at the address pointed to by the first stack item.
+		Bitwise AND of the first two stack items.
 	END
 
 	EXAMPLE
-		%1
-		
-		In this example, ! stores the 16-bit value $2003 at address $8080, which is mapped to two pixels at the center of the screen in the simulator as shown above. Since each pixel is mapped to one byte, storing $2003 writes $03 (the code for red) to the first pixel and $20 (the code for dark blue) to the following pixel. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn. 
+		%1 %2
 	END
 
 	SEE ALSO
-		FETCH @
-		CFETCH C@
-		CSTORE C!
+		NOT
+		OR
+		XOR
 	END
 
 END
 
-WORD FETCH
+WORD NOT
 
-	SHOW @
-
-	CLASS System
-
-	PIC 1 FETCH_1.png Before
-	PIC 2 FETCH_2.png After - 16-bit value fetched from $1234
+	PIC 1 NOT_1.png Before
+	PIC 2 NOT_2.png After
+	PIC 3 NOT_3.png Before
+	PIC 4 NOT_4.png After
 	
 	COMMENT
 		( a -- b )
@@ -692,98 +940,92 @@ WORD FETCH
 	TYPES
 		ARG a
 		RAW_HEX
-		SMART_HEX
 		
 		ARG b
 		RAW_HEX
 		
-		NOTE %warning To fetch values from variables, use the name of the variable instead of @. Only use @ for low-level system access. %done
+		#NOTE
 	END
 
 	DESCRIPTION
-		Fetches the 16-bit value pointed to by the first stack item.
+		Returns $FFFF if the first stack item is $0 and returns $0 if it's non-zero.
 	END
 
 	EXAMPLE
 		%1 %2
+		%3 %4
 	END
 
 	SEE ALSO
-		STORE !
-		CFETCH C@
-		CSTORE C!
+		AND
+		OR
+		XOR
 	END
 
 END
 
-WORD CSTORE
+WORD OR
 
-	SHOW C!
-
-	CLASS System
-
-	PIC 1 CSTORE_1.png Drawing a red pixel to the screen 
+	PIC 1 OR_1.png Before
+	PIC 2 OR_2.png After
 	
 	COMMENT
-		( a b -- )
+		( a b -- c )
 	END
 	
 	TYPES
 		ARG a
 		RAW_HEX
-		SMART_HEX
 		
 		ARG b
 		RAW_HEX
-		SMART_HEX
 		
-		NOTE <ul style="margin:0"><li> %warning To store values in variables, use STO instead. Only use C! for low-level system access. %done </li><li> %warning If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written! %done </li></ul>
+		ARG c
+		RAW_HEX
+		
+		#NOTE
 	END
 
 	DESCRIPTION
-		Stores the low byte of the second stack item at the address pointed to by the first stack item.
+		Bitwise OR of the first two stack items.
 	END
 
 	EXAMPLE
-		%1
-		
-		In this example, C! stores the 8-bit value $03 (the code for red) at address $8080, which is mapped to the pixel at the center of the screen in the simulator as shown above. HALT pauses the simulation here so that the pixels are visible before the screen is redrawn. 
+		%1 %2
 	END
 
 	SEE ALSO
-		CFETCH C@
-		FETCH @
-		STORE !
+		AND
+		NOT
+		XOR
 	END
 
 END
 
-WORD CFETCH
-	
-	SHOW C@
-	
-	CLASS System
-	
-	PIC 1 CFETCH_1.png Before
-	PIC 2 CFETCH_2.png After - 8-bit value fetched from $1234
+WORD XOR
+
+	PIC 1 XOR_1.png Before
+	PIC 2 XOR_2.png After
 	
 	COMMENT
-		( a -- b )
+		( a b -- c )
 	END
 	
 	TYPES
 		ARG a
 		RAW_HEX
-		SMART_HEX
 		
 		ARG b
 		RAW_HEX
 		
-		NOTE %warning To fetch values from variables, use the name of the variable instead of C@. Only use C@ for low-level system access. %done
+		ARG c
+		RAW_HEX
+		
+		#NOTE
 	END
 
 	DESCRIPTION
-		Fetches the 8-bit value pointed to by the first stack item.
+		Bitwise XOR of the first two stack items.
 	END
 
 	EXAMPLE
@@ -791,101 +1033,95 @@ WORD CFETCH
 	END
 
 	SEE ALSO
-		CSTORE C!
-		FETCH @
-		STORE !
+		AND
+		NOT
+		OR
 	END
 
 END
 
-WORD COLON
+WORD LSHIFT
 
-	SHOW :
+	SHOW LS
 
-	CLASS Programming
-
-	PIC 1 COLON_1.png Defining a new word FOO
-	PIC 2 COLON_2.png Before running FOO
-	PIC 3 COLON_3.png After running FOO
+	PIC 1 LSHIFT_1.png Before
+	PIC 2 LSHIFT_2.png After - $123 shifted left by 5 bits
 	
 	COMMENT
-		( -- )
+		( a b -- c )
 	END
 	
 	TYPES
-		NONE
+		ARG a
+		RAW_HEX
+		
+		ARG b
+		RAW_HEX
+		
+		ARG c
+		RAW_HEX
+		
+		#NOTE
 	END
-	
+
 	DESCRIPTION
-		Defines a new word.
+		Shifts the second item on the stack left by the number of bits given in the first item.
 	END
 
 	EXAMPLE
 		%1 %2
-		%3
 	END
 
 	SEE ALSO
-		SEMI ;
+		RSHIFT RS
 	END
 
 END
 
-WORD SEMI
+WORD RSHIFT
 
-	SHOW ;
+	SHOW RS
 
-	CLASS Programming
-
-	PIC 1 COLON_1.png Defining a new word FOO
-	PIC 2 COLON_2.png Before running FOO
-	PIC 3 COLON_3.png After running FOO
+	PIC 1 RSHIFT_1.png Before
+	PIC 2 RSHIFT_2.png After - $2460 shifted right by 5 bits
 	
 	COMMENT
-		( -- )
+		( a b -- c )
 	END
 	
 	TYPES
-		NONE
+		ARG a
+		RAW_HEX
+		
+		ARG b
+		RAW_HEX
+		
+		ARG c
+		RAW_HEX
+		
+		#NOTE
 	END
-	
+
 	DESCRIPTION
-		Concludes the definition of a new word.
+		Shifts the second item on the stack right by the number of bits given in the first item.
 	END
 
 	EXAMPLE
 		%1 %2
-		%3
 	END
 
 	SEE ALSO
-		COLON :
-	END
-END
-
-WORD HALT
-
-	CLASS Programming	
-
-	PIC 1 HALT_1.png Halting simulation
-	
-	COMMENT
-		( -- )
-	END
-	
-	TYPES
-		NONE
-	END
-
-	DESCRIPTION
-		Halts the simulation.
-	END
-
-	EXAMPLE
-		%1
+		LSHIFT LS
 	END
 
 END
+
+
+#################
+SECTION Variables
+	Words for managing variables
+END
+#################
 
 WORD VAR
 
@@ -902,7 +1138,7 @@ WORD VAR
 	END
 
 	DESCRIPTION
-		Creates a new variable. STO also creates a new variable if it doesn't exist. 
+		Creates a new variable. %link STO %unlink also creates a new variable if it doesn't exist. 
 	END
 
 	EXAMPLE
@@ -950,34 +1186,72 @@ WORD STO
 
 END
 
-WORD FREE
 
-	PIC 1 FREE_1.png Before
-	PIC 2 FREE_2.png After
+##############################################
+SECTION Programming
+	Words for defining and controling programs
+END
+##############################################
+
+WORD COLON
+
+	SHOW :
+
+	PIC 1 COLON_1.png Defining a new word FOO
+	PIC 2 COLON_2.png Before running FOO
+	PIC 3 COLON_3.png After running FOO
 	
 	COMMENT
-		( -- a )
+		( -- )
 	END
 	
 	TYPES
-		ARG a
-		RAW_HEX
-		
-		#NOTE
+		NONE
 	END
-
+	
 	DESCRIPTION
-		Puts the number of free bytes of RAM on the stack.
+		Defines a new word.
 	END
 
 	EXAMPLE
 		%1 %2
+		%3
 	END
 
 	SEE ALSO
-		
+		SEMI ;
 	END
 
+END
+
+WORD SEMI
+
+	SHOW ;
+
+	PIC 1 COLON_1.png Defining a new word FOO
+	PIC 2 COLON_2.png Before running FOO
+	PIC 3 COLON_3.png After running FOO
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+	
+	DESCRIPTION
+		Concludes the definition of a new word.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		COLON :
+	END
 END
 
 WORD EXIT
@@ -997,7 +1271,7 @@ WORD EXIT
 
 	DESCRIPTION
 		Exits the currently executing word. Continues execution of calling word if it exists.
-		Calling EXIT from inside a DO loop doesn't require UNLOOP.
+		%no_unloop
 		%compile_only
 	END
 
@@ -1008,6 +1282,28 @@ WORD EXIT
 
 	SEE ALSO
 		QUIT
+	END
+
+END
+
+WORD HALT
+
+	PIC 1 HALT_1.png Halting simulation
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Halts the simulation.
+	END
+
+	EXAMPLE
+		%1
 	END
 
 END
@@ -1038,96 +1334,17 @@ WORD QUIT
 	END
 
 	SEE ALSO
-		
+		EXIT
 	END
 
 END
 
-WORD DO
 
-	PIC 1 DO_1.png A word with a do loop
-	PIC 2 DO_2.png Before
-	PIC 3 DO_3.png After
-	
-	COMMENT
-		( a b -- )
-	END
-	
-	TYPES
-		ARG a
-		FLOAT
-		
-		ARG a
-		FLOAT
-		
-		#NOTE
-	END
-
-	DESCRIPTION
-		Loops from the first value on the stack up to but not including the second value on the stack.
-		Four levels of nested DO loops are supported.
-		Calling EXIT from inside a DO loop doesn't require UNLOOP.
-		%esc_loop
-		%compile_only
-	END
-
-	EXAMPLE
-		%1 %2
-		%3
-	END
-
-	SEE ALSO
-		LOOP
-		I
-		J
-		K
-		LEAVE
-	END
-
+############################################
+SECTION Conditionals
+	Words for conditional program structures
 END
-
-WORD LOOP
-
-	PIC 1 DO_1.png A word with a do loop
-	PIC 2 DO_2.png Before
-	PIC 3 DO_3.png After
-	
-	COMMENT
-		( a b -- )
-	END
-	
-	TYPES
-		ARG a
-		FLOAT
-		
-		ARG a
-		FLOAT
-		
-		#NOTE
-	END
-
-	DESCRIPTION
-		Marks the end of a loop begun with DO.
-		Four levels of nested DO loops are supported.
-		Calling EXIT from inside a DO loop doesn't require UNLOOP.
-		%esc_loop
-		%compile_only
-	END
-
-	EXAMPLE
-		%1 %2
-		%3
-	END
-
-	SEE ALSO
-		DO
-		I
-		J
-		K
-		LEAVE
-	END
-	
-END
+############################################
 
 WORD EQUAL
 
@@ -1177,6 +1394,56 @@ WORD EQUAL
 		THEN
 	END
 
+END
+
+WORD NEQ
+
+	SHOW <>
+
+	PIC 1 NEQ_1.png Before comparing floats
+	PIC 2 NEQ_2.png After comparing floats
+	PIC 3 NEQ_3.png Before comparing hex
+	PIC 4 NEQ_4.png After comparing hex
+	
+	COMMENT
+		( a b -- c )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG a
+		FLOAT
+		RAW_HEX
+		SMART_HEX
+		
+		ARG c 
+		RAW_HEX
+		
+		NOTE Float can be compared to float, and hex can be compared to hex.
+	END
+
+	DESCRIPTION
+		Compares the first item on the stack to the second item. Returns $FFFF if they are not equal and $0000 if they are.
+	END
+
+	EXAMPLE
+		%1 %2
+		%3 %4
+	END
+
+	SEE ALSO
+		EQUAL =
+		GT >
+		LT <
+		IF
+		ELSE
+		THEN
+	END
+	
 END
 
 WORD GT
@@ -1279,59 +1546,239 @@ WORD LT
 	
 END
 
-WORD NEQ
+WORD IF
 
-	SHOW <>
-
-	PIC 1 NEQ_1.png Before comparing floats
-	PIC 2 NEQ_2.png After comparing floats
-	PIC 3 NEQ_3.png Before comparing hex
-	PIC 4 NEQ_4.png After comparing hex
-	
 	COMMENT
-		( a b -- c )
+		( a -- )
 	END
 	
 	TYPES
 		ARG a
-		FLOAT
-		RAW_HEX
-		SMART_HEX
+		ANY
 		
-		ARG a
-		FLOAT
-		RAW_HEX
-		SMART_HEX
-		
-		ARG c 
-		RAW_HEX
-		
-		NOTE Float can be compared to float, and hex can be compared to hex.
+		#NOTE
 	END
 
 	DESCRIPTION
-		Compares the first item on the stack to the second item. Returns $FFFF if they are not equal and $0000 if they are.
+		Tests the first item on the stack and skips to %link THEN %unlink if false.
+		%compile_only
 	END
 
 	EXAMPLE
-		%1 %2
-		%3 %4
+		%example_if
 	END
 
 	SEE ALSO
 		EQUAL =
+		NEQ <>
 		GT >
 		LT <
-		IF
 		ELSE
 		THEN
 	END
 	
 END
 
+WORD ELSE
+
+	PIC 1 ELSE_1.png Defining FOO (partial view)
+	PIC 2 ELSE_2.png Before
+	PIC 3 ELSE_3.png After
+	PIC 4 ELSE_4.png Before
+	PIC 5 ELSE_5.png After
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Marks an alternative block to be executed if an %link IF %unlink statement is false.
+		Must come between %link IF %unlink and %link THEN THEN. %unlink
+		%compile_only
+	END
+
+	EXAMPLE
+		First, define a new word FOO:
+		%code : FOO 18 < IF "CHILD" ELSE "ADULT" THEN ; %done 
+		%1
+		FOO compares the first item on the stack to 18. If it's less, the string "CHILD" is pushed onto the stack. Otherwise, "ADULT" is pushed onto the stack.
+		%2 %3
+		%4 %5
+	END
+
+	SEE ALSO
+		EQUAL =
+		NEQ <>
+		GT >
+		LT <
+		IF
+		THEN
+	END
+
+END
+
+WORD THEN
+
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Marks the end of a conditional block begun by %link IF IF. %unlink
+		%compile_only
+	END
+
+	EXAMPLE
+		%example_if
+	END
+
+	SEE ALSO
+		EQUAL =
+		NEQ <>
+		GT >
+		LT <
+		IF
+		ELSE
+	END
+	
+END
+
+
+#############################
+SECTION Loops
+	Words for loop structures
+END
+#############################
+
+WORD DO
+
+	PIC 1 DO_1.png Defining FOO
+	PIC 2 DO_2.png Before
+	PIC 3 DO_3.png After
+	
+	COMMENT
+		( a b -- )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		
+		ARG a
+		FLOAT
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Loops from the first value on the stack up to but not including the second value on the stack.
+		%do_levels
+		%no_unloop
+		%esc_loop
+		%compile_only
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		LOOP
+		I
+		J
+		K
+		LEAVE
+	END
+
+END
+
+WORD LOOP
+
+	PIC 1 DO_1.png A word with a %link DO %unlink loop
+	PIC 2 DO_2.png Before
+	PIC 3 DO_3.png After
+	
+	COMMENT
+		( a b -- )
+	END
+	
+	TYPES
+		ARG a
+		FLOAT
+		
+		ARG a
+		FLOAT
+		
+		#NOTE
+	END
+
+	DESCRIPTION
+		Marks the end of a loop begun with %link DO DO. %unlink
+		%do_levels
+		%no_unloop
+		%esc_loop
+		%compile_only
+	END
+
+	EXAMPLE
+		%1 %2
+		%3
+	END
+
+	SEE ALSO
+		DO
+		I
+		J
+		K
+		LEAVE
+	END
+	
+END
+
+WORD LEAVE
+
+	PIC 1 LEAVE_1.png Defining FOO (partial view)
+	PIC 2 LEAVE_2.png
+	
+	COMMENT
+		( -- )
+	END
+	
+	TYPES
+		NONE
+	END
+
+	DESCRIPTION
+		Breaks out of a %link DO %unlink loop.
+		%compile_only
+	END
+
+	EXAMPLE
+		First, define a new word FOO with a DO loop:
+		%code : FOO 0 8 1 DO I + I 4 = IF LEAVE THEN LOOP ; %done
+		%1
+		FOO pushes a 0 on the stack to use as a counter. %link DO %unlink iterates from 1 to 7. %link I %unlink %link ADD + %unlink adds the loop value to the counter on the stack. %link I %unlink 4 %link EQUAL = %unlink compares the loop value to 4, and when it's equal, %link LEAVE %unlink exits the loop. As a result, FOO sums the values from 1 to 4 and exits the loop without summing 5, 6, or 7.
+		%2
+	END
+
+	SEE ALSO
+		
+	END
+
+END
+
 WORD I
 
-	PIC 1 DO_1.png A word with a do loop
+	PIC 1 DO_1.png A word with a %link DO %unlink loop
 	PIC 2 DO_2.png Before - looping from 0 to 3
 	PIC 3 DO_3.png After
 	
@@ -1344,7 +1791,7 @@ WORD I
 	END
 
 	DESCRIPTION
-		Pushes the loop value of the innermost DO loop onto the stack.
+		Pushes the loop value of the innermost %link DO %unlink loop onto the stack.
 		%compile_only
 	END
 
@@ -1377,15 +1824,15 @@ WORD J
 	END
 
 	DESCRIPTION
-		Pushes the loop value of a second-level DO loop onto the stack.
+		Pushes the loop value of a second-level %link DO %unlink loop onto the stack.
 		%compile_only
 	END
 
 	EXAMPLE
-		First, define a new word FOO with two nested DO loops:
+		First, define a new word FOO with two nested %link DO %unlink loops:
 		%code : FOO 9 7 DO 5 3 DO I J * LOOP LOOP ; %done
 		%1
-		The outer DO loop iterates from 7 to 8 and the inner loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 7. * multiplies the two values together and leaves 21 on the stack. The next iterations push the results of 4*7, 3*8, and 4*8.
+		The outer %link DO %unlink loop iterates from 7 to 8 and the inner loop iterates from 3 to 4. The first time through, %link I %unlink pushes 3 onto the stack and %link J %unlink pushes 7. %link MULT * %unlink link multiplies the two values together and leaves 21 on the stack. The next iterations push the results of 4*7, 3*8, and 4*8.
 		%2
 	END
 
@@ -1413,15 +1860,15 @@ WORD K
 	END
 
 	DESCRIPTION
-		Pushes the loop value of a third-level DO loop onto the stack.
+		Pushes the loop value of a third-level %link DO %unlink loop onto the stack.
 		%compile_only
 	END
 
 	EXAMPLE
-		First, define a new word FOO with three nested DO loops: 
+		First, define a new word FOO with three nested %link DO %unlink loops: 
 		%code : FOO 9 8 DO 7 6 DO 5 3 DO I J * K + LOOP LOOP LOOP ;</span> 
 		%1
-		The outer DO loop iterates only once with the value of 8 and the second-level loop iterates once with the value 6. (Loops usually iterate more than once, but these are kept short for example's sake.) The innermost loop iterates from 3 to 4. The first time through, I pushes 3 onto the stack and J pushes 6. * multiplies the two values together yielding 18. K pushes 8 onto the stack and + adds 8 to 18 leaving 26 on the stack. The next iteration pushes the result of 4*6+8.
+		The outer %link DO %unlink loop iterates only once with the value of 8 and the second-level loop iterates once with the value 6. (Loops usually iterate more than once, but these are kept short for example's sake.) The innermost loop iterates from 3 to 4. The first time through, %link I %unlink pushes 3 onto the stack and %link J %unlink pushes 6. %link MULT * %unlink multiplies the two values together yielding 18. %link K %unlink pushes 8 onto the stack and %link ADD + %unlink adds 8 to 18 leaving 26 on the stack. The next iteration pushes the result of 4*6+8.
 		%2
 	END
 
@@ -1446,15 +1893,15 @@ WORD BEGIN
 	END
 
 	DESCRIPTION
-		Marks the beginning of a BEGIN/AGAIN infinite loop or the beginning of a BEGIN/UNTIL conditional loop.
+		Marks the beginning of a %link AGAIN BEGIN/AGAIN %unlink infinite loop or the beginning of a %link UNTIL BEGIN/UNTIL %unlink conditional loop.
 		%esc_loop
 		%compile_only
 	END
 
 	EXAMPLE
-		First, define a new word FOO with an infinite BEGIN/AGAIN loop:
+		First, define a new word FOO with an infinite %link AGAIN BEGIN/AGAIN %unlink loop:
 		%example_again
-		Next, define a new word BAR with a conditional BEGIN/UNTIL loop: 
+		Next, define a new word BAR with a conditional %link UNTIL BEGIN/UNTIL %unlink loop: 
 		%example_until
 	END
 
@@ -1478,13 +1925,13 @@ WORD AGAIN
 	END
 
 	DESCRIPTION
-		Marks the end of an infinite loop begun with BEGIN.
+		Marks the end of an infinite loop begun with %link BEGIN BEGIN. %unlink
 		%esc_loop
 		%compile_only
 	END
 
 	EXAMPLE
-		First, define a new word FOO with a BEGIN/AGAIN loop:
+		First, define a new word FOO with a %link AGAIN BEGIN/AGAIN %unlink loop:
 		%example_again
 	END
 
@@ -1509,13 +1956,13 @@ WORD UNTIL
 	END
 
 	DESCRIPTION
-		Marks the end of a conditional loop begun with BEGIN.
+		Marks the end of a conditional loop begun with %link BEGIN BEGIN. %unlink
 		%esc_loop
 		%compile_only
 	END
 
 	EXAMPLE
-		First, define a new word BAR with a conditional BEGIN/UNTIL loop: 
+		First, define a new word BAR with a conditional %link UNTIL BEGIN/UNTIL %unlink loop: 
 		%example_until
 	END
 
@@ -1528,216 +1975,59 @@ WORD UNTIL
 
 END
 
-WORD MAX
 
-	PIC 1 MAX_1.png Before finding max of floats
-	PIC 2 MAX_2.png After finding max of floats
-	PIC 3 MAX_3.png Before finding max of hex
-	PIC 4 MAX_4.png After finding max of hex
-	
-	COMMENT
-		( a b -- c )
-	END
-	
-	TYPES
-		ARG a
-		FLOAT
-		RAW_HEX
-		SMART_HEX
-
-		ARG b
-		FLOAT
-		RAW_HEX
-		SMART_HEX
-		
-		ARG c
-		FLOAT
-		RAW_HEX
-		SMART_HEX
-		
-		NOTE Float can be compared to float, and hex can be compared to hex.
-	END
-
-	DESCRIPTION
-		Compares the first two items on the stack and leaves the larger one.
-	END
-
-	EXAMPLE
-		%1 %2
-		%3 %4
-	END
-
-	SEE ALSO
-		MIN
-	END
-
+#####################################
+SECTION System
+	Words for low-level system access
 END
+#####################################
 
-WORD MIN
+WORD STORE
 
-	PIC 1 MIN_1.png Before finding min of floats
-	PIC 2 MIN_2.png After finding min of floats
-	PIC 3 MIN_3.png Before finding min of hex
-	PIC 4 MIN_4.png After finding min of hex
+	SHOW !
 	
-	COMMENT
-		( a b -- c )
-	END
-	
-	TYPES
-		ARG a
-		FLOAT
-		RAW_HEX
-		SMART_HEX
-
-		ARG b
-		FLOAT
-		RAW_HEX
-		SMART_HEX
+	PIC 1 STORE_1.png Drawing pixels to the screen 
 		
-		ARG b
-		FLOAT
-		RAW_HEX
-		SMART_HEX
-		
-		NOTE Float can be compared to float, and hex can be compared to hex.
-	END
-
-	DESCRIPTION
-		Compares the first two items on the stack and leaves the smaller one.
-	END
-
-	EXAMPLE
-		%1 %2
-		%3 %4
-	END
-
-	SEE ALSO
-		MAX
-	END
-
-END
-
-WORD AND
-
-	PIC 1 AND_1.png Before
-	PIC 2 AND_2.png After
-	
 	COMMENT
-		( a b -- c )
+		( a b -- )
 	END
 	
 	TYPES
 		ARG a
 		RAW_HEX
+		SMART_HEX
 		
 		ARG b
 		RAW_HEX
+		SMART_HEX
 		
-		ARG c
-		RAW_HEX
-		
-		#NOTE
+		NOTE <ul style="margin:0"><li> %warning To store values in variables, use %link STO %unlink instead. Only use ! for low-level system access. %done </li><li> %warning If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written! %done </li></ul>
 	END
 
 	DESCRIPTION
-		Bitwise AND of the first two stack items.
+		Stores the second stack item at the address pointed to by the first stack item.
 	END
 
 	EXAMPLE
-		%1 %2
+		%1
+		
+		In this example, ! stores the 16-bit value $2003 at address $8080, which is mapped to two pixels at the center of the screen in the simulator as shown above. Since each pixel is mapped to one byte, storing $2003 writes $03 (the code for red) to the first pixel and $20 (the code for dark blue) to the following pixel. %link HALT %unlink pauses the simulation here so that the pixels are visible before the screen is redrawn. 
 	END
 
 	SEE ALSO
-		NOT
-		OR
-		XOR
+		FETCH @
+		CFETCH C@
+		CSTORE C!
 	END
 
 END
 
-WORD OR
+WORD FETCH
 
-	PIC 1 OR_1.png Before
-	PIC 2 OR_2.png After
-	
-	COMMENT
-		( a b -- c )
-	END
-	
-	TYPES
-		ARG a
-		RAW_HEX
-		
-		ARG b
-		RAW_HEX
-		
-		ARG c
-		RAW_HEX
-		
-		#NOTE
-	END
+	SHOW @
 
-	DESCRIPTION
-		Bitwise OR of the first two stack items.
-	END
-
-	EXAMPLE
-		%1 %2
-	END
-
-	SEE ALSO
-		NOT
-		AND
-		XOR
-	END
-
-END
-
-WORD XOR
-
-	PIC 1 XOR_1.png Before
-	PIC 2 XOR_2.png After
-	
-	COMMENT
-		( a b -- c )
-	END
-	
-	TYPES
-		ARG a
-		RAW_HEX
-		
-		ARG b
-		RAW_HEX
-		
-		ARG c
-		RAW_HEX
-		
-		#NOTE
-	END
-
-	DESCRIPTION
-		Bitwise XOR of the first two stack items.
-	END
-
-	EXAMPLE
-		%1 %2
-	END
-
-	SEE ALSO
-		NOT
-		AND
-		OR
-	END
-
-END
-
-WORD NOT
-
-	PIC 1 NOT_1.png Before
-	PIC 2 NOT_2.png After
-	PIC 3 NOT_3.png Before
-	PIC 4 NOT_4.png After
+	PIC 1 FETCH_1.png Before
+	PIC 2 FETCH_2.png After - 16-bit value fetched from $1234
 	
 	COMMENT
 		( a -- b )
@@ -1746,211 +2036,16 @@ WORD NOT
 	TYPES
 		ARG a
 		RAW_HEX
+		SMART_HEX
 		
 		ARG b
 		RAW_HEX
 		
-		#NOTE
+		NOTE %warning To fetch values from variables, use the name of the variable instead of @. Only use @ for low-level system access. %done
 	END
 
 	DESCRIPTION
-		Returns $FFFF if the first stack item is $0 and returns $0 if it's non-zero.
-	END
-
-	EXAMPLE
-		%1 %2
-		%3 %4
-	END
-
-	SEE ALSO
-		IF
-		THEN
-		AND
-		OR
-		XOR
-	END
-
-END
-
-WORD LEAVE
-
-	PIC 1 LEAVE_1.png Defining FOO (partial view)
-	PIC 2 LEAVE_2.png
-	
-	COMMENT
-		( -- )
-	END
-	
-	TYPES
-		NONE
-	END
-
-	DESCRIPTION
-		Breaks out of a DO loop.
-		%compile_only
-	END
-
-	EXAMPLE
-		First, define a new word FOO with a DO loop:
-		%code : FOO 0 8 1 DO I + I 4 = IF LEAVE THEN LOOP ; %done
-		%1
-		FOO pushes a 0 on the stack to use as a counter. DO iterates from 1 to 7. I + adds the loop value to the counter on the stack. I 4 = compares the loop value to 4, and when it's equal, LEAVE exits the loop. As a result, FOO sums the values from 1 to 4 and exits the loop without summing 5, 6, or 7.
-		%2
-	END
-
-	SEE ALSO
-		
-	END
-
-END
-
-WORD IF
-
-	PIC 1 IF_1.png Defining FOO (partial view)
-	PIC 2 IF_2.png Before
-	PIC 3 IF_3.png After
-	
-	COMMENT
-		( a -- )
-	END
-	
-	TYPES
-		ARG a
-		ANY
-		
-		#NOTE
-	END
-
-	DESCRIPTION
-		Tests the first item on the stack and skips to THEN if false.
-		%compile_only
-	END
-
-	EXAMPLE
-		First, define a new word FOO:
-		%code : FOO DUP 20 > IF 1.1 * THEN ; %done 
-		%1
-		DUP makes a copy of the first item on the stack. 20 > compares the item to 20. If larger than 20, the value is multiplied by 1.1. If not, the steps between IF and THEN are skipped.
-		%2 %3
-	END
-
-	SEE ALSO
-		EQUAL =
-		NEQ <>
-		GT >
-		LT <
-		ELSE
-		THEN
-	END
-	
-END
-
-WORD THEN
-
-	PIC 1 IF_1.png Defining FOO (partial view)
-	PIC 2 IF_2.png Before
-	PIC 3 IF_3.png After
-	
-	COMMENT
-		( -- )
-	END
-	
-	TYPES
-		NONE
-	END
-
-	DESCRIPTION
-		Marks the end of a conditional block begun by IF.
-		%compile_only
-	END
-
-	EXAMPLE
-		First, define a new word FOO:
-		%code : FOO DUP 20 > IF 1.1 * THEN ; %done 
-		%1
-		DUP makes a copy of the first item on the stack. 20 > compares it to 20. If larger than 20, the value is multiplied by 1.1. If not, the steps between IF and THEN are skipped and the value is not multiplied.
-		%2 %3
-	END
-
-	SEE ALSO
-		EQUAL =
-		NEQ <>
-		GT >
-		LT <
-		IF
-		ELSE
-	END
-	
-END
-
-WORD ELSE
-
-	PIC 1 ELSE_1.png Defining FOO (partial view)
-	PIC 2 ELSE_2.png Before
-	PIC 3 ELSE_3.png After
-	PIC 4 ELSE_4.png Before
-	PIC 5 ELSE_5.png After
-	
-	COMMENT
-		( -- )
-	END
-	
-	TYPES
-		NONE
-	END
-
-	DESCRIPTION
-		Marks an alternative block to be executed if an IF statement is false.
-		Must come between IF and THEN.
-		%compile_only
-	END
-
-	EXAMPLE
-		First, define a new word FOO:
-		%code : FOO 18 < IF "CHILD" ELSE "ADULT" THEN ; %done 
-		%1
-		FOO compares the first item on the stack to 18. If it's less, the string "CHILD" is pushed onto the stack. Otherwise, "ADULT" is pushed onto the stack.
-		%2 %3
-		%4 %5
-	END
-
-	SEE ALSO
-		EQUAL =
-		NEQ <>
-		GT >
-		LT <
-		IF
-		THEN
-	END
-
-END
-
-WORD LSHIFT
-
-	SHOW LS
-
-	PIC 1 LSHIFT_1.png Before
-	PIC 2 LSHIFT_2.png After - $123 shifted left by 5 bits
-	
-	COMMENT
-		( a b -- c )
-	END
-	
-	TYPES
-		ARG a
-		RAW_HEX
-		
-		ARG b
-		RAW_HEX
-		
-		ARG c
-		RAW_HEX
-		
-		#NOTE
-	END
-
-	DESCRIPTION
-		Shifts the second item on the stack left by the number of bits given in the first item.
+		Fetches the 16-bit value pointed to by the first stack item.
 	END
 
 	EXAMPLE
@@ -1958,53 +2053,59 @@ WORD LSHIFT
 	END
 
 	SEE ALSO
-		RSHIFT RS
+		STORE !
+		CFETCH C@
+		CSTORE C!
 	END
 
 END
 
-WORD RSHIFT
+WORD CSTORE
 
-	SHOW RS
+	SHOW C!
 
-	PIC 1 RSHIFT_1.png Before
-	PIC 2 RSHIFT_2.png After - $2460 shifted right by 5 bits
+	PIC 1 CSTORE_1.png Drawing a red pixel to the screen 
 	
 	COMMENT
-		( a b -- c )
+		( a b -- )
 	END
 	
 	TYPES
 		ARG a
 		RAW_HEX
+		SMART_HEX
 		
 		ARG b
 		RAW_HEX
+		SMART_HEX
 		
-		ARG c
-		RAW_HEX
-		
-		#NOTE
+		NOTE <ul style="margin:0"><li> %warning To store values in variables, use %link STO %unlink instead. Only use C! for low-level system access. %done </li><li> %warning If value to be written is smart hex, it will <u>not</u> be automatically updated during garbage collection after being written! %done </li></ul>
 	END
 
 	DESCRIPTION
-		Shifts the second item on the stack right by the number of bits given in the first item.
+		Stores the low byte of the second stack item at the address pointed to by the first stack item.
 	END
 
 	EXAMPLE
-		%1 %2
+		%1
+		
+		In this example, C! stores the 8-bit value $03 (the code for red) at address $8080, which is mapped to the pixel at the center of the screen in the simulator as shown above. %link HALT %unlink pauses the simulation here so that the pixels are visible before the screen is redrawn. 
 	END
 
 	SEE ALSO
-		LSHIFT LS
+		CFETCH C@
+		FETCH @
+		STORE !
 	END
 
 END
 
-WORD ABS
-
-	PIC 1 ABS_1.png Before
-	PIC 2 ABS_2.png After
+WORD CFETCH
+	
+	SHOW C@
+	
+	PIC 1 CFETCH_1.png Before
+	PIC 2 CFETCH_2.png After - 8-bit value fetched from $1234
 	
 	COMMENT
 		( a -- b )
@@ -2012,16 +2113,17 @@ WORD ABS
 	
 	TYPES
 		ARG a
-		FLOAT
+		RAW_HEX
+		SMART_HEX
 		
 		ARG b
-		FLOAT
+		RAW_HEX
 		
-		#NOTE
+		NOTE %warning To fetch values from variables, use the name of the variable instead of C@. Only use C@ for low-level system access. %done
 	END
 
 	DESCRIPTION
-		Absolute value.
+		Fetches the 8-bit value pointed to by the first stack item.
 	END
 
 	EXAMPLE
@@ -2029,15 +2131,19 @@ WORD ABS
 	END
 
 	SEE ALSO
-		
+		CSTORE C!
+		FETCH @
+		STORE !
 	END
 
 END
 
-WORD PI
+WORD TICK
 
-	PIC 1 PI_1.png Before
-	PIC 2 PI_2.png After
+	SHOW '
+	
+	PIC 1 TICK_1.png Before
+	PIC 2 TICK_2.png After - address of %link DUP %unlink
 	
 	COMMENT
 		( -- a )
@@ -2045,163 +2151,70 @@ WORD PI
 	
 	TYPES
 		ARG a
-		FLOAT
+		SMART_HEX
+	END
+
+	DESCRIPTION
+		Fetches the address of the following word, which can be built-in (ie primitive) or user-defined (ie secondary). 
+	END
+
+	EXAMPLE
+		%1 %2
+		%EXEC/TICK_1 %EXEC/TICK_2
+	END
+
+	SEE ALSO
+		EXEC
+	END
+
+END
+
+WORD EXEC
+	
+	COMMENT
+		( a -- )
+	END
+	
+	TYPES
+		ARG a
+		RAW_HEX
+		SMART_HEX
 		
 		#NOTE
 	END
 
 	DESCRIPTION
-		Pushes the value of pi onto the stack.
+		Executes the word pointed to by the first stack item. The word can be built-in (ie primitve) or user-defined (ie secondary).
 	END
 
 	EXAMPLE
-		%1 %2
+		%EXEC/TICK_1 %EXEC/TICK_2
 	END
 
 	SEE ALSO
-		COS
-		SIN
-		TAN
-		DEG
+		TICK '
 	END
 
 END
 
-WORD SIN
+WORD FREE
 
-	PIC 1 SIN_1.png Before
-	PIC 2 SIN_2.png After
-	PIC 3 SIN_3.png Valid range: -PI/2 to PI/2
+	PIC 1 FREE_1.png Before
+	PIC 2 FREE_2.png After
 	
 	COMMENT
-		( a -- b )
+		( -- a )
 	END
 	
 	TYPES
 		ARG a
-		FLOAT
-
-		ARG b
-		FLOAT
-		
-		NOTE a is an angle in radians
-	END
-
-	DESCRIPTION
-		Sine. Argument must be between -PI/2 and PI/2 inclusive.
-	END
-
-	EXAMPLE
-		%1 %2
-		%3
-	END
-
-	SEE ALSO
-		COS
-		TAN
-		PI
-		DEG
-	END
-
-END
-
-WORD COS
-
-	PIC 1 COS_1.png Before
-	PIC 2 COS_2.png After
-	PIC 3 COS_3.png Valid range: -PI/2 to PI/2
-	
-	COMMENT
-		( a -- b )
-	END
-	
-	TYPES
-		ARG a
-		FLOAT
-
-		ARG b
-		FLOAT
-		
-		NOTE a is an angle in radians
-	END
-
-	DESCRIPTION
-		Cosine. Argument must be between -PI/2 and PI/2 inclusive.
-	END
-
-	EXAMPLE
-		%1 %2
-		%3
-	END
-
-	SEE ALSO
-		SIN
-		TAN
-		PI
-		DEG
-	END
-
-END
-
-WORD TAN
-
-	PIC 1 COS_1.png Before
-	PIC 2 COS_2.png After
-	PIC 3 COS_3.png Valid range: between -PI/2 to PI/2
-	
-	COMMENT
-		( a -- b )
-	END
-	
-	TYPES
-		ARG a
-		FLOAT
-
-		ARG b
-		FLOAT
-		
-		NOTE a is an angle in radians
-	END
-
-	DESCRIPTION
-		Tangent. Argument must be between -PI/2 and PI/2.
-	END
-
-	EXAMPLE
-		%1 %2
-		%3
-	END
-
-	SEE ALSO
-		COS
-		SIN
-		PI
-		DEG
-	END
-
-END
-
-WORD DEG
-
-	PIC 1 DEG_1.png Before
-	PIC 2 DEG_2.png After
-	
-	COMMENT
-		( a -- b )
-	END
-	
-	TYPES
-		ARG a
-		FLOAT
-		
-		ARG b
-		FLOAT
+		RAW_HEX
 		
 		#NOTE
 	END
 
 	DESCRIPTION
-		Converts an angle in degrees to radians.
+		Pushes the number of free bytes of RAM onto the stack.
 	END
 
 	EXAMPLE
@@ -2209,10 +2222,8 @@ WORD DEG
 	END
 
 	SEE ALSO
-		COS
-		SIN
-		TAN
-		PI
+		
 	END
 
 END
+

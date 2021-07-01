@@ -4,6 +4,15 @@
 		font-size: 14px;
 	}
 		
+	.section_name {
+		font-size: 24px;
+	}
+	
+	.section_description {
+		font-style: italic;
+	}
+	
+	
 	.word_img_caption {
 		font-style: italic;
 	}
@@ -14,7 +23,7 @@
 	}
 	
 	.word_show {
-		font-size: 24px;
+		font-size: 18px;
 	}
 	
 	.word_comment {

@@ -946,104 +946,104 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	END
 	
 	TODO: remove after debugging
-	CORDIC_DEBUG_COUNTER:
-		DFS 1
-	CORDIC_DEBUG_BUFF:
-		DFS 12
-	CORDIC_DEBUG_STUB:
-
-		LDA #'X'
-		STA DEBUG
-		LDA #':'
-		STA DEBUG
-		LDX #R2
-		JSR DEBUG_REG
-		
-		LDA #'Y'
-		STA DEBUG
-		LDA #':'
-		STA DEBUG
-		LDX #R3
-		JSR DEBUG_REG
-		
-		LDA #'Z'
-		STA DEBUG
-		LDA #':'
-		STA DEBUG
-		LDX #R4
-		JSR DEBUG_REG
-		
-		LDA #'\\'
-		STA DEBUG
-		LDA #'n'
-		STA DEBUG
-		
-		RTS
-		
-	DEBUG_REG:
-		LDA DEC_COUNT/2+1,X
-		BNE .x1
-			.assume_positive:
-			LDA #' '
-			STA DEBUG
-			TXA
-			PHA
-			CLC
-			PHP
-			CLD
-			ADC #CORDIC_WIDTH-1
-			PLP
-			TAX
-			LDY #CORDIC_WIDTH-1
-			.debug_plus:
-				LDA 0,X
-				STA DEBUG_HEX
-				DEX
-				DEY
-				BNE .debug_plus
-			LDA #' '
-			STA DEBUG
-			PLA
-			TAX
-			LDA 0,X
-			STA DEBUG_HEX
-			JMP .done
-		.x1:
-		CMP #$99
-		BNE .x_unknown
-			LDA #'-'
-			STA DEBUG
-			LDY #CORDIC_WIDTH
-			SEC
-			.debug_minus:
-				LDA #0
-				SBC 0,X
-				STA CORDIC_DEBUG_BUFF,Y
-				INX
-				DEY
-				BNE .debug_minus
-			LDY #1
-			.print:
-				LDA CORDIC_DEBUG_BUFF,Y
-				STA DEBUG_HEX
-				INY
-				CPY #CORDIC_WIDTH
-				BNE .print
-			LDA #' '
-			STA DEBUG
-			LDA CORDIC_DEBUG_BUFF,Y
-			STA DEBUG_HEX
-			JMP .done
-		.x_unknown:
-			LDA CORDIC_DEBUG_COUNTER
-			halt
-			JMP .assume_positive
-		.done:
-		
-		LDA #'\\'
-		STA DEBUG
-		LDA #'n'
-		STA DEBUG
-		
-		RTS
+;	CORDIC_DEBUG_COUNTER:
+;		DFS 1
+;	CORDIC_DEBUG_BUFF:
+;		DFS 12
+;	CORDIC_DEBUG_STUB:
+;
+;		LDA #'X'
+;		STA DEBUG
+;		LDA #':'
+;		STA DEBUG
+;		LDX #R2
+;		JSR DEBUG_REG
+;		
+;		LDA #'Y'
+;		STA DEBUG
+;		LDA #':'
+;		STA DEBUG
+;		LDX #R3
+;		JSR DEBUG_REG
+;		
+;		LDA #'Z'
+;		STA DEBUG
+;		LDA #':'
+;		STA DEBUG
+;		LDX #R4
+;		JSR DEBUG_REG
+;		
+;		LDA #'\\'
+;		STA DEBUG
+;		LDA #'n'
+;		STA DEBUG
+;		
+;		RTS
+;		
+;	DEBUG_REG:
+;		LDA DEC_COUNT/2+1,X
+;		BNE .x1
+;			.assume_positive:
+;			LDA #' '
+;			STA DEBUG
+;			TXA
+;			PHA
+;			CLC
+;			PHP
+;			CLD
+;			ADC #CORDIC_WIDTH-1
+;			PLP
+;			TAX
+;			LDY #CORDIC_WIDTH-1
+;			.debug_plus:
+;				LDA 0,X
+;				STA DEBUG_HEX
+;				DEX
+;				DEY
+;				BNE .debug_plus
+;			LDA #' '
+;			STA DEBUG
+;			PLA
+;			TAX
+;			LDA 0,X
+;			STA DEBUG_HEX
+;			JMP .done
+;		.x1:
+;		CMP #$99
+;		BNE .x_unknown
+;			LDA #'-'
+;			STA DEBUG
+;			LDY #CORDIC_WIDTH
+;			SEC
+;			.debug_minus:
+;				LDA #0
+;				SBC 0,X
+;				STA CORDIC_DEBUG_BUFF,Y
+;				INX
+;				DEY
+;				BNE .debug_minus
+;			LDY #1
+;			.print:
+;				LDA CORDIC_DEBUG_BUFF,Y
+;				STA DEBUG_HEX
+;				INY
+;				CPY #CORDIC_WIDTH
+;				BNE .print
+;			LDA #' '
+;			STA DEBUG
+;			LDA CORDIC_DEBUG_BUFF,Y
+;			STA DEBUG_HEX
+;			JMP .done
+;		.x_unknown:
+;			LDA CORDIC_DEBUG_COUNTER
+;			halt
+;			JMP .assume_positive
+;		.done:
+;		
+;		LDA #'\\'
+;		STA DEBUG
+;		LDA #'n'
+;		STA DEBUG
+;		
+;		RTS
 		

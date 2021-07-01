@@ -42,17 +42,16 @@
 		;power transistor
 	
 	TODO: drive RDY with 6532 interrupt
+	TODO:    seems allowed as long as transitions in phi1 not phi2. lower current though? posted on forum
 	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
 	TODO: separate engine and table for 16 bit forth?
 	TODO: more comments
 	TODO: replace calculated jump with JMP (addr)
+	TODO: use registers for text input also somehow?
 	
 	;To finish before website upload
 	TODO: fix aborted word definition
 	TODO: add aux stack check to semi colon
-	TODO: BRK 0 is halt, others are vectored
-	TODO: esc breaking in DO/LOOP
-	TODO: use registers for text input also somehow?
 	
 ;Unlimited lines per page in listing
 	PAGE 0

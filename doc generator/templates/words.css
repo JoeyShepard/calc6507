@@ -1,9 +1,19 @@
 	body {
-		font-family: Verdana, Geneva, sans-serif;
-		/*font-family: Arial, Helvetica, sans-serif;*/
-		font-size: 14px;
+		/*font-family: Verdana, Geneva, sans-serif;*/
+		/*font-size: 15px;*/
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 15px;
 	}
 		
+	.section_name {
+		font-size: 24px;
+	}
+	
+	.section_description {
+		font-style: italic;
+	}
+	
+	
 	.word_img_caption {
 		font-style: italic;
 	}
@@ -14,7 +24,7 @@
 	}
 	
 	.word_show {
-		font-size: 24px;
+		font-size: 18px;
 	}
 	
 	.word_comment {
