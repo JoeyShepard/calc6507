@@ -1,0 +1,85 @@
+ERROR_INPUT.png
+Incorrect or incomplete keyboard input
+<br><br>
+Possible causes:
+-Unrecognized word or invalid number
+-Individual word or number longer than 18 characters
+-Using %l1 VAR with name already in use
+-Using %l1 STO with invalid variable name
+-Using %l2 TICK ' with invalid name
+-Defining word with %l2 COLON : without matching %l2 SEMI ;
+-Defining word with %l2 COLON : using invalid name
+-Unterminated string
+-String longer than 8 characters
+-<i>Other input error</i>
+%done
+   
+ERROR_STACK_OVERFLOW.png
+Stack overflow - data stack holds maximum 8 items
+%done
+   
+ERROR_STACK_UNDERFLOW.png
+Stack underflow - not enough items on stack for word
+%done
+
+ERROR_WRONG_TYPE.png
+Wrong type - word expected different item type(s) on stack. See <a href="/calc6507/docs/wordlist.html">Word List</a> for expected item types.
+<br><br>
+There are four item types:
+-Float
+-Raw hex
+-Smart hex
+-String
+%done
+
+ERROR_DIV_ZERO.png
+Division by zero - floats and raw hex cannot by divided by zero
+%done
+
+ERROR_IMMED_ONLY.png
+Immediate only - %l2 COLON : begins a word definition but cannot appear within a word
+%done
+
+ERROR_COMPILE_ONLY.png
+Compile only - the following words can only appear inside the definition of a word: 
+%l1 DO, 
+%l1 LOOP, 
+%l1 BEGIN, 
+%l1 AGAIN, 
+%l1 UNTIL, 
+%l1 LEAVE, 
+%l1 IF, 
+%l1 ELSE,
+%l1 THEN,
+%l1 EXIT and
+%l2 SEMI ;
+%done
+
+ERROR_OUT_OF_MEM.png
+Out of stack memory or program memory
+<br><br>
+Possible causes:
+-More than 16 nested structures such as %l1 DO, %l1 IF, or %l1 BEGIN in word
+-Not enough program memory to define new word with %l2 COLON :
+-Not enough program memory to define new variable with %l1 VAR or %l1 STO
+%done
+	
+ERROR_STRUCTURE.png
+Mismatched or missing programming structures in word
+<br><br>
+Possible causes:
+- %l1 DO without matching %l1 LOOP
+- %l1 BEGIN without matching %l1 AGAIN or %l1 UNTIL
+- %l1 IF without matching %l1 THEN
+- %l1 ELSE without matching %l1 IF and %l1 THEN
+- %l1 I, %l1 J, or %l1 K without corresponding %l1 DO loop
+%done
+
+ERROR_RANGE.png
+Numerical input out of acceptable range
+<br><br>
+Acceptable ranges:
+-For %l1 COS, >= -PI/2 and <= PI/2
+-For %l1 SIN, >= -PI/2 and <= PI/2
+-For %l1 TAN, > -PI/2 and < PI/2
+%done

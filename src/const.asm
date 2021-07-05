@@ -69,7 +69,9 @@
 	;Error codes
 	ERROR_NONE =				0
 	ERROR_INPUT =				2
+	TODO: delete! combined with ERROR_INPUT
 	ERROR_WORD_TOO_LONG =		4
+	TODO: delete! not used
 	;Generic string error. Save room on error messages
 	ERROR_STRING =				6
 	;ERROR_STRING_TOO_LONG =		3

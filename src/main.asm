@@ -47,7 +47,9 @@
 	TODO: separate engine and table for 16 bit forth?
 	TODO: more comments
 	TODO: replace calculated jump with JMP (addr)
-	TODO: use registers for text input also somehow?
+	TODO: use registers for text input also somehow? no bc could be used
+	TODO: out of memory error then gives input error
+	TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
 	
 	;To finish before website upload
 	TODO: fix aborted word definition

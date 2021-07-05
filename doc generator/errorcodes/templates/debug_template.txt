@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>6507 Graphing Calculator Error Codes - Calc6502</title>
+		<style>
+			.error_img {
+				margin: 0px;
+			}
+			
+			.error_table {
+				margin: 0 auto;
+				border: 1px solid black;
+				border-collapse:collapse;
+			}
+			
+			.error_table td {
+				border: 1px solid black;
+				padding: 8px;
+			}
+			
+			.error_table td:nth-child(1) {
+				vertical-align: middle;
+			}
+
+			.error_table td:nth-child(2) {
+				vertical-align: top;
+			}
+
+			.error_list {
+				margin-top: 0px;
+				margin-bottom: 0px;
+				padding-left: 16px;
+			}
+		</style>
+		<link rel="stylesheet" href="/calc6507/docs/docs.css">
+	</head>
+	<body>
+		<h2 style="margin-top:16px;text-align:center">Error Codes</h2>
+		
+$body
+
+		
+	</body>
+</html>

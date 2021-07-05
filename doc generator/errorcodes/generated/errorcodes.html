@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>6507 Graphing Calculator Error Codes - Calc6502</title>
+		<style>
+			.error_img {
+				margin: 0px;
+			}
+			
+			.error_table {
+				margin: 0 auto;
+				border: 1px solid black;
+				border-collapse:collapse;
+			}
+			
+			.error_table td {
+				border: 1px solid black;
+				padding: 8px;
+			}
+			
+			.error_table td:nth-child(1) {
+				vertical-align: middle;
+			}
+
+			.error_table td:nth-child(2) {
+				vertical-align: top;
+			}
+
+			.error_list {
+				margin-top: 0px;
+				margin-bottom: 0px;
+				padding-left: 16px;
+			}
+		</style>
+		<link rel="stylesheet" href="/calc6507/docs/docs.css">
+	</head>
+	<body>
+		<h2 style="margin-top:16px;text-align:center">Error Codes</h2>
+		
+		<table class="error_table">
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_INPUT.png">
+				</td>
+				<td>
+					Incorrect or incomplete keyboard input
+					<br><br>
+					Possible causes:
+					<ul class="error_list">
+						<li>Unrecognized word or invalid number</li>
+						<li>Individual word or number longer than 18 characters</li>
+						<li>Using <a href="/calc6507/docs/wordlist.html#VAR">VAR</a> with name already in use</li>
+						<li>Using <a href="/calc6507/docs/wordlist.html#STO">STO</a> with invalid variable name</li>
+						<li>Using <a href="/calc6507/docs/wordlist.html#TICK">'</a> with invalid name</li>
+						<li>Defining word with <a href="/calc6507/docs/wordlist.html#COLON">:</a> without matching <a href="/calc6507/docs/wordlist.html#SEMI">;</a></li>
+						<li>Defining word with <a href="/calc6507/docs/wordlist.html#COLON">:</a> using invalid name</li>
+						<li>Unterminated string</li>
+						<li>String longer than 8 characters</li>
+						<li><i>Other input error</i></li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_STACK_OVERFLOW.png">
+				</td>
+				<td>
+					</ul>
+					Stack overflow - data stack holds maximum 8 items
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_STACK_UNDERFLOW.png">
+				</td>
+				<td>
+					Stack underflow - not enough items on stack for word
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_WRONG_TYPE.png">
+				</td>
+				<td>
+					Wrong type - word expected different item type(s) on stack. See <a href="/calc6507/docs/wordlist.html">Word List</a> for expected item types.
+					<br><br>
+					There are four item types:
+					<ul class="error_list">
+						<li>Float</li>
+						<li>Raw hex</li>
+						<li>Smart hex</li>
+						<li>String</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_DIV_ZERO.png">
+				</td>
+				<td>
+					</ul>
+					Division by zero - floats and raw hex cannot by divided by zero
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_IMMED_ONLY.png">
+				</td>
+				<td>
+					Immediate only - <a href="/calc6507/docs/wordlist.html#COLON">:</a> begins a word definition but cannot appear within a word
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_COMPILE_ONLY.png">
+				</td>
+				<td>
+					Compile only - the following words can only appear inside the definition of a word:
+					<a href="/calc6507/docs/wordlist.html#DO">DO</a>,
+					<a href="/calc6507/docs/wordlist.html#LOOP">LOOP</a>,
+					<a href="/calc6507/docs/wordlist.html#BEGIN">BEGIN</a>,
+					<a href="/calc6507/docs/wordlist.html#AGAIN">AGAIN</a>,
+					<a href="/calc6507/docs/wordlist.html#UNTIL">UNTIL</a>,
+					<a href="/calc6507/docs/wordlist.html#LEAVE">LEAVE</a>,
+					<a href="/calc6507/docs/wordlist.html#IF">IF</a>,
+					<a href="/calc6507/docs/wordlist.html#ELSE">ELSE</a>,
+					<a href="/calc6507/docs/wordlist.html#THEN">THEN</a>,
+					<a href="/calc6507/docs/wordlist.html#EXIT">EXIT</a> and
+					<a href="/calc6507/docs/wordlist.html#SEMI">;</a>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_OUT_OF_MEM.png">
+				</td>
+				<td>
+					Out of stack memory or program memory
+					<br><br>
+					Possible causes:
+					<ul class="error_list">
+						<li>More than 16 nested structures such as <a href="/calc6507/docs/wordlist.html#DO">DO</a>, <a href="/calc6507/docs/wordlist.html#IF">IF</a>, or <a href="/calc6507/docs/wordlist.html#BEGIN">BEGIN</a> in word</li>
+						<li>Not enough program memory to define new word with <a href="/calc6507/docs/wordlist.html#COLON">:</a></li>
+						<li>Not enough program memory to define new variable with <a href="/calc6507/docs/wordlist.html#VAR">VAR</a> or <a href="/calc6507/docs/wordlist.html#STO">STO</a></li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_STRUCTURE.png">
+				</td>
+				<td>
+					</ul>
+					Mismatched or missing programming structures in word
+					<br><br>
+					Possible causes:
+					<ul class="error_list">
+						<li> <a href="/calc6507/docs/wordlist.html#DO">DO</a> without matching <a href="/calc6507/docs/wordlist.html#LOOP">LOOP</a></li>
+						<li> <a href="/calc6507/docs/wordlist.html#BEGIN">BEGIN</a> without matching <a href="/calc6507/docs/wordlist.html#AGAIN">AGAIN</a> or <a href="/calc6507/docs/wordlist.html#UNTIL">UNTIL</a></li>
+						<li> <a href="/calc6507/docs/wordlist.html#IF">IF</a> without matching <a href="/calc6507/docs/wordlist.html#THEN">THEN</a></li>
+						<li> <a href="/calc6507/docs/wordlist.html#ELSE">ELSE</a> without matching <a href="/calc6507/docs/wordlist.html#IF">IF</a> and <a href="/calc6507/docs/wordlist.html#THEN">THEN</a></li>
+						<li> <a href="/calc6507/docs/wordlist.html#I">I</a>, <a href="/calc6507/docs/wordlist.html#J">J</a>, or <a href="/calc6507/docs/wordlist.html#K">K</a> without corresponding <a href="/calc6507/docs/wordlist.html#DO">DO</a> loop</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/ERROR_RANGE.png">
+				</td>
+				<td>
+					</ul>
+					Numerical input out of acceptable range
+					<br><br>
+					Acceptable ranges:
+					<ul class="error_list">
+						<li>For <a href="/calc6507/docs/wordlist.html#COS">COS</a>, >= -PI/2 and <= PI/2</li>
+						<li>For <a href="/calc6507/docs/wordlist.html#SIN">SIN</a>, >= -PI/2 and <= PI/2</li>
+						<li>For <a href="/calc6507/docs/wordlist.html#TAN">TAN</a>, > -PI/2 and < PI/2</li>
+					</ul>
+				</td>
+			</tr>
+
+		</table>
+
+
+		
+	</body>
+</html>

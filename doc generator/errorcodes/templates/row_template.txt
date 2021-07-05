@@ -1,0 +1,9 @@
+			<tr>
+				<td>
+					<img src="/calc6507/docs/images/errorcodes/$pic_name">
+					#<img class="error_img" src="../images/resized/$pic_name">
+				</td>
+				<td>
+$pic_info
+				</td>
+			</tr>

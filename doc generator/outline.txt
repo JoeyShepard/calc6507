@@ -1,20 +1,10 @@
 known bugs
 -recursion
--DO/LOOP
+-defining new word though should be fixed
 
 pages:
--quick start
-   Add two numbers: 2 3 +
-   enter numbers on stack
-   define word
-   learn more about RPN
-   learn more about forth
--intro
-   e and sto
--types
--word list
--bugs/limitations
+-overview
+   types
 -planned features
    atrig, ln, graph, mem/words, neg
 -errors and explanations
--vars/words
