@@ -2423,7 +2423,6 @@
 	;[ ]
 	;JUMP
 	;TYPE			;type of stack item?
-	;RAD - convert ASIN
 	;WHILE/REPEAT
 	;RAW - convert smart hex
 	;DEC - dec from hex

@@ -1,0 +1,32 @@
+clarify usage of dict_save
+==========================
+
+emu6507.asm
+-init to be equal to dict_ptr
+
+forth.asm
+- in DictEnd which is only called in ; and VAR
+   points to old word. writes address of new word to next word field of last word
+
+main.asm
+- copied to dict_ptr always in case anything goes wrong
+- discards anything added since last word 
+
+
+
+
+clarify usage of new_dict_ptr
+=============================
+
+forth.asm
+-in AllocMem - holds potential new address
+-in WriteToken - copied to dict_ptr
+
+main.asm
+-in .value_compile
+   THIS IS PROBABLY IT - though errors with word too
+   
+words.asm
+-in :
+   after WriteHeader. copies to dict_ptr like WriteToken
+

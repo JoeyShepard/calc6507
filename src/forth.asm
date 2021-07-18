@@ -326,22 +326,22 @@
 			INY 
 			
 			TODO: remove
-			;LDA #'\'
-			;STA DEBUG
-			;LDA #'n'
-			;STA DEBUG
+			LDA #'\'
+			STA DEBUG
+			LDA #'n'
+			STA DEBUG
 			
 			LDA (ret_address),Y
 			STA ret_address+1
 			
 			TODO: remove
-			;STA DEBUG_HEX
+			STA DEBUG_HEX
 			
 			PLA
 			STA ret_address
 			
 			TODO: remove
-			;STA DEBUG_HEX
+			STA DEBUG_HEX
 			
 			;START HERE: : M X
 			;-starts writing M at dict_ptr (0x178). Errors but then finds M after failed define

@@ -47,13 +47,15 @@
 	TODO: separate engine and table for 16 bit forth?
 	TODO: more comments
 	TODO: replace calculated jump with JMP (addr)
-	TODO: use registers for text input also somehow? no bc could be used
+	TODO: use registers for text input also somehow? no bc could be used by words
 	TODO: out of memory error then gives input error
 	TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
-	
-	;To finish before website upload
-	TODO: fix aborted word definition
 	TODO: add aux stack check to semi colon
+	TODO: var in word? causes double input error
+	
+;To finish before website upload
+	TODO: fix aborted word definition
+	TODO: github readme
 	
 ;Unlimited lines per page in listing
 	PAGE 0
@@ -178,6 +180,7 @@ LOCALS_END set		$1F
 	include math.asm
 	include cordic.asm
 	include output.asm
+	include error.asm
 	include aux_stack.asm
 	include forth.asm
 	include words.asm
@@ -194,7 +197,7 @@ LOCALS_END set		$1F
 		TODO: copyright
 		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
 		TODO: double check not relying on flags from BCD which are not valid for NMOS
-		
+			
 		CALL setup
 		CALL tests
 		;CALL file_tests
@@ -206,12 +209,22 @@ LOCALS_END set		$1F
 		
 		.input_loop:
 			
-			TODO: double error if unknown word AND ; left off definition?
+			TODO: if unknown word in uncompleted definition, erros then jumps here and errors again
 			
 			;Colon definitions must fit on one line
 			LDA mode
 			CMP #MODE_IMMEDIATE
 			BEQ .mode_good
+			
+				;Colon writes new words length and name. Blank out
+				LDY #0
+				TYA
+				STA (dict_save),Y
+				INY
+				STA (dict_save),Y
+				INY
+				STA (dict_save),Y				
+				
 				LDA #MODE_IMMEDIATE
 				STA mode
 				LDA #ERROR_INPUT
