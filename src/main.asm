@@ -54,7 +54,6 @@
 	TODO: var in word? causes double input error
 	
 ;To finish before website upload
-	TODO: fix aborted word definition
 	TODO: github readme
 	
 ;Unlimited lines per page in listing
