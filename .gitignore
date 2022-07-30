@@ -27,6 +27,7 @@ ref\ docs/
 
 #randomized test data
 decimal\ test/input*.txt
+decimal\ test/*/input*.txt
 
 #examples that I did not create myself
 CORDIC/examples\ from\ HP\ forum/

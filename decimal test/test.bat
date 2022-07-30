@@ -1,0 +1,1 @@
+if not exist z:\ ( subst z: new_Z )

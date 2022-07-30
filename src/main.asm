@@ -41,6 +41,7 @@
 		;keyboard buffer
 		;power transistor
 	
+	TODO: DONT NEED OPTIMIZER OR NASM FOR THIS!
 	TODO: drive RDY with 6532 interrupt
 	TODO:    seems allowed as long as transitions in phi1 not phi2. lower current though? posted on forum
 	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
@@ -199,7 +200,7 @@ LOCALS_END set		$1F
 			
 		CALL setup
 		CALL tests
-		;CALL file_tests
+		CALL file_tests
 		TODO: remove
 		CALL stats
 		CALL GfxSetup

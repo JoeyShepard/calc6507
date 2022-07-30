@@ -1043,7 +1043,7 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1			;Flags
 			
-			JMP CODE_STO
+			JMP CODE_STO+EXEC_HEADER
 	
 	TODO: this is called UNUSED in forth
 	TODO: not needed if shown in interface
