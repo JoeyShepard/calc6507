@@ -4,9 +4,12 @@ echo.
 for /f %%i in ('time /T') do set datetime=%%i
 echo [%datetime%] Assembling...
 cd src
+
+..\vm.py main.asm ..\combined.asm
+
 "C:\Program Files\nasm\nasm" --no-line -e -Z main.err -l main.lst nasm.asm > main.i
-copy main.i ..\main.i > nul
-copy main.err ..\main.err > nul
+move main.i ..\main.i > nul
+move main.err ..\main.err > nul
 cd ..
 type main.err
 echo.

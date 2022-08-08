@@ -7,6 +7,7 @@ hardware\ version/output/
 
 # various output and intermediate files
 asm.txt
+combined.asm
 hex.txt
 main.err
 main.i

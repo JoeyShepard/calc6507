@@ -92,6 +92,9 @@ DEBUG_MODE set "off"
 LOCALS_BEGIN set	$0
 LOCALS_END set		$1F
 	
+	;11 free zp bytes shown in emulator
+	;optimizer only uses 23 of 32 bytes
+	
 	TODO: double check all used and move variables out of globals to here
 	
 	ORG $20
@@ -167,6 +170,7 @@ LOCALS_END set		$1F
 	
 	ORG $900
 	code_begin:
+	
 	JMP main	;static entry address for emulator
 	
 	font_table:
@@ -200,7 +204,7 @@ LOCALS_END set		$1F
 			
 		CALL setup
 		CALL tests
-		CALL file_tests
+		;CALL file_tests
 		TODO: remove
 		CALL stats
 		CALL GfxSetup

@@ -108,6 +108,7 @@
 		%assign enum_counter enum_counter+1 
 	%endmacro
 	
-	%include "main.asm"
+	;%include "main.asm"
+	%include "../combined.asm"
 	
 	
