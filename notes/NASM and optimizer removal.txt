@@ -14,11 +14,7 @@ Decide:
 -try to reuse FP regs for 8 and 16 bit? smaller interpreter?
 -better to use 32 bytes recovered locals space for forth
 -otherwise need calling convention for fp regs :/
-
-Decide:
--VM with macros or depend on Python? def python
- - need constants I think
- - hard to parse string for forth with macros :/
+-could have fp and int modes to reuse op codes
 
 START HERE
 -Leave optimizer in place

@@ -29,8 +29,9 @@ true set $FF
 ;====
 
 	%macro halt 0
-		BRK
-		BRK
+		;BRK
+		;BRK
+		STA HALT_PROGRAM
 	%endmacro
 	
 	%macro TODO 1+

@@ -17,6 +17,7 @@ del processed.asm
 python "..\..\..\projects\6502 Optimizer\NASM based\main.py" main.i
 type src\mem_template.asm >> processed.asm
 echo.
+
 echo Re-assembling...
 ..\..\bin\asw processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt
 python "remove escape.py" asm.txt
@@ -24,6 +25,7 @@ echo Generating hex file...
 ..\..\bin\p2hex processed.p -F Intel -l 32 -r $0000-$FFFF > hex.txt
 copy processed.hex emu.hex > nul
 echo :02FFFC000009BF >> emu.hex
+
 echo Copying...
 copy processed.lst "..\..\..\projects\6502 emu\local copy\listing.lst" > nul
 REM copy processed.hex "..\..\..\projects\6502 emu\local copy\prog.hex" > nul

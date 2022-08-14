@@ -70,16 +70,17 @@
 ;=====
 TODO: checking - p110 in Handbook of Floating Point Arithmetic
 
-
-;Main code
-;=========
-	
 DEBUG_MODE set "off"
-		
-	;Reset vector
+
+
+;Vectors
+;=======
+	
+	TODO: change vectors to match 6507 address space
 	ORG RESET_VECTOR
-	;ORG $1FFC
 	FDB main
+	ORG IRQ_VECTOR
+	FDB VM_brk_handler
 		
 	
 ;Variables in zero page
@@ -90,14 +91,25 @@ DEBUG_MODE set "off"
 	
 	;Locals usage
 LOCALS_BEGIN set	$0
-LOCALS_END set		$1F
+;LOCALS_END set		$1F
+LOCALS_END set		$16
 	
-	;11 free zp bytes shown in emulator
-	;optimizer only uses 23 of 32 bytes
-	
+	;VM memory
+	ORG $17			;ORG needs fixed value rather than symbol
+	VM_MEM_BEGIN:
+	WORD VM_ip
+	BYTE VM_sp
+	TODO: adjust stack size
+VM_STACK_SIZE set	16
+	VM_STACK:
+	DFS VM_STACK_SIZE 
+	VM_STACK_END:
+
 	TODO: double check all used and move variables out of globals to here
 	
-	ORG $20
+	;Before VM
+	;ORG $20
+	
 	;For macros
 	WORD dummy
 	WORD ret_val
@@ -140,6 +152,8 @@ LOCALS_END set		$1F
 	
 	Regs_end:
 		
+	TODO: only 160 or so ZP addresses used???
+	
 	
 ;Variables in main RAM
 ;=====================
@@ -152,21 +166,9 @@ LOCALS_END set		$1F
 
 ;Functions in ROM
 ;================
-	;ORG $C000
-	ORG $D000
-	;should be visible to tests below which overflow $C000
-	include debug.asm
 	
-	TODO: remove after debugging
-	include font_debug.asm
-	
-	ORG $8900	;RAM + ROM size
-	;overlaps with video memory, no video output
-	;but banked out after all tests pass
-	include tests.asm
-	include file_tests.asm
-	TODO: remove or add to emu6507
-	include stats.asm
+	;Debug and print functions in higher memory moved below
+	;VM should come first so everything else can access it
 	
 	ORG $900
 	code_begin:
@@ -180,6 +182,7 @@ LOCALS_END set		$1F
 	;include calc6507.asm
 	include emu6507.asm
 	
+	include vm.asm
 	include system.asm
 	include math.asm
 	include cordic.asm
@@ -201,7 +204,14 @@ LOCALS_END set		$1F
 		TODO: copyright
 		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
 		TODO: double check not relying on flags from BCD which are not valid for NMOS
-			
+				
+		CALL VM_Setup
+		
+		<VM
+			ADD R1
+			TEST
+		VM>
+		
 		CALL setup
 		CALL tests
 		;CALL file_tests
@@ -213,7 +223,7 @@ LOCALS_END set		$1F
 		
 		.input_loop:
 			
-			TODO: if unknown word in uncompleted definition, erros then jumps here and errors again
+			TODO: if unknown word in uncompleted definition, errors then jumps here and errors again
 			
 			;Colon definitions must fit on one line
 			LDA mode
@@ -396,6 +406,22 @@ LOCALS_END set		$1F
 			JMP .process_loop
 	END
 	
-	
 	code_end:
+	
+	;ORG $C000
+	ORG $D000
+	;should be visible to tests below which overflow $C000
+	include debug.asm
+	
+	TODO: remove after debugging
+	include font_debug.asm
+	
+	ORG $8900	;RAM + ROM size
+	;overlaps with video memory, no video output
+	;but banked out after all tests pass
+	include tests.asm
+	include file_tests.asm
+	TODO: remove or add to emu6507
+	include stats.asm
+	
 	

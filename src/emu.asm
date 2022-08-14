@@ -20,6 +20,7 @@ LOG_SEND =		$FFEE 		;Send instruction log file
 BELL_SOUND =	$FFEF		;Play bell sound on printing character 7
 FILE_INPUT =	$FFF0		
 NODE_EXIT =		$FFF1		;Reading or writing this address will exit node.js
+HALT_PROGRAM =	$FFF2		;Halt program on write
 
 NMI_VECTOR =	$FFFA
 RESET_VECTOR =	$FFFC
