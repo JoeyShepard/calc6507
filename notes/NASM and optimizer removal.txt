@@ -1,6 +1,5 @@
 TODO
 ====
-starting size before changes: 9391
 remove debug and other directories
 reimplement FUNC/END if keeping that
 -keeping MOV.W?

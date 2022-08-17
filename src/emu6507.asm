@@ -9,39 +9,22 @@
 	ERROR_X =				3*CHAR_WIDTH
 	ERROR_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
 	
-	
 	FUNC setup
 		SEI
 		CLD
 		
-		;Fill RAM with $FF for debugging
-		PLA
-		STA 2
-		PLA
-		STA 3
-		LDA #0
-		STA 0
-		STA 1
-		LDY #4
-		.loop_begin:
-		LDA #$FF
-		.loop:
-			STA (0),Y
-			INY
-			BNE .loop
-		INC 1
-		LDA 1
-		CMP #9
-		BNE .loop_begin
-		
 		;Only use bottom 48 bytes of stack
 		;May need a lot more for R stack
+		PLA
+		STA 0
+		PLA
+		STA 1
 		TODO: expand this - will need a lot of stack space
 		LDX #R_STACK_SIZE-1
 		TXS
-		LDA 3
+		LDA 1
 		PHA
-		LDA 2
+		LDA 0
 		PHA
 		
 		;Stack grows down
@@ -72,40 +55,34 @@
 		;Emulator only!
 		MOV #BANK_GEN_RAM2,RAM_BANK2		
 		MOV #BANK_GEN_RAM3,RAM_BANK3		
-		
 	END
 
+	
 	FUNC GfxSetup
 		
 		;Emulator only!
 		MOV #BANK_GFX_RAM1,RAM_BANK2		
 		MOV #BANK_GFX_RAM2,RAM_BANK3		
 	END
-
+	
 	FUNC ReadKey
 		LDA KB_INPUT
 	END
-
+	
 	FUNC LCD_clrscr
-		VARS
-			BYTE counter
-		END
-		
-		MOV.W #SCREEN_ADDRESS, screen_ptr
-		;Rows on screen
-		MOV #128, counter
-		LDA #BG_COLOR
-		LDY #0
-		.loop:
-			STA (screen_ptr),Y
-			INY
-			BNE .loop
-			INC screen_ptr+1
-			DEC counter
-			BNE .loop
-		MOV.W #SCREEN_ADDRESS, screen_ptr
+		TODO: EXTERN should be block
+		<VM
+			EXTERN SCREEN_SIZE
+			EXTERN SCREEN_ADDRESS
+			EXTERN BG_COLOR
+			EXTERN screen_ptr
+			
+			SCREEN_SIZE INV SCREEN_ADDRESS
+			DO BG_COLOR OVER ! 1+ LOOP2
+			SCREEN_ADDRESS screen_ptr !
+		VM>
 	END
-
+	
 	FUNC LCD_char
 		ARGS
 			BYTE c_out
@@ -233,6 +210,7 @@
 		STA screen_ptr+1
 	END
 	
+	VM_func_begin:
 	FUNC LCD_print
 		ARGS
 			STRING source
@@ -252,4 +230,5 @@
 			JMP .loop
 		.done:
 	END
+	VM_func_end:
 	
