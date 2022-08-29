@@ -5,7 +5,7 @@ from sys import argv
 VM_BEGIN="<VM"
 VM_END="VM>"
 BYTES_PER_LINE=8
-STACK_OPS_BEGIN=240     #Beginning of stack ops encoding
+STACK_OPS_BEGIN=224     #Beginning of stack ops encoding
 
 #VM instruction information
 #==========================
@@ -16,23 +16,71 @@ FP_OPS=[
 
 #Stack operations
 STACK_OPS=[
-    #First tokens take no arguments
+    #First, tokens that take no arguments
     VM_END,     #0
     "!",        #1
     "DUP",      #2
     "OVER",     #3
     "INV",      #4
     "1+",       #5
-    #Second set takes one byte argument
+    "RSHIFT",   #6
+    "A",        #7
+    "+",        #8
+    "-",        #9
+    "LSHIFT",   #10
+    "C!",       #11
+    "DO0",      #12
+    "DO1",      #13
+    "DROP",     #14
+    "HALT",     #15
+    "DEBUG",    #16
+    "SWAP",     #17
+    "@",        #18
+    "SELECT",   #19
+    "AND",      #20
+    "XOR",      #21
+    "C@",       #22
+    #Second, tokens that take one byte argument
     "JSR",
     "PUSH_RES",
-    "LOOP2"]
+    "PUSH_BYTE",
+    "LOOP2",
+    "DJNZ0",
+    "DJNZ1"]
     
 #Other operations processed but not assigned a token
 OTHER_OPS=[
     "EXTERN",
     "RES",
-    "DO"]
+    "DO",
+    "CONST8",   #8-bit constant defined in assembly file
+    "CONST",    #Calculated and named literal value
+    "LIT",
+    "["]
+
+#Types of DO loops
+DO_TYPES=[
+    "DO",
+    "DO0",
+    "DO1"]
+
+#Loop constructs that go with DO    
+LOOP_TYPES=[
+    "LOOP2",
+    "DJNZ0",
+    "DJNZ1"]
+
+#Match DO and corresponding LOOP types
+LOOP_LOOKUP={
+    "LOOP2":"DO",
+    "DJNZ0":"DO0",
+    "DJNZ1":"DO1"}
+    
+STATE_LIST=[
+    "extern",
+    "const8",
+    "immediate",
+    "JSR"]
 
 #Main code
 #=========
@@ -81,16 +129,16 @@ def main():
     #Count of times jumping into VM mode
     transition_count=0
 
-    #Bytes generated below to be written to file
-    byte_list=[]
-    byte_comments=[]
-
     #Constant resources encoded in a single byte
     res_found=False
     res_list=[]
 
-    #List of addresses for DO loops
-    do_list=[]
+    #List of addresses for structures like DO and IF
+    struct_list=[]
+
+    #Internal stack used for calculations between [ and ]
+    internal_stack=[]
+    internal_symbols={}
 
     #Loop through all included files
     while True:
@@ -121,6 +169,8 @@ def main():
                         if split_line[0].upper()==VM_BEGIN:
                             file_mode="VM"
                             input_state="normal"
+                            byte_list=[]
+                            byte_comments=[]
                             del split_line[0]
                             transition_count+=1
                             output_file.write(" BRK\n")
@@ -159,7 +209,7 @@ def main():
                             else:
                                 temp_line+=[item]
                         split_line=temp_line
-                                
+                        
                         if split_line[0]==VM_BEGIN:
                             print("Error: VM opening token found in open block")
                             print(f"Line: {line.strip()}")
@@ -176,7 +226,9 @@ def main():
                             else:
                                 byte_list+=new_bytes
                                 byte_comments+=[" ".join(split_line)]
-                        elif split_line[0].upper() in STACK_OPS + OTHER_OPS or split_line[0].isnumeric() or split_line[0][0]=="$" or split_line[0] in res_list:
+                        elif split_line[0].upper() in STACK_OPS + OTHER_OPS or \
+                        split_line[0].isnumeric() or split_line[0][0] in "$'" or \
+                        split_line[0] in res_list or input_state in STATE_LIST:
                             for item in split_line:
                                 if file_mode=="assembly":
                                     print(f"Error: Tokens left on line after END")
@@ -199,8 +251,11 @@ def main():
                                                 print(f"byte_list: {byte_list}")
                                                 print(f"byte_comments: {byte_comments}")
                                                 exit(1)
-                                            elif do_list:
-                                                print("Error: DO without corresonding LOOP at end of VM block")
+                                            elif struct_list:
+                                                print("Error: unclosed structure at end of VM block")
+                                                print("Structure list:")
+                                                for struct in struct_list:
+                                                    print("\t",struct["type"].upper())
                                                 print(f"Line: {line.strip()}")
                                                 exit(1)
                                             last_byte=None
@@ -215,7 +270,11 @@ def main():
                                                     last_byte=byte_list[i]
                                                     comment=byte_comments[i]
                                                 else:
-                                                    output=f" FCB ${hex(last_byte)[2:].upper()}, ${hex(byte_list[i])[2:].upper()}"
+                                                    output=f" FCB ${hex(last_byte)[2:].upper()}, "
+                                                    if type(byte_list[i])==str:
+                                                        output+=f"{byte_list[i]}"
+                                                    else:
+                                                        output+=f"${hex(byte_list[i])[2:].upper()}"
                                                     output+=" "*(len(MAX_LINE)-len(output))
                                                     output_file.write(f"{output} ;{comment}\n")
                                                     last_byte=None
@@ -224,24 +283,33 @@ def main():
                                                 output+=" "*(len(MAX_LINE)-len(output))
                                                 output_file.write(f"{output} ;{comment}\n")
                                             file_mode="assembly"
-                                        elif item.upper()=="LOOP2":
-                                            if not do_list:
-                                                print("Error: LOOP2 without beginning DO")
+                                        elif item.upper() in LOOP_TYPES:
+                                            if struct_list==[] or struct_list[-1]["type"]!=LOOP_LOOKUP[item.upper()]:
+                                                print(f"Error: {item.upper()} without beginning {LOOP_LOOKUP[item.upper()]}")
                                                 print(f"Line: {line.strip()}")
+                                                print(f"Structure stack: {struct_list}")
                                                 exit(1)
-                                            byte_list+=[len(byte_list)-do_list.pop()+1]
+                                            byte_list+=[len(byte_list)-struct_list.pop()["len"]+1]
                                             byte_comments[-1]+=f" back {byte_list[-1]} bytes"
                                             byte_comments+=[""]
+                                        elif item.upper() in DO_TYPES:
+                                            #DO0 and DO0 are in STACK_OPS but not DO
+                                            struct_list+=[{"type":item.upper(), "len":len(byte_list)}]
+                                    elif item.upper() in DO_TYPES:
+                                        #DO is in STACK_OPS but not D0 or D1
+                                        struct_list+=[{"type":item.upper(), "len":len(byte_list)}]
                                     elif item.upper() in OTHER_OPS:
                                         if item.upper()=="EXTERN":
                                             input_state="extern"
-                                        elif item.upper()=="DO":
-                                            do_list+=[len(byte_list)]
+                                        elif item.upper()=="CONST8":
+                                            input_state="const8"
+                                        elif item=="[":
+                                            input_state="immediate"
                                     elif item in res_list:
                                         #Push 16-bit constant onto stack
                                         byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]
                                         byte_list+=[res_list.index(item)]
-                                        byte_comments+=[f"Const {item}"]
+                                        byte_comments+=[f"16-bit const {item}"]
                                         byte_comments+=[""]
                                     elif item.isnumeric() or item[0]=="$":
                                         #Number not in resource list so add
@@ -255,20 +323,86 @@ def main():
                                                 exit(1)
                                         else:
                                             num=item
-                                        res_list+=[num]
-                                        byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]
-                                        byte_list+=[res_list.index(num)]
-                                        byte_comments+=[f"Const {num}"]
+                                        if int(num)<256:
+                                            #8-bit constant
+                                            byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_BYTE")]
+                                            byte_list+=[int(num)]
+                                            byte_comments+=[f"8-bit const {num}"]
+                                            byte_comments+=[""]
+                                        else:
+                                            #16-bit constant
+                                            res_list+=[num]
+                                            byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]
+                                            byte_list+=[res_list.index(num)]
+                                            byte_comments+=[f"16-bit const {num}"]
+                                            byte_comments+=[""]
+                                    elif item[0]=="'":
+                                        if len(item)!=3 or item[-1]!="'":
+                                            print("Error: Invalid character: {item}")
+                                            print(f"Line: {line.strip()}")
+                                            exit(1)
+                                        char_code=ord(item[1])
+                                        byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_BYTE")]
+                                        byte_list+=[char_code]
+                                        byte_comments+=[f"Character: {item}=={num}"]
                                         byte_comments+=[""]
                                     else:
                                         print(f"Error: VM operation not recognized: {item}")
                                         print(f"Line: {line.strip()}")
                                         exit(1)
                                 elif input_state=="extern":
-                                    if item not in res_list:
-                                        #Only add address if not added yet. Not error to add again.
-                                        res_list+=[item]
+                                    if item.upper()=="END":
+                                        input_state="normal"
+                                    else:
+                                        if item not in res_list:
+                                            #Only add address if not added yet. Not error to add again.
+                                            res_list+=[item] 
+                                elif input_state=="const8":
+                                    byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_BYTE")]
+                                    byte_list+=[item]
+                                    byte_comments+=[f"External 8-bit const {item}"]
+                                    byte_comments+=[""]
                                     input_state="normal"
+                                elif input_state=="immediate":
+                                    if item=="]":
+                                        input_state="normal"
+                                    elif item in "+-*/":
+                                        if len(internal_stack)<2:
+                                            print("Error: internal stack underflow on {item}")
+                                            print(f"Line: {line.strip()}")
+                                            exit(1)
+                                        TOS=internal_stack.pop()
+                                        NOS=internal_stack.pop()
+                                        internal_stack+=[int(eval(f"{NOS}{item}{TOS}"))]
+                                    elif item.upper()=="CONST":
+                                        input_state="immediate-const"
+                                    elif item.isnumeric() or item[0]=="$":
+                                        #Number not in resource list so add
+                                        if item[0]=="$":
+                                            #Possible hex input - try to convert
+                                            try:    
+                                                num=str(int(item[1:],16))
+                                            except:
+                                                print("Error: Invalid hex: {item}")
+                                                print(f"Line: {line.strip()}")
+                                                exit(1)
+                                        else:
+                                            num=item
+                                        internal_stack+=[num]    
+                                    else:
+                                        print("Error: VM operation not recognized: {item}")
+                                        print(f"Line: {line.strip()}")
+                                        exit(1)
+                                elif input_state=="immediate-const":
+                                    if len(internal_stack)==0:
+                                        print("Error: unable to create immediate constant - stack empty")
+                                        print(f"Line: {line.strip()}")
+                                        exit(1)
+                                    internal_symbols[item.upper()]=internal_stack.pop()
+                                    input_state="immediate"
+                                    
+                                    START HERE: recognize symbols in immediate, and compiled. literals
+                                    
                                 elif input_state=="JSR":
                                     if item not in res_list:
                                         print(f"Error: JSR target not found: {item}")
@@ -293,6 +427,11 @@ def main():
     
     #Stats for bytes generated
     print(f"VM invocations: {transition_count}")
+    print(f"Const slots used: {len(res_list)}/256")
+    
+    with open("vm-debug.txt","wt") as f:
+        for i,op in enumerate(STACK_OPS):
+            f.write(f"{hex(i+STACK_OPS_BEGIN)[2:].upper()} - {op}\n")
 
 if __name__=="__main__":
     main()

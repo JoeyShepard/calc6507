@@ -56,6 +56,8 @@
 	TODO: review files. remove improvements.asm and old.asm
 	TODO: main Forth needs split table to conserve token space?
 	TODO: lo and hi defined for NASM, redefine with FUNCTION for AS
+	TODO: move constants to const.asm?
+	TODO: eliminate JSR to BRK? maybe first byte after BRK
 	
 ;To finish before website upload
 	TODO: github readme
@@ -104,7 +106,12 @@ LOCALS_END set		$16
 	BYTE VM_SP		;Stack pointer
 	WORD VM_A0		;Accumuator FP reg address
 	WORD VM_A1		;Argument FP reg address
-	WORD VM_temp	;Temporary register for VM
+	WORD VM_temp	;Temporary register for VM - LOOP2
+	BYTE VM_A_buff	;Value of A when VM invoked
+	BYTE VM_C0		;One byte counter for DJNZ0
+	BYTE VM_C1		;One byte counter for DJNZ1
+	TODO: remove?
+	BYTE VM_debug
 	
 	TODO: adjust stack size
 	TODO: move to constants
@@ -114,9 +121,6 @@ VM_STACK_SIZE set	16
 	VM_STACK_END:
 
 	TODO: double check all used and move variables out of globals to here
-	
-	;Before VM
-	;ORG $20
 	
 	;For macros
 	WORD dummy
@@ -160,7 +164,7 @@ VM_STACK_SIZE set	16
 	;+3 since only need 6 of 9 bytes 
 	R_ans_wide = R7+3
 	
-	Regs_end:
+	ZP_end:
 	
 	TODO: only 160 or so ZP addresses used???
 	
@@ -212,7 +216,6 @@ VM_STACK_SIZE set	16
 		END
 		
 		TODO: copyright
-		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
 		TODO: double check not relying on flags from BCD which are not valid for NMOS
 		
 		CALL VM_setup

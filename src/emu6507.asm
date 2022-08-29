@@ -68,20 +68,56 @@
 	FUNC ReadKey
 		LDA KB_INPUT
 	END
+		
 	
 	FUNC LCD_clrscr
-		TODO: EXTERN should be block
+		TODO: $2A2A - magic number
 		<VM
-			EXTERN SCREEN_SIZE
-			EXTERN SCREEN_ADDRESS
-			EXTERN BG_COLOR
-			EXTERN screen_ptr
+			EXTERN
+				SCREEN_SIZE SCREEN_ADDRESS BG_COLOR screen_ptr
+			END
 			
-			SCREEN_SIZE INV SCREEN_ADDRESS
-			DO BG_COLOR OVER ! 1+ LOOP2
+			SCREEN_SIZE RSHIFT INV SCREEN_ADDRESS
+			DO $2A2A OVER ! 1+ 1+ LOOP2	
+			DROP DROP
 			SCREEN_ADDRESS screen_ptr !
 		VM>
 	END
+	
+	VM_func_begin:
+	FUNC LCD_char_VM
+		
+		<VM
+			EXTERN 
+				SCREEN_ADDRESS font_ptr screen_ptr
+				BG_COLOR FG_COLOR
+			END
+			
+			[ 7 4 - const derp ]
+			
+			A 32 - DUP LSHIFT LSHIFT + font_ptr @ + 5 +
+			screen_ptr @
+			
+			0 DEBUG
+			
+			5 DO1
+				OVER C@ SWAP			;font_ptr font_data screen_ptr
+				8 DO0
+					OVER 128 AND
+					0 $2A2A SELECT		;No way to get BG_COLOR at VM compile time so magic number
+					OVER OVER OVER ! 256 + !
+					512 +				;screen_ptr
+					SWAP LSHIFT SWAP	;shift font data
+				DJNZ0					;font_ptr font_data screen_ptr
+				
+				HALT
+				2046 - SWAP DROP SWAP 1+ SWAP
+			DJNZ1
+			DROP DROP
+		VM>
+		
+	END
+	VM_func_end:
 	
 	FUNC LCD_char
 		ARGS
@@ -208,9 +244,9 @@
 		SEC 
 		SBC #16
 		STA screen_ptr+1
+		
 	END
 	
-	VM_func_begin:
 	FUNC LCD_print
 		ARGS
 			STRING source
@@ -224,11 +260,16 @@
 			LDY index
 			LDA (source),Y
 			BEQ .done
-			STA arg
-			CALL LCD_char, arg
+			
+			;STA arg
+			;CALL LCD_char, arg
+			
+			LDA #'R'
+			JSR LCD_char_VM
+			
 			INC index
 			JMP .loop
 		.done:
 	END
-	VM_func_end:
+	
 	

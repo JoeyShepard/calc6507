@@ -6,6 +6,7 @@ echo [%datetime%] Assembling...
 cd src
 
 ..\vm.py main.asm ..\combined.asm
+move vm-debug.txt ..\vm-debug.txt > nul
 
 "C:\Program Files\nasm\nasm" --no-line -e -Z main.err -l main.lst nasm.asm > main.i
 move main.i ..\main.i > nul
