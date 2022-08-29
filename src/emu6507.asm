@@ -9,6 +9,13 @@
 	ERROR_X =				3*CHAR_WIDTH
 	ERROR_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
 	
+	<NOVM
+		[
+			$2A2A CONST BG_COLOR_WIDE
+			0     CONST FG_COLOR_WIDE
+		]
+	VM>
+	
 	FUNC setup
 		SEI
 		CLD
@@ -71,14 +78,13 @@
 		
 	
 	FUNC LCD_clrscr
-		TODO: $2A2A - magic number
 		<VM
 			EXTERN
 				SCREEN_SIZE SCREEN_ADDRESS BG_COLOR screen_ptr
 			END
 			
 			SCREEN_SIZE RSHIFT INV SCREEN_ADDRESS
-			DO $2A2A OVER ! 1+ 1+ LOOP2	
+			DO BG_COLOR_WIDE OVER ! 1+ 1+ LOOP2	
 			DROP DROP
 			SCREEN_ADDRESS screen_ptr !
 		VM>
@@ -86,36 +92,38 @@
 	
 	VM_func_begin:
 	FUNC LCD_char_VM
-		
 		<VM
 			EXTERN 
 				SCREEN_ADDRESS font_ptr screen_ptr
 				BG_COLOR FG_COLOR
 			END
 			
-			[ 7 4 - const derp ]
-			
-			A 32 - DUP LSHIFT LSHIFT + font_ptr @ + 5 +
+			A 32 - DUP LSHIFT LSHIFT + font_ptr @ + 4 +
 			screen_ptr @
 			
 			0 DEBUG
 			
 			5 DO1
-				OVER C@ SWAP			;font_ptr font_data screen_ptr
+				OVER C@ SWAP					;font_ptr font_data screen_ptr
 				8 DO0
 					OVER 128 AND
-					0 $2A2A SELECT		;No way to get BG_COLOR at VM compile time so magic number
+					FG_COLOR_WIDE BG_COLOR_WIDE
+					SELECT						;No way to get BG_COLOR at VM compile time so magic number
 					OVER OVER OVER ! 256 + !
-					512 +				;screen_ptr
-					SWAP LSHIFT SWAP	;shift font data
-				DJNZ0					;font_ptr font_data screen_ptr
+					512 +						;screen_ptr
+					SWAP LSHIFT SWAP			;shift font data
+				DJNZ0							;font_ptr font_data screen_ptr
 				
-				HALT
-				2046 - SWAP DROP SWAP 1+ SWAP
+				[ 256 16 * 2 - CONST line_reset ]
+				line_reset - SWAP DROP SWAP 1 - SWAP
 			DJNZ1
-			DROP DROP
+			
+			16 DO0
+				BG_COLOR_WIDE OVER ! 256 +
+			DJNZ0
+			
+			line_reset - screen_ptr ! DROP
 		VM>
-		
 	END
 	VM_func_end:
 	
@@ -264,7 +272,7 @@
 			;STA arg
 			;CALL LCD_char, arg
 			
-			LDA #'R'
+			START HERE: graphic distortion at cursor
 			JSR LCD_char_VM
 			
 			INC index
