@@ -1,0 +1,94 @@
+<html><head><style>
+
+        * {
+            font-family: monospace;
+            font-size: 14px;
+        }
+        table, th, td {
+            padding-top: 3px;
+            padding-bottom: 3px;
+            padding-left: 5px;
+            padding-right: 5px;
+            border: 1px solid black;
+            border-collapse: collapse;
+            }
+            </style></head><body>
+<div style="display: table;">
+<div style="display: table-row;">
+<div style="display: table-cell;">
+<div style="width: fit-content;">
+<center><b>General Stats</b></center>
+<table>
+<tr><td>VM invocations</td><td>4</td></tr>
+<tr><td>Const slots used</td><td>10/256</td></tr>
+</table>
+</div>
+<br><br>
+<div style="width: fit-content;">
+<center><b>Floating Point Ops</b></center>
+<table>
+<tr><th>Bytecode</th><th>Op</th><th>R0</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>R6</th><th>R7</th><th>Total</th></tr>
+<tr><td>00</td><td>REG</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>01</td><td>TOS</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>02</td><td>ADD</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="background-color: LightPink">0</td></tr>
+</table>
+</div>
+<br><br>
+<div style="width: fit-content;">
+<center><b>16-bit Constants</b></center>
+<table>
+<tr><th>ID</th><th>Value</th><th>Total</th></tr>
+<tr><td>00</td><td>SCREEN_SIZE</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>01</td><td>SCREEN_ADDRESS</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>02</td><td>BG_COLOR</td><td style="background-color: Red">0</td></tr>
+<tr><td>03</td><td>screen_ptr</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>04</td><td>10794</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>05</td><td>font_ptr</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>06</td><td>FG_COLOR</td><td style="background-color: Red">0</td></tr>
+<tr><td>07</td><td>256</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>08</td><td>512</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>09</td><td>4094</td><td style="background-color: LightPink">1</td></tr>
+</table>
+</div>
+<br><br>
+</div>
+<div style="display: table-cell;padding-left: 2em;">
+<div style="width: fit-content;">
+<center><b>Stack Ops</b></center>
+<table>
+<tr><th>Bytecode</th><th>Op</th><th>Total</th></tr>
+<tr><td>D0</td><td>VM></td><td>3</td></tr>
+<tr><td>D1</td><td>!</td><td>6</td></tr>
+<tr><td>D2</td><td>DUP</td><td>1</td></tr>
+<tr><td>D3</td><td>OVER</td><td>7</td></tr>
+<tr><td>D4</td><td>INV</td><td>1</td></tr>
+<tr><td>D5</td><td>1+</td><td>2</td></tr>
+<tr><td>D6</td><td>RSHIFT</td><td>1</td></tr>
+<tr><td>D7</td><td>A</td><td>1</td></tr>
+<tr><td>D8</td><td>+</td><td>6</td></tr>
+<tr><td>D9</td><td>-</td><td>4</td></tr>
+<tr><td>DA</td><td>LSHIFT</td><td>3</td></tr>
+<tr><td>DB</td><td>C!</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>DC</td><td>DO0</td><td>2</td></tr>
+<tr><td>DD</td><td>DO1</td><td>1</td></tr>
+<tr><td>DE</td><td>DROP</td><td>4</td></tr>
+<tr><td>DF</td><td>HALT</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>E0</td><td>DEBUG</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>E1</td><td>SWAP</td><td>6</td></tr>
+<tr><td>E2</td><td>@</td><td>2</td></tr>
+<tr><td>E3</td><td>SELECT</td><td>1</td></tr>
+<tr><td>E4</td><td>AND</td><td>1</td></tr>
+<tr><td>E5</td><td>XOR</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>E6</td><td>C@</td><td>1</td></tr>
+<tr><td>E7</td><td>JSR</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>E8</td><td>PUSH_RES</td><td>15</td></tr>
+<tr><td>E9</td><td>PUSH_BYTE</td><td>8</td></tr>
+<tr><td>EA</td><td>LOOP2</td><td>1</td></tr>
+<tr><td>EB</td><td>DJNZ0</td><td>2</td></tr>
+<tr><td>EC</td><td>DJNZ1</td><td>1</td></tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</body></html>

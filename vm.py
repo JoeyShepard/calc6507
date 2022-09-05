@@ -6,13 +6,14 @@ VM_BEGIN="<VM"
 NOVM_BEGIN="<NOVM"      #No bytes generated - for defining constants
 VM_END="VM>"
 BYTES_PER_LINE=8
-STACK_OPS_BEGIN=224     #Beginning of stack ops encoding
+STACK_OPS_BEGIN=208     #Beginning of stack ops encoding
 
 #VM instruction information
 #==========================
 #Floating point operations
 FP_OPS=[
     "REG",
+    "TOS",
     "ADD"]
 
 #Stack operations
@@ -83,9 +84,24 @@ STATE_LIST=[
     "immediate",
     "JSR"]
 
+REG_LIST=["R0","R1","R2","R3","R4","R5","R6","R7"]
+
+#Debug information
+#=================
+CONST_OPS=["PUSH_RES","JSR"]
+ARG_OPS=[
+    "JSR",
+    "PUSH_RES",
+    "PUSH_BYTE",
+    "LOOP2",
+    "DJNZ0",
+    "DJNZ1"]
+usage_counts={i:0 for i in FP_OPS+STACK_OPS}
+const_counts={}
+fp_counts={i:[0]*8 for i in FP_OPS}
+
 #Main code
 #=========
-REG_LIST=["R0","R1","R2","R3","R4","R5","R6","R7"]
 def fp_token(split_line):
     if len(split_line)!=2:
         print("Error: Wrong register instruction format")
@@ -96,7 +112,35 @@ def fp_token(split_line):
     else:
         fp_code=FP_OPS.index(split_line[0].upper())
         fp_reg=REG_LIST.index(split_line[1].upper())
-        return [fp_code+(fp_reg<<5)]
+        return [fp_reg+(fp_code<<5)]
+    
+def table_begin(f,title):
+    f.write('<div style="width: fit-content;">\n')
+    f.write(f"<center><b>{title}</b></center>\n")
+    f.write('<table>\n')
+    
+def table_header(f,cells,end=True):
+    f.write("<tr>")
+    for cell in cells:
+        f.write(f"<th>{cell}</th>")
+    if end:
+        table_row_end(f)
+
+def table_row(f,cells,end=True):
+    f.write("<tr>")
+    for cell in cells:
+        f.write(f"<td>{cell}</td>")
+    if end:
+        table_row_end(f)
+
+def table_row_end(f):
+    f.write("</tr>\n")
+    
+def table_end(f,new_lines=True):
+    f.write("</table>\n")
+    f.write("</div>\n")
+    if new_lines:
+        f.write("<br><br>\n")
     
 def main():
     #Print usage and exit if no command line options or more than one
@@ -168,7 +212,6 @@ def main():
                 if file_mode=="assembly":
                     if split_line:
                         if split_line[0].upper() in [VM_BEGIN,NOVM_BEGIN]:
-                            
                             file_mode="VM"
                             input_state="normal"
                             byte_list=[]
@@ -273,6 +316,7 @@ def main():
                                                     print(f"Line: {line.strip()}")
                                                     exit(1)
                                             else:
+                                                #Insert commented bytecode into source output
                                                 last_byte=None
                                                 comment=""
                                                 MAX_LINE=" FCB XXX, XXX "
@@ -297,6 +341,34 @@ def main():
                                                     output=f" FCB ${hex(last_byte)[2:].upper()}"
                                                     output+=" "*(len(MAX_LINE)-len(output))
                                                     output_file.write(f"{output} ;{comment}\n")
+                                                    
+                                                #Count bytecode usage for debugging
+                                                index=0
+                                                while(1):
+                                                    if index>=len(byte_list):
+                                                        #Done processing
+                                                        break
+                                                    op_byte=byte_list[index] 
+                                                    if op_byte<STACK_OPS_BEGIN:
+                                                        #FP op
+                                                        fp_code=op_byte>>3
+                                                        fp_reg=op_byte&7
+                                                        fp_name=FP_OPS[fp_code]
+                                                        fp_counts[fp_name][fp_reg]+=1
+                                                        usage_counts[fp_name]+=1
+                                                    else:
+                                                        #Stack op
+                                                        op_byte-=STACK_OPS_BEGIN
+                                                        op_name=STACK_OPS[op_byte]
+                                                        usage_counts[op_name]+=1
+                                                        if op_name in ARG_OPS:
+                                                            if op_name in CONST_OPS:
+                                                                data_byte=byte_list[index+1]
+                                                                if res_list[data_byte] not in const_counts:
+                                                                    const_counts[data_byte]=0
+                                                                const_counts[data_byte]+=1
+                                                            index+=1
+                                                    index+=1
                                             file_mode="assembly"
                                         elif item.upper() in LOOP_TYPES:
                                             if struct_list==[] or struct_list[-1]["type"]!=LOOP_LOOKUP[item.upper()]:
@@ -342,7 +414,7 @@ def main():
                                             byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]
                                             byte_list+=[res_list.index(num)]
                                             byte_comments+=[f"16-bit const {num}"]
-                                            byte_comments+=[""]    
+                                            byte_comments+=[""]                                        
                                     elif item.isnumeric() or item[0]=="$":
                                         #Number not in resource list so add
                                         if item[0]=="$":
@@ -458,13 +530,118 @@ def main():
         print("Error: Constant resources used but no <VM-RES> statement in source to output table")
         exit(1)
     
-    #Stats for bytes generated
-    print(f"VM invocations: {transition_count}")
-    print(f"Const slots used: {len(res_list)}/256")
-    
-    with open("vm-debug.txt","wt") as f:
+    with open("vm-debug.html","wt") as f:
+        #CSS
+        f.write("<html><head><style>\n")
+        f.write("""
+        * {
+            font-family: monospace;
+            font-size: 14px;
+        }
+        table, th, td {
+            padding-top: 3px;
+            padding-bottom: 3px;
+            padding-left: 5px;
+            padding-right: 5px;
+            border: 1px solid black;
+            border-collapse: collapse;
+            }
+            """)
+        f.write("</style></head><body>\n")
+        
+        f.write('<div style="display: table;">\n')
+        f.write('<div style="display: table-row;">\n')
+        f.write('<div style="display: table-cell;">\n')
+        
+        table_begin(f,"General Stats")
+        table_row(f,["VM invocations",transition_count])
+        table_row(f,["Const slots used",f"{len(res_list)}/256"])
+        table_end(f)
+        
+        #FP ops stats
+        table_begin(f,"Floating Point Ops")
+        table_header(f,["Bytecode","Op"]+["R"+str(i) for i in range(8)]+["Total"])
+        for i,op in enumerate(FP_OPS):
+            cells=[('00'+(hex(i)[2:].upper()))[-2:]]
+            cells+=[op]
+            cells+=fp_counts[op]
+            table_row(f,cells,False)
+            
+            total=sum(fp_counts[op])
+            if total==0:
+                color="LightPink"
+            elif total==1:
+                color="LightGreen"
+            else:
+                color=""
+            
+            if color:
+                f.write(f'<td style="background-color: {color}">')
+            else:
+                f.write("<td>")
+            f.write(f"{total}</td>")
+            table_row_end(f)
+        table_end(f)
+        
+        #Tokenized constants
+        table_begin(f,"16-bit Constants")
+        table_header(f,["ID","Value","Total"])
+        for i,res in enumerate(res_list):
+            cells=[('00'+(hex(i)[2:].upper()))[-2:]]
+            cells+=[res]
+            table_row(f,cells,False)
+            
+            if i in const_counts:
+                total=const_counts[i]
+            else:
+                total=0
+                
+            if total==0:
+                color="Red"
+            elif total==1:
+                color="LightPink"
+            else:
+                color=""
+            
+            if color:
+                f.write(f'<td style="background-color: {color}">')
+            else:
+                f.write("<td>")
+            f.write(f"{total}</td>")
+            table_row_end(f)
+        table_end(f)
+        
+        #End of first column
+        f.write('</div>\n')
+        f.write('<div style="display: table-cell;padding-left: 2em;">\n')
+        
+        #Stack op stats
+        table_begin(f,"Stack Ops")
+        table_header(f,["Bytecode","Op","Total"])
         for i,op in enumerate(STACK_OPS):
-            f.write(f"{hex(i+STACK_OPS_BEGIN)[2:].upper()} - {op}\n")
-
+            cells=[('00'+(hex(i+STACK_OPS_BEGIN)[2:].upper()))[-2:]]
+            cells+=[op]
+            table_row(f,cells,False)
+            
+            total=usage_counts[op]
+            if total==0:
+                color="LightPink"
+            else:
+                color=""
+            
+            if color:
+                f.write(f'<td style="background-color: {color}">')
+            else:
+                f.write("<td>")
+            f.write(f"{total}</td>")
+            table_row_end(f)
+        table_end(f,False)
+        
+        f.write('</div>\n') #div table-cell
+        f.write('</div>\n') #div table-row
+        f.write('</div>\n') #div table
+        
+        f.write("</body></html>\n")
+        
 if __name__=="__main__":
     main()

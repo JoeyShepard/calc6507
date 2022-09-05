@@ -2,7 +2,7 @@ TODO: different op for pushing bytes
 
 ;Constants
 ;=========
-STACK_OPS_BEGIN =		224
+STACK_OPS_BEGIN =		208
 STACK_NO_OPS_COUNT =	23
 
 VM_code_begin:
@@ -40,21 +40,21 @@ VM_dispatch:
 	TAY	;Save a copy for testing for argument loading
 	
 	TODO: remove
-	LDA VM_debug
-	BEQ .no_debug
-		LDA VM_IP+1
-		STA DEBUG_HEX
-		LDA VM_IP
-		STA DEBUG_HEX
-		LDA #':'
-		STA DEBUG
-		TYA
-		STA DEBUG_HEX
-		LDA #' '
-		STA DEBUG
-		JSR VM_stub_halt
-	.no_debug:
-	TYA
+	;LDA VM_debug
+	;BEQ .no_debug
+	;	LDA VM_IP+1
+	;	STA DEBUG_HEX
+	;	LDA VM_IP
+	;	STA DEBUG_HEX
+	;	LDA #':'
+	;	STA DEBUG
+	;	TYA
+	;	STA DEBUG_HEX
+	;	LDA #' '
+	;	STA DEBUG
+	;	JSR VM_stub_halt
+	;.no_debug:
+	;TYA
 	
 	TODO: eliminate overhead if enough room?
 	JSR VM_IP_inc
@@ -86,13 +86,17 @@ VM_dispatch:
 	.fp_op:
 	;VM fp op
 	TAX
-	AND #$E0
-	LSR
-	LSR
+	TODO: magic number
+	AND #7
+	ASL
+	ASL
+	ASL
 	STA VM_A1
 	TXA
-	AND #$1F
-	ASL
+	TODO: magic number
+	AND #$F8
+	LSR
+	LSR
 	TAX
 	LDA VM_table_fp+1,X
 	PHA
@@ -106,13 +110,17 @@ VM_op_reg_fp:
 	LDA #$25
 	JMP VM_dispatch
 	
-VM_op_add_fp:
+VM_op_tos_fp:
 	LDA #$26
 	JMP VM_dispatch
 
+
+
 VM_table_fp:
 	FDB VM_op_reg_fp-1
-	FDB VM_op_add_fp-1
+	FDB VM_op_tos_fp-1
+
+
 
 ;VM stack operations
 ;===================
@@ -373,7 +381,7 @@ VM_op_djnz1:
 	JMP VM_stub_loop
 
 VM_table_stack:
-	;Stack ops
+	;Single byte stack ops
 	FDB VM_op_end-1			;0
 	FDB VM_op_store-1		;1
 	FDB VM_op_dup-1			;2
@@ -397,13 +405,16 @@ VM_table_stack:
 	FDB VM_op_and-1			;20
 	FDB VM_op_xor-1			;21
 	FDB VM_op_cfetch-1		;22
-	;These take arguments
-	FDB VM_op_JSR-1
-	FDB VM_op_push_res-1
-	FDB VM_op_push_byte-1
-	FDB VM_op_loop2-1
-	FDB VM_op_djnz0-1
-	FDB VM_op_djnz1-1
+	
+	;Single byte ops for FP VM
+	
+	;Single byte ops that take single byte argument
+	FDB VM_op_JSR-1			;1
+	FDB VM_op_push_res-1	;2
+	FDB VM_op_push_byte-1	;3
+	FDB VM_op_loop2-1		;4
+	FDB VM_op_djnz0-1		;5
+	FDB VM_op_djnz1-1		;6
 	
 
 ;Small stubs used above
@@ -445,6 +456,7 @@ VM_stub_loop:
 	STA VM_IP+1
 	JMP VM_dispatch
 
+VM_func_begin:
 VM_stub_halt:
 	LDA #'['
 	STA DEBUG
@@ -477,6 +489,7 @@ VM_stub_halt:
 	STA DEBUG	
 	halt
 	RTS
+VM_func_end:
 
 VM_code_end:
 	

@@ -271,7 +271,7 @@
 				.not_hex:
 				.item_done:
 			.no_item:
-			
+						
 			LDA address
 			SEC
 			SBC #OBJ_SIZE
@@ -305,7 +305,7 @@
 			STA (screen_ptr),Y
 			DEC screen_ptr+1
 			INY
-			BNE .loop_line
+			BNE .loop_line		
 	END
 	
 		

@@ -75,7 +75,6 @@
 	FUNC ReadKey
 		LDA KB_INPUT
 	END
-		
 	
 	FUNC LCD_clrscr
 		<VM
@@ -90,7 +89,6 @@
 		VM>
 	END
 	
-	VM_func_begin:
 	FUNC LCD_char_VM
 		<VM
 			EXTERN 
@@ -101,21 +99,19 @@
 			A 32 - DUP LSHIFT LSHIFT + font_ptr @ + 4 +
 			screen_ptr @
 			
-			0 DEBUG
-			
 			5 DO1
-				OVER C@ SWAP					;font_ptr font_data screen_ptr
+				OVER C@ SWAP							;font_ptr font_data screen_ptr
 				8 DO0
 					OVER 128 AND
 					FG_COLOR_WIDE BG_COLOR_WIDE
-					SELECT						;No way to get BG_COLOR at VM compile time so magic number
+					SELECT
 					OVER OVER OVER ! 256 + !
-					512 +						;screen_ptr
-					SWAP LSHIFT SWAP			;shift font data
-				DJNZ0							;font_ptr font_data screen_ptr
+					512 +								;screen_ptr
+					SWAP LSHIFT SWAP					;shift font data
+				DJNZ0									;font_ptr font_data screen_ptr
 				
 				[ 256 16 * 2 - CONST line_reset ]
-				line_reset - SWAP DROP SWAP 1 - SWAP
+				line_reset - SWAP DROP SWAP 1 - SWAP	;font_ptr screen_ptr
 			DJNZ1
 			
 			16 DO0
@@ -123,9 +119,9 @@
 			DJNZ0
 			
 			line_reset - screen_ptr ! DROP
+			
 		VM>
 	END
-	VM_func_end:
 	
 	FUNC LCD_char
 		ARGS
@@ -272,7 +268,6 @@
 			;STA arg
 			;CALL LCD_char, arg
 			
-			START HERE: graphic distortion at cursor
 			JSR LCD_char_VM
 			
 			INC index

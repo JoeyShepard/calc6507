@@ -618,7 +618,11 @@
 		SED
 		TXA
 		PHA
-			
+		
+		<VM
+		
+		VM>
+		
 		;check for zero - simplifies logic below
 		LDA R0+GR_OFFSET+DEC_COUNT/2-1
 		BNE .no_zero_exit

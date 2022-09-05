@@ -218,13 +218,7 @@ VM_STACK_SIZE set	16
 		TODO: copyright
 		TODO: double check not relying on flags from BCD which are not valid for NMOS
 		
-		CALL VM_setup
-		
-		;<VM
-		;	REG R2
-		;	ADD R3
-		;VM>
-		
+		CALL VM_setup	
 		CALL setup
 		CALL tests
 		;CALL file_tests
@@ -283,6 +277,8 @@ VM_STACK_SIZE set	16
 					LDA mode
 					CMP #MODE_IMMEDIATE
 					BNE .compile_word
+						
+						TODO: simplify dispatch with separate type table
 						
 						;Immediate mode - insert word into temp thread and execute
 						.immediate:
