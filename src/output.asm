@@ -213,6 +213,21 @@
 		.done:
 		CALL LCD_char, #CHAR_QUOTE
 	END
+
+	TODO: remove
+	<NOVM
+		EXTERN
+			VM_test1 VM_test2 VM_test3 VM_test4
+		END
+	VM>
+	VM_test1:
+		<VM 2 VM>
+	VM_test2:
+		<VM 4 VM_test3 EXEC VM>
+	VM_test3:
+		<VM 5 VM>
+	VM_test4:
+		<VM DROP DROP DROP VM>
 	
 	FUNC DrawStack
 		VARS
@@ -244,19 +259,10 @@
 		;CALL LCD_print, " FREE]"
 		;JSR CODE_DROP+EXEC_HEADER
 		
-		;<VM " FREE]" JSR LCD_print_VM FDROP VM>
-		
-		START HERE
-		
-		<VM
-			1 DEBUG
-			1 2 IF 3 THEN
-			5 0 IF 7 THEN
-			DROP DROP DROP	
-			0 DEBUG
-		VM>
-		
-		
+		;<VM 
+		;	EXTERN LCD_print_VM END 
+		;	" FREE]" LCD_print_VM EXEC FDROP
+		;VM>
 		
 		MOV #'5',character
 		MOV #5,counter

@@ -14,18 +14,18 @@ VM_stub_halt:
 	STA DEBUG
 	LDA #' '
 	STA DEBUG
-	LDX VM_SP
+	LDX #VM_stack_end
 	.loop:
-		CPX #VM_stack_end
+		CPX VM_SP
 		BEQ .done
+			DEX
+			DEX
 			LDA 1,X
 			STA DEBUG_HEX
 			LDA 0,X
 			STA DEBUG_HEX
 			LDA #' '
 			STA DEBUG
-			INX
-			INX
 			JMP .loop
 	.done:
 	LDA #'\'

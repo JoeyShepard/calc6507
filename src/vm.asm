@@ -32,6 +32,8 @@ VM_brk_handler:
 	PLA		;High byte of return address
 	SBC #0
 	STA VM_IP+1
+	LDA #1
+	STA VM_nest_level
 	;Fall through to VM dispatch
 
 VM_dispatch:
@@ -144,9 +146,20 @@ TODO: all of these either LDX stack_SP or JSR VM_SP_dec? encode in byte
 TODO: replace JMP VM_dispatch with BRK and check status in handler? lots of stack manipulations though
 
 VM_op_nop:			;0
+	INC VM_nest_level
 	JMP VM_dispatch
 
 VM_op_end:			;1
+	DEC VM_nest_level
+	BEQ .hard_return
+		;Return to VM function
+		PLA
+		STA VM_IP
+		PLA
+		STA VM_IP+1
+		JMP VM_dispatch
+	.hard_return:
+	;Finished nested VM calls. Hard return.
 	LDX stack_SP
 	JMP (VM_IP)
 			
@@ -354,7 +367,71 @@ VM_op_cfetch:		;23
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_if:
+VM_op_exec:			;24
+	LDX VM_SP
+	LDA VM_IP+1
+	PHA
+	LDA VM_IP
+	PHA
+	LDA 0,X
+	STA VM_IP
+	LDA 1,X
+	STA VM_IP+1	
+	INC VM_nest_level
+	JMP VM_SP_inc_dispatch
+		
+;Single byte ops for FP VM
+VM_op_fdrop:		;0
+	TODO: only one copy, dont dup with word DROP
+	LDA stack_SP
+	CLC
+	ADC #OBJ_SIZE
+	STA stack_SP
+	DEC stack_count
+	JMP VM_dispatch
+	
+;Single byte ops that take single byte argument	
+VM_op_push_res:		;0
+	JSR VM_SP_dec
+	LDA VM_res_table_low,Y
+	STA 0,X
+	LDA VM_res_table_high,Y
+	STA 1,X
+	JMP VM_dispatch
+
+VM_op_push_byte:	;1
+	JSR VM_SP_dec
+	STY 0,X
+	LDA #0
+	STA 1,X
+	JMP VM_dispatch
+
+VM_op_loop2:		;2
+	LDX VM_SP
+	INC 2,X
+	BNE .loop
+		INC 3,X
+		BNE .loop
+			;Reached end. Stop looping
+			JMP VM_dispatch
+	.loop:
+	JMP VM_stub_loop
+
+VM_op_djnz0:		;3
+	DEC VM_C0
+	BNE .loop
+		JMP VM_dispatch
+	.loop:
+	JMP VM_stub_loop
+	
+VM_op_djnz1:		;4
+	DEC VM_C1
+	BNE .loop
+		JMP VM_dispatch
+	.loop:
+	JMP VM_stub_loop
+
+VM_op_if:			;5
 	LDX VM_SP
 	LDA 0,X
 	ORA 1,X
@@ -369,69 +446,6 @@ VM_op_if:
 		STA VM_IP+1
 	.true:
 	JMP VM_SP_inc_dispatch
-	
-;Single byte ops for FP VM
-VM_op_fdrop:		;#0
-	TODO: only one copy, dont dup with word DROP
-	LDA stack_SP
-	CLC
-	ADC #OBJ_SIZE
-	STA stack_SP
-	DEC stack_count
-	JMP VM_dispatch
-	
-;Single byte ops that take single byte argument
-VM_op_JSR:			;#0
-	JSR VM_SP_dec
-	LDA VM_IP
-	STA 0,X
-	LDA VM_IP+1
-	STA 1,X
-	LDA VM_res_table_low,Y
-	STA VM_IP
-	LDA VM_res_table_high,Y
-	STA VM_IP+1
-	JMP VM_dispatch
-	
-VM_op_push_res:		;#1
-	JSR VM_SP_dec
-	LDA VM_res_table_low,Y
-	STA 0,X
-	LDA VM_res_table_high,Y
-	STA 1,X
-	JMP VM_dispatch
-
-VM_op_push_byte:	;#2
-	JSR VM_SP_dec
-	STY 0,X
-	LDA #0
-	STA 1,X
-	JMP VM_dispatch
-
-VM_op_loop2:		;#3
-	LDX VM_SP
-	INC 2,X
-	BNE .loop
-		INC 3,X
-		BNE .loop
-			;Reached end. Stop looping
-			JMP VM_dispatch
-	.loop:
-	JMP VM_stub_loop
-
-VM_op_djnz0:		;#4
-	DEC VM_C0
-	BNE .loop
-		JMP VM_dispatch
-	.loop:
-	JMP VM_stub_loop
-	
-VM_op_djnz1:		;#5
-	DEC VM_C1
-	BNE .loop
-		JMP VM_dispatch
-	.loop:
-	JMP VM_stub_loop
 
 VM_table_stack:
 	;Single byte stack ops
@@ -459,19 +473,18 @@ VM_table_stack:
 	FDB VM_op_and-1			;21
 	FDB VM_op_xor-1			;22
 	FDB VM_op_cfetch-1		;23
-	FDB VM_op_if-1			;24
+	FDB VM_op_exec-1		;24
 	
 	;Single byte ops for FP VM
 	FDB VM_op_fdrop-1		;0
 	
 	;Single byte ops that take single byte argument
-	FDB VM_op_JSR-1			;0
-	FDB VM_op_push_res-1	;1
-	FDB VM_op_push_byte-1	;2
-	FDB VM_op_loop2-1		;3
-	FDB VM_op_djnz0-1		;4
-	FDB VM_op_djnz1-1		;5
-	
+	FDB VM_op_push_res-1	;0
+	FDB VM_op_push_byte-1	;1
+	FDB VM_op_loop2-1		;2
+	FDB VM_op_djnz0-1		;3
+	FDB VM_op_djnz1-1		;4
+	FDB VM_op_if-1			;5
 
 ;Small stubs used above
 ;======================

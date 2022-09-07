@@ -59,6 +59,10 @@
 	TODO: eliminate JSR to BRK? maybe first byte after BRK
 	TODO: shadow space on main stack? had planned on 3 but now only space for 1
 	
+	TODO: if still wont fit, remove hex and strings :/ can always add back what will fit but then redo docs :/
+		TODO: even removing strings or smart hex on stack could be good
+		TODO: can do without ! and @
+	
 ;To finish before website upload
 	TODO: github readme
 	
@@ -115,6 +119,7 @@ LOCALS_END set		$13
 	BYTE VM_A_buff		;Value of A when VM invoked
 	BYTE VM_C0			;One byte counter for DJNZ0
 	BYTE VM_C1			;One byte counter for DJNZ1
+	BYTE VM_nest_level	;Nested level of VM calls
 	TODO: remove?
 	BYTE VM_debug
 	

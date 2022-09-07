@@ -44,18 +44,18 @@ STACK_OPS=[
     "AND",          #21
     "XOR",          #22
     "C@",           #23
-    "IF",           #24
+    "EXEC",         #24
     
     #Single byte ops for FP VM
     "FDROP",        #0
     
     #Single byte ops that take single byte argument
-    "JSR",          #0
-    "PUSH_RES",     #1
-    "PUSH_BYTE",    #2
-    "LOOP2",        #3
-    "DJNZ0",        #4
-    "DJNZ1"]        #5
+    "PUSH_RES",     #0
+    "PUSH_BYTE",    #1
+    "LOOP2",        #2
+    "DJNZ0",        #3
+    "DJNZ1",        #4
+    "IF"]           #5
     
 #Other operations processed but not assigned a token
 OTHER_OPS=[
@@ -430,7 +430,7 @@ def main():
                                                 print(f"Line: {line.strip()}")
                                                 exit(1)
                                             index=if_list.pop()
-                                            byte_list[index]=len(byte_list)-index
+                                            byte_list[index]=len(byte_list)-index-1
                                     elif item in res_list:
                                         #Push 16-bit constant onto stack
                                         byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]

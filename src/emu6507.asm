@@ -38,18 +38,16 @@
 		
 		<VM
 			EXTERN
-				font_inverted dict_begin dict_ptr dict_save
-				MODE_IMMEDIATE mode
-				BANK_GEN_RAM2 BANK_GEN_RAM3
-				RAM_BANK2 RAM_BANK3
+				font_inverted dict_begin dict_ptr dict_save 
+				mode RAM_BANK2 RAM_BANK3
 			END
 			
 			0 font_inverted c!
 			dict_begin DUP dict_ptr ! dict_save !
 			0 dict_begin OVER OVER ! c!
-			MODE_IMMEDIATE mode c!
-			BANK_GEN_RAM2 RAM_BANK2 c!
-			BANK_GEN_RAM3 RAM_BANK3 c!
+			CONST8 MODE_IMMEDIATE mode c!
+			CONST8 BANK_GEN_RAM2 RAM_BANK2 c!
+			CONST8 BANK_GEN_RAM3 RAM_BANK3 c!
 		VM>		
 	END
 	VM_func_end:
