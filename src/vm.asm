@@ -3,7 +3,7 @@ TODO: different op for pushing bytes
 ;Constants
 ;=========
 STACK_OPS_BEGIN =		208
-STACK_NO_OPS_COUNT =	23
+STACK_NO_OPS_COUNT =	25+1
 
 VM_code_begin:
 
@@ -12,7 +12,7 @@ FUNC VM_setup
 	LDA VM_code_end-VM_code_begin	;Total size of VM
 	LDA VM_func_end-VM_func_begin	;Size of function being modified
 	
-	LDA #VM_STACK_END
+	LDA #VM_stack_end
 	STA VM_SP
 	LDA #0
 	TODO: remove
@@ -40,21 +40,11 @@ VM_dispatch:
 	TAY	;Save a copy for testing for argument loading
 	
 	TODO: remove
-	;LDA VM_debug
-	;BEQ .no_debug
-	;	LDA VM_IP+1
-	;	STA DEBUG_HEX
-	;	LDA VM_IP
-	;	STA DEBUG_HEX
-	;	LDA #':'
-	;	STA DEBUG
-	;	TYA
-	;	STA DEBUG_HEX
-	;	LDA #' '
-	;	STA DEBUG
-	;	JSR VM_stub_halt
-	;.no_debug:
-	;TYA
+	LDA VM_debug
+	BEQ .no_debug
+		JSR VM_handler_debug
+	.no_debug:
+	TYA
 	
 	TODO: eliminate overhead if enough room?
 	JSR VM_IP_inc
@@ -89,9 +79,13 @@ VM_dispatch:
 	TODO: magic number
 	AND #7
 	ASL
+	STA VM_temp0
 	ASL
 	ASL
-	STA VM_A1
+	ADC VM_temp0
+	ADC #regs_begin
+	TODO: store in VM_src instead? may need to analysze usage
+	TAY
 	TXA
 	TODO: magic number
 	AND #$F8
@@ -106,19 +100,41 @@ VM_dispatch:
 
 ;VM fp operations
 ;================
-VM_op_reg_fp:
-	LDA #$25
+VM_op_dest_fp:
+	STY VM_dest
+	STY VM_src1
+	JMP VM_dispatch
+
+VM_op_src_fp:
+	STY VM_src1
 	JMP VM_dispatch
 	
+TODO: replace with one copy of MemCopy?
 VM_op_tos_fp:
-	LDA #$26
+	STY VM_src0
+	LDX stack_SP
+	STX VM_temp0
+	LDY #OBJ_SIZE-TYPE_SIZE
+	.loop:
+		LDX VM_temp0
+		LDA 1,X
+		INC VM_temp0
+		LDX VM_src0
+		STA 1,X
+		INC VM_src0
+		DEY
+		BNE .loop
+	JMP VM_dispatch	
+
+VM_op_add_fp:
+	LDA #$28
 	JMP VM_dispatch
 
-
-
 VM_table_fp:
-	FDB VM_op_reg_fp-1
+	FDB VM_op_dest_fp-1
+	FDB VM_op_src_fp-1
 	FDB VM_op_tos_fp-1
+	FDB VM_op_add_fp-1
 
 
 
@@ -126,11 +142,15 @@ VM_table_fp:
 ;===================
 TODO: all of these either LDX stack_SP or JSR VM_SP_dec? encode in byte
 TODO: replace JMP VM_dispatch with BRK and check status in handler? lots of stack manipulations though
-VM_op_end:			;#0
+
+VM_op_nop:			;0
+	JMP VM_dispatch
+
+VM_op_end:			;1
 	LDX stack_SP
 	JMP (VM_IP)
 			
-VM_op_store:		;#1
+VM_op_store:		;2
 	LDX VM_SP
 	LDA 2,X
 	STA (0,X)
@@ -142,7 +162,7 @@ VM_op_store:		;#1
 	STA (0,X)
 	JMP VM_SP_inc2_dispatch
 	
-VM_op_dup:			;#2
+VM_op_dup:			;3
 	JSR VM_SP_dec
 	LDA 2,X
 	STA 0,X
@@ -150,7 +170,7 @@ VM_op_dup:			;#2
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_over:			;#3
+VM_op_over:			;4
 	JSR VM_SP_dec
 	LDA 4,X
 	STA 0,X
@@ -158,7 +178,7 @@ VM_op_over:			;#3
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_inv:			;#4
+VM_op_inv:			;5
 	LDX VM_SP
 	SEC
 	LDA #0
@@ -169,7 +189,7 @@ VM_op_inv:			;#4
 	STA 1,X
 	JMP VM_dispatch
 
-VM_op_inc:			;#5
+VM_op_inc:			;6
 	LDX VM_SP
 	INC 0,X
 	BNE .done
@@ -177,13 +197,17 @@ VM_op_inc:			;#5
 	.done:
 	JMP VM_dispatch
 	
-VM_op_rshift:		;#6
+VM_op_rshift:		;7
 	LDX VM_SP
-	LSR 1,X
-	ROR 0,X
-	JMP VM_dispatch
+	LDY 0,X
+	.loop:
+		LSR 3,X
+		ROR 2,X
+		DEY
+		BNE .loop
+	JMP VM_SP_inc_dispatch
 	
-VM_op_A:			;#7
+VM_op_A:			;8
 	JSR VM_SP_dec
 	LDA VM_A_buff
 	STA 0,X
@@ -191,7 +215,7 @@ VM_op_A:			;#7
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_add:			;#8	
+VM_op_add:			;9
 	LDX VM_SP
 	CLC
 	LDA 2,X
@@ -202,7 +226,7 @@ VM_op_add:			;#8
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 
-VM_op_sub:			;#9
+VM_op_sub:			;10
 	LDX VM_SP
 	SEC
 	LDA 2,X
@@ -213,47 +237,50 @@ VM_op_sub:			;#9
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 	
-VM_op_lshift:		;#10
+VM_op_lshift:		;11
 	LDX VM_SP
-	ASL 0,X
-	ROL 1,X
-	JMP VM_dispatch
+	LDY 0,X
+	.loop:
+		ASL 2,X
+		ROL 3,X
+		DEY
+		BNE .loop
+	JMP VM_SP_inc_dispatch
 
-VM_op_cstore:		;#11
+VM_op_cstore:		;12
 	LDX VM_SP
 	LDA 2,X
 	STA (0,X)
 	JMP VM_SP_inc2_dispatch
 	
 TODO: use assembly name of VM_C0 instead?
-VM_op_do0:			;#12
+VM_op_do0:			;13
 	LDX VM_SP
 	LDA 0,X
 	STA VM_C0
 	JMP VM_SP_inc_dispatch
 
-VM_op_do1:			;#13
+VM_op_do1:			;14
 	LDX VM_SP
 	LDA 0,X
 	STA VM_C1
 	JMP VM_SP_inc_dispatch
 
-VM_op_drop:			;#14
+VM_op_drop:			;15
 	LDX VM_SP
 	JMP VM_SP_inc_dispatch
 	
-VM_op_halt:			;#15
+VM_op_halt:			;16
 	TODO: remove
-	JSR VM_stub_halt
-	JMP VM_dispatch
+	JMP VM_debug_op_halt
 	
-VM_op_debug:		;#16
+VM_op_debug:		;17
 	LDX VM_SP
 	LDA 0,X
 	STA VM_debug
 	JMP VM_SP_inc_dispatch
 	
-VM_op_swap:			;#17
+VM_op_swap:			;18
 	LDX VM_SP
 	LDA 0,X
 	TAY
@@ -267,7 +294,7 @@ VM_op_swap:			;#17
 	STY 3,X
 	JMP VM_dispatch
 	
-VM_op_fetch:		;#18
+VM_op_fetch:		;19
 	LDX VM_SP
 	LDA (0,X)
 	TAY
@@ -280,7 +307,7 @@ VM_op_fetch:		;#18
 	STY 0,X
 	JMP VM_dispatch
 	
-VM_op_select:		;#19
+VM_op_select:		;20
 	LDX VM_SP
 	LDA 4,X
 	ORA 5,X
@@ -299,7 +326,7 @@ VM_op_select:		;#19
 	JMP VM_SP_inc2_dispatch
 	
 TODO: share with main stack code
-VM_op_and:			;#20
+VM_op_and:			;21
 	LDX VM_SP
 	LDA 2,X
 	AND 0,X
@@ -309,7 +336,7 @@ VM_op_and:			;#20
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 
-VM_op_xor:			;#21
+VM_op_xor:			;22
 	LDX VM_SP
 	LDA 2,X
 	EOR 0,X
@@ -319,7 +346,7 @@ VM_op_xor:			;#21
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 	
-VM_op_cfetch:
+VM_op_cfetch:		;23
 	LDX VM_SP
 	LDA (0,X)
 	STA 0,X
@@ -327,8 +354,34 @@ VM_op_cfetch:
 	STA 1,X
 	JMP VM_dispatch
 	
-;These take arguments
-VM_op_JSR:
+VM_op_if:
+	LDX VM_SP
+	LDA 0,X
+	ORA 1,X
+	BNE .true
+		;Branch to THEN
+		TYA
+		CLC
+		ADC VM_IP
+		STA VM_IP
+		LDA VM_IP+1
+		ADC #0
+		STA VM_IP+1
+	.true:
+	JMP VM_SP_inc_dispatch
+	
+;Single byte ops for FP VM
+VM_op_fdrop:		;#0
+	TODO: only one copy, dont dup with word DROP
+	LDA stack_SP
+	CLC
+	ADC #OBJ_SIZE
+	STA stack_SP
+	DEC stack_count
+	JMP VM_dispatch
+	
+;Single byte ops that take single byte argument
+VM_op_JSR:			;#0
 	JSR VM_SP_dec
 	LDA VM_IP
 	STA 0,X
@@ -340,7 +393,7 @@ VM_op_JSR:
 	STA VM_IP+1
 	JMP VM_dispatch
 	
-VM_op_push_res:
+VM_op_push_res:		;#1
 	JSR VM_SP_dec
 	LDA VM_res_table_low,Y
 	STA 0,X
@@ -348,14 +401,14 @@ VM_op_push_res:
 	STA 1,X
 	JMP VM_dispatch
 
-VM_op_push_byte:
+VM_op_push_byte:	;#2
 	JSR VM_SP_dec
 	STY 0,X
 	LDA #0
 	STA 1,X
 	JMP VM_dispatch
 
-VM_op_loop2:
+VM_op_loop2:		;#3
 	LDX VM_SP
 	INC 2,X
 	BNE .loop
@@ -366,14 +419,14 @@ VM_op_loop2:
 	.loop:
 	JMP VM_stub_loop
 
-VM_op_djnz0:
+VM_op_djnz0:		;#4
 	DEC VM_C0
 	BNE .loop
 		JMP VM_dispatch
 	.loop:
 	JMP VM_stub_loop
 	
-VM_op_djnz1:
+VM_op_djnz1:		;#5
 	DEC VM_C1
 	BNE .loop
 		JMP VM_dispatch
@@ -382,39 +435,42 @@ VM_op_djnz1:
 
 VM_table_stack:
 	;Single byte stack ops
-	FDB VM_op_end-1			;0
-	FDB VM_op_store-1		;1
-	FDB VM_op_dup-1			;2
-	FDB VM_op_over-1		;3
-	FDB VM_op_inv-1			;4
-	FDB VM_op_inc-1			;5
-	FDB VM_op_rshift-1		;6
-	FDB VM_op_A-1			;7
-	FDB VM_op_add-1			;8
-	FDB VM_op_sub-1			;9
-	FDB VM_op_lshift-1		;10
-	FDB VM_op_cstore-1		;11
-	FDB VM_op_do0-1			;12
-	FDB VM_op_do1-1			;13
-	FDB VM_op_drop-1		;14
-	FDB VM_op_halt-1		;15
-	FDB VM_op_debug-1		;16
-	FDB VM_op_swap-1		;17
-	FDB VM_op_fetch-1		;18
-	FDB VM_op_select-1		;19
-	FDB VM_op_and-1			;20
-	FDB VM_op_xor-1			;21
-	FDB VM_op_cfetch-1		;22
+	FDB VM_op_nop-1			;0
+	FDB VM_op_end-1			;1
+	FDB VM_op_store-1		;2
+	FDB VM_op_dup-1			;3
+	FDB VM_op_over-1		;4
+	FDB VM_op_inv-1			;5
+	FDB VM_op_inc-1			;6
+	FDB VM_op_rshift-1		;7
+	FDB VM_op_A-1			;8
+	FDB VM_op_add-1			;9
+	FDB VM_op_sub-1			;10
+	FDB VM_op_lshift-1		;11
+	FDB VM_op_cstore-1		;12
+	FDB VM_op_do0-1			;13
+	FDB VM_op_do1-1			;14
+	FDB VM_op_drop-1		;15
+	FDB VM_op_halt-1		;16
+	FDB VM_op_debug-1		;17
+	FDB VM_op_swap-1		;18
+	FDB VM_op_fetch-1		;19
+	FDB VM_op_select-1		;20
+	FDB VM_op_and-1			;21
+	FDB VM_op_xor-1			;22
+	FDB VM_op_cfetch-1		;23
+	FDB VM_op_if-1			;24
 	
 	;Single byte ops for FP VM
+	FDB VM_op_fdrop-1		;0
 	
 	;Single byte ops that take single byte argument
-	FDB VM_op_JSR-1			;1
-	FDB VM_op_push_res-1	;2
-	FDB VM_op_push_byte-1	;3
-	FDB VM_op_loop2-1		;4
-	FDB VM_op_djnz0-1		;5
-	FDB VM_op_djnz1-1		;6
+	FDB VM_op_JSR-1			;0
+	FDB VM_op_push_res-1	;1
+	FDB VM_op_push_byte-1	;2
+	FDB VM_op_loop2-1		;3
+	FDB VM_op_djnz0-1		;4
+	FDB VM_op_djnz1-1		;5
 	
 
 ;Small stubs used above
@@ -446,50 +502,15 @@ VM_SP_inc_dispatch:
 	JMP VM_dispatch
 	
 VM_stub_loop:
-	STY VM_temp
+	STY VM_temp0
 	SEC
 	LDA VM_IP
-	SBC VM_temp
+	SBC VM_temp0
 	STA VM_IP
 	LDA VM_IP+1
 	SBC #0
 	STA VM_IP+1
 	JMP VM_dispatch
-
-VM_func_begin:
-VM_stub_halt:
-	LDA #'['
-	STA DEBUG
-	LDA #VM_STACK_END
-	SEC
-	SBC VM_SP
-	LSR
-	STA DEBUG_HEX
-	LDA #']'
-	STA DEBUG
-	LDA #' '
-	STA DEBUG
-	LDX VM_SP
-	.loop:
-		CPX #VM_STACK_END
-		BEQ .done
-			LDA 1,X
-			STA DEBUG_HEX
-			LDA 0,X
-			STA DEBUG_HEX
-			LDA #' '
-			STA DEBUG
-			INX
-			INX
-			JMP .loop
-	.done:
-	LDA #'\'
-	STA DEBUG
-	LDA #'n'
-	STA DEBUG	
-	halt
-	RTS
-VM_func_end:
 
 VM_code_end:
 	

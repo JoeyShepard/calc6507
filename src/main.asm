@@ -45,7 +45,6 @@
 	TODO: drive RDY with 6532 interrupt
 	TODO:    seems allowed as long as transitions in phi1 not phi2. lower current though? posted on forum
 	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
-	TODO: separate engine and table for 16 bit forth?
 	TODO: more comments
 	TODO: replace calculated jump with JMP (addr)
 	TODO: use registers for text input also somehow? no bc could be used by words
@@ -58,6 +57,7 @@
 	TODO: lo and hi defined for NASM, redefine with FUNCTION for AS
 	TODO: move constants to const.asm?
 	TODO: eliminate JSR to BRK? maybe first byte after BRK
+	TODO: shadow space on main stack? had planned on 3 but now only space for 1
 	
 ;To finish before website upload
 	TODO: github readme
@@ -97,28 +97,33 @@ DEBUG_MODE set "off"
 	;Locals usage
 LOCALS_BEGIN set	$0
 ;LOCALS_END set		$1F
-LOCALS_END set		$16
+LOCALS_END set		$13
 	
 	;VM memory
-	ORG $17			;ORG needs fixed value rather than symbol
+	ORG $14			;ORG needs fixed value rather than symbol
 	VM_MEM_BEGIN:
-	WORD VM_IP		;Instruction pointer
-	BYTE VM_SP		;Stack pointer
-	WORD VM_A0		;Accumuator FP reg address
-	WORD VM_A1		;Argument FP reg address
-	WORD VM_temp	;Temporary register for VM - LOOP2
-	BYTE VM_A_buff	;Value of A when VM invoked
-	BYTE VM_C0		;One byte counter for DJNZ0
-	BYTE VM_C1		;One byte counter for DJNZ1
+	WORD VM_IP			;Instruction pointer
+	BYTE VM_SP			;Stack pointer
+	BYTE VM_dest		;FP VM op destination
+	BYTE VM_src0		;FP VM op source 0
+	BYTE VM_src1		;FP VM op source 1
+	BYTE VM_dest_buff
+	BYTE VM_src0_buff
+	BYTE VM_src1_buff
+	BYTE VM_temp0		;Temporary registers for VM
+	BYTE VM_temp1
+	BYTE VM_A_buff		;Value of A when VM invoked
+	BYTE VM_C0			;One byte counter for DJNZ0
+	BYTE VM_C1			;One byte counter for DJNZ1
 	TODO: remove?
 	BYTE VM_debug
 	
 	TODO: adjust stack size
 	TODO: move to constants
 VM_STACK_SIZE set	16
-	VM_STACK:
+	VM_stack:
 	DFS VM_STACK_SIZE 
-	VM_STACK_END:
+	VM_stack_end:
 
 	TODO: double check all used and move variables out of globals to here
 	
@@ -132,7 +137,6 @@ VM_STACK_SIZE set	16
 	;Output
 	WORD screen_ptr
 	TODO: remove after debugging done
-	WORD font_ptr
 	
 	;Forth
 	WORD dict_ptr
@@ -149,24 +153,24 @@ VM_STACK_SIZE set	16
 	WORD math_ptr1
 	WORD math_ptr2
 	
-	;Don't need header byte, +1 for guard and round, +1 for exp sign
-	R0: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R1: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R2: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R3: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R4: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R5: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R6: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R7: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R_ans:	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	regs_begin:
+	
+	R0: 	DFS REG_SIZE
+	R1: 	DFS REG_SIZE
+	R2: 	DFS REG_SIZE
+	R3: 	DFS REG_SIZE
+	R4: 	DFS REG_SIZE
+	R5: 	DFS REG_SIZE
+	R6: 	DFS REG_SIZE
+	R7: 	DFS REG_SIZE
+	TODO: remove at end
+	R_ans:	DFS REG_SIZE
 	
 	;reg before R_ans in case double wide reg needed
 	;+3 since only need 6 of 9 bytes 
 	R_ans_wide = R7+3
 	
 	ZP_end:
-	
-	TODO: only 160 or so ZP addresses used???
 	
 	
 ;Variables in main RAM
@@ -218,7 +222,9 @@ VM_STACK_SIZE set	16
 		TODO: copyright
 		TODO: double check not relying on flags from BCD which are not valid for NMOS
 		
-		CALL VM_setup	
+		SEI
+		CLD
+		CALL VM_setup
 		CALL setup
 		CALL tests
 		;CALL file_tests
@@ -425,9 +431,9 @@ VM_STACK_SIZE set	16
 	ORG $D000
 	;should be visible to tests below which overflow $C000
 	include debug.asm
-	
-	TODO: remove after debugging
-	include font_debug.asm
+	TODO: remove
+	;store separate from main VM for more accurate file size calculation
+	include vm_debug.asm
 	
 	ORG $8900	;RAM + ROM size
 	;overlaps with video memory, no video output

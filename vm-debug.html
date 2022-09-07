@@ -19,8 +19,8 @@
 <div style="width: fit-content;">
 <center><b>General Stats</b></center>
 <table>
-<tr><td>VM invocations</td><td>4</td></tr>
-<tr><td>Const slots used</td><td>10/256</td></tr>
+<tr><td>VM invocations</td><td>6</td></tr>
+<tr><td>Const slots used</td><td>18/256</td></tr>
 </table>
 </div>
 <br><br>
@@ -28,9 +28,10 @@
 <center><b>Floating Point Ops</b></center>
 <table>
 <tr><th>Bytecode</th><th>Op</th><th>R0</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>R6</th><th>R7</th><th>Total</th></tr>
-<tr><td>00</td><td>REG</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>01</td><td>TOS</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>02</td><td>ADD</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>$00</td><td>DEST</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td>2</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGreen">1</td></tr>
+<tr><td>$01</td><td>SRC</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>$02</td><td>TOS</td><td>1</td><td>1</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td>2</td></tr>
+<tr><td>$03</td><td>ADD</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightPink">0</td></tr>
 </table>
 </div>
 <br><br>
@@ -38,16 +39,24 @@
 <center><b>16-bit Constants</b></center>
 <table>
 <tr><th>ID</th><th>Value</th><th>Total</th></tr>
-<tr><td>00</td><td>SCREEN_SIZE</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>01</td><td>SCREEN_ADDRESS</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>02</td><td>BG_COLOR</td><td style="background-color: Red">0</td></tr>
-<tr><td>03</td><td>screen_ptr</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>04</td><td>10794</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>05</td><td>font_ptr</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>06</td><td>FG_COLOR</td><td style="background-color: Red">0</td></tr>
-<tr><td>07</td><td>256</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>08</td><td>512</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>09</td><td>4094</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$00</td><td>font_inverted</td><td>3</td></tr>
+<tr><td>$01</td><td>dict_begin</td><td>2</td></tr>
+<tr><td>$02</td><td>dict_ptr</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$03</td><td>dict_save</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$04</td><td>MODE_IMMEDIATE</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$05</td><td>mode</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$06</td><td>BANK_GEN_RAM2</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$07</td><td>BANK_GEN_RAM3</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$08</td><td>RAM_BANK2</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$09</td><td>RAM_BANK3</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$0A</td><td>SCREEN_SIZE</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$0B</td><td>SCREEN_ADDRESS</td><td>2</td></tr>
+<tr><td>$0C</td><td>screen_ptr</td><td>3</td></tr>
+<tr><td>$0D</td><td>10794</td><td>3</td></tr>
+<tr><td>$0E</td><td>font_table</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$0F</td><td>256</td><td>2</td></tr>
+<tr><td>$10</td><td>512</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$11</td><td>4094</td><td>2</td></tr>
 </table>
 </div>
 <br><br>
@@ -57,36 +66,39 @@
 <center><b>Stack Ops</b></center>
 <table>
 <tr><th>Bytecode</th><th>Op</th><th>Total</th></tr>
-<tr><td>D0</td><td>VM></td><td>3</td></tr>
-<tr><td>D1</td><td>!</td><td>6</td></tr>
-<tr><td>D2</td><td>DUP</td><td>1</td></tr>
-<tr><td>D3</td><td>OVER</td><td>7</td></tr>
-<tr><td>D4</td><td>INV</td><td>1</td></tr>
-<tr><td>D5</td><td>1+</td><td>2</td></tr>
-<tr><td>D6</td><td>RSHIFT</td><td>1</td></tr>
-<tr><td>D7</td><td>A</td><td>1</td></tr>
-<tr><td>D8</td><td>+</td><td>6</td></tr>
-<tr><td>D9</td><td>-</td><td>4</td></tr>
-<tr><td>DA</td><td>LSHIFT</td><td>3</td></tr>
-<tr><td>DB</td><td>C!</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>DC</td><td>DO0</td><td>2</td></tr>
-<tr><td>DD</td><td>DO1</td><td>1</td></tr>
-<tr><td>DE</td><td>DROP</td><td>4</td></tr>
-<tr><td>DF</td><td>HALT</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>E0</td><td>DEBUG</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>E1</td><td>SWAP</td><td>6</td></tr>
-<tr><td>E2</td><td>@</td><td>2</td></tr>
-<tr><td>E3</td><td>SELECT</td><td>1</td></tr>
-<tr><td>E4</td><td>AND</td><td>1</td></tr>
-<tr><td>E5</td><td>XOR</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>E6</td><td>C@</td><td>1</td></tr>
-<tr><td>E7</td><td>JSR</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>E8</td><td>PUSH_RES</td><td>15</td></tr>
-<tr><td>E9</td><td>PUSH_BYTE</td><td>8</td></tr>
-<tr><td>EA</td><td>LOOP2</td><td>1</td></tr>
-<tr><td>EB</td><td>DJNZ0</td><td>2</td></tr>
-<tr><td>EC</td><td>DJNZ1</td><td>1</td></tr>
-</table>
+<tr><td>$D0</td><td>None</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>$D1</td><td>VM></td><td>5</td></tr>
+<tr><td>$D2</td><td>!</td><td>9</td></tr>
+<tr><td>$D3</td><td>DUP</td><td>2</td></tr>
+<tr><td>$D4</td><td>OVER</td><td>10</td></tr>
+<tr><td>$D5</td><td>INV</td><td>1</td></tr>
+<tr><td>$D6</td><td>1+</td><td>2</td></tr>
+<tr><td>$D7</td><td>RSHIFT</td><td>1</td></tr>
+<tr><td>$D8</td><td>A</td><td>1</td></tr>
+<tr><td>$D9</td><td>+</td><td>6</td></tr>
+<tr><td>$DA</td><td>-</td><td>4</td></tr>
+<tr><td>$DB</td><td>LSHIFT</td><td>3</td></tr>
+<tr><td>$DC</td><td>C!</td><td>5</td></tr>
+<tr><td>$DD</td><td>DO0</td><td>2</td></tr>
+<tr><td>$DE</td><td>DO1</td><td>1</td></tr>
+<tr><td>$DF</td><td>DROP</td><td>8</td></tr>
+<tr><td>$E0</td><td>HALT</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>$E1</td><td>DEBUG</td><td>2</td></tr>
+<tr><td>$E2</td><td>SWAP</td><td>7</td></tr>
+<tr><td>$E3</td><td>@</td><td>1</td></tr>
+<tr><td>$E4</td><td>SELECT</td><td>2</td></tr>
+<tr><td>$E5</td><td>AND</td><td>1</td></tr>
+<tr><td>$E6</td><td>XOR</td><td>1</td></tr>
+<tr><td>$E7</td><td>C@</td><td>3</td></tr>
+<tr><td>$E8</td><td>IF</td><td>2</td></tr>
+<tr><td>$E9</td><td>FDROP</td><td>1</td></tr>
+<tr><td>$EA</td><td>JSR</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>$EB</td><td>PUSH_RES</td><td>28</td></tr>
+<tr><td>$EC</td><td>PUSH_BYTE</td><td>23</td></tr>
+<tr><td>$ED</td><td>LOOP2</td><td>1</td></tr>
+<tr><td>$EE</td><td>DJNZ0</td><td>2</td></tr>
+<tr><td>$EF</td><td>DJNZ1</td><td>1</td></tr>
+<td colspan="3">Unused: $F0-$FF (16)</td></table>
 </div>
 </div>
 </div>

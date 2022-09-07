@@ -31,7 +31,9 @@
 	
 	TYPE_SIZE =				1
 	OBJ_SIZE =				9
-	OBJ_TYPE =				0	;first bytes of stack item is type
+	OBJ_TYPE =				0	;first byte of stack item is type
+	;Don't need header byte, +1 for guard and round, +1 for exp sign
+	REG_SIZE =				OBJ_SIZE-TYPE_SIZE+1+1	
 	
 	;Input
 	TODO: increase size?

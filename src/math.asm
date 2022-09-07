@@ -158,6 +158,8 @@
 		;STA R0
 		;STA R1
 
+		halt
+
 		LDY #GR_OFFSET
 		.loop:
 			INX
@@ -618,10 +620,6 @@
 		SED
 		TXA
 		PHA
-		
-		<VM
-		
-		VM>
 		
 		;check for zero - simplifies logic below
 		LDA R0+GR_OFFSET+DEC_COUNT/2-1

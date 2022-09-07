@@ -178,9 +178,12 @@
 			CMP #OBJ_FLOAT
 			BNE .not_float
 				.float:
-					JSR TosR0R1
+					<VM
+						TOS R0
+						FDROP
+						TOS R1
+					VM>
 					JSR BCD_Add
-					JSR CODE_DROP+EXEC_HEADER
 					JMP RansTos
 			.not_float:
 			
@@ -309,7 +312,6 @@
 			
 			;Multiplying hex objects
 			LDA HEX_TYPE,X
-			TODO: why?
 			ASL
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex

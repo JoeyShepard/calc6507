@@ -13,8 +13,9 @@
 		LSR
 		CLC
 		ADC #'0'
-		STA digit
-		CALL LCD_char, digit
+		;STA digit
+		;CALL LCD_char, digit
+		JSR LCD_char
 	END
 	
 	FUNC DigitLow
@@ -26,8 +27,9 @@
 		AND #$F
 		CLC
 		ADC #'0'
-		STA digit
-		CALL LCD_char, digit
+		;STA digit
+		;CALL LCD_char, digit
+		JSR LCD_char
 	END
 	
 	FUNC DrawFloat
@@ -47,19 +49,23 @@
 		LDA (source),Y
 		AND #SIGN_BIT
 		BEQ .positive
-			;LDA #CHAR_MINUS
 			LDA #'-'
 			STA sign
 		.positive:
 		
-		CALL LCD_char, sign
-				
+		;CALL LCD_char, sign
+		LDA sign
+		JSR LCD_char
+		
 		LDY #5
 		LDA R0,Y
 		STA arg
 		CALL DigitHigh, arg
 		
-		CALL LCD_char, #'.'
+		;CALL LCD_char, #'.'
+		LDA #'.'
+		JSR LCD_char
+		
 		CALL DigitLow, arg
 		LDA #4
 		STA index
@@ -86,7 +92,11 @@
 			LDA #'-'
 			STA sign
 		.positive_e:
-		CALL LCD_char,sign
+		
+		;CALL LCD_char,sign
+		LDA sign
+		JSR LCD_char
+		
 		LDY #7
 		LDA R0,Y
 		STA arg
@@ -115,14 +125,16 @@
 		BCC .print_digit
 			CLC
 			ADC #'A'-10
-			STA arg
+			;STA arg
 			JMP .done
 		.print_digit:
 			CLC
 			ADC #'0'
-			STA arg
+			;STA arg
 		.done:
-		CALL LCD_char, arg
+		
+		;CALL LCD_char, arg
+		JSR LCD_char
 	END
 	
 	FUNC HexLow
@@ -138,14 +150,15 @@
 		BCC .print_digit
 			CLC
 			ADC #'A'-10
-			STA arg
+			;STA arg
 			JMP .done
 		.print_digit:
 			CLC
 			ADC #'0'
-			STA arg
+			;STA arg
 		.done:
-		CALL LCD_char, arg
+		;CALL LCD_char, arg
+		JSR LCD_char
 	END
 	
 	FUNC DrawHex
@@ -155,7 +168,9 @@
 			BYTE arg
 		END
 		
-		CALL LCD_char, #'$'
+		;CALL LCD_char, #'$'
+		LDA #'$'
+		JSR LCD_char
 		
 		LDY #2
 		LDA (source),Y
@@ -176,8 +191,10 @@
 			BYTE arg
 			BYTE index
 		END
-
-		CALL LCD_char, #CHAR_QUOTE
+		
+		;CALL LCD_char, #CHAR_QUOTE
+		LDA #CHAR_QUOTE
+		JSR LCD_char
 		
 		LDA #1
 		STA index
@@ -185,8 +202,10 @@
 			LDY index
 			LDA (source),Y
 			BEQ .done
-			STA arg
-			CALL LCD_char, arg
+			;STA arg
+			;CALL LCD_char, arg
+			JSR LCD_char
+			
 			INC index
 			LDA index
 			CMP #9
@@ -216,11 +235,28 @@
 		CALL LCD_clrscr
 		LDA #CHAR_WIDTH*8
 		STA screen_ptr
-		CALL LCD_char, #'['
-		CALL DrawHex, address
-		CALL LCD_print, " FREE]"
+		;CALL LCD_char, #'['
+		LDA #'['
+		JSR LCD_char
 		
-		JSR CODE_DROP+EXEC_HEADER
+		CALL DrawHex, address
+		
+		;CALL LCD_print, " FREE]"
+		;JSR CODE_DROP+EXEC_HEADER
+		
+		;<VM " FREE]" JSR LCD_print_VM FDROP VM>
+		
+		START HERE
+		
+		<VM
+			1 DEBUG
+			1 2 IF 3 THEN
+			5 0 IF 7 THEN
+			DROP DROP DROP	
+			0 DEBUG
+		VM>
+		
+		
 		
 		MOV #'5',character
 		MOV #5,counter
@@ -239,8 +275,12 @@
 			CLC
 			ADC #CHAR_HEIGHT
 			STA screen_ptr+1
-			CALL LCD_char, character
-			CALL LCD_char, #':'
+			;CALL LCD_char, character
+			;CALL LCD_char, #':'
+			LDA character
+			JSR LCD_char
+			LDA #':'
+			JSR LCD_char
 			
 			DEC counter
 			LDA counter

@@ -12,43 +12,50 @@ STACK_OPS_BEGIN=208     #Beginning of stack ops encoding
 #==========================
 #Floating point operations
 FP_OPS=[
-    "REG",
+    "DEST",
+    "SRC",
     "TOS",
     "ADD"]
 
 #Stack operations
 STACK_OPS=[
-    #First, tokens that take no arguments
-    VM_END,     #0
-    "!",        #1
-    "DUP",      #2
-    "OVER",     #3
-    "INV",      #4
-    "1+",       #5
-    "RSHIFT",   #6
-    "A",        #7
-    "+",        #8
-    "-",        #9
-    "LSHIFT",   #10
-    "C!",       #11
-    "DO0",      #12
-    "DO1",      #13
-    "DROP",     #14
-    "HALT",     #15
-    "DEBUG",    #16
-    "SWAP",     #17
-    "@",        #18
-    "SELECT",   #19
-    "AND",      #20
-    "XOR",      #21
-    "C@",       #22
-    #Second, tokens that take one byte argument
-    "JSR",
-    "PUSH_RES",
-    "PUSH_BYTE",
-    "LOOP2",
-    "DJNZ0",
-    "DJNZ1"]
+    #Single byte stack ops
+    None,           #0  ;Interpretting BRK ignored as NOP
+    VM_END,         #1
+    "!",            #2
+    "DUP",          #3
+    "OVER",         #4
+    "INV",          #5
+    "1+",           #6
+    "RSHIFT",       #7
+    "A",            #8
+    "+",            #9
+    "-",            #10
+    "LSHIFT",       #11
+    "C!",           #12
+    "DO0",          #13
+    "DO1",          #14
+    "DROP",         #15
+    "HALT",         #16
+    "DEBUG",        #17
+    "SWAP",         #18
+    "@",            #19
+    "SELECT",       #20
+    "AND",          #21
+    "XOR",          #22
+    "C@",           #23
+    "IF",           #24
+    
+    #Single byte ops for FP VM
+    "FDROP",        #0
+    
+    #Single byte ops that take single byte argument
+    "JSR",          #0
+    "PUSH_RES",     #1
+    "PUSH_BYTE",    #2
+    "LOOP2",        #3
+    "DJNZ0",        #4
+    "DJNZ1"]        #5
     
 #Other operations processed but not assigned a token
 OTHER_OPS=[
@@ -58,7 +65,8 @@ OTHER_OPS=[
     "CONST8",   #8-bit constant defined in assembly file
     "CONST",    #Calculated and named literal value
     "LIT",
-    "["]
+    "[",
+    "THEN"]
 
 #Types of DO loops
 DO_TYPES=[
@@ -112,7 +120,7 @@ def fp_token(split_line):
     else:
         fp_code=FP_OPS.index(split_line[0].upper())
         fp_reg=REG_LIST.index(split_line[1].upper())
-        return [fp_reg+(fp_code<<5)]
+        return [fp_reg+(fp_code<<3)]
     
 def table_begin(f,title):
     f.write('<div style="width: fit-content;">\n')
@@ -141,6 +149,9 @@ def table_end(f,new_lines=True):
     f.write("</div>\n")
     if new_lines:
         f.write("<br><br>\n")
+    
+def Hex2(number):
+    return "$"+('00'+(hex(number)[2:].upper()))[-2:]
     
 def main():
     #Print usage and exit if no command line options or more than one
@@ -184,6 +195,13 @@ def main():
     #Internal stack used for calculations between [ and ]
     internal_stack=[]
     internal_symbols={}
+
+    #Constant strings
+    const_string=""
+    const_string_list=[]
+    
+    #IF/THEN statements
+    if_list=[]
 
     #Loop through all included files
     while True:
@@ -245,6 +263,12 @@ def main():
                             if res_list:
                                 for resource in res_list:
                                     output_file.write(f" FCB hi({resource})\n")
+                                output_file.write("\n")
+                            if const_string_list:
+                                for i,string in enumerate(const_string_list):
+                                    output_file.write(f" __vm_const_str{i}:\n")
+                                    output_file.write(f' FCB "{string}",0\n')
+                                output_file.write("\n")
                             res_found=True
                         else:
                             output_file.write(line)
@@ -278,7 +302,7 @@ def main():
                         elif split_line[0].upper() in STACK_OPS + OTHER_OPS or \
                         split_line[0].isnumeric() or split_line[0][0] in "$'" or \
                         split_line[0] in res_list or split_line[0] in internal_symbols or \
-                        input_state in STATE_LIST:
+                        split_line[0]=='"' or input_state in STATE_LIST:
                             for item in split_line:
                                 if file_mode=="assembly":
                                     print(f"Error: Tokens left on line after END")
@@ -306,6 +330,10 @@ def main():
                                                 print("Structure list:")
                                                 for struct in struct_list:
                                                     print("\t",struct["type"].upper())
+                                                print(f"Line: {line.strip()}")
+                                                exit(1)
+                                            elif if_list:
+                                                print("Error: unclosed IF at end of VM block")
                                                 print(f"Line: {line.strip()}")
                                                 exit(1)
                                             if VM_mode=="NOVM":
@@ -364,7 +392,7 @@ def main():
                                                         if op_name in ARG_OPS:
                                                             if op_name in CONST_OPS:
                                                                 data_byte=byte_list[index+1]
-                                                                if res_list[data_byte] not in const_counts:
+                                                                if data_byte not in const_counts:
                                                                     const_counts[data_byte]=0
                                                                 const_counts[data_byte]+=1
                                                             index+=1
@@ -382,6 +410,10 @@ def main():
                                         elif item.upper() in DO_TYPES:
                                             #DO0 and DO0 are in STACK_OPS but not DO
                                             struct_list+=[{"type":item.upper(), "len":len(byte_list)}]
+                                        elif item.upper()=="IF":
+                                            if_list+=[len(byte_list)]
+                                            byte_list+=[0]      #Placeholder jump length
+                                            byte_comments+=[""]
                                     elif item.upper() in DO_TYPES:
                                         #DO is in STACK_OPS but not D0 or D1
                                         struct_list+=[{"type":item.upper(), "len":len(byte_list)}]
@@ -392,6 +424,13 @@ def main():
                                             input_state="const8"
                                         elif item=="[":
                                             input_state="immediate"
+                                        elif item.upper()=="THEN":
+                                            if not if_list:
+                                                print(f"Error: THEN without matching IF")
+                                                print(f"Line: {line.strip()}")
+                                                exit(1)
+                                            index=if_list.pop()
+                                            byte_list[index]=len(byte_list)-index
                                     elif item in res_list:
                                         #Push 16-bit constant onto stack
                                         byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]
@@ -450,6 +489,9 @@ def main():
                                         byte_list+=[char_code]
                                         byte_comments+=[f"Character: {item}=={num}"]
                                         byte_comments+=[""]
+                                    elif item=='"':
+                                        const_string=""
+                                        input_state="string"
                                     else:
                                         print(f"Error: VM operation not recognized: {item}")
                                         print(f"Line: {line.strip()}")
@@ -516,7 +558,22 @@ def main():
                                     byte_list+=[res_list.index(item)]
                                     byte_comments+=[""]
                                     input_state="normal"
-                        
+                                elif input_state=="string":
+                                    if const_string:
+                                        const_string+=" "
+                                    if item[-1]!='"':
+                                        const_string+=item
+                                    else:
+                                        const_string+=item[:-1]
+                                        if const_string not in const_string_list:
+                                            const_string_list+=[const_string]
+                                        str_name=f"__vm_const_str{const_string_list.index(const_string)}"
+                                        res_list+=[str_name]
+                                        byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]
+                                        byte_list+=[res_list.index(str_name)]
+                                        byte_comments+=[f'Const string "{const_string}"']
+                                        byte_comments+=[""]
+                                        input_state="normal"
                         else:
                             print("Error: first symbol on line not recognized")
                             print(f"Line: {line.strip()}")
@@ -562,15 +619,22 @@ def main():
         table_begin(f,"Floating Point Ops")
         table_header(f,["Bytecode","Op"]+["R"+str(i) for i in range(8)]+["Total"])
         for i,op in enumerate(FP_OPS):
-            cells=[('00'+(hex(i)[2:].upper()))[-2:]]
+            cells=[Hex2(i)]
             cells+=[op]
-            cells+=fp_counts[op]
             table_row(f,cells,False)
             
-            total=sum(fp_counts[op])
-            if total==0:
+            reg_count=0
+            for reg in fp_counts[op]:
+                if reg:
+                    reg_count+=1
+                    f.write("<td>")
+                else:
+                    f.write('<td style="background-color: LightGray">')
+                f.write(f"{reg}</td>")
+            
+            if reg_count==0:
                 color="LightPink"
-            elif total==1:
+            elif reg_count==1:
                 color="LightGreen"
             else:
                 color=""
@@ -579,7 +643,7 @@ def main():
                 f.write(f'<td style="background-color: {color}">')
             else:
                 f.write("<td>")
-            f.write(f"{total}</td>")
+            f.write(f"{reg_count}</td>")
             table_row_end(f)
         table_end(f)
         
@@ -587,7 +651,7 @@ def main():
         table_begin(f,"16-bit Constants")
         table_header(f,["ID","Value","Total"])
         for i,res in enumerate(res_list):
-            cells=[('00'+(hex(i)[2:].upper()))[-2:]]
+            cells=[Hex2(i)]
             cells+=[res]
             table_row(f,cells,False)
             
@@ -619,7 +683,7 @@ def main():
         table_begin(f,"Stack Ops")
         table_header(f,["Bytecode","Op","Total"])
         for i,op in enumerate(STACK_OPS):
-            cells=[('00'+(hex(i+STACK_OPS_BEGIN)[2:].upper()))[-2:]]
+            cells=[Hex2(i+STACK_OPS_BEGIN)]
             cells+=[op]
             table_row(f,cells,False)
             
@@ -635,6 +699,8 @@ def main():
                 f.write("<td>")
             f.write(f"{total}</td>")
             table_row_end(f)
+        if len(STACK_OPS)+STACK_OPS_BEGIN<256:
+            f.write(f'<td colspan="3">Unused: {Hex2(STACK_OPS_BEGIN+len(STACK_OPS))}-$FF ({0x100-STACK_OPS_BEGIN-len(STACK_OPS)})</td>')
         table_end(f,False)
         
         f.write('</div>\n') #div table-cell
