@@ -15,7 +15,7 @@
 		ADC #'0'
 		;STA digit
 		;CALL LCD_char, digit
-		JSR LCD_char
+		JSR LCD_char_A
 	END
 	
 	FUNC DigitLow
@@ -29,7 +29,7 @@
 		ADC #'0'
 		;STA digit
 		;CALL LCD_char, digit
-		JSR LCD_char
+		JSR LCD_char_A
 	END
 	
 	FUNC DrawFloat
@@ -55,7 +55,7 @@
 		
 		;CALL LCD_char, sign
 		LDA sign
-		JSR LCD_char
+		JSR LCD_char_A
 		
 		LDY #5
 		LDA R0,Y
@@ -64,7 +64,7 @@
 		
 		;CALL LCD_char, #'.'
 		LDA #'.'
-		JSR LCD_char
+		JSR LCD_char_A
 		
 		CALL DigitLow, arg
 		LDA #4
@@ -95,7 +95,7 @@
 		
 		;CALL LCD_char,sign
 		LDA sign
-		JSR LCD_char
+		JSR LCD_char_A
 		
 		LDY #7
 		LDA R0,Y
@@ -109,79 +109,15 @@
 			
 	END
 	
-	FUNC HexHigh
-		ARGS
-			BYTE digit
-		VARS
-			BYTE arg
-		END
-		
-		LDA digit
-		LSR
-		LSR
-		LSR
-		LSR
-		CMP #$A
-		BCC .print_digit
-			CLC
-			ADC #'A'-10
-			;STA arg
-			JMP .done
-		.print_digit:
-			CLC
-			ADC #'0'
-			;STA arg
-		.done:
-		
-		;CALL LCD_char, arg
-		JSR LCD_char
-	END
-	
-	FUNC HexLow
-		ARGS
-			BYTE digit
-		VARS
-			BYTE arg
-		END
-		
-		LDA digit
-		AND #$F
-		CMP #$A
-		BCC .print_digit
-			CLC
-			ADC #'A'-10
-			;STA arg
-			JMP .done
-		.print_digit:
-			CLC
-			ADC #'0'
-			;STA arg
-		.done:
-		;CALL LCD_char, arg
-		JSR LCD_char
-	END
-	
 	FUNC DrawHex
-		ARGS
-			WORD source
-		VARS
-			BYTE arg
-		END
-		
-		;CALL LCD_char, #'$'
-		LDA #'$'
-		JSR LCD_char
-		
-		LDY #2
-		LDA (source),Y
-		STA arg
-		CALL HexHigh, arg
-		CALL HexLow, arg
-		LDY #1
-		LDA (source),Y
-		STA arg
-		CALL HexHigh, arg
-		CALL HexLow, arg
+		<VM
+			12
+			4 DO
+				OVER OVER RSHIFT $F AND '0' +
+				LCD_char EXEC
+				4 -
+			LOOP DROP DROP
+		VM>
 	END
 	
 	FUNC DrawString
@@ -192,9 +128,8 @@
 			BYTE index
 		END
 		
-		;CALL LCD_char, #CHAR_QUOTE
 		LDA #CHAR_QUOTE
-		JSR LCD_char
+		JSR LCD_char_A
 		
 		LDA #1
 		STA index
@@ -202,32 +137,17 @@
 			LDY index
 			LDA (source),Y
 			BEQ .done
-			;STA arg
-			;CALL LCD_char, arg
-			JSR LCD_char
+			JSR LCD_char_A
 			
 			INC index
 			LDA index
 			CMP #9
 			BNE .loop
 		.done:
-		CALL LCD_char, #CHAR_QUOTE
+		LDA #CHAR_QUOTE
+		JSR LCD_char_A
+		
 	END
-
-	TODO: remove
-	<NOVM
-		EXTERN
-			VM_test1 VM_test2 VM_test3 VM_test4
-		END
-	VM>
-	VM_test1:
-		<VM 2 VM>
-	VM_test2:
-		<VM 4 VM_test3 EXEC VM>
-	VM_test3:
-		<VM 5 VM>
-	VM_test4:
-		<VM DROP DROP DROP VM>
 	
 	FUNC DrawStack
 		VARS
@@ -235,6 +155,27 @@
 			BYTE counter
 			WORD address
 		END
+		
+		TODO: strings appear more than once in table
+		
+		START HERE: cant reuse DO for while!
+		
+		<VM
+			LCD_clrscr EXEC
+			
+			CONST8 CHAR_WIDTH*8 SCREEN_ADDRESS + screen_ptr !
+			'[' LCD_char EXEC
+			
+			FNEW
+			DO_FREE JSR
+			FTOS FDROP
+			DrawHex EXEC
+			
+			halt
+			
+			" \sFREE]" LCD_print EXEC
+			halt
+		VM>
 		
 		JSR StackAddItem
 		JSR CODE_FREE+EXEC_HEADER
@@ -250,19 +191,14 @@
 		CALL LCD_clrscr
 		LDA #CHAR_WIDTH*8
 		STA screen_ptr
-		;CALL LCD_char, #'['
 		LDA #'['
-		JSR LCD_char
+		JSR LCD_char_A
 		
-		CALL DrawHex, address
+		;CALL DrawHex, address
 		
-		;CALL LCD_print, " FREE]"
-		;JSR CODE_DROP+EXEC_HEADER
-		
-		;<VM 
-		;	EXTERN LCD_print_VM END 
-		;	" FREE]" LCD_print_VM EXEC FDROP
-		;VM>
+		<VM 
+			" \sFREE]" LCD_print EXEC FDROP
+		VM>
 		
 		MOV #'5',character
 		MOV #5,counter
@@ -281,12 +217,11 @@
 			CLC
 			ADC #CHAR_HEIGHT
 			STA screen_ptr+1
-			;CALL LCD_char, character
-			;CALL LCD_char, #':'
+			
 			LDA character
-			JSR LCD_char
+			JSR LCD_char_A
 			LDA #':'
-			JSR LCD_char
+			JSR LCD_char_A
 			
 			DEC counter
 			LDA counter
@@ -312,7 +247,9 @@
 					;one space after colon
 					;LDA #CHAR_WIDTH*3
 					;STA screen_ptr
-					CALL DrawHex, address
+					
+					TODO: Make sure it works
+					;CALL DrawHex, address
 					JMP .item_done
 				.not_hex:
 				.item_done:

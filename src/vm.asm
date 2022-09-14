@@ -3,7 +3,7 @@ TODO: different op for pushing bytes
 ;Constants
 ;=========
 STACK_OPS_BEGIN =		208
-STACK_NO_OPS_COUNT =	25+1
+STACK_NO_OPS_COUNT =	26+4
 
 VM_code_begin:
 
@@ -17,12 +17,13 @@ FUNC VM_setup
 	LDA #0
 	TODO: remove
 	STA VM_debug
+	LDA #1
+	STA VM_embedded
 END
 
 ;Interrupt handler so no FUNC/END
 VM_brk_handler:
 	CLD
-	STX stack_SP
 	STA VM_A_buff
 	PLA		;Discard status reg from BRK
 	PLA		;Low byte of return address
@@ -32,8 +33,13 @@ VM_brk_handler:
 	PLA		;High byte of return address
 	SBC #0
 	STA VM_IP+1
-	LDA #1
-	STA VM_nest_level
+	LDA VM_embedded
+	BEQ .embedded
+		STX stack_SP	
+		LDA #1
+		STA VM_nest_level
+		STA VM_embedded
+	.embedded:
 	;Fall through to VM dispatch
 
 VM_dispatch:
@@ -46,6 +52,18 @@ VM_dispatch:
 	BEQ .no_debug
 		JSR VM_handler_debug
 	.no_debug:
+	TYA
+	
+	TODO: remove
+	LDA VM_SP
+	CMP #VM_stack
+	BCS .good
+		.stack_overflow:
+		halt
+		LDA VM_SP
+		LDX #VM_stack
+		JMP .stack_overflow
+	.good:
 	TYA
 	
 	TODO: eliminate overhead if enough room?
@@ -191,16 +209,7 @@ VM_op_over:			;4
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_inv:			;5
-	LDX VM_SP
-	SEC
-	LDA #0
-	SBC 0,X
-	STA 0,X
-	LDA #0
-	SBC 1,X
-	STA 1,X
-	JMP VM_dispatch
+;Free				;5
 
 VM_op_inc:			;6
 	LDX VM_SP
@@ -213,11 +222,13 @@ VM_op_inc:			;6
 VM_op_rshift:		;7
 	LDX VM_SP
 	LDY 0,X
+	BEQ .done
 	.loop:
 		LSR 3,X
 		ROR 2,X
 		DEY
 		BNE .loop
+	.done:
 	JMP VM_SP_inc_dispatch
 	
 VM_op_A:			;8
@@ -266,21 +277,33 @@ VM_op_cstore:		;12
 	STA (0,X)
 	JMP VM_SP_inc2_dispatch
 	
-TODO: use assembly name of VM_C0 instead?
-VM_op_do0:			;13
+VM_op_do:			;13
 	LDX VM_SP
 	LDA 0,X
-	STA VM_C0
+	PHA
 	JMP VM_SP_inc_dispatch
 
-VM_op_do1:			;14
+VM_op_jsr:			;14
 	LDX VM_SP
 	LDA 0,X
-	STA VM_C1
-	JMP VM_SP_inc_dispatch
+	STA VM_temp0
+	LDA 1,X
+	STA VM_temp0+1
+	LDA #hi(VM_op_jsr_return-1)
+	PHA
+	LDA #lo(VM_op_jsr_return-1)
+	PHA
+	TODO: always makes sense?
+	LDX stack_SP
+	JMP (VM_temp0)
+	VM_op_jsr_return:
+	TODO: abstract
+	STX stack_SP
+	LDX VM_SP
+	JMP VM_SP_inc_dispatch	
 
 VM_op_drop:			;15
-	LDX VM_SP
+	LDX VM_SP	
 	JMP VM_SP_inc_dispatch
 	
 VM_op_halt:			;16
@@ -367,6 +390,7 @@ VM_op_cfetch:		;23
 	STA 1,X
 	JMP VM_dispatch
 	
+TODO: always known at compile time? if so, take argument not from stack
 VM_op_exec:			;24
 	LDX VM_SP
 	LDA VM_IP+1
@@ -379,7 +403,13 @@ VM_op_exec:			;24
 	STA VM_IP+1	
 	INC VM_nest_level
 	JMP VM_SP_inc_dispatch
-		
+	
+VM_op_embed:		;25
+	LDX stack_SP
+	LDA #0
+	STA VM_embedded
+	JMP (VM_IP)
+	
 ;Single byte ops for FP VM
 VM_op_fdrop:		;0
 	TODO: only one copy, dont dup with word DROP
@@ -388,6 +418,33 @@ VM_op_fdrop:		;0
 	ADC #OBJ_SIZE
 	STA stack_SP
 	DEC stack_count
+	JMP VM_dispatch
+	
+VM_op_fnew:			;1
+	TODO: only one copy, dont dup with StackNewItem
+	LDA stack_SP
+	SEC
+	SBC #OBJ_SIZE
+	STA stack_SP
+	INC stack_count
+	JMP VM_dispatch
+	
+VM_op_fsp:			;2
+	LDX VM_SP
+	LDA stack_SP
+	STA 0,X
+	LDA #0
+	STA 1,X
+	JMP VM_dispatch
+	
+VM_op_ftos:			;3
+	LDX stack_SP
+	LDA HEX_SUM,X
+	TAY
+	LDA HEX_SUM+1,X
+	JSR VM_SP_dec
+	STA 1,X
+	STY 0,X
 	JMP VM_dispatch
 	
 ;Single byte ops that take single byte argument	
@@ -406,32 +463,19 @@ VM_op_push_byte:	;1
 	STA 1,X
 	JMP VM_dispatch
 
-VM_op_loop2:		;2
-	LDX VM_SP
-	INC 2,X
+VM_op_loop:			;2
+	PLA
+	TAX
+	DEX
 	BNE .loop
-		INC 3,X
-		BNE .loop
-			;Reached end. Stop looping
-			JMP VM_dispatch
-	.loop:
-	JMP VM_stub_loop
-
-VM_op_djnz0:		;3
-	DEC VM_C0
-	BNE .loop
+		;Done looping
 		JMP VM_dispatch
 	.loop:
-	JMP VM_stub_loop
-	
-VM_op_djnz1:		;4
-	DEC VM_C1
-	BNE .loop
-		JMP VM_dispatch
-	.loop:
+	TXA
+	PHA
 	JMP VM_stub_loop
 
-VM_op_if:			;5
+VM_op_if:			;3
 	LDX VM_SP
 	LDA 0,X
 	ORA 1,X
@@ -446,7 +490,19 @@ VM_op_if:			;5
 		STA VM_IP+1
 	.true:
 	JMP VM_SP_inc_dispatch
-
+	
+VM_op_while:		;4
+	LDX VM_SP
+	LDA 0,X
+	ORA 1,X
+	BNE .loop
+		JMP VM_SP_inc_dispatch
+	.loop:
+	INX
+	INX
+	STX VM_SP
+	JMP VM_stub_loop
+	
 VM_table_stack:
 	;Single byte stack ops
 	FDB VM_op_nop-1			;0
@@ -454,7 +510,7 @@ VM_table_stack:
 	FDB VM_op_store-1		;2
 	FDB VM_op_dup-1			;3
 	FDB VM_op_over-1		;4
-	FDB VM_op_inv-1			;5
+	FDB VM_op_over-1		;5	<==Free!
 	FDB VM_op_inc-1			;6
 	FDB VM_op_rshift-1		;7
 	FDB VM_op_A-1			;8
@@ -462,8 +518,8 @@ VM_table_stack:
 	FDB VM_op_sub-1			;10
 	FDB VM_op_lshift-1		;11
 	FDB VM_op_cstore-1		;12
-	FDB VM_op_do0-1			;13
-	FDB VM_op_do1-1			;14
+	FDB VM_op_do-1			;13
+	FDB VM_op_jsr-1			;14
 	FDB VM_op_drop-1		;15
 	FDB VM_op_halt-1		;16
 	FDB VM_op_debug-1		;17
@@ -474,17 +530,20 @@ VM_table_stack:
 	FDB VM_op_xor-1			;22
 	FDB VM_op_cfetch-1		;23
 	FDB VM_op_exec-1		;24
+	FDB VM_op_embed-1		;25
 	
 	;Single byte ops for FP VM
 	FDB VM_op_fdrop-1		;0
+	FDB VM_op_fnew-1		;1
+	FDB VM_op_fsp-1			;2
+	FDB VM_op_ftos-1		;3
 	
 	;Single byte ops that take single byte argument
 	FDB VM_op_push_res-1	;0
 	FDB VM_op_push_byte-1	;1
-	FDB VM_op_loop2-1		;2
-	FDB VM_op_djnz0-1		;3
-	FDB VM_op_djnz1-1		;4
-	FDB VM_op_if-1			;5
+	FDB VM_op_loop-1		;2
+	FDB VM_op_if-1			;3
+	FDB VM_op_while-1		;4
 
 ;Small stubs used above
 ;======================

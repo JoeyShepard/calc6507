@@ -13,9 +13,9 @@
 		[
 			$2A2A CONST BG_COLOR_WIDE
 			0     CONST FG_COLOR_WIDE
-		] VM>
+		]
+	VM>
 	
-	VM_func_begin:
 	FUNC setup
 		
 		;Only use bottom 48 bytes of stack
@@ -50,7 +50,6 @@
 			CONST8 BANK_GEN_RAM3 RAM_BANK3 c!
 		VM>		
 	END
-	VM_func_end:
 
 	FUNC GfxSetup
 		;Emulator only!
@@ -62,77 +61,73 @@
 		LDA KB_INPUT
 	END
 	
+	VM_func_begin:
 	FUNC LCD_clrscr
 		<VM
 			EXTERN
-				SCREEN_SIZE SCREEN_ADDRESS screen_ptr
+				screen_ptr
 			END
 			
-			SCREEN_SIZE 1 RSHIFT INV SCREEN_ADDRESS
-			DO BG_COLOR_WIDE OVER ! 1+ 1+ LOOP2	
+			BG_COLOR_WIDE SCREEN_ADDRESS
+			64 DO 
+				0 DO
+					;Faster than pushing BG_COLOR_WIDE every time
+					OVER OVER ! 1+ 1+ 
+				LOOP
+			LOOP	
 			DROP DROP
 			SCREEN_ADDRESS screen_ptr !
 		VM>
 	END
+	VM_func_end:
 	
-	FUNC LCD_char
+	FUNC LCD_char_A
+		TODO: more elegant solution?
+		TODO: maybe skip VM> and <V M pair
+		
+		<VM A VM>
+		LCD_char:
 		<VM
 			EXTERN 
-				SCREEN_ADDRESS font_table font_inverted screen_ptr
+				font_table font_inverted screen_ptr
 			END
 			
-			A 32 - DUP 1 LSHIFT 1 LSHIFT + font_table + 4 +
+			32 - DUP 2 LSHIFT + font_table + 4 +
 			screen_ptr @
 			
-			5 DO1
+			5 DO
 				OVER C@ font_inverted C@ XOR SWAP		;font_table font_data screen_ptr
-				8 DO0
+				8 DO
 					OVER 128 AND
 					FG_COLOR_WIDE BG_COLOR_WIDE
 					SELECT
 					OVER OVER OVER ! 256 + !
 					512 +								;screen_ptr
 					SWAP 1 LSHIFT SWAP					;shift font data
-				DJNZ0									;font_table font_data screen_ptr
-				
+				LOOP									;font_table font_data screen_ptr
+
 				[ 256 16 * 2 - CONST line_reset ]
 				line_reset - SWAP DROP SWAP 1 - SWAP	;font_table screen_ptr
-			DJNZ1
+			LOOP
 			
 			font_inverted C@ 
 			FG_COLOR_WIDE BG_COLOR_WIDE SELECT SWAP		;font_table color screen_ptr
-			16 DO0
+			16 DO
 				OVER OVER ! 256 +
-			DJNZ0
+			LOOP
 			
 			line_reset - screen_ptr ! DROP DROP
 		VM>
 	END
 	
-	FUNC LCD_print_VM
-		;<VM
-		;	SWAP C@
-		;VM>
-	END
-	
 	FUNC LCD_print
-		
-		ARGS
-			STRING source
-		VARS
-			BYTE index, arg
-		END
-		
-		LDA #0
-		STA index
-		.loop:
-			LDY index
-			LDA (source),Y
-			BEQ .done
-			JSR LCD_char
-			INC index
-			JMP .loop
-		.done:
+		<VM			
+			DO
+				DUP C@ LCD_char EXEC 1+ DUP C@ 
+			WHILE
+			DROP
+		VM>
 	END
+
 	
 	

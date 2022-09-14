@@ -38,7 +38,11 @@
 		LDA #INPUT_Y
 		STA screen_ptr+1
 		
-		CALL LCD_print,"a                    "
+		<VM 
+			" a\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s" 
+			LCD_print EXEC
+		VM>
+		
 		LDA #0
 		STA screen_ptr
 		LDA TIMER_S
@@ -75,7 +79,7 @@
 						BCS .backspace_scroll
 							;CALL LCD_char, #' '
 							LDA #' '
-							JSR LCD_char
+							JSR LCD_char_A
 							
 							LDA screen_ptr
 							SEC
@@ -84,7 +88,7 @@
 							PHA
 							;CALL LCD_char, #CHAR_ARROW
 							LDA #CHAR_ARROW
-							JSR LCD_char
+							JSR LCD_char_A
 							
 							PLA
 							STA screen_ptr
@@ -173,13 +177,13 @@
 						BCS .scroll_buffer
 							;CALL LCD_char, arg
 							LDA arg
-							JSR LCD_char
+							JSR LCD_char_A
 							
 							LDA screen_ptr
 							PHA
 							;CALL LCD_char, #CHAR_ARROW
 							LDA #CHAR_ARROW
-							JSR LCD_char
+							JSR LCD_char_A
 							
 							PLA
 							STA screen_ptr
@@ -198,7 +202,7 @@
 								STA arg
 								;CALL LCD_char, arg
 								LDA arg
-								JSR LCD_char
+								JSR LCD_char_A
 								
 								LDA index
 								CMP str_index
@@ -207,7 +211,7 @@
 							PHA
 							;CALL LCD_char, #CHAR_ARROW
 							LDA #CHAR_ARROW
-							JSR LCD_char
+							JSR LCD_char_A
 							
 							PLA
 							STA screen_ptr
@@ -234,7 +238,7 @@
 				STA arg
 				;CALL LCD_char, arg
 				LDA arg
-				JSR LCD_char
+				JSR LCD_char_A
 				
 				LDA screen_ptr
 				SEC
@@ -1017,6 +1021,7 @@
 			
 	END
 	
+	TODO: remove if not needed
 	FUNC StackAddItem
 		TXA
 		SEC

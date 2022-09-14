@@ -1,3 +1,6 @@
+;Unlimited lines per page in listing
+	PAGE 0
+
 ;Macros
 ;======
 	include macros.asm
@@ -58,6 +61,10 @@
 	TODO: move constants to const.asm?
 	TODO: eliminate JSR to BRK? maybe first byte after BRK
 	TODO: shadow space on main stack? had planned on 3 but now only space for 1
+	TODO: remove commented out code replaced by VM
+	TODO: copyright
+	TODO: double check not relying on flags from BCD which are not valid for NMOS
+	TODO: automate search for patterns that can be subwords
 	
 	TODO: if still wont fit, remove hex and strings :/ can always add back what will fit but then redo docs :/
 		TODO: even removing strings or smart hex on stack could be good
@@ -66,13 +73,10 @@
 ;To finish before website upload
 	TODO: github readme
 	
-;Unlimited lines per page in listing
-	PAGE 0
-
-
 ;Constants
 ;=========
 	include const.asm
+	include vm_const.asm
 	include emu.asm
 	
 ;Notes
@@ -117,15 +121,14 @@ LOCALS_END set		$13
 	BYTE VM_temp0		;Temporary registers for VM
 	BYTE VM_temp1
 	BYTE VM_A_buff		;Value of A when VM invoked
-	BYTE VM_C0			;One byte counter for DJNZ0
-	BYTE VM_C1			;One byte counter for DJNZ1
 	BYTE VM_nest_level	;Nested level of VM calls
+	BYTE VM_embedded	;Whether VM last left to execute assembly embedded in Forth
 	TODO: remove?
 	BYTE VM_debug
 	
 	TODO: adjust stack size
 	TODO: move to constants
-VM_STACK_SIZE set	16
+VM_STACK_SIZE set	20
 	VM_stack:
 	DFS VM_STACK_SIZE 
 	VM_stack_end:
@@ -223,10 +226,7 @@ VM_STACK_SIZE set	16
 			WORD dest
 			BYTE arg,type
 		END
-		
-		TODO: copyright
-		TODO: double check not relying on flags from BCD which are not valid for NMOS
-		
+				
 		SEI
 		CLD
 		CALL VM_setup

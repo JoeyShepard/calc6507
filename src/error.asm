@@ -68,7 +68,9 @@
 		LDA #ERROR_Y+CHAR_HEIGHT
 		STA screen_ptr+1
 		MOV.B #$FF,font_inverted
-		CALL LCD_char,#' '
+		;CALL LCD_char,#' '
+		LDA #' '
+		JSR LCD_char_A
 		CALL LCD_print, msg
 		LDA #ERROR_X
 		STA screen_ptr

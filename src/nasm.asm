@@ -3,8 +3,8 @@
 		%include %%temp
 	%endmacro
 	
-	%define lo(x) x % 256
-	%define hi(x) x / 256
+	%define lo(x) (x) % 256
+	%define hi(x) (x) / 256
 	
 	
 	%macro upper 0-1
