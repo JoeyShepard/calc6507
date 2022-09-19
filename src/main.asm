@@ -65,6 +65,7 @@
 	TODO: copyright
 	TODO: double check not relying on flags from BCD which are not valid for NMOS
 	TODO: automate search for patterns that can be subwords
+		TODO: DO and EXEC always with constant? most used EXEC is own token?
 	
 	TODO: if still wont fit, remove hex and strings :/ can always add back what will fit but then redo docs :/
 		TODO: even removing strings or smart hex on stack could be good
@@ -439,6 +440,7 @@ VM_STACK_SIZE set	20
 	TODO: remove
 	;store separate from main VM for more accurate file size calculation
 	include vm_debug.asm
+	include vm_debug_words.asm
 	
 	ORG $8900	;RAM + ROM size
 	;overlaps with video memory, no video output

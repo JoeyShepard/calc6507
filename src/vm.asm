@@ -3,7 +3,7 @@ TODO: different op for pushing bytes
 ;Constants
 ;=========
 STACK_OPS_BEGIN =		208
-STACK_NO_OPS_COUNT =	26+4
+STACK_NO_OPS_COUNT =	27+4
 
 VM_code_begin:
 
@@ -11,6 +11,7 @@ FUNC VM_setup
 	TODO: remove
 	LDA VM_code_end-VM_code_begin	;Total size of VM
 	LDA VM_func_end-VM_func_begin	;Size of function being modified
+	LDA VM_res_end-VM_res_begin
 	
 	LDA #VM_stack_end
 	STA VM_SP
@@ -209,7 +210,14 @@ VM_op_over:			;4
 	STA 1,X
 	JMP VM_dispatch
 	
-;Free				;5
+VM_op_i:			;5
+	JSR VM_SP_dec
+	PLA
+	STA 0,X
+	PHA
+	LDA #0
+	STA 1,X
+	JMP VM_dispatch
 
 VM_op_inc:			;6
 	LDX VM_SP
@@ -279,7 +287,9 @@ VM_op_cstore:		;12
 	
 VM_op_do:			;13
 	LDX VM_SP
-	LDA 0,X
+	LDY 0,X
+	DEY
+	TYA
 	PHA
 	JMP VM_SP_inc_dispatch
 
@@ -343,6 +353,7 @@ VM_op_fetch:		;19
 	STY 0,X
 	JMP VM_dispatch
 	
+TODO: either eliminate since have IF/ELSE or recode with SWAP
 VM_op_select:		;20
 	LDX VM_SP
 	LDA 4,X
@@ -410,6 +421,20 @@ VM_op_embed:		;25
 	STA VM_embedded
 	JMP (VM_IP)
 	
+VM_op_lt:			;26
+	LDX VM_SP
+	SEC
+	LDA 2,X
+	SBC 0,X
+	LDA 3,X
+	SBC 1,X
+	LDA #$FF
+	ADC #0
+	STA 2,X
+	STA 3,X
+	JMP VM_SP_inc_dispatch	
+
+	
 ;Single byte ops for FP VM
 VM_op_fdrop:		;0
 	TODO: only one copy, dont dup with word DROP
@@ -430,7 +455,7 @@ VM_op_fnew:			;1
 	JMP VM_dispatch
 	
 VM_op_fsp:			;2
-	LDX VM_SP
+	JSR VM_SP_dec
 	LDA stack_SP
 	STA 0,X
 	LDA #0
@@ -465,12 +490,12 @@ VM_op_push_byte:	;1
 
 VM_op_loop:			;2
 	PLA
-	TAX
-	DEX
 	BNE .loop
 		;Done looping
 		JMP VM_dispatch
 	.loop:
+	TAX
+	DEX
 	TXA
 	PHA
 	JMP VM_stub_loop
@@ -479,16 +504,10 @@ VM_op_if:			;3
 	LDX VM_SP
 	LDA 0,X
 	ORA 1,X
-	BNE .true
-		;Branch to THEN
-		TYA
-		CLC
-		ADC VM_IP
-		STA VM_IP
-		LDA VM_IP+1
-		ADC #0
-		STA VM_IP+1
-	.true:
+	BNE VM_op_if.true
+		;Jump to THEN
+		JSR VM_stub_then
+	VM_op_if.true:
 	JMP VM_SP_inc_dispatch
 	
 VM_op_while:		;4
@@ -503,6 +522,11 @@ VM_op_while:		;4
 	STX VM_SP
 	JMP VM_stub_loop
 	
+VM_op_else:			;5
+	JSR VM_stub_then
+	JMP VM_dispatch
+
+	
 VM_table_stack:
 	;Single byte stack ops
 	FDB VM_op_nop-1			;0
@@ -510,7 +534,7 @@ VM_table_stack:
 	FDB VM_op_store-1		;2
 	FDB VM_op_dup-1			;3
 	FDB VM_op_over-1		;4
-	FDB VM_op_over-1		;5	<==Free!
+	FDB VM_op_i-1			;5
 	FDB VM_op_inc-1			;6
 	FDB VM_op_rshift-1		;7
 	FDB VM_op_A-1			;8
@@ -531,6 +555,7 @@ VM_table_stack:
 	FDB VM_op_cfetch-1		;23
 	FDB VM_op_exec-1		;24
 	FDB VM_op_embed-1		;25
+	FDB VM_op_lt-1			;26
 	
 	;Single byte ops for FP VM
 	FDB VM_op_fdrop-1		;0
@@ -544,10 +569,12 @@ VM_table_stack:
 	FDB VM_op_loop-1		;2
 	FDB VM_op_if-1			;3
 	FDB VM_op_while-1		;4
+	FDB VM_op_else-1		;5
 
 ;Small stubs used above
 ;======================
 TODO: check occurences and if this really makes sense
+TODO: save 3 bytes per stub by embedding into word?
 VM_IP_inc:
 	INC VM_IP
 	BNE .done
@@ -584,5 +611,14 @@ VM_stub_loop:
 	STA VM_IP+1
 	JMP VM_dispatch
 
+VM_stub_then:
+	TYA
+	CLC
+	ADC VM_IP
+	STA VM_IP
+	LDA VM_IP+1
+	ADC #0
+	STA VM_IP+1
+	RTS
 VM_code_end:
 	

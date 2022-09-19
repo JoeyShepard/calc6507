@@ -1,7 +1,7 @@
 ;Output functions
 ;================
 
-	FUNC DigitHigh
+	FUNC DigitHighZ
 		ARGS
 			BYTE digit
 		END
@@ -32,6 +32,7 @@
 		JSR LCD_char_A
 	END
 	
+	VM_func_begin:
 	FUNC DrawFloat
 		ARGS
 			WORD source
@@ -108,12 +109,14 @@
 		CALL DigitLow, arg
 			
 	END
+	VM_func_end:
 	
 	FUNC DrawHex
 		<VM
 			12
 			4 DO
-				OVER OVER RSHIFT $F AND '0' +
+				OVER OVER RSHIFT $F AND 
+				DUP 10 < '0' CONST8 'A'-10 SELECT +
 				LCD_char EXEC
 				4 -
 			LOOP DROP DROP
@@ -150,20 +153,17 @@
 	END
 	
 	FUNC DrawStack
-		VARS
-			BYTE character
-			BYTE counter
-			WORD address
-		END
-		
 		TODO: strings appear more than once in table
-		
-		START HERE: cant reuse DO for while!
+		TODO: stack usage in status? battery? takes up more room though
+		TODO: 3 way structure below should be more efficient
 		
 		<VM
 			LCD_clrscr EXEC
 			
-			CONST8 CHAR_WIDTH*8 SCREEN_ADDRESS + screen_ptr !
+			EXTERN
+				CHAR_WIDTH*8+SCREEN_ADDRESS AS STATUS_X
+			END
+			STATUS_X screen_ptr !
 			'[' LCD_char EXEC
 			
 			FNEW
@@ -171,125 +171,59 @@
 			FTOS FDROP
 			DrawHex EXEC
 			
-			halt
-			
 			" \sFREE]" LCD_print EXEC
-			halt
-		VM>
-		
-		JSR StackAddItem
-		JSR CODE_FREE+EXEC_HEADER
-		
-		TXA
-		STA address
-		LDA #0
-		STA address+1
-		
-		TODO: stack usage in status? battery? takes up more room though
-		
-		TODO: shrink
-		CALL LCD_clrscr
-		LDA #CHAR_WIDTH*8
-		STA screen_ptr
-		LDA #'['
-		JSR LCD_char_A
-		
-		;CALL DrawHex, address
-		
-		<VM 
-			" \sFREE]" LCD_print EXEC FDROP
-		VM>
-		
-		MOV #'5',character
-		MOV #5,counter
-		
-		TXA
-		CLC
-		ADC #(4*OBJ_SIZE)
-		STA address
-		LDA #0
-		STA address+1
-		
-		.loop:
-			LDA #0
-			STA screen_ptr
-			LDA screen_ptr+1
-			CLC
-			ADC #CHAR_HEIGHT
-			STA screen_ptr+1
 			
-			LDA character
-			JSR LCD_char_A
-			LDA #':'
-			JSR LCD_char_A
+			EXTERN
+				CHAR_HEIGHT*SCREEN_WIDTH AS STACK_LINE_HEIGHT
+				CHAR_HEIGHT*SCREEN_WIDTH+SCREEN_ADDRESS AS STACK_X
+				OBJ_SIZE*4 AS STACK_DRAW_OFFSET
+				stack_count
+			END
 			
-			DEC counter
-			LDA counter
-			CMP stack_count
-			BCS .no_item
-				LDY #0
-				LDA (address),Y
-				CMP #OBJ_FLOAT
-				BNE .not_float
-					CALL DrawFloat, address
-					JMP .item_done
-				.not_float:
-				CMP #OBJ_STR
-				BNE .not_str
-					;one space after colon
-					;LDA #CHAR_WIDTH*3
-					;STA screen_ptr
-					CALL DrawString, address
-					JMP .item_done
-				.not_str:
-				CMP #OBJ_HEX
-				BNE .not_hex
-					;one space after colon
-					;LDA #CHAR_WIDTH*3
-					;STA screen_ptr
+			STACK_X screen_ptr !
+			FSP STACK_DRAW_OFFSET + 
+			5 DO
+				I DUP 1+ '0' + LCD_char EXEC
+				':' LCD_char EXEC
+				
+				;I+1 on stack from above				
+				stack_count C@ <
+				IF
+					DUP DUP C@
+					1 DEBUG	
 					
-					TODO: Make sure it works
-					;CALL DrawHex, address
-					JMP .item_done
-				.not_hex:
-				.item_done:
-			.no_item:
-						
-			LDA address
-			SEC
-			SBC #OBJ_SIZE
-			STA address
+					DUP CONST8 OBJ_FLOAT IF
+						DrawFloat 
+					ELSE
+						DUP CONST8 OBJ_STR IF
+							DrawString
+						ELSE
+							DUP CONST8 OBJ_HEX IF
+								DrawHex
+							THEN
+						THEN
+					THEN
+					;SWAP DROP EXEC
+					SWAP DROP DROP
+					
+					0 DEBUG
+				THEN
+				CONST8 OBJ_SIZE -
+				screen_ptr @ $FF00 AND STACK_LINE_HEIGHT + screen_ptr !
+			LOOP
+			DROP
 			
-			DEC character
-			LDA counter
-			BNE .loop
-		LDA #0
-		STA screen_ptr
-		
-		TODO: 6th line of stack or status??? (would save code space)
-		TODO: status=bytes free? auto complete? too much space :(
-		TODO: option 1: line on bottom, status on top
-		TODO: option 2: 6th line on top, status AND line on bottom
-		;LDA screen_ptr+1
-		;CLC
-		;ADC #CHAR_HEIGHT
-		;STA screen_ptr+1
-		;CALL LCD_print, "--------------STATUS?"
-		
-		LDA screen_ptr+1
-		CLC
-		ADC #CHAR_HEIGHT*1.5
-		STA screen_ptr+1
-		LDY #0
-		LDA #FG_COLOR
-		.loop_line:
-			STA (screen_ptr),Y
-			INC screen_ptr+1
-			STA (screen_ptr),Y
-			DEC screen_ptr+1
-			INY
-			BNE .loop_line		
+			EXTERN
+				SCREEN_ADDRESS+CHAR_HEIGHT*6.5*SCREEN_WIDTH AS STACK_LINE_Y
+			END
+			
+			STACK_LINE_Y
+			0 DO
+				0 OVER ! 1+ 1+
+			LOOP
+			DROP	
+		VM>
 	END
-	
+
 		
 	

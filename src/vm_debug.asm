@@ -46,5 +46,39 @@ VM_handler_debug:
 	STA DEBUG_HEX
 	LDA #' '
 	STA DEBUG
+	
+	TYA
+	SEC
+	SBC #STACK_OPS_BEGIN
+	BEQ .done
+	TAX
+	LDA #lo(VM_DEBUG_WORDS)
+	STA VM_temp0
+	LDA #hi(VM_DEBUG_WORDS)
+	STA VM_temp1
+	.loop:
+		CLC
+		LDA VM_temp0
+		ADC VM_DEBUG_WORDS_LEN
+		STA VM_temp0
+		LDA VM_temp1
+		ADC #0
+		STA VM_temp1
+		DEX
+		BNE .loop
+	.done:
+	
+	TYA
+	TAX
+	LDY #0
+	.loop2:
+	LDA (VM_temp0),Y
+	BEQ .done2
+		STA DEBUG
+		INY
+		JMP .loop2
+	.done2:
+	TXA
+	TAY
 	JMP VM_stub_halt
 	

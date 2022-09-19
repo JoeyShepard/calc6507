@@ -25,7 +25,7 @@ STACK_OPS=[
     "!",            #2
     "DUP",          #3
     "OVER",         #4
-    "",             #5  <==Free!
+    "I",            #5
     "1+",           #6
     "RSHIFT",       #7
     "A",            #8
@@ -46,6 +46,7 @@ STACK_OPS=[
     "C@",           #23
     "EXEC",         #24
     "VM...",        #25
+    "<",            #26
     
     #Single byte ops for FP VM
     "FDROP",        #0
@@ -58,28 +59,29 @@ STACK_OPS=[
     "PUSH_BYTE",    #1
     "LOOP",         #2
     "IF",           #3
-    "WHILE"]        #4
-    
+    "WHILE",        #4
+    "ELSE"          #5
+    ]
 #Other operations processed but not assigned a token
 OTHER_OPS=[
     "EXTERN",
     "RES",
     "CONST8",   #8-bit constant defined in assembly file
     "CONST",    #Calculated and named literal value
-    "LIT",
     "[",
     "THEN",
+    "BEGIN",
     "...VM"]
 
-#Loop constructs that go with DO    
+#Loop constructs  
 LOOP_TYPES=[
     "LOOP",
     "WHILE"]
 
-#Match DO and corresponding LOOP types
+#Match corresponding loop types
 LOOP_LOOKUP={
     "LOOP":"DO",
-    "WHILE":"DO"}
+    "WHILE":"BEGIN"}
     
 STATE_LIST=[
     "extern",
@@ -90,11 +92,17 @@ REG_LIST=["R0","R1","R2","R3","R4","R5","R6","R7"]
 
 #Debug information
 #=================
+#Arguments that have an argument byte after specifying a 16-bit constant
 CONST_OPS=["PUSH_RES"]
+
+#Arguments that have an argument byte after
 ARG_OPS=[
     "PUSH_RES",
     "PUSH_BYTE",
-    "LOOP"]
+    "LOOP",
+    "IF",
+    "ELSE"
+    ]
 usage_counts={i:0 for i in FP_OPS+STACK_OPS}
 const_counts={}
 fp_counts={i:[0]*8 for i in FP_OPS}
@@ -209,8 +217,12 @@ def main():
                 #No more files in list. Stop looping.
                 break
         else:
-            #Line of input from file
-            split_line=line.split()
+            #Line of input from file - strip comments
+            split_line=[]
+            for word in line.split():
+                if word[0]==";":
+                    break
+                split_line+=[word]
             
             #Process included files
             if split_line and split_line[0]=="include":
@@ -349,7 +361,7 @@ def main():
                                                 #Insert commented bytecode into source output
                                                 last_byte=None
                                                 comment=""
-                                                MAX_LINE=" FCB XXX, XXX "
+                                                MAX_LINE=" FCB XXX, CONST_NAME "
                                                 for i in range(len(byte_list)):
                                                     if byte_comments[i]:
                                                         if last_byte!=None:
@@ -415,6 +427,16 @@ def main():
                                             if_list+=[len(byte_list)]
                                             byte_list+=[0]      #Placeholder jump length
                                             byte_comments+=[""]
+                                        elif item.upper()=="ELSE":
+                                            if not if_list:
+                                                print(f"Error: ELSE without matching IF")
+                                                print(f"Line: {line.strip()}")
+                                                exit(1)
+                                            index=if_list.pop()
+                                            byte_list[index]=len(byte_list)-index
+                                            if_list+=[len(byte_list)]
+                                            byte_list+=[0]      #Placeholder jump length
+                                            byte_comments+=[""]
                                     elif item.upper() in OTHER_OPS:
                                         if item.upper()=="EXTERN":
                                             input_state="extern"
@@ -428,7 +450,9 @@ def main():
                                                 print(f"Line: {line.strip()}")
                                                 exit(1)
                                             index=if_list.pop()
-                                            byte_list[index]=len(byte_list)-index-1 
+                                            byte_list[index]=len(byte_list)-index-1
+                                        elif item.upper()=="BEGIN":
+                                            struct_list+=[{"type":item.upper(), "len":len(byte_list)}]
                                     elif item in res_list:
                                         #Push 16-bit constant onto stack
                                         byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_RES")]
@@ -598,6 +622,7 @@ def main():
         print("Error: Constant resources used but no <VM-RES> statement in source to output table")
         exit(1)
     
+    #Output HTML file with debug info
     with open("vm-debug.html","wt") as f:
         #CSS
         f.write("<html><head><style>\n")
@@ -720,6 +745,17 @@ def main():
         f.write('</div>\n') #div table
         
         f.write("</body></html>\n")
+        
+    #Output word names for debugging in simulator
+    MAX_WORD_LEN=max([0 if x==None else len(x) for x in STACK_OPS])
+    with open("vm_debug_words.asm","wt") as f:
+        f.write(f"\tVM_DEBUG_WORDS_LEN: FCB {MAX_WORD_LEN+1}\n")
+        f.write("\tVM_DEBUG_WORDS:\n")
+        for op in STACK_OPS:
+            if op==None:
+                op="None"
+            f.write(f'\tFCB "{(op+(" "*MAX_WORD_LEN))[:MAX_WORD_LEN]}",0\n')
+            
         
 if __name__=="__main__":
     main()

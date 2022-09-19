@@ -61,7 +61,6 @@
 		LDA KB_INPUT
 	END
 	
-	VM_func_begin:
 	FUNC LCD_clrscr
 		<VM
 			EXTERN
@@ -79,10 +78,9 @@
 			SCREEN_ADDRESS screen_ptr !
 		VM>
 	END
-	VM_func_end:
 	
 	FUNC LCD_char_A
-		TODO: more elegant solution?
+		TODO: more elegant solution? shouldnt be necessary after all is VM
 		TODO: maybe skip VM> and <V M pair
 		
 		<VM A VM>
@@ -121,8 +119,9 @@
 	END
 	
 	FUNC LCD_print
-		<VM			
-			DO
+		<VM		
+			
+			BEGIN
 				DUP C@ LCD_char EXEC 1+ DUP C@ 
 			WHILE
 			DROP
