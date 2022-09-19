@@ -50,7 +50,6 @@ VM_handler_debug:
 	TYA
 	SEC
 	SBC #STACK_OPS_BEGIN
-	BEQ .done
 	TAX
 	LDA #lo(VM_DEBUG_WORDS)
 	STA VM_temp0
@@ -66,7 +65,6 @@ VM_handler_debug:
 		STA VM_temp1
 		DEX
 		BNE .loop
-	.done:
 	
 	TYA
 	TAX

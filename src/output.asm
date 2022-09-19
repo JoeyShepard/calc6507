@@ -1,115 +1,36 @@
 ;Output functions
 ;================
-
-	FUNC DigitHighZ
-		ARGS
-			BYTE digit
-		END
-		
-		LDA digit
-		LSR
-		LSR
-		LSR
-		LSR
-		CLC
-		ADC #'0'
-		;STA digit
-		;CALL LCD_char, digit
-		JSR LCD_char_A
+	FUNC DigitHigh
+		<VM
+			4 RSHIFT '0' + LCD_char EXEC
+		VM>
 	END
 	
 	FUNC DigitLow
-		ARGS
-			BYTE digit
-		END
-		
-		LDA digit
-		AND #$F
-		CLC
-		ADC #'0'
-		;STA digit
-		;CALL LCD_char, digit
-		JSR LCD_char_A
+		<VM
+			$F AND '0' + LCD_char EXEC
+		VM>
 	END
 	
-	VM_func_begin:
 	FUNC DrawFloat
-		ARGS
-			WORD source
-		VARS
-			BYTE index, arg, sign
-			WORD buff
-		END
-		
-		INC.W source
-		CALL MemCopy,source,#R0,#8
-		
-		LDA #' '
-		STA sign
-		LDY #EXP_HI-1
-		LDA (source),Y
-		AND #SIGN_BIT
-		BEQ .positive
-			LDA #'-'
-			STA sign
-		.positive:
-		
-		;CALL LCD_char, sign
-		LDA sign
-		JSR LCD_char_A
-		
-		LDY #5
-		LDA R0,Y
-		STA arg
-		CALL DigitHigh, arg
-		
-		;CALL LCD_char, #'.'
-		LDA #'.'
-		JSR LCD_char_A
-		
-		CALL DigitLow, arg
-		LDA #4
-		STA index
-		.loop:
-			LDY index
-			LDA R0,Y
-			STA arg
-			CALL DigitHigh, arg
-			CALL DigitLow, arg
-			DEC index
-			
-			TODO: instead, adjust R0 above
-			LDA index
-			CMP #$FF
-			
-			BNE .loop
-		LDA #'+'
-		STA sign
-		LDY #EXP_HI-1
-		LDA (source),Y
-		AND #E_SIGN_BIT
-		BEQ .positive_e
-			;LDA #CHAR_MINUS
-			LDA #'-'
-			STA sign
-		.positive_e:
-		
-		;CALL LCD_char,sign
-		LDA sign
-		JSR LCD_char_A
-		
-		LDY #7
-		LDA R0,Y
-		STA arg
-		CALL DigitLow, arg
-		LDY #6
-		LDA R0,Y
-		STA arg
-		CALL DigitHigh, arg
-		CALL DigitLow, arg
-			
+		<VM
+			1+ DUP CONST8 EXP_HI-1 + C@ CONST8 SIGN_BIT AND
+			'-' '\s' SELECT LCD_char EXEC
+			DUP 5 + C@ DUP DigitHigh EXEC
+			'.' LCD_char EXEC
+			DigitLow EXEC
+			4 +
+			5 DO
+				DUP C@ DUP 
+				DigitHigh EXEC DigitLow EXEC
+				1 -
+			LOOP
+			CONST8 EXP_HI + DUP C@ DUP CONST8 E_SIGN_BIT AND
+			'-' '+' SELECT LCD_char EXEC
+			DigitLow EXEC
+			1 - C@ DUP DigitHigh EXEC DigitLow EXEC
+		VM>		
 	END
-	VM_func_end:
 	
 	FUNC DrawHex
 		<VM
@@ -123,35 +44,26 @@
 		VM>
 	END
 	
+	
 	FUNC DrawString
-		ARGS
-			WORD source
-		VARS
-			BYTE arg
-			BYTE index
-		END
-		
-		LDA #CHAR_QUOTE
-		JSR LCD_char_A
-		
-		LDA #1
-		STA index
-		.loop:
-			LDY index
-			LDA (source),Y
-			BEQ .done
-			JSR LCD_char_A
-			
-			INC index
-			LDA index
-			CMP #9
-			BNE .loop
-		.done:
-		LDA #CHAR_QUOTE
-		JSR LCD_char_A
-		
+		<VM
+			'"' LCD_char EXEC
+			0
+			BEGIN
+				SWAP 1+ SWAP
+				OVER C@ DUP IF		;address count char
+					LCD_char EXEC
+					1+ DUP 8 <
+				ELSE
+					DROP 0
+				THEN
+			WHILE
+			DROP DROP
+			'"' LCD_char EXEC
+		VM>
 	END
 	
+	VM_func_begin:
 	FUNC DrawStack
 		TODO: strings appear more than once in table
 		TODO: stack usage in status? battery? takes up more room though
@@ -189,24 +101,17 @@
 				;I+1 on stack from above				
 				stack_count C@ <
 				IF
-					DUP DUP C@
-					1 DEBUG	
-					
-					DUP CONST8 OBJ_FLOAT IF
-						DrawFloat 
+					DUP DUP C@					
+					DUP CONST8 OBJ_HEX = IF
+						DROP
+						'$' LCD_char EXEC
+						CONST8 HEX_SUM + @
+						DrawHex
 					ELSE
-						DUP CONST8 OBJ_STR IF
-							DrawString
-						ELSE
-							DUP CONST8 OBJ_HEX IF
-								DrawHex
-							THEN
-						THEN
+						1 - DrawString DrawFloat SELECT
 					THEN
-					;SWAP DROP EXEC
-					SWAP DROP DROP
-					
-					0 DEBUG
+					EXEC
+					HALT
 				THEN
 				CONST8 OBJ_SIZE -
 				screen_ptr @ $FF00 AND STACK_LINE_HEIGHT + screen_ptr !
@@ -224,6 +129,7 @@
 			DROP	
 		VM>
 	END
+	VM_func_end:
 
 		
 	

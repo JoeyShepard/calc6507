@@ -18,6 +18,9 @@ TODO: keep FUNC abstraction so script can recognize?
 		LCD_print
 		LCD_char
 		
+		DigitHigh
+		DigitLow
+		
 		DrawFloat
 		DrawString
 		DrawHex

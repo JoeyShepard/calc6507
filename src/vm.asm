@@ -105,7 +105,7 @@ VM_dispatch:
 	ASL
 	ADC VM_temp0
 	ADC #regs_begin
-	TODO: store in VM_src instead? may need to analysze usage
+	TODO: store in VM_src instead? may need to analyze usage
 	TAY
 	TXA
 	TODO: magic number
@@ -122,6 +122,11 @@ VM_dispatch:
 ;VM fp operations
 ;================
 VM_op_dest_fp:
+	CPY #regs_begin
+	BNE .not_special
+		INC VM_nest_level
+		JMP VM_dispatch
+	.not_special:
 	STY VM_dest
 	STY VM_src1
 	JMP VM_dispatch
@@ -164,11 +169,7 @@ VM_table_fp:
 TODO: all of these either LDX stack_SP or JSR VM_SP_dec? encode in byte
 TODO: replace JMP VM_dispatch with BRK and check status in handler? lots of stack manipulations though
 
-VM_op_nop:			;0
-	INC VM_nest_level
-	JMP VM_dispatch
-
-VM_op_end:			;1
+VM_op_end:			;0
 	DEC VM_nest_level
 	BEQ .hard_return
 		;Return to VM function
@@ -182,7 +183,7 @@ VM_op_end:			;1
 	LDX stack_SP
 	JMP (VM_IP)
 			
-VM_op_store:		;2
+VM_op_store:		;1
 	LDX VM_SP
 	LDA 2,X
 	STA (0,X)
@@ -194,7 +195,7 @@ VM_op_store:		;2
 	STA (0,X)
 	JMP VM_SP_inc2_dispatch
 	
-VM_op_dup:			;3
+VM_op_dup:			;2
 	JSR VM_SP_dec
 	LDA 2,X
 	STA 0,X
@@ -202,7 +203,7 @@ VM_op_dup:			;3
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_over:			;4
+VM_op_over:			;3
 	JSR VM_SP_dec
 	LDA 4,X
 	STA 0,X
@@ -210,7 +211,7 @@ VM_op_over:			;4
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_i:			;5
+VM_op_i:			;4
 	JSR VM_SP_dec
 	PLA
 	STA 0,X
@@ -219,7 +220,7 @@ VM_op_i:			;5
 	STA 1,X
 	JMP VM_dispatch
 
-VM_op_inc:			;6
+VM_op_inc:			;5
 	LDX VM_SP
 	INC 0,X
 	BNE .done
@@ -227,7 +228,7 @@ VM_op_inc:			;6
 	.done:
 	JMP VM_dispatch
 	
-VM_op_rshift:		;7
+VM_op_rshift:		;6
 	LDX VM_SP
 	LDY 0,X
 	BEQ .done
@@ -239,7 +240,7 @@ VM_op_rshift:		;7
 	.done:
 	JMP VM_SP_inc_dispatch
 	
-VM_op_A:			;8
+VM_op_A:			;7
 	JSR VM_SP_dec
 	LDA VM_A_buff
 	STA 0,X
@@ -247,7 +248,7 @@ VM_op_A:			;8
 	STA 1,X
 	JMP VM_dispatch
 	
-VM_op_add:			;9
+VM_op_add:			;8
 	LDX VM_SP
 	CLC
 	LDA 2,X
@@ -258,7 +259,7 @@ VM_op_add:			;9
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 
-VM_op_sub:			;10
+VM_op_sub:			;9
 	LDX VM_SP
 	SEC
 	LDA 2,X
@@ -269,7 +270,7 @@ VM_op_sub:			;10
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 	
-VM_op_lshift:		;11
+VM_op_lshift:		;10
 	LDX VM_SP
 	LDY 0,X
 	.loop:
@@ -279,13 +280,13 @@ VM_op_lshift:		;11
 		BNE .loop
 	JMP VM_SP_inc_dispatch
 
-VM_op_cstore:		;12
+VM_op_cstore:		;11
 	LDX VM_SP
 	LDA 2,X
 	STA (0,X)
 	JMP VM_SP_inc2_dispatch
 	
-VM_op_do:			;13
+VM_op_do:			;12
 	LDX VM_SP
 	LDY 0,X
 	DEY
@@ -293,7 +294,7 @@ VM_op_do:			;13
 	PHA
 	JMP VM_SP_inc_dispatch
 
-VM_op_jsr:			;14
+VM_op_jsr:			;13
 	LDX VM_SP
 	LDA 0,X
 	STA VM_temp0
@@ -312,21 +313,21 @@ VM_op_jsr:			;14
 	LDX VM_SP
 	JMP VM_SP_inc_dispatch	
 
-VM_op_drop:			;15
+VM_op_drop:			;14
 	LDX VM_SP	
 	JMP VM_SP_inc_dispatch
 	
-VM_op_halt:			;16
+VM_op_halt:			;15
 	TODO: remove
 	JMP VM_debug_op_halt
 	
-VM_op_debug:		;17
+VM_op_debug:		;16
 	LDX VM_SP
 	LDA 0,X
 	STA VM_debug
 	JMP VM_SP_inc_dispatch
 	
-VM_op_swap:			;18
+VM_op_swap:			;17
 	LDX VM_SP
 	LDA 0,X
 	TAY
@@ -340,7 +341,7 @@ VM_op_swap:			;18
 	STY 3,X
 	JMP VM_dispatch
 	
-VM_op_fetch:		;19
+VM_op_fetch:		;18
 	LDX VM_SP
 	LDA (0,X)
 	TAY
@@ -354,7 +355,7 @@ VM_op_fetch:		;19
 	JMP VM_dispatch
 	
 TODO: either eliminate since have IF/ELSE or recode with SWAP
-VM_op_select:		;20
+VM_op_select:		;19
 	LDX VM_SP
 	LDA 4,X
 	ORA 5,X
@@ -373,7 +374,7 @@ VM_op_select:		;20
 	JMP VM_SP_inc2_dispatch
 	
 TODO: share with main stack code
-VM_op_and:			;21
+VM_op_and:			;20
 	LDX VM_SP
 	LDA 2,X
 	AND 0,X
@@ -383,7 +384,7 @@ VM_op_and:			;21
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 
-VM_op_xor:			;22
+VM_op_xor:			;21
 	LDX VM_SP
 	LDA 2,X
 	EOR 0,X
@@ -393,7 +394,7 @@ VM_op_xor:			;22
 	STA 3,X
 	JMP VM_SP_inc_dispatch
 	
-VM_op_cfetch:		;23
+VM_op_cfetch:		;22
 	LDX VM_SP
 	LDA (0,X)
 	STA 0,X
@@ -402,7 +403,7 @@ VM_op_cfetch:		;23
 	JMP VM_dispatch
 	
 TODO: always known at compile time? if so, take argument not from stack
-VM_op_exec:			;24
+VM_op_exec:			;23
 	LDX VM_SP
 	LDA VM_IP+1
 	PHA
@@ -412,16 +413,16 @@ VM_op_exec:			;24
 	STA VM_IP
 	LDA 1,X
 	STA VM_IP+1	
-	INC VM_nest_level
+	;INC VM_nest_level
 	JMP VM_SP_inc_dispatch
 	
-VM_op_embed:		;25
+VM_op_embed:		;24
 	LDX stack_SP
 	LDA #0
 	STA VM_embedded
 	JMP (VM_IP)
 	
-VM_op_lt:			;26
+VM_op_lt:			;25
 	LDX VM_SP
 	SEC
 	LDA 2,X
@@ -434,6 +435,23 @@ VM_op_lt:			;26
 	STA 3,X
 	JMP VM_SP_inc_dispatch	
 
+VM_op_eq:			;26
+	LDX VM_SP
+	LDA 2,X
+	EOR 0,X
+	BNE .not_equal
+	LDA 3,X
+	EOR 1,X
+	BNE .not_equal
+	;Equal
+	LDA #$FF
+	BNE .done
+	.not_equal:
+	LDA #0
+	.done:
+	STA 2,X
+	STA 3,X
+	JMP VM_SP_inc_dispatch	
 	
 ;Single byte ops for FP VM
 VM_op_fdrop:		;0
@@ -529,33 +547,33 @@ VM_op_else:			;5
 	
 VM_table_stack:
 	;Single byte stack ops
-	FDB VM_op_nop-1			;0
-	FDB VM_op_end-1			;1
-	FDB VM_op_store-1		;2
-	FDB VM_op_dup-1			;3
-	FDB VM_op_over-1		;4
-	FDB VM_op_i-1			;5
-	FDB VM_op_inc-1			;6
-	FDB VM_op_rshift-1		;7
-	FDB VM_op_A-1			;8
-	FDB VM_op_add-1			;9
-	FDB VM_op_sub-1			;10
-	FDB VM_op_lshift-1		;11
-	FDB VM_op_cstore-1		;12
-	FDB VM_op_do-1			;13
-	FDB VM_op_jsr-1			;14
-	FDB VM_op_drop-1		;15
-	FDB VM_op_halt-1		;16
-	FDB VM_op_debug-1		;17
-	FDB VM_op_swap-1		;18
-	FDB VM_op_fetch-1		;19
-	FDB VM_op_select-1		;20
-	FDB VM_op_and-1			;21
-	FDB VM_op_xor-1			;22
-	FDB VM_op_cfetch-1		;23
-	FDB VM_op_exec-1		;24
-	FDB VM_op_embed-1		;25
-	FDB VM_op_lt-1			;26
+	FDB VM_op_end-1			;0
+	FDB VM_op_store-1		;1
+	FDB VM_op_dup-1			;2
+	FDB VM_op_over-1		;3
+	FDB VM_op_i-1			;4
+	FDB VM_op_inc-1			;5
+	FDB VM_op_rshift-1		;6
+	FDB VM_op_A-1			;7
+	FDB VM_op_add-1			;8
+	FDB VM_op_sub-1			;9
+	FDB VM_op_lshift-1		;10
+	FDB VM_op_cstore-1		;11
+	FDB VM_op_do-1			;12
+	FDB VM_op_jsr-1			;13
+	FDB VM_op_drop-1		;14
+	FDB VM_op_halt-1		;15
+	FDB VM_op_debug-1		;16
+	FDB VM_op_swap-1		;17
+	FDB VM_op_fetch-1		;18
+	FDB VM_op_select-1		;19
+	FDB VM_op_and-1			;20
+	FDB VM_op_xor-1			;21
+	FDB VM_op_cfetch-1		;22
+	FDB VM_op_exec-1		;23
+	FDB VM_op_embed-1		;24
+	FDB VM_op_lt-1			;25
+	FDB VM_op_eq-1			;26
 	
 	;Single byte ops for FP VM
 	FDB VM_op_fdrop-1		;0

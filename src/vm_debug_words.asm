@@ -1,6 +1,5 @@
 	VM_DEBUG_WORDS_LEN: FCB 10
 	VM_DEBUG_WORDS:
-	FCB "None     ",0
 	FCB "VM>      ",0
 	FCB "!        ",0
 	FCB "DUP      ",0
@@ -27,6 +26,7 @@
 	FCB "EXEC     ",0
 	FCB "VM...    ",0
 	FCB "<        ",0
+	FCB "=        ",0
 	FCB "FDROP    ",0
 	FCB "FNEW     ",0
 	FCB "FSP      ",0

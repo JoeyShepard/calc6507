@@ -19,8 +19,8 @@
 <div style="width: fit-content;">
 <center><b>General Stats</b></center>
 <table>
-<tr><td>VM invocations</td><td>13</td></tr>
-<tr><td>Const slots used</td><td>30/256</td></tr>
+<tr><td>VM invocations</td><td>17</td></tr>
+<tr><td>Const slots used</td><td>32/256</td></tr>
 </table>
 </div>
 <br><br>
@@ -30,7 +30,7 @@
 <tr><th>Bytecode</th><th>Op</th><th>R0</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>R6</th><th>R7</th><th>Total</th></tr>
 <tr><td>$00</td><td>DEST</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightPink">0</td></tr>
 <tr><td>$01</td><td>SRC</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td>1</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGreen">1</td></tr>
-<tr><td>$02</td><td>TOS</td><td>1</td><td>1</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td>2</td></tr>
+<tr><td>$02</td><td>TOS</td><td>1</td><td>1</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td>1</td><td>3</td></tr>
 <tr><td>$03</td><td>ADD</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightGray">0</td><td style="background-color: LightPink">0</td></tr>
 <td colspan="11">Unused: $04-$1A (22)</table>
 </div>
@@ -42,33 +42,35 @@
 <tr><td>$00</td><td>SCREEN_ADDRESS</td><td>2</td></tr>
 <tr><td>$01</td><td>LCD_clrscr</td><td style="background-color: LightPink">1</td></tr>
 <tr><td>$02</td><td>LCD_print</td><td>2</td></tr>
-<tr><td>$03</td><td>LCD_char</td><td>5</td></tr>
-<tr><td>$04</td><td>DrawFloat</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$05</td><td>DrawString</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$06</td><td>DrawHex</td><td>2</td></tr>
-<tr><td>$07</td><td>CODE_FREE+EXEC_HEADER</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$08</td><td>font_inverted</td><td>3</td></tr>
-<tr><td>$09</td><td>dict_begin</td><td>2</td></tr>
-<tr><td>$0A</td><td>dict_ptr</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$0B</td><td>dict_save</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$0C</td><td>mode</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$0D</td><td>RAM_BANK2</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$0E</td><td>RAM_BANK3</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$0F</td><td>screen_ptr</td><td>7</td></tr>
-<tr><td>$10</td><td>10794</td><td>3</td></tr>
-<tr><td>$11</td><td>font_table</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$12</td><td>256</td><td>2</td></tr>
-<tr><td>$13</td><td>512</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$14</td><td>4094</td><td>2</td></tr>
-<tr><td>$15</td><td>CHAR_WIDTH*8+SCREEN_ADDRESS</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$16</td><td>__vm_const_str0</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$17</td><td>CHAR_HEIGHT*SCREEN_WIDTH</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$18</td><td>CHAR_HEIGHT*SCREEN_WIDTH+SCREEN_ADDRESS</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$19</td><td>OBJ_SIZE*4</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$1A</td><td>stack_count</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$1B</td><td>65280</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$1C</td><td>SCREEN_ADDRESS+CHAR_HEIGHT*6.5*SCREEN_WIDTH</td><td style="background-color: LightPink">1</td></tr>
-<tr><td>$1D</td><td>__vm_const_str1</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$03</td><td>LCD_char</td><td>14</td></tr>
+<tr><td>$04</td><td>DigitHigh</td><td>3</td></tr>
+<tr><td>$05</td><td>DigitLow</td><td>4</td></tr>
+<tr><td>$06</td><td>DrawFloat</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$07</td><td>DrawString</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$08</td><td>DrawHex</td><td>2</td></tr>
+<tr><td>$09</td><td>CODE_FREE+EXEC_HEADER</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$0A</td><td>font_inverted</td><td>3</td></tr>
+<tr><td>$0B</td><td>dict_begin</td><td>2</td></tr>
+<tr><td>$0C</td><td>dict_ptr</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$0D</td><td>dict_save</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$0E</td><td>mode</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$0F</td><td>RAM_BANK2</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$10</td><td>RAM_BANK3</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$11</td><td>screen_ptr</td><td>7</td></tr>
+<tr><td>$12</td><td>10794</td><td>3</td></tr>
+<tr><td>$13</td><td>font_table</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$14</td><td>256</td><td>2</td></tr>
+<tr><td>$15</td><td>512</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$16</td><td>4094</td><td>2</td></tr>
+<tr><td>$17</td><td>CHAR_WIDTH*8+SCREEN_ADDRESS</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$18</td><td>__vm_const_str0</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$19</td><td>CHAR_HEIGHT*SCREEN_WIDTH</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$1A</td><td>CHAR_HEIGHT*SCREEN_WIDTH+SCREEN_ADDRESS</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$1B</td><td>OBJ_SIZE*4</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$1C</td><td>stack_count</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$1D</td><td>65280</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$1E</td><td>SCREEN_ADDRESS+CHAR_HEIGHT*6.5*SCREEN_WIDTH</td><td style="background-color: LightPink">1</td></tr>
+<tr><td>$1F</td><td>__vm_const_str1</td><td style="background-color: LightPink">1</td></tr>
 </table>
 </div>
 <br><br>
@@ -78,42 +80,42 @@
 <center><b>Stack Ops</b></center>
 <table>
 <tr><th>Bytecode</th><th>Op</th><th>Total</th></tr>
-<tr><td>$D0</td><td>None</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>$D1</td><td>VM></td><td>9</td></tr>
-<tr><td>$D2</td><td>!</td><td>13</td></tr>
-<tr><td>$D3</td><td>DUP</td><td>11</td></tr>
-<tr><td>$D4</td><td>OVER</td><td>14</td></tr>
-<tr><td>$D5</td><td>I</td><td>1</td></tr>
-<tr><td>$D6</td><td>1+</td><td>6</td></tr>
-<tr><td>$D7</td><td>RSHIFT</td><td>1</td></tr>
-<tr><td>$D8</td><td>A</td><td>1</td></tr>
-<tr><td>$D9</td><td>+</td><td>10</td></tr>
-<tr><td>$DA</td><td>-</td><td>6</td></tr>
-<tr><td>$DB</td><td>LSHIFT</td><td>2</td></tr>
-<tr><td>$DC</td><td>C!</td><td>5</td></tr>
-<tr><td>$DD</td><td>DO</td><td>8</td></tr>
-<tr><td>$DE</td><td>JSR</td><td>1</td></tr>
-<tr><td>$DF</td><td>DROP</td><td>12</td></tr>
-<tr><td>$E0</td><td>HALT</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>$E1</td><td>DEBUG</td><td>2</td></tr>
-<tr><td>$E2</td><td>SWAP</td><td>8</td></tr>
-<tr><td>$E3</td><td>@</td><td>2</td></tr>
-<tr><td>$E4</td><td>SELECT</td><td>3</td></tr>
-<tr><td>$E5</td><td>AND</td><td>3</td></tr>
-<tr><td>$E6</td><td>XOR</td><td>1</td></tr>
-<tr><td>$E7</td><td>C@</td><td>7</td></tr>
-<tr><td>$E8</td><td>EXEC</td><td>9</td></tr>
-<tr><td>$E9</td><td>VM...</td><td style="background-color: LightPink">0</td></tr>
-<tr><td>$EA</td><td><</td><td>2</td></tr>
+<tr><td>$D0</td><td>VM></td><td>13</td></tr>
+<tr><td>$D1</td><td>!</td><td>13</td></tr>
+<tr><td>$D2</td><td>DUP</td><td>19</td></tr>
+<tr><td>$D3</td><td>OVER</td><td>15</td></tr>
+<tr><td>$D4</td><td>I</td><td>1</td></tr>
+<tr><td>$D5</td><td>1+</td><td>9</td></tr>
+<tr><td>$D6</td><td>RSHIFT</td><td>2</td></tr>
+<tr><td>$D7</td><td>A</td><td>1</td></tr>
+<tr><td>$D8</td><td>+</td><td>17</td></tr>
+<tr><td>$D9</td><td>-</td><td>9</td></tr>
+<tr><td>$DA</td><td>LSHIFT</td><td>2</td></tr>
+<tr><td>$DB</td><td>C!</td><td>5</td></tr>
+<tr><td>$DC</td><td>DO</td><td>9</td></tr>
+<tr><td>$DD</td><td>JSR</td><td>1</td></tr>
+<tr><td>$DE</td><td>DROP</td><td>14</td></tr>
+<tr><td>$DF</td><td>HALT</td><td>1</td></tr>
+<tr><td>$E0</td><td>DEBUG</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>$E1</td><td>SWAP</td><td>9</td></tr>
+<tr><td>$E2</td><td>@</td><td>3</td></tr>
+<tr><td>$E3</td><td>SELECT</td><td>6</td></tr>
+<tr><td>$E4</td><td>AND</td><td>6</td></tr>
+<tr><td>$E5</td><td>XOR</td><td>1</td></tr>
+<tr><td>$E6</td><td>C@</td><td>13</td></tr>
+<tr><td>$E7</td><td>EXEC</td><td>26</td></tr>
+<tr><td>$E8</td><td>VM...</td><td style="background-color: LightPink">0</td></tr>
+<tr><td>$E9</td><td><</td><td>3</td></tr>
+<tr><td>$EA</td><td>=</td><td>1</td></tr>
 <tr><td>$EB</td><td>FDROP</td><td>2</td></tr>
 <tr><td>$EC</td><td>FNEW</td><td>1</td></tr>
 <tr><td>$ED</td><td>FSP</td><td>1</td></tr>
 <tr><td>$EE</td><td>FTOS</td><td>1</td></tr>
-<tr><td>$EF</td><td>PUSH_RES</td><td>50</td></tr>
-<tr><td>$F0</td><td>PUSH_BYTE</td><td>37</td></tr>
-<tr><td>$F1</td><td>LOOP</td><td>8</td></tr>
-<tr><td>$F2</td><td>IF</td><td>4</td></tr>
-<tr><td>$F3</td><td>WHILE</td><td>1</td></tr>
+<tr><td>$EF</td><td>PUSH_RES</td><td>66</td></tr>
+<tr><td>$F0</td><td>PUSH_BYTE</td><td>59</td></tr>
+<tr><td>$F1</td><td>LOOP</td><td>9</td></tr>
+<tr><td>$F2</td><td>IF</td><td>3</td></tr>
+<tr><td>$F3</td><td>WHILE</td><td>2</td></tr>
 <tr><td>$F4</td><td>ELSE</td><td>2</td></tr>
 <td colspan="3">Unused: $F5-$FF (11)</td></table>
 </div>

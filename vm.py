@@ -12,7 +12,7 @@ STACK_OPS_BEGIN=208     #Beginning of stack ops encoding
 #==========================
 #Floating point operations
 FP_OPS=[
-    "DEST",
+    "DEST",         #Note DEST R0 reused since encodes to 0
     "SRC",
     "TOS",
     "ADD"]
@@ -20,7 +20,6 @@ FP_OPS=[
 #Stack operations
 STACK_OPS=[
     #Single byte stack ops
-    None,           #0  ;Interpretting BRK ignored as NOP
     VM_END,         #1
     "!",            #2
     "DUP",          #3
@@ -47,6 +46,7 @@ STACK_OPS=[
     "EXEC",         #24
     "VM...",        #25
     "<",            #26
+    "=",            #27
     
     #Single byte ops for FP VM
     "FDROP",        #0
@@ -508,10 +508,11 @@ def main():
                                             byte_comments+=[f"16-bit const {num}"]
                                             byte_comments+=[""]
                                     elif item[0]=="'":
-                                        if len(item)!=3 or item[-1]!="'":
+                                        if (len(item)!=3 or item[-1]!="'") and item!="'\s'":
                                             print("Error: Invalid character: {item}")
                                             print(f"Line: {line.strip()}")
                                             exit(1)
+                                        item=item.replace("\s"," ")
                                         char_code=ord(item[1])
                                         byte_list+=[STACK_OPS_BEGIN+STACK_OPS.index("PUSH_BYTE")]
                                         byte_list+=[char_code]
