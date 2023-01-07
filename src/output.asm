@@ -29,7 +29,7 @@
 			'-' '+' SELECT LCD_char EXEC
 			DigitLow EXEC
 			1 - C@ DUP DigitHigh EXEC DigitLow EXEC
-		VM>		
+		VM>
 	END
 	
 	FUNC DrawHex
@@ -43,7 +43,6 @@
 			LOOP DROP DROP
 		VM>
 	END
-	
 	
 	FUNC DrawString
 		<VM
@@ -111,7 +110,6 @@
 						1 - DrawString DrawFloat SELECT
 					THEN
 					EXEC
-					HALT
 				THEN
 				CONST8 OBJ_SIZE -
 				screen_ptr @ $FF00 AND STACK_LINE_HEIGHT + screen_ptr !

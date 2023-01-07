@@ -10,7 +10,8 @@ difference()
     //translate([0,-70,0])
     scale(SCALE_VALUE)
     linear_extrude(height=1)
-    import("keypad_path.svg");
+    //import("keypad_path.svg");
+    import("keypad.svg");
     
     //cut off all but top 5 letters for testing
     //translate([0,-220,-1])

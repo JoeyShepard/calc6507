@@ -1,0 +1,3 @@
+SVG Export is Chrome extension
+With SVG loaded in Chrome, click on icon in extensions toolbar
+May need to pin icon to toolbar

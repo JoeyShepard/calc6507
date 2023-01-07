@@ -1,0 +1,12 @@
+Tried Inkscape a long time ago but did not try this time
+
+Safari
+ - https://www.deskera.com/blog/a-lazy-developers-guide-to-converting-svg-image-to-png/
+ - apparently no Safari on Windows after 2012
+ - could not download old version either
+
+node.js package
+ - https://github.com/neocotic/convert-svg/tree/main/packages/convert-svg-to-png\
+
+JavaScript
+ - several links mention short piece of code to save as PNG
