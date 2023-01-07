@@ -1,6 +1,3 @@
-;Unlimited lines per page in listing
-	PAGE 0
-
 ;Macros
 ;======
 	include macros.asm
@@ -44,10 +41,10 @@
 		;keyboard buffer
 		;power transistor
 	
-	TODO: DONT NEED OPTIMIZER OR NASM FOR THIS!
 	TODO: drive RDY with 6532 interrupt
 	TODO:    seems allowed as long as transitions in phi1 not phi2. lower current though? posted on forum
 	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
+	TODO: separate engine and table for 16 bit forth?
 	TODO: more comments
 	TODO: replace calculated jump with JMP (addr)
 	TODO: use registers for text input also somehow? no bc could be used by words
@@ -55,46 +52,33 @@
 	TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
 	TODO: add aux stack check to semi colon
 	TODO: var in word? causes double input error
-	TODO: review files. remove improvements.asm and old.asm
-	TODO: main Forth needs split table to conserve token space?
-	TODO: lo and hi defined for NASM, redefine with FUNCTION for AS
-	TODO: move constants to const.asm?
-	TODO: eliminate JSR to BRK? maybe first byte after BRK
-	TODO: shadow space on main stack? had planned on 3 but now only space for 1
-	TODO: remove commented out code replaced by VM
-	TODO: copyright
-	TODO: double check not relying on flags from BCD which are not valid for NMOS
-	TODO: automate search for patterns that can be subwords
-		TODO: DO and EXEC always with constant? most used EXEC is own token?
-	
-	TODO: if still wont fit, remove hex and strings :/ can always add back what will fit but then redo docs :/
-		TODO: even removing strings or smart hex on stack could be good
-		TODO: can do without ! and @
 	
 ;To finish before website upload
 	TODO: github readme
 	
+;Unlimited lines per page in listing
+	PAGE 0
+
+
 ;Constants
 ;=========
 	include const.asm
-	include vm_const.asm
 	include emu.asm
 	
 ;Notes
 ;=====
 TODO: checking - p110 in Handbook of Floating Point Arithmetic
 
-DEBUG_MODE set "off"
 
-
-;Vectors
-;=======
+;Main code
+;=========
 	
-	TODO: change vectors to match 6507 address space
+DEBUG_MODE set "off"
+		
+	;Reset vector
 	ORG RESET_VECTOR
+	;ORG $1FFC
 	FDB main
-	ORG IRQ_VECTOR
-	FDB VM_brk_handler
 		
 	
 ;Variables in zero page
@@ -105,37 +89,11 @@ DEBUG_MODE set "off"
 	
 	;Locals usage
 LOCALS_BEGIN set	$0
-;LOCALS_END set		$1F
-LOCALS_END set		$13
+LOCALS_END set		$1F
 	
-	;VM memory
-	ORG $14			;ORG needs fixed value rather than symbol
-	VM_MEM_BEGIN:
-	WORD VM_IP			;Instruction pointer
-	BYTE VM_SP			;Stack pointer
-	BYTE VM_dest		;FP VM op destination
-	BYTE VM_src0		;FP VM op source 0
-	BYTE VM_src1		;FP VM op source 1
-	BYTE VM_dest_buff
-	BYTE VM_src0_buff
-	BYTE VM_src1_buff
-	BYTE VM_temp0		;Temporary registers for VM
-	BYTE VM_temp1
-	BYTE VM_A_buff		;Value of A when VM invoked
-	BYTE VM_nest_level	;Nested level of VM calls
-	BYTE VM_embedded	;Whether VM last left to execute assembly embedded in Forth
-	TODO: remove?
-	BYTE VM_debug
-	
-	TODO: adjust stack size
-	TODO: move to constants
-VM_STACK_SIZE set	20
-	VM_stack:
-	DFS VM_STACK_SIZE 
-	VM_stack_end:
-
 	TODO: double check all used and move variables out of globals to here
 	
+	ORG $20
 	;For macros
 	WORD dummy
 	WORD ret_val
@@ -146,6 +104,7 @@ VM_STACK_SIZE set	20
 	;Output
 	WORD screen_ptr
 	TODO: remove after debugging done
+	WORD font_ptr
 	
 	;Forth
 	WORD dict_ptr
@@ -155,32 +114,28 @@ VM_STACK_SIZE set	20
 	WORD exec_ptr
 	TODO: share with ret_address?
 	WORD obj_address
-	TODO: combine with or eliminate stack_X
-	BYTE stack_SP		;Main 
 	
 	;Math
 	WORD math_ptr1
 	WORD math_ptr2
 	
-	regs_begin:
-	
-	R0: 	DFS REG_SIZE
-	R1: 	DFS REG_SIZE
-	R2: 	DFS REG_SIZE
-	R3: 	DFS REG_SIZE
-	R4: 	DFS REG_SIZE
-	R5: 	DFS REG_SIZE
-	R6: 	DFS REG_SIZE
-	R7: 	DFS REG_SIZE
-	TODO: remove at end
-	R_ans:	DFS REG_SIZE
+	;Don't need header byte, +1 for guard and round, +1 for exp sign
+	R0: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R1: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R2: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R3: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R4: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R5: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R6: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R7: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
+	R_ans:	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
 	
 	;reg before R_ans in case double wide reg needed
 	;+3 since only need 6 of 9 bytes 
 	R_ans_wide = R7+3
 	
-	ZP_end:
-	
+	Regs_end:
+		
 	
 ;Variables in main RAM
 ;=====================
@@ -193,13 +148,24 @@ VM_STACK_SIZE set	20
 
 ;Functions in ROM
 ;================
+	;ORG $C000
+	ORG $D000
+	;should be visible to tests below which overflow $C000
+	include debug.asm
 	
-	;Debug and print functions in higher memory moved below
-	;VM should come first so everything else can access it
+	TODO: remove after debugging
+	include font_debug.asm
+	
+	ORG $8900	;RAM + ROM size
+	;overlaps with video memory, no video output
+	;but banked out after all tests pass
+	include tests.asm
+	include file_tests.asm
+	TODO: remove or add to emu6507
+	include stats.asm
 	
 	ORG $900
 	code_begin:
-	
 	JMP main	;static entry address for emulator
 	
 	font_table:
@@ -209,7 +175,6 @@ VM_STACK_SIZE set	20
 	;include calc6507.asm
 	include emu6507.asm
 	
-	include vm.asm
 	include system.asm
 	include math.asm
 	include cordic.asm
@@ -227,10 +192,11 @@ VM_STACK_SIZE set	20
 			WORD dest
 			BYTE arg,type
 		END
-				
-		SEI
-		CLD
-		CALL VM_setup
+		
+		TODO: copyright
+		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
+		TODO: double check not relying on flags from BCD which are not valid for NMOS
+			
 		CALL setup
 		CALL tests
 		;CALL file_tests
@@ -242,7 +208,7 @@ VM_STACK_SIZE set	20
 		
 		.input_loop:
 			
-			TODO: if unknown word in uncompleted definition, errors then jumps here and errors again
+			TODO: if unknown word in uncompleted definition, erros then jumps here and errors again
 			
 			;Colon definitions must fit on one line
 			LDA mode
@@ -289,8 +255,6 @@ VM_STACK_SIZE set	20
 					LDA mode
 					CMP #MODE_IMMEDIATE
 					BNE .compile_word
-						
-						TODO: simplify dispatch with separate type table
 						
 						;Immediate mode - insert word into temp thread and execute
 						.immediate:
@@ -427,27 +391,6 @@ VM_STACK_SIZE set	20
 			JMP .process_loop
 	END
 	
-	;Constant table generated by VM script run at assembly time
-	;Must come after all VM usage in source
-	include vm_done.asm
 	
 	code_end:
-	
-	;ORG $C000
-	ORG $D000
-	;should be visible to tests below which overflow $C000
-	include debug.asm
-	TODO: remove
-	;store separate from main VM for more accurate file size calculation
-	include vm_debug.asm
-	include vm_debug_words.asm
-	
-	ORG $8900	;RAM + ROM size
-	;overlaps with video memory, no video output
-	;but banked out after all tests pass
-	include tests.asm
-	include file_tests.asm
-	TODO: remove or add to emu6507
-	include stats.asm
-	
 	

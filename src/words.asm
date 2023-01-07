@@ -178,12 +178,9 @@
 			CMP #OBJ_FLOAT
 			BNE .not_float
 				.float:
-					<VM
-						TOS R0
-						FDROP
-						TOS R1
-					VM>
+					JSR TosR0R1
 					JSR BCD_Add
+					JSR CODE_DROP+EXEC_HEADER
 					JMP RansTos
 			.not_float:
 			
@@ -312,6 +309,7 @@
 			
 			;Multiplying hex objects
 			LDA HEX_TYPE,X
+			TODO: why?
 			ASL
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex
@@ -1045,7 +1043,7 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1			;Flags
 			
-			JMP CODE_STO+EXEC_HEADER
+			JMP CODE_STO
 	
 	TODO: this is called UNUSED in forth
 	TODO: not needed if shown in interface

@@ -24,7 +24,7 @@
 	;Rest of RAM for user dictionary
 	dict_begin:
 
-	TODO: magic number
+	TODO: magical number
 	ORG $800
 	dict_end:
 	
@@ -82,6 +82,6 @@
 	
 	RIOT_mem_end:
 	
-	TODO: magic number
+	TODO: magical number
 	ORG $880
 	

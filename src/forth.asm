@@ -37,12 +37,7 @@
 		STA screen_ptr
 		LDA #INPUT_Y
 		STA screen_ptr+1
-		
-		<VM 
-			" a\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s\s" 
-			LCD_print EXEC
-		VM>
-		
+		CALL LCD_print,"a                     "
 		LDA #0
 		STA screen_ptr
 		LDA TIMER_S
@@ -77,19 +72,14 @@
 						DEC index
 						CMP #CHAR_SCREEN_WIDTH
 						BCS .backspace_scroll
-							;CALL LCD_char, #' '
-							LDA #' '
-							JSR LCD_char_A
-							
+							TODO: pass input in register?
+							CALL LCD_char, #' '
 							LDA screen_ptr
 							SEC
 							SBC #CHAR_WIDTH*2
 							STA screen_ptr
 							PHA
-							;CALL LCD_char, #CHAR_ARROW
-							LDA #CHAR_ARROW
-							JSR LCD_char_A
-							
+							CALL LCD_char, #CHAR_ARROW
 							PLA
 							STA screen_ptr
 							JMP .draw_done
@@ -101,6 +91,34 @@
 					.backspace_done:
 					JMP .no_key
 				.not_backspace:
+				
+				TODO: remove this and extra font data from ROM
+				;;Switch font (debug only!)
+				;CMP #'f'
+				;BNE .not_font
+				;	LDY font_counter
+				;	LDA debug_fonts,Y
+				;	STA font_ptr
+				;	LDA debug_fonts+1,Y
+				;	STA font_ptr+1
+				;	INY
+				;	INY
+				;	CPY #DEBUG_FONT_COUNT*2
+				;	BNE .no_font_reset
+				;		LDY #0
+				;	.no_font_reset:
+				;	STY font_counter
+				;	CALL DrawStack
+				;	;Reset screen pointer after drawing
+				;	LDA #0
+				;	STA cursor
+				;	STA index
+				;	STA screen_ptr
+				;	LDA #INPUT_Y
+				;	STA screen_ptr+1
+				;	
+				;	JMP .no_key
+				;.not_font:
 				
 				;Special character
 				LDY #0
@@ -175,16 +193,10 @@
 						INC index
 						CPY #CHAR_SCREEN_WIDTH-1
 						BCS .scroll_buffer
-							;CALL LCD_char, arg
-							LDA arg
-							JSR LCD_char_A
-							
+							CALL LCD_char, arg
 							LDA screen_ptr
 							PHA
-							;CALL LCD_char, #CHAR_ARROW
-							LDA #CHAR_ARROW
-							JSR LCD_char_A
-							
+							CALL LCD_char, #CHAR_ARROW
 							PLA
 							STA screen_ptr
 							JMP .draw_done
@@ -200,19 +212,13 @@
 								INC str_index
 								LDA input_buff,Y
 								STA arg
-								;CALL LCD_char, arg
-								LDA arg
-								JSR LCD_char_A
-								
+								CALL LCD_char, arg
 								LDA index
 								CMP str_index
 								BNE .scroll_loop
 							LDA screen_ptr
 							PHA
-							;CALL LCD_char, #CHAR_ARROW
-							LDA #CHAR_ARROW
-							JSR LCD_char_A
-							
+							CALL LCD_char, #CHAR_ARROW
 							PLA
 							STA screen_ptr
 						.draw_done:
@@ -236,10 +242,7 @@
 					LDA #CHAR_ARROW
 				.draw:
 				STA arg
-				;CALL LCD_char, arg
-				LDA arg
-				JSR LCD_char_A
-				
+				CALL LCD_char, arg
 				LDA screen_ptr
 				SEC
 				SBC #CHAR_WIDTH
@@ -1021,7 +1024,6 @@
 			
 	END
 	
-	TODO: remove if not needed
 	FUNC StackAddItem
 		TXA
 		SEC

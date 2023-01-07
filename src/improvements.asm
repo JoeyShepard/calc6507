@@ -5,6 +5,9 @@ TODO: move somewhere else for final version
 	;either (R0),Y or LDX R0 then 0,X
 	;X is easier to do offset within same word
 	
+TODO: this might help reduce size a lot
+;fp register based VM (see google doc)
+
 TODO: separate table for two header bytes for primaries
 
 	

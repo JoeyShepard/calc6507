@@ -1,133 +1,311 @@
 ;Output functions
 ;================
+
 	FUNC DigitHigh
-		<VM
-			4 RSHIFT '0' + LCD_char EXEC
-		VM>
+		ARGS
+			BYTE digit
+		END
+		
+		LDA digit
+		LSR
+		LSR
+		LSR
+		LSR
+		CLC
+		ADC #'0'
+		STA digit
+		CALL LCD_char, digit
 	END
 	
 	FUNC DigitLow
-		<VM
-			$F AND '0' + LCD_char EXEC
-		VM>
+		ARGS
+			BYTE digit
+		END
+		
+		LDA digit
+		AND #$F
+		CLC
+		ADC #'0'
+		STA digit
+		CALL LCD_char, digit
 	END
 	
 	FUNC DrawFloat
-		<VM
-			1+ DUP CONST8 EXP_HI-1 + C@ CONST8 SIGN_BIT AND
-			'-' '\s' SELECT LCD_char EXEC
-			DUP 5 + C@ DUP DigitHigh EXEC
-			'.' LCD_char EXEC
-			DigitLow EXEC
-			4 +
-			5 DO
-				DUP C@ DUP 
-				DigitHigh EXEC DigitLow EXEC
-				1 -
-			LOOP
-			CONST8 EXP_HI + DUP C@ DUP CONST8 E_SIGN_BIT AND
-			'-' '+' SELECT LCD_char EXEC
-			DigitLow EXEC
-			1 - C@ DUP DigitHigh EXEC DigitLow EXEC
-		VM>
+		ARGS
+			WORD source
+		VARS
+			BYTE index, arg, sign
+			WORD buff
+		END
+		
+		INC.W source
+		CALL MemCopy,source,#R0,#8
+		
+		LDA #' '
+		STA sign
+		LDY #EXP_HI-1
+		LDA (source),Y
+		AND #SIGN_BIT
+		BEQ .positive
+			;LDA #CHAR_MINUS
+			LDA #'-'
+			STA sign
+		.positive:
+		
+		CALL LCD_char, sign
+				
+		LDY #5
+		LDA R0,Y
+		STA arg
+		CALL DigitHigh, arg
+		
+		CALL LCD_char, #'.'
+		CALL DigitLow, arg
+		LDA #4
+		STA index
+		.loop:
+			LDY index
+			LDA R0,Y
+			STA arg
+			CALL DigitHigh, arg
+			CALL DigitLow, arg
+			DEC index
+			
+			TODO: instead, adjust R0 above
+			LDA index
+			CMP #$FF
+			
+			BNE .loop
+		LDA #'+'
+		STA sign
+		LDY #EXP_HI-1
+		LDA (source),Y
+		AND #E_SIGN_BIT
+		BEQ .positive_e
+			;LDA #CHAR_MINUS
+			LDA #'-'
+			STA sign
+		.positive_e:
+		CALL LCD_char,sign
+		LDY #7
+		LDA R0,Y
+		STA arg
+		CALL DigitLow, arg
+		LDY #6
+		LDA R0,Y
+		STA arg
+		CALL DigitHigh, arg
+		CALL DigitLow, arg
+			
+	END
+	
+	FUNC HexHigh
+		ARGS
+			BYTE digit
+		VARS
+			BYTE arg
+		END
+		
+		LDA digit
+		LSR
+		LSR
+		LSR
+		LSR
+		CMP #$A
+		BCC .print_digit
+			CLC
+			ADC #'A'-10
+			STA arg
+			JMP .done
+		.print_digit:
+			CLC
+			ADC #'0'
+			STA arg
+		.done:
+		CALL LCD_char, arg
+	END
+	
+	FUNC HexLow
+		ARGS
+			BYTE digit
+		VARS
+			BYTE arg
+		END
+		
+		LDA digit
+		AND #$F
+		CMP #$A
+		BCC .print_digit
+			CLC
+			ADC #'A'-10
+			STA arg
+			JMP .done
+		.print_digit:
+			CLC
+			ADC #'0'
+			STA arg
+		.done:
+		CALL LCD_char, arg
 	END
 	
 	FUNC DrawHex
-		<VM
-			12
-			4 DO
-				OVER OVER RSHIFT $F AND 
-				DUP 10 < '0' CONST8 'A'-10 SELECT +
-				LCD_char EXEC
-				4 -
-			LOOP DROP DROP
-		VM>
+		ARGS
+			WORD source
+		VARS
+			BYTE arg
+		END
+		
+		CALL LCD_char, #'$'
+		
+		LDY #2
+		LDA (source),Y
+		STA arg
+		CALL HexHigh, arg
+		CALL HexLow, arg
+		LDY #1
+		LDA (source),Y
+		STA arg
+		CALL HexHigh, arg
+		CALL HexLow, arg
 	END
 	
 	FUNC DrawString
-		<VM
-			'"' LCD_char EXEC
-			0
-			BEGIN
-				SWAP 1+ SWAP
-				OVER C@ DUP IF		;address count char
-					LCD_char EXEC
-					1+ DUP 8 <
-				ELSE
-					DROP 0
-				THEN
-			WHILE
-			DROP DROP
-			'"' LCD_char EXEC
-		VM>
+		ARGS
+			WORD source
+		VARS
+			BYTE arg
+			BYTE index
+		END
+
+		CALL LCD_char, #CHAR_QUOTE
+		
+		LDA #1
+		STA index
+		.loop:
+			LDY index
+			LDA (source),Y
+			BEQ .done
+			STA arg
+			CALL LCD_char, arg
+			INC index
+			LDA index
+			CMP #9
+			BNE .loop
+		.done:
+		CALL LCD_char, #CHAR_QUOTE
 	END
 	
-	VM_func_begin:
 	FUNC DrawStack
-		TODO: strings appear more than once in table
-		TODO: stack usage in status? battery? takes up more room though
-		TODO: 3 way structure below should be more efficient
+		VARS
+			BYTE character
+			BYTE counter
+			WORD address
+		END
 		
-		<VM
-			LCD_clrscr EXEC
+		JSR StackAddItem
+		JSR CODE_FREE+EXEC_HEADER
+		
+		TXA
+		STA address
+		LDA #0
+		STA address+1
+		
+		TODO: stack usage in status? battery? takes up more room though
+		
+		TODO: shrink
+		CALL LCD_clrscr
+		LDA #CHAR_WIDTH*8
+		STA screen_ptr
+		CALL LCD_char, #'['
+		CALL DrawHex, address
+		CALL LCD_print, " FREE]"
+		
+		JSR CODE_DROP+EXEC_HEADER
+		
+		MOV #'5',character
+		MOV #5,counter
+		
+		TXA
+		CLC
+		ADC #(4*OBJ_SIZE)
+		STA address
+		LDA #0
+		STA address+1
+		
+		.loop:
+			LDA #0
+			STA screen_ptr
+			LDA screen_ptr+1
+			CLC
+			ADC #CHAR_HEIGHT
+			STA screen_ptr+1
+			CALL LCD_char, character
+			CALL LCD_char, #':'
 			
-			EXTERN
-				CHAR_WIDTH*8+SCREEN_ADDRESS AS STATUS_X
-			END
-			STATUS_X screen_ptr !
-			'[' LCD_char EXEC
+			DEC counter
+			LDA counter
+			CMP stack_count
+			BCS .no_item
+				LDY #0
+				LDA (address),Y
+				CMP #OBJ_FLOAT
+				BNE .not_float
+					CALL DrawFloat, address
+					JMP .item_done
+				.not_float:
+				CMP #OBJ_STR
+				BNE .not_str
+					;one space after colon
+					;LDA #CHAR_WIDTH*3
+					;STA screen_ptr
+					CALL DrawString, address
+					JMP .item_done
+				.not_str:
+				CMP #OBJ_HEX
+				BNE .not_hex
+					;one space after colon
+					;LDA #CHAR_WIDTH*3
+					;STA screen_ptr
+					CALL DrawHex, address
+					JMP .item_done
+				.not_hex:
+				.item_done:
+			.no_item:
 			
-			FNEW
-			DO_FREE JSR
-			FTOS FDROP
-			DrawHex EXEC
+			LDA address
+			SEC
+			SBC #OBJ_SIZE
+			STA address
 			
-			" \sFREE]" LCD_print EXEC
-			
-			EXTERN
-				CHAR_HEIGHT*SCREEN_WIDTH AS STACK_LINE_HEIGHT
-				CHAR_HEIGHT*SCREEN_WIDTH+SCREEN_ADDRESS AS STACK_X
-				OBJ_SIZE*4 AS STACK_DRAW_OFFSET
-				stack_count
-			END
-			
-			STACK_X screen_ptr !
-			FSP STACK_DRAW_OFFSET + 
-			5 DO
-				I DUP 1+ '0' + LCD_char EXEC
-				':' LCD_char EXEC
-				
-				;I+1 on stack from above				
-				stack_count C@ <
-				IF
-					DUP DUP C@					
-					DUP CONST8 OBJ_HEX = IF
-						DROP
-						'$' LCD_char EXEC
-						CONST8 HEX_SUM + @
-						DrawHex
-					ELSE
-						1 - DrawString DrawFloat SELECT
-					THEN
-					EXEC
-				THEN
-				CONST8 OBJ_SIZE -
-				screen_ptr @ $FF00 AND STACK_LINE_HEIGHT + screen_ptr !
-			LOOP
-			DROP
-			
-			EXTERN
-				SCREEN_ADDRESS+CHAR_HEIGHT*6.5*SCREEN_WIDTH AS STACK_LINE_Y
-			END
-			
-			STACK_LINE_Y
-			0 DO
-				0 OVER ! 1+ 1+
-			LOOP
-			DROP	
-		VM>
+			DEC character
+			LDA counter
+			BNE .loop
+		LDA #0
+		STA screen_ptr
+		
+		TODO: 6th line of stack or status??? (would save code space)
+		TODO: status=bytes free? auto complete? too much space :(
+		TODO: option 1: line on bottom, status on top
+		TODO: option 2: 6th line on top, status AND line on bottom
+		;LDA screen_ptr+1
+		;CLC
+		;ADC #CHAR_HEIGHT
+		;STA screen_ptr+1
+		;CALL LCD_print, "--------------STATUS?"
+		
+		LDA screen_ptr+1
+		CLC
+		ADC #CHAR_HEIGHT*1.5
+		STA screen_ptr+1
+		LDY #0
+		LDA #FG_COLOR
+		.loop_line:
+			STA (screen_ptr),Y
+			INC screen_ptr+1
+			STA (screen_ptr),Y
+			DEC screen_ptr+1
+			INY
+			BNE .loop_line
 	END
-	VM_func_end:
-
 		
 	

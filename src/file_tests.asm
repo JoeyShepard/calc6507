@@ -1,8 +1,6 @@
 ;Tests from file input
 ;=====================
 
-	;NOTE: modified for x86 port on Linux
-
 	;should never run from ROM, so ok to put variables here
 	WORD counter1, counter2
 	WORD failed1, failed2
@@ -43,14 +41,13 @@
 		.loop:
 			LDA FILE_INPUT
 			BEQ .loop_done
-			;CMP #$D - Windows
-			CMP #$A ;Linux
+			CMP #$D
 			BEQ .loop_done
 			STA new_word_buff,Y
 			INY
 			JMP .loop
 		.loop_done:
-		;LDA FILE_INPUT - Windows???
+		LDA FILE_INPUT
 		STY new_word_len
 		CALL CheckData
 	END
@@ -98,8 +95,7 @@
 			BNE .failed_input
 			INY
 			LDA FILE_INPUT
-			;CMP #$D - Windows
-			CMP #$A ;Linux
+			CMP #$D
 			BNE .continue
 				JMP .done
 			.continue:
@@ -131,7 +127,7 @@
 				JMP .failed_input
 			
 		.done:
-		;LDA FILE_INPUT - Windows???
+		LDA FILE_INPUT
 		CALL inc_line
 		INC.W test_count
 	END
@@ -174,7 +170,7 @@
 			CMP #'I'
 			BNE .not_I
 				LDA FILE_INPUT
-				;LDA FILE_INPUT - Windows
+				LDA FILE_INPUT
 				CALL FileInputTest
 				JMP .loop
 			.not_I:
@@ -183,7 +179,7 @@
 			CMP #'A'
 			BNE .not_A
 				LDA FILE_INPUT
-				;LDA FILE_INPUT - Windows
+				LDA FILE_INPUT
 				CALL read2
 				CALL BCD_Add
 				CALL RansToBuff
@@ -197,7 +193,7 @@
 			CMP #'M'
 			BNE .not_M
 				LDA FILE_INPUT
-				;LDA FILE_INPUT - Windows
+				LDA FILE_INPUT
 				CALL read2
 				CALL BCD_Mult
 				CALL RansToBuff
@@ -223,10 +219,9 @@
 			.not_comment:
 			
 			;Empty line
-			;CMP #$D - Windows
-			CMP #$A
+			CMP #$D
 			BNE .not_newline
-				;LDA FILE_INPUT - Windows
+				LDA FILE_INPUT
 				JMP .loop
 			.not_newline:
 			

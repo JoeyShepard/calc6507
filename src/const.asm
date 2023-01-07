@@ -5,7 +5,6 @@
 	SCREEN_ADDRESS = 		$4000
 	SCREEN_WIDTH = 			256
 	SCREEN_HEIGHT =			128
-	SCREEN_SIZE = 			SCREEN_WIDTH*SCREEN_HEIGHT
 	CHAR_WIDTH = 			12
 	CHAR_HEIGHT = 			16
 	CHAR_SCREEN_WIDTH = 	21
@@ -31,9 +30,7 @@
 	
 	TYPE_SIZE =				1
 	OBJ_SIZE =				9
-	OBJ_TYPE =				0	;first byte of stack item is type
-	;Don't need header byte, +1 for guard and round, +1 for exp sign
-	REG_SIZE =				OBJ_SIZE-TYPE_SIZE+1+1	
+	OBJ_TYPE =				0	;first bytes of stack item is type
 	
 	;Input
 	TODO: increase size?
