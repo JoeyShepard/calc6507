@@ -159,7 +159,7 @@
 		CALL DebugText,"\\n\\n\\lBeginning file-based tests\\n"
 		
 		.loop:
-			CALL inc_line, #counter1
+			CALL inc_line
 			
 			LDA FILE_INPUT
 			

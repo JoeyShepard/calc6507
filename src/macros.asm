@@ -1,3 +1,8 @@
+TODO:
+ - double check all complicated macros like IF_EQ removed
+ - new macros like the ones below
+ - hi and lo
+
 ;Constants
 ;=========
 false set 0

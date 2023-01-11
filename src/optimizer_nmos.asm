@@ -41,6 +41,15 @@ LOCALS_END set $FF
     %xdefine mov_ret ""
     %assign call_offset 0
 
+;Debugging
+;=========
+	%assign func_counter 0
+	%macro FUNC_COUNT 0
+		%defstr %%temp func_counter
+		%strcat %%temp, "Func count: " %%temp
+		%warning %%temp
+	%endmacro
+
 ;Variables
 ;=========
 ;called from begin_vars and begin_args only!
@@ -1210,6 +1219,7 @@ LOCALS_END set $FF
 	%endmacro
 
 	%macro FUNC 1-2 ""
+		%assign func_counter func_counter+1
 		FUNC_ATTRIB %1, %2
 		%1:
 		%ifnidn var_state,"done"

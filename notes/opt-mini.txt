@@ -1,0 +1,28 @@
+Reimplemented zero page assignment for args and locals only
+
+Output from old optimizer for comparison:
+
+[05:13] Assembling...
+
+6502 Assembly Optimizer v0.1
+============================
+Pass: 1 - classifying symbols
+   Done
+Pass: 2 - resolving references
+   Done
+Pass: 3 - generating call graph
+   Done
+Pass: 4 - assigning variables
+   Globals: 0 bytes
+   Locals: $0-$16 (23 bytes)
+   Total: 23 bytes (71% of 32 allocated bytes)
+Pass: 5 - assigning instructions
+   Done
+
+Re-assembling...
+
+Memory usage
+============
+ROM size:       9,391 bytes (114%) of 8k ROM
+Generating hex file...
+Copying...

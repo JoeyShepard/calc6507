@@ -1,8 +1,7 @@
 ;Macros
 ;======
 	include macros.asm
-	include optimizer_nmos.asm
-
+	
 ;Notes
 ;=====
 ;GPIO
@@ -74,7 +73,7 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 ;=========
 	
 DEBUG_MODE set "off"
-		
+	
 	;Reset vector
 	ORG RESET_VECTOR
 	;ORG $1FFC
@@ -88,8 +87,8 @@ DEBUG_MODE set "off"
 	TODO: assign unused locals space
 	
 	;Locals usage
-LOCALS_BEGIN set	$0
-LOCALS_END set		$1F
+	LOCALS_BEGIN	$0
+	LOCALS_END		$1F
 	
 	TODO: double check all used and move variables out of globals to here
 	
@@ -187,7 +186,7 @@ LOCALS_END set		$1F
 	
 ;Main function
 ;=============
-	FUNC main, begin
+	FUNC main BEGIN
 		VARS
 			WORD dest
 			BYTE arg,type
@@ -390,7 +389,6 @@ LOCALS_END set		$1F
 			
 			JMP .process_loop
 	END
-	
-	
+		
 	code_end:
 	
