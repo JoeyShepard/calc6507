@@ -71,7 +71,6 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 
 ;Main code
 ;=========
-	
 DEBUG_MODE set "off"
 	
 	;Reset vector
@@ -144,7 +143,7 @@ DEBUG_MODE set "off"
 	;Must come after include const.asm for constants
 	include globals.asm
 
-
+	
 ;Functions in ROM
 ;================
 	;ORG $C000
@@ -389,6 +388,11 @@ DEBUG_MODE set "off"
 			
 			JMP .process_loop
 	END
-		
+
+;Insertion point for string literals
+;(should come after all instances of CALL)
+;=========================================
+	STRING_LITERALS
+
 	code_end:
 	

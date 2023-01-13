@@ -68,6 +68,7 @@ locals_begin=0              #Start of memory for local variables
 locals_end=0xFF             #End of memory for local variables
 debug_text_end=""           #Text to be added to end of debug file
 final_text=[]               #List of source blocks and CALL statements filled in at end
+string_assignments=""       #Assignment of string literals from CALL 
 assignments= ";Optimizer zero page assignments\n"   #List of zero page assignments made by optimizer
 assignments+=";===============================\n"
 
@@ -76,6 +77,7 @@ assignments+=";===============================\n"
 TYPE_TEXT=0                 #Constants for final_text - source text block
 TYPE_CALL=1                 #Constants for final_text - call to be filled in
 TYPE_VARS=2                 #Constants for final_text - function args and vars declaration
+TYPE_STRINGS=3              #Constants for final_text - string literals from CALL
 
 #Process file lines until last line of last included file
 while running:
@@ -206,9 +208,14 @@ while running:
                         if len(line_objs)==1:
                             error_exit(f"bad argument to {first_word} - {line.lstrip()}",error_obj)
                      
-                    #Check for words that are invalud outside of function
+                    #Check for words that are invalid outside of function
                     if first_word in ["END","ARGS","VARS"]:
                         error_exit(f"{first_word} invalid outside of FUNC block - {line.lstrip()}",error_obj)
+                     
+                    #Check for words that should have no arguments
+                    if first_word in ["STRING_LITERALS"]:
+                        if len(line_objs)!=1:
+                            error_exit("STRING_LITERALS does not take arguments - {line.lstrip()}",error_obj)
                      
                     #Handle special words the optimizer looks out for
                     if first_word in ["BYTE","WORD","STRING"]:
@@ -247,6 +254,10 @@ while running:
                     elif first_word[:5]=="TODO:":
                         line=";"+line
                         print_line=True
+                    elif first_word=="STRING_LITERALS":
+                        final_text+=[[TYPE_TEXT,file_output]]
+                        file_output=""
+                        final_text+=[[TYPE_STRINGS]]
                     else:
                         print_line=True
                 #State machine state FUNC - inside a function but not in an ARGS or VARS block
@@ -287,7 +298,6 @@ while running:
                         if byte_total!=0:
                             debug_output+=[[-1,f"{byte_total} byte{'s' if byte_total>1 else ''} used",0]]
                         func_dict[func_name]["BYTES"]=byte_total
-                        line_num=func_line_num+func_temp.count("\n")+2
                         func_temp+=f";{line}\n"
                         padding=" "+line[:(len(line)-len(line.lstrip()))]
                         func_temp+=padding+"RTS\n"
@@ -399,38 +409,36 @@ assignments+="\n"
 output_f.write(assignments)
 final_text+=[[TYPE_TEXT,file_output]]
 
-for i in final_text:       
-    if i[0]==TYPE_TEXT:
-        output_f.write(i[1])
-    elif i[0]==TYPE_VARS:
-        if len(i)==1:
+for i,text_block in enumerate(final_text):
+    if text_block[0]==TYPE_TEXT:
+        output_f.write(text_block[1])
+    elif text_block[0]==TYPE_VARS:
+        if len(text_block)==1:
             error_exit("VAR block not filled in! FUNC without END?",error_obj)
-        output_f.write(i[1])
-    elif i[0]==TYPE_CALL:
+        output_f.write(text_block[1])
+    elif text_block[0]==TYPE_STRINGS:
+        output_f.write(string_assignments)
+        string_assignments=""
+    elif text_block[0]==TYPE_CALL:
         #Formulate CALL statement - do here at end after all functions read in
-        func=i[2][1]
+        func=text_block[2][1]
         func_args=func_dict[func]["ARGS"]
         func_args_list=func_dict[func]["ARGS LIST"]
-        call_args=i[2][2:]
-        
-        print(i[1].lstrip(),end="")
-        print(f"\t{str(i[2])}")
-        print(f"\t{call_args}")
-        print(f"\t{func_args}")
-        print(f"\t{func_args_list}")
-        
+        call_args=text_block[2][2:]
         comma=True
         comma_found=False
-        call_text=""
         index=0
+        string_index=1
+        func_comment=text_block[1].lstrip().replace('\n','')
+        call_text=f"\t;{func_comment}\n"
         for call_arg in call_args:
             if comma==False:
                 if arg==",":
-                    error_exit(f"comma not expected in CALL - {i[1].lstrip()}",error_obj)
+                    error_exit(f"comma not expected in CALL - {text_block[1].lstrip()}",error_obj)
                 else:
                     #Valid input - copy to destination
                     if index>=len(func_args_list):
-                        error_exit(f"too many arguments in CALL - {i[1].lstrip()}",error_obj)
+                        error_exit(f"too many arguments in CALL - {text_block[1].lstrip()}",error_obj)
                     func_arg_name=func_args_list[index]
                     index+=1
                     func_arg_type=func_args[func_arg_name]
@@ -438,33 +446,61 @@ for i in final_text:
                         call_text+=f"\tLDA {call_arg}\n"
                         call_text+=f"\tSTA _{func}.{func_arg_name}\n"
                     elif func_arg_type in ["WORD"]:
-                        call_text+=f"\tLDA {call_arg}#256\n"
-                        call_text+=f"\tSTA _{func}.{func_arg_name}\n"
-                        call_text+=f"\tLDA {call_arg}>>8\n"
-                        call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
+                        if call_arg[0]=="#":
+                            #Immediate
+                            call_text+=f"\tLDA #({call_arg[1:]})#256\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}\n"
+                            call_text+=f"\tLDA #({call_arg[1:]})>>8\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
+                        else:
+                            #Address
+                            call_text+=f"\tLDA ({call_arg})#256\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}\n"
+                            call_text+=f"\tLDA ({call_arg})>>8\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
                     elif func_arg_type in ["STRING"]:
-                        pass
-                        
+                        if call_arg[0]=='"':
+                            #String literal
+                            if call_arg[-1]!='"':
+                                error_exit('unrecognized argument in CALL beginning with " - {call_arg.lstrip()}',error_obj)
+                            string_address=f"_string_literal{('00000'+str(string_index))[-5:]}"
+                        else:
+                            #String address
+                            string_address=call_arg
+                        string_assignments+="\t: {string_address} FCC {call_arg},0\n"
+                        call_text+=f"\tLDA ({string_address})#256\n"
+                        call_text+=f"\tSTA _{func}.{func_arg_name}\n"
+                        call_text+=f"\tLDA ({string_address})>>8\n"
+                        call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
             else:
                 if call_arg!=",":
-                    error_exit(f"comma expected but found '{call_arg}' in CALL - {i[1].lstrip()}",error_obj)
+                    error_exit(f"comma expected but found '{call_arg}' in CALL - {text_block[1].lstrip()}",error_obj)
                 comma_found=True
             comma=not comma
         if comma==False:
-            error_exit(f"missing value in CALL - {i[1].lstrip()}",error_obj)
-        call_text+=f"\tJSR {func}\n"
-        
-        print(call_text)
-        #output_f.write(i[1])        
+            error_exit(f"missing value in CALL - {text_block[1].lstrip()}",error_obj)
+        call_text+=f"\tJSR {func}\n\n"
+        #Replace TYPE_CALL block in final_text with generated text
+        final_text[i]=[TYPE_TEXT,call_text]
+        output_f.write(call_text)        
 
-#Adjust line numbers for debug file output based on length of assignments block and output to file
+#Make sure string literals from CALL were written
+if string_assignments!="":
+    error_exit("string literals from CALL not written. STRING_LITERALS appears in source?",error_obj)
+
+#Output debug file
+debug_f.write("Line numbers\n")
+debug_f.write("============\n")
 debug_f.write("1: Zero page assignments\n")
 assignments_len=assignments.count("\n")
 block_lens=[]
 total_len=assignments_len+1
 for block in final_text:
     block_lens+=[total_len]
-    total_len+=block[1].count("\n")
+    if block[0]==TYPE_STRINGS:
+        total_len+=string_assignments.count("\n")
+    else:
+        total_len+=block[1].count("\n")
 for line in debug_output:
     line_num=block_lens[line[0]]+line[2]
     if line[0]==-1:
@@ -475,7 +511,16 @@ for line in debug_output:
 debug_f.write("\n")
     
 #Also add call graph to debug file
+debug_f.write("Call graph\n")
+debug_f.write("==========\n")
 debug_f.write(debug_text_end)
+debug_f.write("\n")
+
+#String literals from CALL
+debug_f.write("String literals from CALL\n")
+debug_f.write("=========================\n")
+debug_f.write(string_assignments)
+debug_f.write("\n")
 
 #Close output and debug files
 output_f.close()
