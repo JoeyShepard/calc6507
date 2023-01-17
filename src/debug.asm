@@ -35,8 +35,8 @@
 		LDA test_count
 		AND test_count+1
 		CMP #$FF
-		IF_EQ
+		BNE .skip
 			halt
-		END_IF
+		.skip:
 	END 
 	

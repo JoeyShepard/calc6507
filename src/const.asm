@@ -2,210 +2,210 @@
 ;=========
 	
 	;Screen
-	SCREEN_ADDRESS = 		$4000
-	SCREEN_WIDTH = 			256
-	SCREEN_HEIGHT =			128
-	CHAR_WIDTH = 			12
-	CHAR_HEIGHT = 			16
-	CHAR_SCREEN_WIDTH = 	21
-	CHAR_SCREEN_HEIGHT = 	8
+	equ SCREEN_ADDRESS,		$4000
+	equ SCREEN_WIDTH,		256
+	equ SCREEN_HEIGHT,		128
+	equ CHAR_WIDTH,			12
+	equ CHAR_HEIGHT, 		16
+	equ CHAR_SCREEN_WIDTH, 	21
+	equ CHAR_SCREEN_HEIGHT, 8
 	
 	;Special characters
-	CHAR_ARROW =			'a'	;cursor arrow
-	CHAR_BOX =				'b'	;box for drawing error message
-	;CHAR_MINUS =			'c'	;actually, better to use - for this
-	CHAR_STO =				'd'	;store arrow
-	CHAR_EXP =				'e'	;lowercase e exponent
-	CHAR_QUOTE = 			34	;double quote
+	equ CHAR_ARROW,				'a'	;cursor arrow
+	equ CHAR_BOX,				'b'	;box for drawing error message
+	;equ CHAR_MINUS,			'c'	;actually, better to use - for this
+	equ CHAR_STO,				'd'	;store arrow
+	equ CHAR_EXP,				'e'	;lowercase e exponent
+	equ CHAR_QUOTE, 			34	;double quote
 	
 	;Object types
-	OBJ_FLOAT = 			1
-	OBJ_STR = 				2
-	OBJ_HEX = 				3
-	OBJ_ERROR =				4
+	equ OBJ_FLOAT,				1
+	equ OBJ_STR, 				2
+	equ OBJ_HEX, 				3
+	equ OBJ_ERROR,				4
 	TODO: replace with code that isnt op code, so unlikely to crash on EXEC
-	OBJ_PRIMITIVE =			5
-	OBJ_SECONDARY =			6
-	OBJ_VAR =				7
+	equ OBJ_PRIMITIVE,			5
+	equ OBJ_SECONDARY,			6
+	equ OBJ_VAR,				7
 	
-	TYPE_SIZE =				1
-	OBJ_SIZE =				9
-	OBJ_TYPE =				0	;first bytes of stack item is type
+	equ TYPE_SIZE,				1
+	equ OBJ_SIZE,				9
+	equ OBJ_TYPE,				0	;first bytes of stack item is type
 	
 	;Input
 	TODO: increase size?
-	BUFF_SIZE =				64
-	WORD_MAX_SIZE =			19	;-1.23456789012e-999
-	MAX_DIGITS =			12
-	MODE_IMMEDIATE =		64
-	MODE_COMPILE =			128
+	equ BUFF_SIZE,			64
+	equ WORD_MAX_SIZE,		19	;-1.23456789012e-999
+	equ MAX_DIGITS,			12
+	equ MODE_IMMEDIATE,		64
+	equ MODE_COMPILE,		128
 	
 	;Key constants
-	KEY_BACKSPACE = 		8
-	KEY_ENTER = 			13
-	KEY_ESCAPE =			27
+	equ KEY_BACKSPACE, 		8
+	equ KEY_ENTER, 			13
+	equ KEY_ESCAPE,			27
 	
 	;Floats
-	DEC_COUNT =				12
-	SIGN_BIT =				$80
-	E_SIGN_BIT =			$40
-	FIRST_DIGIT =			6
-	LAST_DIGIT =			1
-	EXP_LO =				7
-	EXP_HI =				8
+	equ DEC_COUNT,			12
+	equ SIGN_BIT,			$80
+	equ E_SIGN_BIT,			$40
+	equ FIRST_DIGIT,		6
+	equ LAST_DIGIT,			1
+	equ EXP_LO,				7
+	equ EXP_HI,				8
 	;Only in registers, not on stack
-	SIGN_INFO =				9
-	GR_OFFSET =				1
+	equ SIGN_INFO,			9
+	equ GR_OFFSET,			1
 	
 	;Hex fields
-	HEX_SUM = 				1
-	HEX_BASE =				3
-	HEX_OFFSET =			5
-	HEX_TYPE =				7
+	equ HEX_SUM,			1
+	equ HEX_BASE,			3
+	equ HEX_OFFSET,			5
+	equ HEX_TYPE,			7
 	
 	;Hex constants
-	HEX_SMART =				1
+	equ HEX_SMART,			1
 	
 	;Error codes
-	ERROR_NONE =				0
-	ERROR_INPUT =				2
+	equ ERROR_NONE,					0
+	equ ERROR_INPUT,				2
 	TODO: delete! combined with ERROR_INPUT
-	ERROR_WORD_TOO_LONG =		4
+	equ ERROR_WORD_TOO_LONG,		4
 	TODO: delete! not used
 	;Generic string error. Save room on error messages
-	ERROR_STRING =				6
+	equ ERROR_STRING,				6
 	;ERROR_STRING_TOO_LONG =		3
 	;ERROR_STRING_UNTERMINATED =	4
-	ERROR_STACK_OVERFLOW =		8
-	ERROR_STACK_UNDERFLOW =		10
-	ERROR_WRONG_TYPE =			12
-	ERROR_DIV_ZERO =			14
-	ERROR_IMMED_ONLY =			16
-	ERROR_COMPILE_ONLY =		18
-	ERROR_OUT_OF_MEM =			20
-	ERROR_STRUCTURE =			22
-	ERROR_RANGE =				24
+	equ ERROR_STACK_OVERFLOW,		8
+	equ ERROR_STACK_UNDERFLOW,		10
+	equ ERROR_WRONG_TYPE,			12
+	equ ERROR_DIV_ZERO, 			14
+	equ ERROR_IMMED_ONLY, 			16
+	equ ERROR_COMPILE_ONLY, 		18
+	equ ERROR_OUT_OF_MEM, 			20
+	equ ERROR_STRUCTURE, 			22
+	equ ERROR_RANGE, 				24
 	
 	;Forth
 	;=====
 		;Word flags
-		NONE =				0
-		MIN1 =				1
-		MIN2 =				2
-		MIN3 =				3
-		ADD1 =				4
+		equ NONE, 			0
+		equ MIN1,			1
+		equ MIN2,			2
+		equ MIN3,			3
+		equ ADD1,			4
 		;FLOAT1 =			8
 		;STRING1 =			16
 		;HEX1 =				24
 		;FLOAT2 =			32
 		;STRING2 =			64
 		;HEX2 =				96
-		FLOATS =			8
-		STRINGS =			16
-		HEX =				24
-		SAME =				32
-		IMMED =				64
-		COMPILE =			128
+		equ FLOATS,			8
+		equ STRINGS,		16
+		equ HEX,			24
+		equ SAME,			32
+		equ IMMED,			64
+		equ COMPILE,		128
 		
 		;Word tokens
 		;							0 - reserved
-		TOKEN_DUP =					2
-		TOKEN_SWAP =				4
-		TOKEN_DROP =				6
-		TOKEN_OVER =				8
-		TOKEN_ROT =					10
-		TOKEN_MIN_ROT =				12
-		TOKEN_CLEAR =				14
-		TOKEN_ADD =					16
-		TOKEN_SUB =					18
-		TOKEN_MULT =				20
-		TOKEN_DIV =					22
-		TOKEN_TICK =				24
-		TOKEN_EXEC =				26
-		TOKEN_STORE =				28
-		TOKEN_FETCH =				30
-		TOKEN_CSTORE =				32
-		TOKEN_CFETCH =				34
-		TOKEN_COLON =				36
-		TOKEN_SEMI =				38
-		TOKEN_FLOAT =				40
-		TOKEN_HEX =					42
-		TOKEN_STRING =				44
-		TOKEN_HALT =				46
-		TOKEN_VAR =					48
-		TOKEN_VAR_THREAD =			50
-		TOKEN_STO =					52
-		TOKEN_FREE =				54
-		TOKEN_SECONDARY =			56
-		TOKEN_EXIT =				58
-		TOKEN_BREAK =				60
-		TOKEN_QUIT =				62
-		TOKEN_STO_THREAD =			64
-		TOKEN_DO =					66
-		TOKEN_DO_THREAD =			68
-		TOKEN_LOOP =				70
-		TOKEN_LOOP_THREAD =			72
-		TOKEN_EQUAL =				74
-		TOKEN_GT =					76
-		TOKEN_LT =					78
-		TOKEN_NEQ =					80
-		TOKEN_I =					82
-		TOKEN_J =					84
-		TOKEN_K =					86
-		TOKEN_EXIT_THREAD =			88
-		TOKEN_BEGIN =				90
-		TOKEN_AGAIN =				92
-		TOKEN_AGAIN_THREAD =		94
-		TOKEN_UNTIL =				96
-		TOKEN_UNTIL_THREAD =		98
-		TOKEN_MAX =					100
-		TOKEN_MIN =					102
-		TOKEN_AND =					104
-		TOKEN_OR =					106
-		TOKEN_XOR =					108
-		TOKEN_NOT =					110
-		TOKEN_LEAVE =				112
-		TOKEN_LEAVE_THREAD =		114
-		TOKEN_IF =					116
-		TOKEN_THEN =				118
-		TOKEN_ELSE =				120
-		TOKEN_LSHIFT =				122
-		TOKEN_RSHIFT =				124
-		TOKEN_ABS =					126
-		TOKEN_PI =					128
-		TOKEN_SIN =					130
-		TOKEN_COS =					132
-		TOKEN_TAN =					134
-		TOKEN_ASIN =				136
-		TOKEN_ACOS =				138
-		TOKEN_ATAN =				140
-		TOKEN_DEG =					142
+		equ TOKEN_DUP,				2
+		equ TOKEN_SWAP,				4
+		equ TOKEN_DROP,				6
+		equ TOKEN_OVER,				8
+		equ TOKEN_ROT,				10
+		equ TOKEN_MIN_ROT,			12
+		equ TOKEN_CLEAR,			14
+		equ TOKEN_ADD,				16
+		equ TOKEN_SUB,				18
+		equ TOKEN_MULT,				20
+		equ TOKEN_DIV,				22
+		equ TOKEN_TICK,				24
+		equ TOKEN_EXEC,				26
+		equ TOKEN_STORE,			28
+		equ TOKEN_FETCH,			30
+		equ TOKEN_CSTORE,			32
+		equ TOKEN_CFETCH,			34
+		equ TOKEN_COLON,			36
+		equ TOKEN_SEMI,				38
+		equ TOKEN_FLOAT,			40
+		equ TOKEN_HEX,				42
+		equ TOKEN_STRING,			44
+		equ TOKEN_HALT,				46
+		equ TOKEN_VAR,				48
+		equ TOKEN_VAR_THREAD,		50
+		equ TOKEN_STO,				52
+		equ TOKEN_FREE,				54
+		equ TOKEN_SECONDARY,		56
+		equ TOKEN_EXIT,				58
+		equ TOKEN_BREAK,			60
+		equ TOKEN_QUIT,				62
+		equ TOKEN_STO_THREAD,		64
+		equ TOKEN_DO,				66
+		equ TOKEN_DO_THREAD,		68
+		equ TOKEN_LOOP,				70
+		equ TOKEN_LOOP_THREAD,		72
+		equ TOKEN_EQUAL,			74
+		equ TOKEN_GT,				76
+		equ TOKEN_LT,				78
+		equ TOKEN_NEQ,				80
+		equ TOKEN_I,				82
+		equ TOKEN_J,				84
+		equ TOKEN_K,				86
+		equ TOKEN_EXIT_THREAD,		88
+		equ TOKEN_BEGIN,			90
+		equ TOKEN_AGAIN,			92
+		equ TOKEN_AGAIN_THREAD,		94
+		equ TOKEN_UNTIL,			96
+		equ TOKEN_UNTIL_THREAD,		98
+		equ TOKEN_MAX,				100
+		equ TOKEN_MIN,				102
+		equ TOKEN_AND,				104
+		equ TOKEN_OR,				106
+		equ TOKEN_XOR,				108
+		equ TOKEN_NOT,				110
+		equ TOKEN_LEAVE,			112
+		equ TOKEN_LEAVE_THREAD,		114
+		equ TOKEN_IF,				116
+		equ TOKEN_THEN,				118
+		equ TOKEN_ELSE,				120
+		equ TOKEN_LSHIFT,			122
+		equ TOKEN_RSHIFT,			124
+		equ TOKEN_ABS,				126
+		equ TOKEN_PI,				128
+		equ TOKEN_SIN,				130
+		equ TOKEN_COS,				132
+		equ TOKEN_TAN,				134
+		equ TOKEN_ASIN,				136
+		equ TOKEN_ACOS,				138
+		equ TOKEN_ATAN,				140
+		equ TOKEN_DEG,				142
 		
 		;Execution modes
-		EXEC_INPUT =		0
-		EXEC_THREAD =		1
+		equ EXEC_INPUT,			0
+		equ EXEC_THREAD,		1
 		
 		;Return stack types
-		R_RAW =			0
-		R_THREAD =		1
+		equ R_RAW,				0
+		equ R_THREAD,			1
 		
 		;Flag masks
-		FLAG_MIN =			3
-		FLAG_TYPES =		$38
+		equ FLAG_MIN,			3
+		equ FLAG_TYPES,			$38
 		
 		;Stack
-		STACK_SIZE =		8
-		SYS_STACK_SIZE =	3
-		R_STACK_SIZE =		$30
+		equ STACK_SIZE,			8
+		equ SYS_STACK_SIZE,		3
+		equ R_STACK_SIZE,		$30
 		
 		;Two byte header of each word
-		EXEC_HEADER =		2
+		equ EXEC_HEADER,		2
 		
 		;Three byte header for empty item at end of stack
-		DICT_END_SIZE =		3
+		equ DICT_END_SIZE,		3
 		
 		;Header for new dictionary words
-		WORD_HEADER_SIZE =	7
+		equ WORD_HEADER_SIZE,	7
 			;1 - name length
 			;2 - next word
 			;1 - token
@@ -227,23 +227,20 @@
 		
 		;v3
 		;LOOP values only need one type byte per pair
-		AUX_STACK_ITEM_SIZE =	(1+8+8)	;1 func ID, 8 for limit, 8 for iterator
-		AUX_STACK_COUNT =		4
-		AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
-		AUX_LIMIT_OFFSET =		1		;limit data begins after type byte
-		AUX_ITER_OFFSET =		9		;iterator data begins after limit data
+		equ AUX_STACK_ITEM_SIZE,	(1+8+8)	;1 func ID, 8 for limit, 8 for iterator
+		equ AUX_STACK_COUNT,		4
+		equ AUX_STACK_SIZE,		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
+		equ AUX_LIMIT_OFFSET,		1		;limit data begins after type byte
+		equ AUX_ITER_OFFSET,		9		;iterator data begins after limit data
 		
 		;Reused at compile time to hold addresses
-		AUX_STACK_SHORT_SIZE =	AUX_STACK_SIZE / 3
+		equ AUX_STACK_SHORT_SIZE,	AUX_STACK_SIZE / 3
 		
 		;Data types for auxilliary stack
-		AUX_TYPE_DO =			1
-		AUX_TYPE_BEGIN =		2
-		AUX_TYPE_LEAVE =		3
-		AUX_TYPE_IF =			4
-		;AUX_TYPE_ELSE =		5	;reuse AUX_TYPE_IF since behavior is the same
-		AUX_TYPE_CLEARED =		6	;set AUX_TYPE_IF to CLEARED instead of popping
-	
-	
-	
-	
+		equ AUX_TYPE_DO,			1
+		equ AUX_TYPE_BEGIN,			2
+		equ AUX_TYPE_LEAVE,			3
+		equ AUX_TYPE_IF,			4
+		;equ AUX_TYPE_ELSE,			5	;reuse AUX_TYPE_IF since behavior is the same
+		equ AUX_TYPE_CLEARED,		6	;set AUX_TYPE_IF to CLEARED instead of popping
+		

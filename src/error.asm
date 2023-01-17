@@ -61,13 +61,13 @@
 		STA screen_ptr
 		LDA #ERROR_Y
 		STA screen_ptr+1
-		MOV.B #$FF,font_inverted
+		MOV #$FF,font_inverted
 		CALL LCD_print, "               "
 		LDA #ERROR_X
 		STA screen_ptr
 		LDA #ERROR_Y+CHAR_HEIGHT
 		STA screen_ptr+1
-		MOV.B #$FF,font_inverted
+		MOV #$FF,font_inverted
 		CALL LCD_char,#' '
 		CALL LCD_print, msg
 		LDA #ERROR_X
@@ -75,7 +75,7 @@
 		LDA #ERROR_Y+CHAR_HEIGHT*2
 		STA screen_ptr+1
 		CALL LCD_print, "           [OK]"
-		MOV.B #0,font_inverted
+		MOV #0,font_inverted
 		
 		;halt
 		

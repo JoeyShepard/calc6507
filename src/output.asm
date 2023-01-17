@@ -295,7 +295,7 @@
 		
 		LDA screen_ptr+1
 		CLC
-		ADC #CHAR_HEIGHT*1.5
+		ADC #int(CHAR_HEIGHT*1.5)
 		STA screen_ptr+1
 		LDY #0
 		LDA #FG_COLOR

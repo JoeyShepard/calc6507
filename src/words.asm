@@ -1057,7 +1057,7 @@
 			
 			LDA #OBJ_HEX
 			STA 0,X
-			LDA #dict_end % 256
+			LDA #dict_end # 256
 			SEC
 			SBC dict_ptr
 			STA HEX_SUM,X

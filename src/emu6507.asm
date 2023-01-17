@@ -1,13 +1,13 @@
 ;I/O and setup for emulator
 ;==========================
 	
-	BG_COLOR = $2A
-	FG_COLOR = $0
+	equ BG_COLOR,	$2A
+	equ FG_COLOR,	$0
 	
 	;Layout
-	INPUT_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*7
-	ERROR_X =				3*CHAR_WIDTH
-	ERROR_Y =				(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
+	equ INPUT_Y,	(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*7
+	equ ERROR_X,	3*CHAR_WIDTH
+	equ ERROR_Y,	(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
 	
 	
 	FUNC setup
@@ -53,7 +53,7 @@
 		
 		MOV.W #font_table,font_ptr
 		
-		LDA #dict_begin % 256
+		LDA #dict_begin # 256
 		STA dict_ptr
 		STA dict_save
 		LDA #dict_begin / 256
@@ -118,14 +118,14 @@
 		
 		LDA c_out
 		CMP #' '
-		IF_LT
+		BCS .skip_gt
 			RTS
-		END_IF
+		.skip_gt:
 		
 		CMP #'e'+1	
-		IF_GE
+		BCC .skip_lt
 			RTS
-		END_IF
+		.skip_lt:
 		
 		SEC
 		SBC #32

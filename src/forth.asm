@@ -17,11 +17,11 @@
 		LDX #0
 	END
 	
-	SPECIAL_CHARS_LEN = 18	;1+15+2
+	equ SPECIAL_CHARS_LEN, 18	;1+15+2
 	special_chars:
-	FCB CHAR_QUOTE					;1
-	FCB " .$+-*/'!@:;=<>"			;15
-	FCB "SE"						;2
+	FCB CHAR_QUOTE				;1
+	FCB " .$+-*/'!@:;=<>"		;15
+	FCB "SE"					;2
 	
 	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
@@ -857,7 +857,11 @@
 			
 	END
 	
+			
+	
 	;Token in A
+	set flags,	R0+0
+	set temp, 	R0+1
 	FUNC ExecToken
 		TODO: add support to optimizer. wont work since gets here from word
 		;VARS
@@ -865,9 +869,6 @@
 		;	BYTE temp
 		;END
 		
-		flags = 		R0+0
-		temp =			R0+1
-
 		;No error unless set below
 		LDY #ERROR_NONE
 		STY ret_val
@@ -1114,7 +1115,7 @@
 		STA new_dict_ptr+1
 		
 		SEC
-		LDA #dict_end % 256
+		LDA #dict_end # 256
 		SBC new_dict_ptr
 		LDA #dict_end / 256
 		SBC new_dict_ptr+1
@@ -1180,6 +1181,10 @@
 	
 	
 	;Allocate room for word header
+	set count,		R0+0
+	set src_index,	R0+1
+	set dest_index,	R0+2
+	set ptr,		R0+3
 	FUNC WriteHeader
 		TODO: stop relying on optimizer then?
 		TODO: or add functionality to optimizer? not trivial
@@ -1190,10 +1195,7 @@
 		;	WORD ptr
 		;END
 		
-		count = 		R0+0
-		src_index =		R0+1
-		dest_index =	R0+2
-		ptr =			R0+3
+		
 		
 		PLA
 		STA ptr

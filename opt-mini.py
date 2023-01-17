@@ -46,31 +46,33 @@ except:
     exit(1)
 
 #Variables
-running=True                #Loop until reaches end of last source file
-file_list=[]                #Stack of files included from source
-filename_list=[argv[1]]     #List of filenames matching file_list for adding comments to combined source
-file_name=argv[1]           #Filename to open - updated on each include statement in source
-file_state="None"           #State machine state to track where in FUNC statement
-global_dict={}              #Global variables defined outside of functions
-func_name=""                #Name of function currently being processed
-func_line_num=0             #Line number which the currently processed function starts on
-func_temp=""                #Text of function. Formed in memory then written at end of function processing.
-func_index=-1               #Index in final_text where variable definitions will be placed
-func_dict={}                #All attributes of functions
-args_dict={}                #Temp storage for args in func. Copied to func_dict for each function.
-args_list=[]                #Temp storage for args in func. Copied to func_dict for each function.
-vars_dict={}                #Temp storage for vars in func. Copied to func_dict for each function.
-calls_list=[]               #Temp storage for call list in func. Copied to func_dict for each function.
-file_output=""              #Text of final output file. Formed in memory then written to file at very end.
-debug_output=[]             #List of lines to be added to debug file at very end.
-error_obj={}                #Combination of information for passing errors messages then exiting
-locals_begin=0              #Start of memory for local variables
-locals_end=0xFF             #End of memory for local variables
-debug_text_end=""           #Text to be added to end of debug file
-final_text=[]               #List of source blocks and CALL statements filled in at end
-string_assignments=""       #Assignment of string literals from CALL 
-assignments= ";Optimizer zero page assignments\n"   #List of zero page assignments made by optimizer
-assignments+=";===============================\n"
+running=True                        #Loop until reaches end of last source file
+file_list=[]                        #Stack of files included from source
+filename_list=[argv[1]]             #List of filenames matching file_list for adding comments to combined source
+file_name=argv[1]                   #Filename to open - updated on each include statement in source
+file_state="None"                   #State machine state to track where in FUNC statement
+global_dict={}                      #Global variables defined outside of functions
+func_name=""                        #Name of function currently being processed
+func_line_num=0                     #Line number which the currently processed function starts on
+func_temp=""                        #Text of function. Formed in memory then written at end of function processing.
+func_index=-1                       #Index in final_text where variable definitions will be placed
+func_dict={}                        #All attributes of functions
+args_dict={}                        #Temp storage for args in func. Copied to func_dict for each function.
+args_list=[]                        #Temp storage for args in func. Copied to func_dict for each function.
+vars_dict={}                        #Temp storage for vars in func. Copied to func_dict for each function.
+calls_list=[]                       #Temp storage for call list in func. Copied to func_dict for each function.
+file_output=""                      #Text of final output file. Formed in memory then written to file at very end.
+debug_output=[]                     #List of lines to be added to debug file at very end.
+error_obj={}                        #Combination of information for passing errors messages then exiting
+locals_begin=0                      #Start of memory for local variables
+locals_end=0xFF                     #End of memory for local variables
+debug_text_end=""                   #Text to be added to end of debug file
+final_text=[]                       #List of source blocks and CALL statements filled in at end
+string_assignments=""               #Assignment of string literals from CALL
+string_assignments_written=False    #Whether string literals from CALL written to combined source
+string_index=1                      #ID number assigned for string literals from CALL
+func_name_inserted=False            #Whether label for FUNC name has been inserted into text
+assignments=[]                      #List of zero page assignments made by optimizer
 
 #Constants
 #=========
@@ -215,7 +217,7 @@ while running:
                     #Check for words that should have no arguments
                     if first_word in ["STRING_LITERALS"]:
                         if len(line_objs)!=1:
-                            error_exit("STRING_LITERALS does not take arguments - {line.lstrip()}",error_obj)
+                            error_exit(f"STRING_LITERALS does not take arguments - {line.lstrip()}",error_obj)
                      
                     #Handle special words the optimizer looks out for
                     if first_word in ["BYTE","WORD","STRING"]:
@@ -231,8 +233,11 @@ while running:
                         final_text+=[[TYPE_TEXT,file_output]]
                         debug_output+=[[len(final_text),f"FUNC {' '.join(line_objs[1:])}",0]]
                         file_output=f";{line}\n"
-                        padding=" "+line[:(len(line)-len(line.lstrip()))]
-                        file_output+=f"{padding}{line_objs[1]}:\n"
+                        
+                        #Local labels use last defined symbol, so func label comes after all variables
+                        #padding=" "+line[:(len(line)-len(line.lstrip()))]
+                        #file_output+=f"{padding}{line_objs[1]}:\n"
+                        
                         final_text+=[[TYPE_TEXT,file_output]]
                         file_output=""
                         func_temp=""
@@ -246,6 +251,7 @@ while running:
                         calls_list=[]
                         vars_temp=""
                         func_begin=False
+                        func_name_inserted=False
                         for attrib in line_objs[2:]:
                             if attrib=="BEGIN":
                                 func_begin=True
@@ -275,7 +281,7 @@ while running:
                         byte_total=0
                         debug_str="ARGS: "
                         for k,v in args_dict.items():
-                            vars_temp+=f"{k} set _{func_name}.{k} ;ARG {v} {k}\n"
+                            vars_temp+=f"\tset {k}, _{func_name}.{k} ;ARG {v} {k}\n"
                             if debug_str!="ARGS: ": debug_str+=", "
                             debug_str+=f"{v} {k}"
                             if v in ["BYTE"]:
@@ -286,7 +292,7 @@ while running:
                             debug_output+=[[-1,debug_str,0]]
                         debug_str="VARS: "
                         for k,v in vars_dict.items():
-                            vars_temp+=f"{k} set _{func_name}.{k} ;VAR {v} {k}\n"
+                            vars_temp+=f"\tset {k}, _{func_name}.{k} ;VAR {v} {k}\n"
                             if debug_str!="VARS: ": debug_str+=", "
                             debug_str+=f"{v} {k}"
                             if v in ["BYTE"]:
@@ -298,6 +304,9 @@ while running:
                         if byte_total!=0:
                             debug_output+=[[-1,f"{byte_total} byte{'s' if byte_total>1 else ''} used",0]]
                         func_dict[func_name]["BYTES"]=byte_total
+                        if func_name_inserted==False:
+                            func_temp+=f"\t{func_name}:\n"
+                            func_name_inserted=True
                         func_temp+=f";{line}\n"
                         padding=" "+line[:(len(line)-len(line.lstrip()))]
                         func_temp+=padding+"RTS\n"
@@ -307,6 +316,9 @@ while running:
                     elif first_word[:5]=="TODO:":
                         func_temp+=";"+line+"\n"
                     else:
+                        if func_name_inserted==False:
+                            func_temp+=f"\t{func_name}:\n"
+                            func_name_inserted=True
                         func_temp+=line+"\n"
                 #State machine state in ARGS or VARS block
                 elif file_state in ["ARGS","VARS"]:
@@ -347,14 +359,14 @@ BYTES=2
 func_nodes=[[first_func,0]]
 byte_total=0
 address_max={}
+func_used_list=[first_func]
 while True:
     node=func_nodes[-1]
     if node[INDEX]>=len(func_dict[node[NAME]]["CALLS"]):
         #Done with child node - remove from stack
         byte_total=0
-        for node in func_nodes:
-            byte_total+=func_dict[node[NAME]]["BYTES"]
-        byte_total-=func_dict[node[NAME]]["BYTES"]  #Readjust since last node bytes should not count
+        for node_info in func_nodes:
+            byte_total+=func_dict[node_info[NAME]]["BYTES"]
         if node[NAME] not in address_max or address_max[node[NAME]]<byte_total:
             address_max[node[NAME]]=byte_total
         func_nodes.pop()        
@@ -364,19 +376,19 @@ while True:
         func_nodes[-1][INDEX]+=1
     else:
         #New child node added to stack
+        if func_dict[node[NAME]]["CALLS"][node[INDEX]] not in func_used_list:
+            func_used_list+=[func_dict[node[NAME]]["CALLS"][node[INDEX]]]
         func_nodes+=[[func_dict[node[NAME]]["CALLS"][node[INDEX]],0]]
         byte_total=0
         debug_line=""
-        for node in func_nodes:
+        for node_info in func_nodes:
             if debug_line!="":
                 debug_line+=" > "
-            debug_line+=f'{node[NAME]}({func_dict[node[NAME]]["BYTES"]})'
-            byte_total+=func_dict[node[NAME]]["BYTES"]
-        byte_total-=func_dict[node[NAME]]["BYTES"]  #Readjust since last node bytes should not count
+            debug_line+=f'{node_info[NAME]}({func_dict[node_info[NAME]]["BYTES"]})'
+            byte_total+=func_dict[node_info[NAME]]["BYTES"]
         debug_text_end+=f'{debug_line} - ({byte_total} bytes)\n'
 name_list=list(address_max.keys())
 name_list.sort()
-MAX_LINE_LEN=40
 for name in name_list:
     base_address=address_max[name]
     #Arguments
@@ -384,9 +396,7 @@ for name in name_list:
     arg_list.sort()
     for arg in arg_list:
         arg_type=func_dict[name]["ARGS"][arg]
-        addition=f"_{name}.{arg} equ ${(hex(base_address)[2:]).upper()}"
-        padding=max(1,MAX_LINE_LEN-len(addition))*" "
-        assignments+=f"{addition}{padding};ARG {arg_type}\n"
+        assignments+=[[f"_{name}.{arg}",base_address,f";ARG {arg_type}"]]
         if arg_type in ["BYTE"]:
             base_address+=1
         elif arg_type in ["WORD","STRING"]:
@@ -396,19 +406,46 @@ for name in name_list:
     var_list.sort()
     for var in var_list:
         var_type=func_dict[name]["VARS"][var]
-        addition=f"{name}.{var} equ ${(hex(base_address)[2:]).upper()}"
-        padding=max(1,MAX_LINE_LEN-len(addition))*" "
-        assignments+=f"_{addition}{padding};VAR {var_type}\n"
+        assignments+=[[f"_{name}.{var}",base_address,f";VAR {var_type}"]]
         if var_type in ["BYTE"]:
             base_address+=1
         elif var_type in ["WORD","STRING"]:
             base_address+=2
-assignments+="\n"
 
-#Write optimizer assigned zero page addresses output file followed by chunks of source code
-output_f.write(assignments)
+#Write optimizer assigned zero page addresses to output file followed
+output_f.write(";Optimizer zero page assignments\n")
+output_f.write(";===============================\n")
+assignment_length=0
+func_unused_list=[name for name in func_dict.keys() if name not in func_used_list]
+func_unused_list.sort()
+for assignment in assignments:
+    name,_,_=assignment
+    assignment_length=max(assignment_length, len(name))
+for name in func_unused_list:
+    for var in func_dict[name]["VARS"]:
+        assignment_length=max(assignment_length, len(f"_{name}.{var}"))
+    for arg in func_dict[name]["ARGS"]:
+        assignment_length=max(assignment_length, len(f"_{name}.{arg}"))
+for assignment in assignments:
+    name,address,var_type=assignment
+    address="$"+(("00"+(hex(address).upper()[2:]))[-2:])
+    output_f.write(f'{name}{" "*(assignment_length-len(name))} equ {address}   {var_type}\n')
+output_f.write("\n")
+
+#Write dummy addresses for functions not appearing in call graph
+for name in func_unused_list:
+    for var in func_dict[name]["VARS"]:
+        var_type=func_dict[name]["VARS"][var]
+        var_name=f"_{name}.{var}"
+        output_f.write(f'{var_name}{" "*(assignment_length-len(var_name))} equ dummy ;VAR {var_type}\n')
+    for arg in func_dict[name]["ARGS"]:
+        arg_type=func_dict[name]["ARGS"][arg]
+        arg_name=f"_{name}.{arg}"
+        output_f.write(f'{arg_name}{" "*(assignment_length-len(arg_name))} equ dummy ;ARG {arg_type}\n')
+output_f.write("\n")
+
+#Write source code pices to output file
 final_text+=[[TYPE_TEXT,file_output]]
-
 for i,text_block in enumerate(final_text):
     if text_block[0]==TYPE_TEXT:
         output_f.write(text_block[1])
@@ -418,7 +455,7 @@ for i,text_block in enumerate(final_text):
         output_f.write(text_block[1])
     elif text_block[0]==TYPE_STRINGS:
         output_f.write(string_assignments)
-        string_assignments=""
+        string_assignments_written=True
     elif text_block[0]==TYPE_CALL:
         #Formulate CALL statement - do here at end after all functions read in
         func=text_block[2][1]
@@ -428,7 +465,6 @@ for i,text_block in enumerate(final_text):
         comma=True
         comma_found=False
         index=0
-        string_index=1
         func_comment=text_block[1].lstrip().replace('\n','')
         call_text=f"\t;{func_comment}\n"
         for call_arg in call_args:
@@ -443,8 +479,14 @@ for i,text_block in enumerate(final_text):
                     index+=1
                     func_arg_type=func_args[func_arg_name]
                     if func_arg_type in ["BYTE"]:
-                        call_text+=f"\tLDA {call_arg}\n"
-                        call_text+=f"\tSTA _{func}.{func_arg_name}\n"
+                        if call_arg[0]=="#":
+                            #Immediate
+                            call_text+=f"\tLDA #({call_arg[1:]})#256\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}\n"
+                        else:
+                            #Address
+                            call_text+=f"\tLDA {call_arg}\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}\n"
                     elif func_arg_type in ["WORD"]:
                         if call_arg[0]=="#":
                             #Immediate
@@ -454,24 +496,32 @@ for i,text_block in enumerate(final_text):
                             call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
                         else:
                             #Address
-                            call_text+=f"\tLDA ({call_arg})#256\n"
+                            call_text+=f"\tLDA {call_arg}\n"
                             call_text+=f"\tSTA _{func}.{func_arg_name}\n"
-                            call_text+=f"\tLDA ({call_arg})>>8\n"
+                            call_text+=f"\tLDA ({call_arg})+1\n"
                             call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
                     elif func_arg_type in ["STRING"]:
                         if call_arg[0]=='"':
                             #String literal
                             if call_arg[-1]!='"':
-                                error_exit('unrecognized argument in CALL beginning with " - {call_arg.lstrip()}',error_obj)
+                                error_exit(f'unrecognized argument in CALL beginning with " - {call_arg.lstrip()}',error_obj)
+                            if string_assignments_written:
+                                error_exit('CALL with string literal after list of literals added to source. Move STRING_LITERALS below last CALL.')
                             string_address=f"_string_literal{('00000'+str(string_index))[-5:]}"
+                            string_assignments+=f"\t{string_address}: FCB {call_arg},0\n"
+                            string_index+=1
+                            call_text+=f"\tLDA #({string_address})#256\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}\n"
+                            call_text+=f"\tLDA #({string_address})>>8\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
+
                         else:
                             #String address
                             string_address=call_arg
-                        string_assignments+="\t: {string_address} FCC {call_arg},0\n"
-                        call_text+=f"\tLDA ({string_address})#256\n"
-                        call_text+=f"\tSTA _{func}.{func_arg_name}\n"
-                        call_text+=f"\tLDA ({string_address})>>8\n"
-                        call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
+                            call_text+=f"\tLDA {string_address}\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}\n"
+                            call_text+=f"\tLDA ({string_address})+1\n"
+                            call_text+=f"\tSTA _{func}.{func_arg_name}+1\n"
             else:
                 if call_arg!=",":
                     error_exit(f"comma expected but found '{call_arg}' in CALL - {text_block[1].lstrip()}",error_obj)
@@ -485,7 +535,7 @@ for i,text_block in enumerate(final_text):
         output_f.write(call_text)        
 
 #Make sure string literals from CALL were written
-if string_assignments!="":
+if string_assignments_written==False:
     error_exit("string literals from CALL not written. STRING_LITERALS appears in source?",error_obj)
 
 #Output debug file
@@ -499,6 +549,7 @@ for block in final_text:
     block_lens+=[total_len]
     if block[0]==TYPE_STRINGS:
         total_len+=string_assignments.count("\n")
+        string_assignments_written=True
     else:
         total_len+=block[1].count("\n")
 for line in debug_output:
@@ -516,10 +567,18 @@ debug_f.write("==========\n")
 debug_f.write(debug_text_end)
 debug_f.write("\n")
 
+#Add functions not appearing in call graph to debug file
+debug_f.write("Functions outside of call graph\n")
+debug_f.write("===============================\n")
+for name in func_unused_list:
+    debug_f.write(f'{name}({func_dict[name]["BYTES"]} bytes)\n')
+debug_f.write("\n")
+
 #String literals from CALL
 debug_f.write("String literals from CALL\n")
 debug_f.write("=========================\n")
-debug_f.write(string_assignments)
+for assignment in string_assignments.split("\n"):
+    debug_f.write(assignment.lstrip()+"\n")
 debug_f.write("\n")
 
 #Close output and debug files

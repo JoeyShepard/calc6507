@@ -2,22 +2,25 @@
 title 6507 Calculator
 echo.
 for /f %%i in ('time /T') do set datetime=%%i
-echo [%datetime%] Assembling...
+
+echo [%datetime%] Running optimizer...
 cd src
-
-"C:\Program Files\nasm\nasm" --no-line -e -Z main.err -l main.lst nasm.asm > main.i
-move main.i ..\main.i > nul
-move main.err ..\main.err > nul
+REM echo Optimizer start time %time% REM 0.15 seconds
+..\opt-mini.py main.asm
+REM echo Optimizer end time   %time%
+move processed.asm ../ > nul
+move debug.txt ../ > nul
 cd ..
-type main.err
-echo.
-del processed.asm
-python "..\..\..\projects\6502 Optimizer\NASM based\main.py" main.i
 type src\mem_template.asm >> processed.asm
-echo.
 
-echo Re-assembling...
-..\..\bin\asw processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt
+echo Assembling...
+REM P - write macro processor output
+REM G - ???
+REM U - case-sensitive operation
+REM L - listing to file
+REM g - write debug info
+REM q - quiet mode
+..\..\bin\asw processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt 2>&1
 python "remove escape.py" asm.txt
 echo Generating hex file...
 ..\..\bin\p2hex processed.p -F Intel -l 32 -r $0000-$FFFF > hex.txt
@@ -32,4 +35,10 @@ REM copy emu.hex "..\..\..\projects\6502 emu\node.js\prog.hex" > nul
 copy input.txt "..\..\..\projects\6502 emu\local copy\input.txt" > nul
 REM break > "..\..\..\projects\6502 emu\local copy\keys.txt"
 copy keys.txt "..\..\..\projects\6502 emu\local copy\keys.txt" > nul
-echo.
+
+echo Cleaning up...
+del asm.txt
+del processed.hex
+del processed.i
+del processed.p
+

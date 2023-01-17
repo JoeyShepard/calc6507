@@ -195,7 +195,7 @@ font1:
 ;`
   FCB $0, $0, $40, $80, $0
 
-  %include "font_custom.asm"
+	include font_custom.asm
 
 
 font2:
@@ -395,7 +395,7 @@ font2:
 ;`
   FCB $0, $0, $40, $80, $0
 
-  %include "font_custom.asm"
+	include font_custom.asm
 
 
 font3:
@@ -595,7 +595,7 @@ font3:
 ;`
   FCB $0, $0, $40, $80, $0
 
-  %include "font_custom.asm"
+	include font_custom.asm
 
 
 font4:
@@ -795,18 +795,18 @@ font4:
 ;`
   FCB $0, $0, $40, $80, $0
 
-  %include "font_custom.asm"
+	include font_custom.asm
 
 
 DEBUG_FONT_COUNT set 4
 font_counter:
   FCB 0
 debug_fonts:
-  FCB font1 % 256
+  FCB font1 # 256
   FCB font1 / 256
-  FCB font2 % 256
+  FCB font2 # 256
   FCB font2 / 256
-  FCB font3 % 256
+  FCB font3 # 256
   FCB font3 / 256
-  FCB font4 % 256
+  FCB font4 # 256
   FCB font4 / 256

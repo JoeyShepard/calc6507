@@ -1,4 +1,0 @@
-     1                                  	%xdefine foo "hi"
-     2                                  	%if foo="12345"
-     2          ******************       warning: character constant too long [-w+other]
-     3                                  	%endif

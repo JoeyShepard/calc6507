@@ -71,8 +71,7 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 
 ;Main code
 ;=========
-DEBUG_MODE set "off"
-	
+
 	;Reset vector
 	ORG RESET_VECTOR
 	;ORG $1FFC
@@ -130,7 +129,7 @@ DEBUG_MODE set "off"
 	
 	;reg before R_ans in case double wide reg needed
 	;+3 since only need 6 of 9 bytes 
-	R_ans_wide = R7+3
+	equ R_ans_wide, R7+3
 	
 	Regs_end:
 		
@@ -138,7 +137,7 @@ DEBUG_MODE set "off"
 ;Variables in main RAM
 ;=====================
 	TODO: special handling of ORG for new version of NASM breaks this
-	R_STACK_ADDRESS = $100+R_STACK_SIZE
+	equ R_STACK_ADDRESS, $100+R_STACK_SIZE
 	ORG R_STACK_ADDRESS
 	;Must come after include const.asm for constants
 	include globals.asm
@@ -276,7 +275,7 @@ DEBUG_MODE set "off"
 						STA temp_thread+2
 						STY temp_thread+3
 						.jump_thread:
-						LDA #temp_thread % 256
+						LDA #temp_thread # 256
 						STA exec_ptr
 						LDA #temp_thread / 256
 						STA exec_ptr+1
@@ -356,7 +355,7 @@ DEBUG_MODE set "off"
 					
 				JMP .process_loop
 				
-		.error_sub:
+		.error_sub:	
 			CALL ErrorMsg
 			JMP .input_loop
 			

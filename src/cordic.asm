@@ -25,25 +25,25 @@ TODO: more precision to X and Y below would probably give more accurate answer
 
 	;Constants
 	;=========
-	CORDIC_SIGN =			1
+	equ CORDIC_SIGN,			1
 	
 	;Masks and flags
-	CORDIC_ADD_Y =			0
-	CORDIC_SUB_Y =			1
-	CORDIC_ADD_MASK =		1
-	CORDIC_CMP_Z =			0
-	CORDIC_CMP_Y =			2
-	CORDIC_CMP_Y_R5 =		4
-	CORDIC_CMP_MASK =		2|4
-	CORDIC_HALF =			8
-	CORDIC_HALF_MASK =		8
-	CORDIC_ATAN =			0
-	CORDIC_ATANH =			16
-	CORDIC_ATAN_MASK =		16
+	equ CORDIC_ADD_Y,			0
+	equ CORDIC_SUB_Y,			1
+	equ CORDIC_ADD_MASK,		1
+	equ CORDIC_CMP_Z,			0
+	equ CORDIC_CMP_Y,			2
+	equ CORDIC_CMP_Y_R5,		4
+	equ CORDIC_CMP_MASK,		2|4
+	equ CORDIC_HALF,			8
+	equ CORDIC_HALF_MASK,		8
+	equ CORDIC_ATAN,			0
+	equ CORDIC_ATANH,			16
+	equ CORDIC_ATAN_MASK,		16
 	
 	;Return values
-	CORDIC_CLEANUP =			0
-	CORDIC_NO_CLEANUP =			1
+	equ CORDIC_CLEANUP,			0
+	equ CORDIC_NO_CLEANUP,		1
 	
 	INV_K:
 		;1/k = 1/23.674377006269683 = 0.0 42 23 97 59 87 | 77 43 35
@@ -83,10 +83,10 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		FCB $10, $00, $00, $00, $00, $00, $00
 		FCB $01, $00, $00, $00, $00, $00, $00
 
-	ATAN_ROWS = 	14
-	ATANH_ROWS =	13
+	equ ATAN_ROWS, 		14
+	equ ATANH_ROWS,		13
 	
-	CORDIC_WIDTH = 7
+	equ CORDIC_WIDTH,	7
 	
 	;Functions
 	;=========
