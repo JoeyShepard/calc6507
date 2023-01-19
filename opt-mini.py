@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from sys import argv
 
 #Parses one or more arguments separated by commas

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 
 f=open(sys.argv[1],"r")
@@ -9,3 +11,4 @@ for line in f:
   else:
     print(line[:-1])
 f.close()
+
