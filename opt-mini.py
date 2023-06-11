@@ -442,7 +442,8 @@ for assignment in assignments:
     if var_type in ["WORD","STRING"]:
         assignment_debug[address-locals_begin+1]+=[debug_info]
 with open("debug.html","w") as fptr:
-    fptr.write('<html><body><table border="1">\n')
+    fptr.write('<html><body>\n<h1>Zero page assignments</h1>\n')
+    fptr.write('<table border="1">\n')
     for index in range(len(assignment_debug)):
         fptr.write(f"<tr>\n<td>0x{hex(index+locals_begin)[2:]}</td>\n")
         for assignment in assignment_debug[index]:

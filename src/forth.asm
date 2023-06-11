@@ -269,16 +269,26 @@
 		.found:
 	END
 	
+    ;If word found:
+    ;- ret_val: token
+    ;- ret_address: beginning of word header
+    ;- obj_address: beginning of code after header
+    ;If word not found:
+    ;- ret_val: 0 
+    ;- ret_address: last searched word (not useful)
+    ;- obj_address: unchanged
 	FUNC FindWord
-		LDA new_word_len
+		LDA new_word_len    ;Set by LineWord
 		BEQ .not_found
 		MOV.W #FORTH_WORDS,ret_address
 		.loop:
+            ;Length of word in dictionary
 			LDY #0
 			LDA (ret_address),Y
 			CMP new_word_len
 			BNE .loop_next
 				INY
+                ;Loop through letters of word in dictionary
 				.str_loop:
 					LDA (ret_address),Y
 					CMP new_word_buff-1,Y	;offset by 1 since string starts one byte in
@@ -289,6 +299,7 @@
 							JMP .str_loop
 					.no_match:
 			.loop_next:
+            ;Address of next word in dictionary
 			LDY #0
 			LDA (ret_address),Y
 			TAY
@@ -300,6 +311,7 @@
 			STA ret_address+1
 			PLA
 			STA ret_address
+            ;Check for end of dictionary
 			ORA ret_address+1
 			BNE .loop
 			;Done searching - zero ret_val
@@ -307,15 +319,15 @@
 			STA ret_val
 			RTS
 		.word_found:
-		
+	    
+        ;Load token
 		LDY #0
 		LDA (ret_address),Y
 		TAY
 		INY
 		INY
-		INY		;point past header
+		INY
 		LDA (ret_address),Y
-		;Token
 		STA ret_val
 		;Address for tick and user defined words
 		INY
@@ -327,7 +339,9 @@
 		ADC #0
 		STA obj_address+1
 	END
-	
+    
+    TODO: store as one bit flags to reduce mem usage?
+    TODO: use registers instead?
 	FUNC CheckData
 		VARS
 			BYTE input_mode			;input mode for float - pre decimal, post decimal, or exponent
@@ -408,6 +422,7 @@
 			LDA #OBJ_STR
 			STA R_ans
 			.str_return:
+			;item type already set to OBJ_ERROR
 			RTS
 		.not_string:
 		
@@ -499,8 +514,8 @@
 		BNE .float_not_exp
 			;First character cannot be exponent sign
 			RTS
+
 		.float_not_exp:
-		
 		.float_first_done:
 		
 		.loop_float:
@@ -679,6 +694,7 @@
 		TODO: look up table?
 		LDA #0
 		LDY exp_count
+        TODO: BMI works right in decimal mode?
 		BMI .exp_count_neg
 			DEY				;count of digits, so -1 since 5 is e0 not e1
 			BEQ .exp_count_done
@@ -864,7 +880,7 @@
 		BEQ .exec_primitive
 		CMP #OBJ_SECONDARY
 		BEQ .exec_word
-			;ie try to EXEC variable or random address
+			;ie tried to EXEC variable or random address
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
@@ -964,8 +980,7 @@
 		
 		CLC
 		LDA ret_address
-		TODO: magic number
-		ADC #2
+		ADC #2 ;Skip past type and flag bytes to instructions
 		STA ret_address
 		BCC .skip
 			INC ret_address+1
@@ -983,6 +998,7 @@
 			LDY #0
 			LDA (exec_ptr),Y
 			CALL ExecToken
+            TODO: one CALL to ErrorMsg, token in A for QUIT
 			LDA ret_val
 			BEQ .no_error
 				CALL ErrorMsg
@@ -1114,6 +1130,7 @@
 		BEQ .add_address
 		CPY #TOKEN_VAR_THREAD
 		BEQ .add_address
+        TODO: other parts only made allowance for SECONDARY and VAR
 		CPY #TOKEN_LEAVE_THREAD
 		BEQ .add_address
 			LDA #1

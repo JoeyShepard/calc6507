@@ -180,9 +180,10 @@
 		
 		.input_loop:
 			
-			TODO: if unknown word in uncompleted definition, erros then jumps here and errors again
+			TODO: if unknown word in uncompleted definition, errors then jumps here and errors again
 			
 			;Colon definitions must fit on one line
+            ;Error message handled below
 			LDA mode
 			CMP #MODE_IMMEDIATE
 			BEQ .mode_good
@@ -198,8 +199,6 @@
 				
 				LDA #MODE_IMMEDIATE
 				STA mode
-				LDA #ERROR_INPUT
-				JMP .error_sub
 			.mode_good:
 			
 			;Reset dict_ptr in case anything went wrong below
@@ -213,12 +212,21 @@
 				CALL LineWord
 				LDA ret_val
 				BEQ .no_word_error
+                    ;Only error should be if word was too long
 					JMP .error_sub
 				.no_word_error:
 				LDA new_word_len
-				BEQ .input_loop
-				
-				TODO: need to copy obj_address to ret_address in new design?
+
+                BNE .still_processing
+                    ;Out of words to process
+                    ;Error if still in compile mode
+                    LDA mode
+                    CMP #MODE_IMMEDIATE
+                    BEQ .input_loop
+                    LDA #ERROR_INPUT
+                    JMP .error_sub
+				.still_processing:
+
 				CALL FindWord
 				LDA ret_val
 				BEQ .word_not_found
@@ -228,7 +236,7 @@
 					CMP #MODE_IMMEDIATE
 					BNE .compile_word
 						
-						;Immediate mode - insert word into temp thread and execute
+						;Immediate mode - insert word token into temp thread and execute
 						.immediate:
 						LDY #TOKEN_BREAK
 						LDA ret_val
@@ -242,7 +250,7 @@
 						.insert_address:
 						;Secondaries and variables need address in stream
 						CLC
-						LDA obj_address
+						LDA obj_address ;Beginning of CODE
 						ADC #3
 						STA temp_thread+1
 						LDA obj_address+1
@@ -254,14 +262,13 @@
 						STA exec_ptr
 						LDA #temp_thread / 256
 						STA exec_ptr+1
-						JMP ExecThread
+						JMP ExecThread ;BREAK inserted above returns to main loop
 					.compile_word:
 					
 					;Compile mode
 					LDA ret_val
 					TAY
 					LDA JUMP_TABLE-2,Y
-					TODO: sure ret_address isnt needed later?
 					STA ret_address
 					LDA JUMP_TABLE-1,Y
 					STA ret_address+1
@@ -284,7 +291,13 @@
 				LDA R_ans
 				CMP #OBJ_ERROR
 				BNE .input_good
-					LDA #ERROR_INPUT
+                    ;Unrecognized input
+
+                    ;Set mode to IMMEDIATE to avoid double error if compiling
+                    LDA #MODE_IMMEDIATE
+                    STA mode
+					
+                    LDA #ERROR_INPUT
 					JMP .error_sub
 				.input_good:
 				

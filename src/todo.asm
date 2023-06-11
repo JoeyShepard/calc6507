@@ -7,6 +7,16 @@
     ;Implement necessary words
     ;Implement optional words as space allows
 
+    ;To fix
+    ;======
+    TODO: out of memory error then gives input error
+    TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
+    TODO: DEG appears to be wrong
+    TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
+    TODO: STO handled correctly in words? should be. seems VAR is what I remember not working
+    TODO: optimizer should identify unreachable code that passes variables or uses locals
+        ;Should be fine if treated as if jumped from main
+
     ;General
     ;=======
     TODO: replace calculated jump with JMP (addr)
@@ -17,19 +27,13 @@
     TODO: checking - p110 in Handbook of Floating Point Arithmetic
     TODO: copyright
     TODO: double check not relying on flags from BCD which are not valid for NMOS
-    TODO: optimizer should identify unreachable code that passes variables or uses locals
     TODO: remove trailing zeroes?
-    TODO: draw smart hex differently?
+    TODO: draw smart hex differently? M$1234
     TODO: double check list on webpage
-
-    ;To fix
-    ;======
-    TODO: aborted word definition still needs to be fixed?
-    TODO: out of memory error then gives input error
-    TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
-    TODO: DEG appears to be wrong
-    TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
-    TODO: STO handled correctly in words? should be. seems VAR is what I remember not working
+    TODO: LDA ret_val, BNE error_exit could be smaller
+    TODO: compare to error_sub in main.asm
+    TODO: use registers instead of optimized mem in forth.asm where possible
+    TODO: better error messages if room left
 
     ;Necessary words
     ;===============
