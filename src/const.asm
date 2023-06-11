@@ -197,7 +197,8 @@
 		equ STACK_SIZE,			8
 		equ SYS_STACK_SIZE,		3
 		equ R_STACK_SIZE,		$30
-		
+	    equ HW_STACK_BEGIN,     $100
+
 		;Two byte header of each word
 		equ EXEC_HEADER,		2
 		

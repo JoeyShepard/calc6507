@@ -43,33 +43,18 @@
 	TODO: drive RDY with 6532 interrupt
 	TODO:    seems allowed as long as transitions in phi1 not phi2. lower current though? posted on forum
 	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
-	TODO: separate engine and table for 16 bit forth?
-	TODO: more comments
-	TODO: replace calculated jump with JMP (addr)
-	TODO: use registers for text input also somehow? no bc could be used by words
-	TODO: out of memory error then gives input error
-	TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
-	TODO: add aux stack check to semi colon
-	TODO: var in word? causes double input error
-    TODO: DEG appears to be wrong
 
-;To finish before website upload
-	TODO: github readme
-	
+;General TODO items stored in separate file. Included here so todo.py can find it.
+    include todo.asm
+
 ;Unlimited lines per page in listing
 	PAGE 0
-
 
 ;Constants
 ;=========
 	include const.asm
 	include emu.asm
 	
-;Notes
-;=====
-TODO: checking - p110 in Handbook of Floating Point Arithmetic
-
-
 ;Main code
 ;=========
 
@@ -78,7 +63,6 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 	;ORG $1FFC
 	FDB main
 		
-	
 ;Variables in zero page
 ;======================
 	ORG $0000
@@ -101,8 +85,6 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 	
 	;Output
 	WORD screen_ptr
-	TODO: remove after debugging done
-	WORD font_ptr
 	
 	;Forth
 	WORD dict_ptr
@@ -137,9 +119,8 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 	
 ;Variables in main RAM
 ;=====================
-	TODO: special handling of ORG for new version of NASM breaks this
-	equ R_STACK_ADDRESS, $100+R_STACK_SIZE
-	ORG R_STACK_ADDRESS
+    ORG HW_STACK_BEGIN+R_STACK_SIZE
+
 	;Must come after include const.asm for constants
 	include globals.asm
 
@@ -150,9 +131,6 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 	ORG $D000
 	;should be visible to tests below which overflow $C000
 	include debug.asm
-	
-	TODO: remove after debugging
-	include font_debug.asm
 	
 	ORG $8900	;RAM + ROM size
 	;overlaps with video memory, no video output
@@ -191,10 +169,6 @@ TODO: checking - p110 in Handbook of Floating Point Arithmetic
 			BYTE arg,type
 		END
 		
-		TODO: copyright
-		TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
-		TODO: double check not relying on flags from BCD which are not valid for NMOS
-			
 		CALL setup
 		CALL tests
 		;CALL file_tests

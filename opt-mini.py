@@ -402,55 +402,28 @@ for func in func_used_list:
         var_list.sort()
         for var in var_list:
             var_type=func_dict[func][var_arg][var]
-            print(f"{var_type} {func}.{var}")
             for address in range(len(assigned_mem)):
                 for address_func in assigned_mem[address]:
                     if address_func in func_touched_list:
-                        print(f"- Skipping address {address} which contains {address_func} which touches {func}")
-                        print(f"  - Address {address} assigned to:",assigned_mem[address])
-                        print(f"  - {func} touches:",func_touched_list)
-                        print()
                         #Memory address already assigned to function that touches current function - skip address
                         break
                 else:
                     #For loop completed - no clashes
                     if var_type in ["BYTE"]:
-
-                        print(f"- Free address for BYTE found at {address}")
-                        print(f"  - Address {address} assigned to:",assigned_mem[address])
-                        print(f"  - {func} touches:",func_touched_list)
-                        print(f"  - (There should be no overlap in the two lists)")
-                        print()
-
                         #Only one byte needed - assign memory
                         assignments+=[[f"_{func}.{var}",locals_begin+address,f";{'VAR' if var_arg=='VARS' else 'ARG'} {var_type}",(func,var,var_type)]]
                         assigned_mem[address]+=[func]
                         #Skip to next var to assign
                         break 
                     elif var_type in["WORD","STRING"]:
-
-                        print(f"- Free address for {var_type} found at {address}")
-                        print(f"  - Address {address} assigned to:",assigned_mem[address])
-                        print(f"  - {func} touches:",func_touched_list)
-                        print(f"  - (There should be no overlap in the two lists)")
-
                         #Two bytes needed - check that next byte is free too before assigning memory
                         if address+1>=len(assigned_mem):
                             error_exit(f"Error: end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
                         for address_func in assigned_mem[address+1]:
                             if address_func in func_touched_list:
-                                print(f"- Skipping next address {address+1} which contains {address_func} which touches {func}")
-                                print(f"  - Address {address+1} assigned to:",assigned_mem[address+1])
-                                print(f"  - {func} touches:",func_touched_list)
-                                print()
                                #Memory address already assigned to function that touches current function - skip address
                                 break
                         else:
-                            print(f"- Next address at {address+1} free too")
-                            print(f"  - Address {address+1} assigned to:",assigned_mem[address+1])
-                            print(f"  - {func} touches:",func_touched_list)
-                            print(f"  - (There should be no overlap in the two lists)")
-                            print()
                             #For loop completed for two-byte var - no clashes
                             assignments+=[[f"_{func}.{var}",locals_begin+address,f";{'VAR' if var_arg=='VARS' else 'ARG'} {var_type}",(func,var,var_type)]]
                             assigned_mem[address]+=[func]
@@ -459,8 +432,6 @@ for func in func_used_list:
                             break 
             else:
                 error_exit(f"Error: end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
-            print("==========")
-            #input()
             
 #Output debug html file
 assignment_debug=[[] for _ in range(locals_end-locals_begin)]
@@ -479,8 +450,6 @@ with open("debug.html","w") as fptr:
             fptr.write(f"<td>{var_type} {func}.{var}</td>\n")
         fptr.write("</tr\n\n>")
     fptr.write("</table></body></html>\n")
-
-exit(1)
 
 #Write optimizer assigned zero page addresses to output file
 output_f.write(";Optimizer zero page assignments\n")

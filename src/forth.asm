@@ -92,35 +92,7 @@
 					JMP .no_key
 				.not_backspace:
 				
-				TODO: remove this and extra font data from ROM
-				;;Switch font (debug only!)
-				;CMP #'f'
-				;BNE .not_font
-				;	LDY font_counter
-				;	LDA debug_fonts,Y
-				;	STA font_ptr
-				;	LDA debug_fonts+1,Y
-				;	STA font_ptr+1
-				;	INY
-				;	INY
-				;	CPY #DEBUG_FONT_COUNT*2
-				;	BNE .no_font_reset
-				;		LDY #0
-				;	.no_font_reset:
-				;	STY font_counter
-				;	CALL DrawStack
-				;	;Reset screen pointer after drawing
-				;	LDA #0
-				;	STA cursor
-				;	STA index
-				;	STA screen_ptr
-				;	LDA #INPUT_Y
-				;	STA screen_ptr+1
-				;	
-				;	JMP .no_key
-				;.not_font:
-				
-				;Special character
+                ;Special character
 				LDY #0
 				.special_loop:
 					CMP special_chars,Y

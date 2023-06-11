@@ -51,8 +51,6 @@
 		LDA #0
 		STA font_inverted
 		
-		MOV.W #font_table,font_ptr
-		
 		LDA #dict_begin # 256
 		STA dict_ptr
 		STA dict_save
@@ -144,24 +142,7 @@
 		BCC .no_C
 			INC pixel_ptr+1
 		.no_C:
-		
-		TODO: remove after debugging
-		;CLC
-		;LDA #font_table % 256
-		;ADC pixel_ptr
-		;STA pixel_ptr
-		;LDA #font_table / 256
-		;ADC pixel_ptr+1
-		;STA pixel_ptr+1
-		
-		CLC
-		LDA font_ptr
-		ADC pixel_ptr
-		STA pixel_ptr
-		LDA font_ptr+1
-		ADC pixel_ptr+1
-		STA pixel_ptr+1
-		
+	
 		;LDA #0
 		;STA pixel_index
 		LDA #5
@@ -231,8 +212,6 @@
 		SEC 
 		SBC #16
 		STA screen_ptr+1
-
-        halt
 
 	END
 	

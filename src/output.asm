@@ -38,8 +38,6 @@
 			WORD buff
 		END
 	
-        halt
-
 		INC.W source
 		CALL MemCopy,source,#R0,#8
 		
