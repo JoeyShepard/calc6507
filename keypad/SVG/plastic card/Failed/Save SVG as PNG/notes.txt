@@ -1,4 +1,0 @@
-Chrome extension
- - installs but says failed to detect height and width
- - manually added height and width (sigh)
- - still can't detect

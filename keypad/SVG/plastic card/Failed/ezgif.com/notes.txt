@@ -1,2 +1,0 @@
-Default width wrong so added manually
-Result is wrong font and wrong spacing on top row letters

@@ -179,6 +179,9 @@ while running:
                     final_text+=[[TYPE_TEXT,file_output]]
                     file_output=""
                 else:
+                    if func_name_inserted==False:
+                        func_temp+=f"\t{func_name}:\n"
+                        func_name_inserted=True
                     final_text+=[[TYPE_TEXT,func_temp]]
                     func_temp=""
                 final_text+=[[TYPE_CALL,line+"\n",line_objs[:]]]
@@ -280,6 +283,7 @@ while running:
                         func_dict[func_name]["VARS"]=vars_dict
                         func_dict[func_name]["CALLS"]=calls_list
                         func_dict[func_name]["BEGIN"]=func_begin
+                        func_dict[func_name]["TOUCHES"]=set()
                         byte_total=0
                         debug_str="ARGS: "
                         for k,v in args_dict.items():
@@ -360,17 +364,11 @@ INDEX=1
 BYTES=2
 func_nodes=[[first_func,0]]
 byte_total=0
-address_max={}
 func_used_list=[first_func]
 while True:
     node=func_nodes[-1]
     if node[INDEX]>=len(func_dict[node[NAME]]["CALLS"]):
         #Done with child node - remove from stack
-        byte_total=0
-        for node_info in func_nodes:
-            byte_total+=func_dict[node_info[NAME]]["BYTES"]
-        if node[NAME] not in address_max or address_max[node[NAME]]<byte_total:
-            address_max[node[NAME]]=byte_total
         func_nodes.pop()        
         if func_nodes==[]:
             #No more nodes left to check - done
@@ -383,45 +381,115 @@ while True:
         func_nodes+=[[func_dict[node[NAME]]["CALLS"][node[INDEX]],0]]
         byte_total=0
         debug_line=""
+        all_funcs=[node_info[NAME] for node_info in func_nodes]
         for node_info in func_nodes:
+            #Record what nodes each node touches
+            func_dict[node_info[NAME]]["TOUCHES"].update(all_funcs)
+            #Debug info
             if debug_line!="":
                 debug_line+=" > "
             debug_line+=f'{node_info[NAME]}({func_dict[node_info[NAME]]["BYTES"]})'
             byte_total+=func_dict[node_info[NAME]]["BYTES"]
         debug_text_end+=f'{debug_line} - ({byte_total} bytes)\n'
-name_list=list(address_max.keys())
-name_list.sort()
-for name in name_list:
-    base_address=address_max[name]
-    #Arguments
-    arg_list=list(func_dict[name]["ARGS"].keys())
-    arg_list.sort()
-    for arg in arg_list:
-        arg_type=func_dict[name]["ARGS"][arg]
-        assignments+=[[f"_{name}.{arg}",base_address,f";ARG {arg_type}"]]
-        if arg_type in ["BYTE"]:
-            base_address+=1
-        elif arg_type in ["WORD","STRING"]:
-            base_address+=2
-    #Local variables
-    var_list=list(func_dict[name]["VARS"].keys())
-    var_list.sort()
-    for var in var_list:
-        var_type=func_dict[name]["VARS"][var]
-        assignments+=[[f"_{name}.{var}",base_address,f";VAR {var_type}"]]
-        if var_type in ["BYTE"]:
-            base_address+=1
-        elif var_type in ["WORD","STRING"]:
-            base_address+=2
 
-#Write optimizer assigned zero page addresses to output file followed
+assigned_mem=[[] for i in range(locals_end-locals_begin)]
+func_used_list.sort()
+for func in func_used_list:
+    #Loop through arguments then local variables
+    func_touched_list=func_dict[func]["TOUCHES"]
+    for var_arg in ["ARGS","VARS"]:
+        var_list=list(func_dict[func][var_arg].keys())
+        var_list.sort()
+        for var in var_list:
+            var_type=func_dict[func][var_arg][var]
+            print(f"{var_type} {func}.{var}")
+            for address in range(len(assigned_mem)):
+                for address_func in assigned_mem[address]:
+                    if address_func in func_touched_list:
+                        print(f"- Skipping address {address} which contains {address_func} which touches {func}")
+                        print(f"  - Address {address} assigned to:",assigned_mem[address])
+                        print(f"  - {func} touches:",func_touched_list)
+                        print()
+                        #Memory address already assigned to function that touches current function - skip address
+                        break
+                else:
+                    #For loop completed - no clashes
+                    if var_type in ["BYTE"]:
+
+                        print(f"- Free address for BYTE found at {address}")
+                        print(f"  - Address {address} assigned to:",assigned_mem[address])
+                        print(f"  - {func} touches:",func_touched_list)
+                        print(f"  - (There should be no overlap in the two lists)")
+                        print()
+
+                        #Only one byte needed - assign memory
+                        assignments+=[[f"_{func}.{var}",locals_begin+address,f";{'VAR' if var_arg=='VARS' else 'ARG'} {var_type}",(func,var,var_type)]]
+                        assigned_mem[address]+=[func]
+                        #Skip to next var to assign
+                        break 
+                    elif var_type in["WORD","STRING"]:
+
+                        print(f"- Free address for {var_type} found at {address}")
+                        print(f"  - Address {address} assigned to:",assigned_mem[address])
+                        print(f"  - {func} touches:",func_touched_list)
+                        print(f"  - (There should be no overlap in the two lists)")
+
+                        #Two bytes needed - check that next byte is free too before assigning memory
+                        if address+1>=len(assigned_mem):
+                            error_exit(f"Error: end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
+                        for address_func in assigned_mem[address+1]:
+                            if address_func in func_touched_list:
+                                print(f"- Skipping next address {address+1} which contains {address_func} which touches {func}")
+                                print(f"  - Address {address+1} assigned to:",assigned_mem[address+1])
+                                print(f"  - {func} touches:",func_touched_list)
+                                print()
+                               #Memory address already assigned to function that touches current function - skip address
+                                break
+                        else:
+                            print(f"- Next address at {address+1} free too")
+                            print(f"  - Address {address+1} assigned to:",assigned_mem[address+1])
+                            print(f"  - {func} touches:",func_touched_list)
+                            print(f"  - (There should be no overlap in the two lists)")
+                            print()
+                            #For loop completed for two-byte var - no clashes
+                            assignments+=[[f"_{func}.{var}",locals_begin+address,f";{'VAR' if var_arg=='VARS' else 'ARG'} {var_type}",(func,var,var_type)]]
+                            assigned_mem[address]+=[func]
+                            assigned_mem[address+1]+=[func]
+                            #Skip to next var to assign
+                            break 
+            else:
+                error_exit(f"Error: end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
+            print("==========")
+            #input()
+            
+#Output debug html file
+assignment_debug=[[] for _ in range(locals_end-locals_begin)]
+for assignment in assignments:
+    _,address,_,debug_info=assignment
+    assignment_debug[address-locals_begin]+=[debug_info]
+    func,var,var_type=debug_info
+    if var_type in ["WORD","STRING"]:
+        assignment_debug[address-locals_begin+1]+=[debug_info]
+with open("debug.html","w") as fptr:
+    fptr.write('<html><body><table border="1">\n')
+    for index in range(len(assignment_debug)):
+        fptr.write(f"<tr>\n<td>0x{hex(index+locals_begin)[2:]}</td>\n")
+        for assignment in assignment_debug[index]:
+            func,var,var_type=assignment
+            fptr.write(f"<td>{var_type} {func}.{var}</td>\n")
+        fptr.write("</tr\n\n>")
+    fptr.write("</table></body></html>\n")
+
+exit(1)
+
+#Write optimizer assigned zero page addresses to output file
 output_f.write(";Optimizer zero page assignments\n")
 output_f.write(";===============================\n")
 assignment_length=0
 func_unused_list=[name for name in func_dict.keys() if name not in func_used_list]
 func_unused_list.sort()
 for assignment in assignments:
-    name,_,_=assignment
+    name,_,_,_=assignment
     assignment_length=max(assignment_length, len(name))
 for name in func_unused_list:
     for var in func_dict[name]["VARS"]:
@@ -429,7 +497,7 @@ for name in func_unused_list:
     for arg in func_dict[name]["ARGS"]:
         assignment_length=max(assignment_length, len(f"_{name}.{arg}"))
 for assignment in assignments:
-    name,address,var_type=assignment
+    name,address,var_type,_=assignment
     address="$"+(("00"+(hex(address).upper()[2:]))[-2:])
     output_f.write(f'{name}{" "*(assignment_length-len(name))} equ {address}   {var_type}\n')
 output_f.write("\n")
@@ -446,7 +514,7 @@ for name in func_unused_list:
         output_f.write(f'{arg_name}{" "*(assignment_length-len(arg_name))} equ dummy ;ARG {arg_type}\n')
 output_f.write("\n")
 
-#Write source code pices to output file
+#Write source code pieces to output file
 final_text+=[[TYPE_TEXT,file_output]]
 for i,text_block in enumerate(final_text):
     if text_block[0]==TYPE_TEXT:

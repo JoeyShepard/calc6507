@@ -231,6 +231,9 @@
 		SEC 
 		SBC #16
 		STA screen_ptr+1
+
+        halt
+
 	END
 	
 	FUNC LCD_print

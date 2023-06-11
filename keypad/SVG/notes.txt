@@ -1,7 +1,0 @@
-3D printed (old)/ - various tests to 3D print letters without much success
-
-dye sub/check/ - original "test" labels for first try
-
-plastic card/ - two plastic cards for buttons
-
-laser cut/1/ - test for Joaquin's laser cutter. sizes based on 3D printed button row

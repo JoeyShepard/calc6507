@@ -51,7 +51,8 @@
 	TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
 	TODO: add aux stack check to semi colon
 	TODO: var in word? causes double input error
-	
+    TODO: DEG appears to be wrong
+
 ;To finish before website upload
 	TODO: github readme
 	

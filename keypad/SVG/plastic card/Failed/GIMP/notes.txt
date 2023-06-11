@@ -1,1 +1,0 @@
-Actually, SVG rendering broke in too many ways just move on

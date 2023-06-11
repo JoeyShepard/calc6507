@@ -7,6 +7,7 @@ cd src
 ../opt-mini.py main.asm
 mv processed.asm ../
 mv debug.txt ../
+mv debug.html ../
 cd ..
 cat src/mem_template.asm >> processed.asm
 
