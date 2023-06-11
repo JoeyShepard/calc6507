@@ -1,9 +1,13 @@
-# html output from optimizer
+#html output from optimizer
 output/
 hardware\ version/output/
 
-# hex files for loading into emulator or ROM
+#hex files for loading into emulator or ROM
 *.hex
+
+#.swp files from editing in vim
+*.swp
+src/*.swp
 
 # various output and intermediate files
 asm.txt

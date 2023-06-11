@@ -1,25 +1,35 @@
 ;Space for general TODO items
 ;Cleaner to keep here than in main.asm
 
+    ;Plan
+    ;====
+    ;Fix errors
+    ;Implement necessary words
+    ;Implement optional words as space allows
+
     ;General
     ;=======
     TODO: replace calculated jump with JMP (addr)
     TODO: use registers for text input also somehow? no bc could be used by words
-    TODO: out of memory error then gives input error
-    TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
     TODO: add aux stack check to semi colon
     TODO: var in word? causes double input error
-    TODO: DEG appears to be wrong
-    TODO: aborted word definition still needs to be fixed?
 	TODO: github readme
     TODO: checking - p110 in Handbook of Floating Point Arithmetic
     TODO: copyright
-    TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
     TODO: double check not relying on flags from BCD which are not valid for NMOS
     TODO: optimizer should identify unreachable code that passes variables or uses locals
-    TODO: STO handled correctly in words?
     TODO: remove trailing zeroes?
     TODO: draw smart hex differently?
+    TODO: double check list on webpage
+
+    ;To fix
+    ;======
+    TODO: aborted word definition still needs to be fixed?
+    TODO: out of memory error then gives input error
+    TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
+    TODO: DEG appears to be wrong
+    TODO: easy to add calculated jumps to optimizer - just need to mark which can jump to
+    TODO: STO handled correctly in words? should be. seems VAR is what I remember not working
 
     ;Necessary words
     ;===============

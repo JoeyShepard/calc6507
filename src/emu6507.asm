@@ -142,7 +142,15 @@
 		BCC .no_C
 			INC pixel_ptr+1
 		.no_C:
-	
+
+        CLC
+        LDA #font_table # 256
+        ADC pixel_ptr
+        STA pixel_ptr
+        LDA #font_table / 256
+        ADC pixel_ptr+1
+        STA pixel_ptr+1
+
 		;LDA #0
 		;STA pixel_index
 		LDA #5
