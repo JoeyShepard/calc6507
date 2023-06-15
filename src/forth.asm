@@ -694,7 +694,6 @@
 		TODO: look up table?
 		LDA #0
 		LDY exp_count
-        TODO: BMI works right in decimal mode?
 		BMI .exp_count_neg
 			DEY				;count of digits, so -1 since 5 is e0 not e1
 			BEQ .exp_count_done

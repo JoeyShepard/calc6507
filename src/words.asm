@@ -2375,7 +2375,7 @@
 	TODO: remove as last resort
 	WORD_DEG:
 		FCB 3,"DEG"				;Name
-		FDB dict_begin			;Next word
+		FDB WORD_WORDS			;Next word
 		FCB TOKEN_DEG			;ID - 142
 		CODE_DEG:
 			FCB OBJ_PRIMITIVE				;Type
@@ -2403,62 +2403,17 @@
 			JSR BCD_Mult
 			JSR CODE_DROP+EXEC_HEADER
 			JMP RansTos
-						
-						
-			
 
-	;NEG			;change sign of float
-	;MOD			76
-	;^				116
-	;E^				118
-	;LN				120
-	;GRAPH			138
+	WORD_WORDS:
+		FCB 5,"WORDS"			;Name
+		FDB dict_begin			;Next word
+		FCB TOKEN_WORDS			;ID - 144
+		CODE_WORDS:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB NONE     					;Flags	
 
-	;WORDS/MEM		146
-	
-	;4ish zp pages also mapped to address range
-	
-	;Optional:
-	;LIT			144
-	;[ ]
-	;JUMP
-	;TYPE			;type of stack item?
-	;WHILE/REPEAT
-	;RAW - convert smart hex
-	;DEC - dec from hex
-	;HEX - hex from dec
-	;WHILE			82
-	;+LOOP		;great if room
-	;IMMED
-	;COMPILE
-	;RESET
-	;RDROP		;actually better not expose to user
-	;R>
-	;R<
-	;R@
-	;RIGHT
-	;LEFT
-	;+ (string)
-	;= (string)
-	;CHR
-	;CREATE
-	;,
-	;C,
-	;SEE
-	;EDIT
-	;addresses from ZP, dict, etc onto stack
-	;'STO or STO" or similar for indirection on stack
-		;hmm, now mismatched though :(
-	;DEPTH
-	;HERE
-		;may be useful even without CREATE
-	;BETWEEN
-		
-	;Not needed:
-	;>=				96		;omit to save space
-	;<=				98		;omit to save space
-	;FORGET			100		;do in MEM window instead
-	
+            RTS 
+
 	JUMP_TABLE:
 		FDB CODE_DUP				;2
 		FDB CODE_SWAP				;4
@@ -2531,6 +2486,6 @@
 		FDB CODE_ACOS				;138
 		FDB CODE_ATAN				;140
 		FDB CODE_DEG				;142
-		
+		FDB CODE_WORDS              ;144
 		
 		

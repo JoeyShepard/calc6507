@@ -267,6 +267,12 @@
 					
 					;Compile mode
 					LDA ret_val
+                    CMP #TOKEN_VAR
+                    BNE .compile_not_var
+                        ;Do not allow VAR to be compiled 
+                        LDA #ERROR_INPUT
+                        JMP .error_sub
+                    .compile_not_var:
 					TAY
 					LDA JUMP_TABLE-2,Y
 					STA ret_address
@@ -274,7 +280,7 @@
 					STA ret_address+1
 					LDY #1
 					LDA (ret_address),Y
-					AND #MODE_IMMEDIATE
+					AND #IMMED
 					BNE .immediate
 					;Not immediate so compile
 					LDA ret_val
@@ -292,11 +298,6 @@
 				CMP #OBJ_ERROR
 				BNE .input_good
                     ;Unrecognized input
-
-                    ;Set mode to IMMEDIATE to avoid double error if compiling
-                    LDA #MODE_IMMEDIATE
-                    STA mode
-					
                     LDA #ERROR_INPUT
 					JMP .error_sub
 				.input_good:

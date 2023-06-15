@@ -10,5 +10,4 @@ for line in f:
     sys.exit()
   else:
     print(line[:-1])
-f.close()
 

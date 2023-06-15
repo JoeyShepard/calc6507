@@ -89,23 +89,23 @@
 	;Forth
 	;=====
 		;Word flags
-		equ NONE, 			0
-		equ MIN1,			1
-		equ MIN2,			2
-		equ MIN3,			3
-		equ ADD1,			4
+		equ NONE, 			0   ;No flags
+		equ MIN1,			1   ;At least one item on stack
+		equ MIN2,			2   ;At least two items on stack
+		equ MIN3,			3   ;At least three items on stack
+		equ ADD1,			4   ;Add one stack item for result
 		;FLOAT1 =			8
 		;STRING1 =			16
 		;HEX1 =				24
 		;FLOAT2 =			32
 		;STRING2 =			64
 		;HEX2 =				96
-		equ FLOATS,			8
-		equ STRINGS,		16
-		equ HEX,			24
-		equ SAME,			32
+		equ FLOATS,			8   ;Minimum items on stack must be floats
+		equ STRINGS,		16  ;Minimum items on stack must be strings
+		equ HEX,			24  ;Minimum items on stack must be hex
+		equ SAME,			32  ;Minimum items on stack must be floats
 		equ IMMED,			64
-		equ COMPILE,		128
+		equ COMPILE,		128 ;Compile-only
 		
 		;Word tokens
 		;							0 - reserved
@@ -180,6 +180,7 @@
 		equ TOKEN_ACOS,				138
 		equ TOKEN_ATAN,				140
 		equ TOKEN_DEG,				142
+        equ TOKEN_WORDS,            144
 		
 		;Execution modes
 		equ EXEC_INPUT,			0

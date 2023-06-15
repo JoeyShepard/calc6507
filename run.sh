@@ -18,9 +18,18 @@ echo Assembling...
 #L - listing to file
 #g - write debug info
 #q - quiet mode
-asl processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt
+asl processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt 2> errors.txt
+./show-errors.py errors.txt
+if [[ ! $? -eq 0  ]] 
+then
+    #Stop processing if there were errors in assembling
+    rm asm.txt
+    rm errors.txt
+    exit 1
+fi
 ./remove-escape.py asm.txt
 echo
+
 echo Generating hex file...
 p2hex processed.p -F Intel -l 32 -r 0x0000-0xFFFF > hex.txt
 cp processed.hex emu.hex
@@ -35,6 +44,7 @@ cp keys.txt "${emu_path}/keys.txt"
 
 echo Cleaning up...
 rm asm.txt
+rm errors.txt
 rm processed.hex
 rm processed.i
 rm processed.p
