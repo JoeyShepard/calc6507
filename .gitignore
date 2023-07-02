@@ -35,4 +35,7 @@ decimal\ test/input*.txt
 decimal\ test/*/input*.txt
 
 #examples that I did not create myself
-CORDIC/examples\ from\ HP\ forum/
+CORDIC/
+
+#tmux configuration files
+*.tmux
