@@ -53,8 +53,21 @@
 			.key_read:
 			
 				;Enter key
+                ;=========
+                ;KEY_ENTER defined as 13 in src/const.asm which works in Windows
+                ;when loading key input from file, but newline in Linux is just 10, 
+                ;so doesn't work when loading key input in Linux.
+                ;Confirmed editing existing key input file from Linux with notepad 
+                ;in Windows doesn't insert 13, so ok to edit existing files but
+                ;not to create file on Windows.
+                ;Check for 13 and 10 below, though note could cause problems if
+                ;keys.txt created in Windows as would be read as two new lines.
+                ;edited in Windows.
 				CMP #KEY_ENTER
-				BNE .not_enter
+				BEQ .key_enter
+                CMP #KEY_ENTER_ALT
+                BNE .not_enter
+                .key_enter:
 					LDA index
 					BEQ .loop
 					LDA #0

@@ -5,6 +5,9 @@ true equ $FF
 
 ;Misc
 ;====
+lo FUNCTION x,x # 256
+hi FUNCTION x,x / 256
+
 halt MACRO
 	BRK
 	BRK

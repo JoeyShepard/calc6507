@@ -1,6 +1,6 @@
 ;I/O and setup for emulator
 ;==========================
-	
+    ;Screen	
 	equ BG_COLOR,	$2A
 	equ FG_COLOR,	$0
 	
@@ -9,6 +9,9 @@
 	equ ERROR_X,	3*CHAR_WIDTH
 	equ ERROR_Y,	(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
 	
+    ;Keyboard
+    equ KEY_DOWN,   0
+    equ KEY_UP,     0
 	
 	FUNC setup
 		SEI
@@ -222,7 +225,7 @@
 		STA screen_ptr+1
 
 	END
-	
+    
 	FUNC LCD_print
 		ARGS
 			STRING source

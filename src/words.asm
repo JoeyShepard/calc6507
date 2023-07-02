@@ -2404,6 +2404,18 @@
 			JSR CODE_DROP+EXEC_HEADER
 			JMP RansTos
 
+    ;R0+0 - mode: primary, variables, user-defined words
+    ;R0+1 - words to skip before starting to print words. for scrolling.
+    ;R0+2 - counter of words to skip then counter of words to print
+    ;R0+3 - pointer to word list
+    ;R0+4 - pointer to word list
+    ;R0+5 - selected row on screen
+    ;R0+6 - index into word characters for word 
+    ;R0+7 - temp for calling LCD_char
+    ;R1+0 - pointer to next word in word list
+    ;R1+1 - pointer to next word in word list
+    ;R1+2 - difference between next word (R1+0) and current (R0+3)
+    ;R1+3 - difference between next word (R1+0) and current (R0+3)
 	WORD_WORDS:
 		FCB 5,"WORDS"			;Name
 		FDB dict_begin			;Next word
@@ -2412,7 +2424,195 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB NONE     					;Flags	
 
+            LDA #WORDS_PRIM
+            .display_new:   ;New screen - reset offset into list
+                STA R0      ;What to display - primary words, variables, or user-defined words
+                LDA #49
+                STA R0+1    ;Words to skip before printing
+                TODO: remove
+                LDA #0
+                STA R0+5    ;Selected row on screen
+            .display:
+                CALL LCD_clrscr
+
+                ;Print out list of words
+                LDA R0+1    ;Words to skip before printing
+                STA R0+2    ;Counter of words to skip
+                LDA R0
+                CMP #WORDS_PRIM
+                JNE .not_prim
+                    MOV.W #FORTH_WORDS,R0+3
+                    .word_skip_loop:
+                        JSR NEXT_WORD_STUB
+                        ;No words left to skip?
+                        LDA R0+2
+                        BEQ .word_skip_done     
+                        ;End of word list reached?
+                        LDA R0+3
+                        EOR R0+4
+                        JEQ .word_draw_done     
+                        ;Still processing primitives?
+                        
+                        halt
+
+                        LDY #0
+                        LDA (R0+3),Y
+                        CLC
+                        ADC #4  ;point past name to word type
+                        TAY
+                        LDA (R0+3),Y
+                        CMP #OBJ_PRIMITIVE
+                        BEQ .word_skip_done
+                        ;Skip words with no name
+                        LDY #0
+                        LDA (R0+3),Y
+                        BEQ .zero_len
+                            DEC R0+2
+                        .zero_len:
+                        ;Update pointer to next word
+                        MOV.W R1,R0+3
+                        JMP .word_skip_loop
+                    .word_skip_done:
+
+                    LDA #WORDS_ROWS
+                    STA R0+2
+                    .word_draw_loop:  
+                        LDA R0+2
+                        JEQ .word_draw_done     ;No rows left to draw
+                        LDA R0+3
+                        EOR R0+4
+                        JEQ .word_draw_done     ;End of word list reached
+                       
+                        ;Don't count word with no name
+                        LDY #0
+                        LDA (R0+3),Y
+                        BEQ .skip_word
+
+                        ;Invert selected row
+                        LDA #0
+                        STA font_inverted
+                        LDA #WORDS_ROWS
+                        SEC
+                        SBC R0+2    ;Rows left to print
+                        CMP R0+5    ;Selected row
+                        BNE .not_selected_row
+                            LDA #$FF
+                            STA font_inverted
+                            CALL LCD_print, "                     "
+                            LDA #0
+                            STA screen_ptr
+                        .not_selected_row:
+
+                        ;Draw characters in word
+                        LDA #1
+                        STA R0+6
+                        .word_draw_chars:
+                            LDY R0+6
+                            LDA (R0+3),Y
+                            STA R0+7
+                            CALL LCD_char, R0+7
+                            INC R0+6
+                            LDY #0
+                            LDA (R0+3),Y
+                            CMP R0+6
+                        BCS .word_draw_chars
+                       
+                        ;Draw size
+                        LDA #WORDS_SIZE_X
+                        STA screen_ptr
+                        CALL HexHigh, R1+3
+                        CALL HexLow, R1+3
+                        CALL HexHigh, R1+2
+                        CALL HexLow, R1+2
+
+                        ;Next line on screen
+                        LDA #0
+                        STA screen_ptr
+                        LDA screen_ptr+1
+                        CLC
+                        ADC #CHAR_HEIGHT
+                        STA screen_ptr+1
+                       
+                        ;Next word to draw
+                        DEC R0+2
+                        .skip_word:
+                        MOV.W R1,R0+3
+                        JSR NEXT_WORD_STUB 
+                        JMP .word_draw_loop
+
+                    .word_draw_done:
+                .not_prim:
+
+                ;Print modes out along bottom of screen
+                LDA #lo(WORDS_MSG)
+                STA R0+3
+                LDA #WORDS_MSG / 256
+                STA R0+4
+                MOV.W #WORDS_Y,screen_ptr
+                .mode_loop:
+                    LDA #0
+                    STA font_inverted
+                    LDA R0
+                    CMP R0+2
+                    BNE .not_selected
+                        LDA #$FF
+                        STA font_inverted
+                    .not_selected:
+                    CALL LCD_print, R0+3
+
+                    CLC
+                    LDA R0+3
+                    ADC #WORD_MSG_LEN
+                    STA R0+3
+                    BCC .no_carry
+                        INC R0+4
+                    .no_carry:
+
+                    INC R0+2
+                    LDA R0+2
+                    CMP #WORDS_MODES
+                    BNE .mode_loop
+
+            halt
+            LDA R0+3
+            LDA R0+4
+            LDA R1+0
+            LDA R1+1
+
+            .input_loop:
+                CALL ReadKey
+                CMP #'a'
+                BNE .not_a
+                    LDA #WORDS_PRIM
+                    JMP .display_new
+                .not_a:
+                CMP #'b'
+                BNE .not_b
+                    LDA #WORDS_VARS
+                    JMP .display_new
+                .not_b:
+                CMP #'c'
+                BNE .not_c
+                    LDA #WORDS_USER
+                    JMP .display_new
+                .not_c:
+                CMP #'+'    ;Selection down
+                BNE .not_down
+                    LDA R1+0
+                    EOR R1+1
+                    BEQ .input_loop ;At end of word list
+                    INC R0+1
+
+                    JMP .display
+                .not_down:
+            JMP .input_loop
+            
             RTS 
+
+            WORDS_MSG:
+                FCB " A-PRIM",0
+                FCB " B-VARS",0
+                FCB " C-USER",0
 
 	JUMP_TABLE:
 		FDB CODE_DUP				;2

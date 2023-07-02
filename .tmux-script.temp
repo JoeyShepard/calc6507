@@ -1,0 +1,25 @@
+#!/bin/bash
+
+tmux new-session -d -x 132 -y 48 -c ./ ''
+tmux rename-window -t 0 run
+
+tmux new-window -c ./ 'vim src/main.asm'
+tmux rename-window -t 1 main
+
+tmux new-window -c ./ 'vim src/todo.asm'
+tmux rename-window -t 2 TODO
+
+tmux new-window -c ./ 'vim src/emu6507.asm'
+tmux rename-window -t 3 emu6507
+
+tmux new-window -c ./ 'vim src/forth.asm'
+tmux rename-window -t 4 forth
+
+tmux new-window -c ./ 'vim src/math.asm'
+tmux rename-window -t 5 math
+
+tmux new-window -c ./ 'vim src/words.asm'
+tmux rename-window -t 6 words
+
+tmux select-window -t 0
+tmux attach-session -d

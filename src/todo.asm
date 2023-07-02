@@ -24,6 +24,8 @@
     TODO: draw smart hex differently? M$1234
     TODO: double check list on webpage
     TODO: better error messages if room left
+    TODO: combine improvements.asm with this file
+    TODO: merge system.asm
 
     ;Size related - only if necessary
     ;================================

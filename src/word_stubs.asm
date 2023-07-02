@@ -209,8 +209,24 @@
 		JSR PUSH_STUB
 		FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00
 		RTS
-			
 	
+    NEXT_WORD_STUB:
+        LDY #0                  ;Point to next word
+        LDA (R0+3),Y
+        TAY
+        INY
+        LDA (R0+3),Y
+        STA R1
+        SEC
+        SBC R0+3
+        STA R1+2
+        INY
+        LDA (R0+3),Y
+        SBC R0+4
+        STA R1+3
+        LDA (R0+3),Y
+        STA R1+1
+        RTS
 	
 	TODO: delete?
 	TODO: check that BCD_CopyConst is smaller than this - seems only 19 bytes

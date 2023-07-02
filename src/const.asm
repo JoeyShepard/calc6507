@@ -43,6 +43,7 @@
 	;Key constants
 	equ KEY_BACKSPACE, 		8
 	equ KEY_ENTER, 			13
+	equ KEY_ENTER_ALT, 		10  ;Compatibility for key input files on Linux
 	equ KEY_ESCAPE,			27
 	
 	;Floats
@@ -65,7 +66,17 @@
 	
 	;Hex constants
 	equ HEX_SMART,			1
-	
+
+    ;Constants for WORDS
+    equ WORDS_PRIM,         0
+    equ WORDS_VARS,         1
+    equ WORDS_USER,         2
+    equ WORDS_MODES,        3   ;Count of modes above
+    equ WORDS_Y,            SCREEN_ADDRESS+(SCREEN_HEIGHT-CHAR_HEIGHT)*SCREEN_WIDTH
+    equ WORD_MSG_LEN,       8
+    equ WORDS_ROWS,         7
+    equ WORDS_SIZE_X,       17*CHAR_WIDTH
+
 	;Error codes
 	equ ERROR_NONE,					0
 	equ ERROR_INPUT,				2
