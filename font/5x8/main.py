@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 from graphics import *
 import os
@@ -66,10 +67,18 @@ for i in range(font_counter-1):
 f.close()
 f_debug.close()
 
+#OLD - switched to Linux since then
 #Update font file in source
-os.system("copy font_5x8.asm ..\\..\\src\\font_5x8.asm")
-os.system("copy font_debug.asm ..\\..\\src\\font_debug.asm")
+#os.system("copy font_5x8.asm ..\\..\\src\\font_5x8.asm")
+#os.system("copy font_debug.asm ..\\..\\src\\font_debug.asm")
 
+#DOESN'T WORK - will not run "from graphics import *" since no
+#display connected on headless though no display needed
+
+#WORKED - ran through PuTTY with X server
+#Update font file in source
+os.system("cp font_5x8.asm ../../src/font_5x8.asm")
+os.system("cp font_debug.asm ../../src/font_debug.asm")
 
 #win=GraphWin("Font",547,58)
 #font_img.draw(win)

@@ -2444,31 +2444,28 @@
                     MOV.W #FORTH_WORDS,R0+3
                     .word_skip_loop:
                         JSR NEXT_WORD_STUB
+
                         ;No words left to skip?
                         LDA R0+2
                         BEQ .word_skip_done     
+                        
                         ;End of word list reached?
                         LDA R0+3
                         EOR R0+4
                         JEQ .word_draw_done     
-                        ;Still processing primitives?
-                        
-                        halt
 
-                        LDY #0
-                        LDA (R0+3),Y
-                        CLC
-                        ADC #4  ;point past name to word type
-                        TAY
-                        LDA (R0+3),Y
+                        ;Still processing primitives?
+                        JSR WORD_TYPE_STUB
                         CMP #OBJ_PRIMITIVE
-                        BEQ .word_skip_done
+                        JNE .word_draw_done
+
                         ;Skip words with no name
                         LDY #0
                         LDA (R0+3),Y
                         BEQ .zero_len
                             DEC R0+2
                         .zero_len:
+                        
                         ;Update pointer to next word
                         MOV.W R1,R0+3
                         JMP .word_skip_loop
@@ -2477,12 +2474,21 @@
                     LDA #WORDS_ROWS
                     STA R0+2
                     .word_draw_loop:  
+                        
+                        ;No words left to draw?
                         LDA R0+2
-                        JEQ .word_draw_done     ;No rows left to draw
+                        JEQ .word_draw_done
+
+                        ;End of word list reached?
                         LDA R0+3
                         EOR R0+4
-                        JEQ .word_draw_done     ;End of word list reached
-                       
+                        JEQ .word_draw_done
+                      
+                        ;Still processing primitives?
+                        JSR WORD_TYPE_STUB
+                        CMP #OBJ_PRIMITIVE
+                        JNE .word_draw_done
+
                         ;Don't count word with no name
                         LDY #0
                         LDA (R0+3),Y
@@ -2549,6 +2555,8 @@
                 LDA #WORDS_MSG / 256
                 STA R0+4
                 MOV.W #WORDS_Y,screen_ptr
+                LDA #0
+                STA R0+2
                 .mode_loop:
                     LDA #0
                     STA font_inverted
@@ -2572,12 +2580,6 @@
                     LDA R0+2
                     CMP #WORDS_MODES
                     BNE .mode_loop
-
-            halt
-            LDA R0+3
-            LDA R0+4
-            LDA R1+0
-            LDA R1+1
 
             .input_loop:
                 CALL ReadKey
@@ -2605,10 +2607,16 @@
 
                     JMP .display
                 .not_down:
+                CMP #'-'    ;Selection up
+                BNE .not_up
+                    TODO: selection up
+                .not_up:
+                CMP #KEY_ON
+                BNE .not_on
+                    RTS
+                .not_on:
             JMP .input_loop
             
-            RTS 
-
             WORDS_MSG:
                 FCB " A-PRIM",0
                 FCB " B-VARS",0

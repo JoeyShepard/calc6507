@@ -9,10 +9,6 @@
 	equ ERROR_X,	3*CHAR_WIDTH
 	equ ERROR_Y,	(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
 	
-    ;Keyboard
-    equ KEY_DOWN,   0
-    equ KEY_UP,     0
-	
 	FUNC setup
 		SEI
 		CLD

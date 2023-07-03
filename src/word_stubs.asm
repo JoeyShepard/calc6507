@@ -222,12 +222,20 @@
         STA R1+2
         INY
         LDA (R0+3),Y
+        STA R1+1
         SBC R0+4
         STA R1+3
-        LDA (R0+3),Y
-        STA R1+1
         RTS
-	
+
+    WORD_TYPE_STUB:
+        LDY #0
+        LDA (R0+3),Y
+        CLC
+        ADC #4  ;point past name to word type
+        TAY
+        LDA (R0+3),Y
+        RTS
+
 	TODO: delete?
 	TODO: check that BCD_CopyConst is smaller than this - seems only 19 bytes
 	TODO: eliminate PUSH_STUB too?
