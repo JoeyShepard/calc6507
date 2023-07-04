@@ -248,8 +248,7 @@
                 LDY #WORDS_WORDS_DONE
                 RTS
         .not_dict_begin:
-        ;FALLTHROUGH!!!
-    WORD_SIZE_STUB_USER:
+
         ;Check if next word is last word in dictionary
         LDA R1+1
         CMP dict_ptr+1

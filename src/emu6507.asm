@@ -87,7 +87,9 @@
 		VARS
 			BYTE counter
 		END
-		
+	
+        LDA #0
+        STA font_inverted
 		MOV.W #SCREEN_ADDRESS, screen_ptr
 		;Rows on screen
 		MOV #128, counter

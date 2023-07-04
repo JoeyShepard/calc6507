@@ -69,10 +69,10 @@
 	equ HEX_SMART,			1
 
     ;Constants for WORDS
-    equ WORDS_PRIM,         0
-    equ WORDS_VARS,         1
-    equ WORDS_USER,         2
-    equ WORDS_MODES,        3   ;Count of modes above
+    equ WORDS_PRIM,         OBJ_PRIMITIVE
+    equ WORDS_USER,         OBJ_SECONDARY
+    equ WORDS_VARS,         OBJ_VAR
+    equ WORDS_LAST_MODE,    WORDS_VARS+1
     equ WORDS_Y,            SCREEN_ADDRESS+(SCREEN_HEIGHT-CHAR_HEIGHT)*SCREEN_WIDTH
     equ WORD_MSG_LEN,       8
     equ WORDS_ROWS,         7
