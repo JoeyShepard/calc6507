@@ -76,7 +76,9 @@
     equ WORDS_Y,            SCREEN_ADDRESS+(SCREEN_HEIGHT-CHAR_HEIGHT)*SCREEN_WIDTH
     equ WORD_MSG_LEN,       8
     equ WORDS_ROWS,         7
-    equ WORDS_SIZE_X,       17*CHAR_WIDTH
+    equ WORDS_SIZE_X,       16*CHAR_WIDTH
+    equ WORDS_WORDS_LEFT,   0
+    equ WORDS_WORDS_DONE,   1
 
 	;Error codes
 	equ ERROR_NONE,					0
@@ -115,7 +117,7 @@
 		equ FLOATS,			8   ;Minimum items on stack must be floats
 		equ STRINGS,		16  ;Minimum items on stack must be strings
 		equ HEX,			24  ;Minimum items on stack must be hex
-		equ SAME,			32  ;Minimum items on stack must be floats
+		equ SAME,			32  ;Minimum items on stack must be of same type
 		equ IMMED,			64
 		equ COMPILE,		128 ;Compile-only
 		

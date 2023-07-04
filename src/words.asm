@@ -2372,7 +2372,6 @@
 			
 			RTS
 	
-	TODO: remove as last resort
 	WORD_DEG:
 		FCB 3,"DEG"				;Name
 		FDB WORD_WORDS			;Next word
@@ -2404,18 +2403,23 @@
 			JSR CODE_DROP+EXEC_HEADER
 			JMP RansTos
 
-    ;R0+0 - mode: primary, variables, user-defined words
+    TODO: placed before last word in primitives?
+    FORTH_LAST_WORD:
+    TODO: variable names
+    ;R0+0 - mode: primary, variables, or user-defined words
     ;R0+1 - words to skip before starting to print words. for scrolling.
     ;R0+2 - counter of words to skip then counter of words to print
     ;R0+3 - pointer to word list
     ;R0+4 - pointer to word list
     ;R0+5 - selected row on screen
     ;R0+6 - index into word characters for word 
-    ;R0+7 - temp for calling LCD_char
+    ;R0+7 - temp for calling LCD_char. temp for next word status.
     ;R1+0 - pointer to next word in word list
     ;R1+1 - pointer to next word in word list
     ;R1+2 - difference between next word (R1+0) and current (R0+3)
     ;R1+3 - difference between next word (R1+0) and current (R0+3)
+    ;R1+4 - whether word left to draw after last drawn
+    ;R1+5 - rows drawn to screen
 	WORD_WORDS:
 		FCB 5,"WORDS"			;Name
 		FDB dict_begin			;Next word
@@ -2427,7 +2431,9 @@
             LDA #WORDS_PRIM
             .display_new:   ;New screen - reset offset into list
                 STA R0      ;What to display - primary words, variables, or user-defined words
-                LDA #49
+                TODO: remove
+                LDA #47
+                LDA #0
                 STA R0+1    ;Words to skip before printing
                 TODO: remove
                 LDA #0
@@ -2438,26 +2444,37 @@
                 ;Print out list of words
                 LDA R0+1    ;Words to skip before printing
                 STA R0+2    ;Counter of words to skip
+                LDA #0
+                STA R1+5    ;Rows drawn to screen
                 LDA R0
                 CMP #WORDS_PRIM
                 JNE .not_prim
+
+                    ;Showing primary words
                     MOV.W #FORTH_WORDS,R0+3
                     .word_skip_loop:
                         JSR NEXT_WORD_STUB
 
+                        TODO: condense with below into stub?
                         ;No words left to skip?
                         LDA R0+2
                         BEQ .word_skip_done     
-                        
+                       
+                        ;End of primitives?
+                        JSR WORD_SIZE_STUB
+                        CPY #WORDS_WORDS_DONE
+                        BEQ .word_skip_done
+
+                        TODO: remove
                         ;End of word list reached?
-                        LDA R0+3
-                        EOR R0+4
-                        JEQ .word_draw_done     
+                        ;LDA R0+3
+                        ;ORA R0+4
+                        ;JEQ .word_draw_done     
 
                         ;Still processing primitives?
-                        JSR WORD_TYPE_STUB
-                        CMP #OBJ_PRIMITIVE
-                        JNE .word_draw_done
+                        ;JSR WORD_TYPE_STUB
+                        ;CMP #OBJ_PRIMITIVE
+                        ;JNE .word_draw_done
 
                         ;Skip words with no name
                         LDY #0
@@ -2480,19 +2497,19 @@
                         JEQ .word_draw_done
 
                         ;End of word list reached?
-                        LDA R0+3
-                        EOR R0+4
-                        JEQ .word_draw_done
+                        ;LDA R0+3
+                        ;ORA R0+4
+                        ;JEQ .word_draw_done
                       
                         ;Still processing primitives?
-                        JSR WORD_TYPE_STUB
-                        CMP #OBJ_PRIMITIVE
-                        JNE .word_draw_done
+                        ;JSR WORD_TYPE_STUB
+                        ;CMP #OBJ_PRIMITIVE
+                        ;JNE .word_draw_done
 
                         ;Don't count word with no name
                         LDY #0
                         LDA (R0+3),Y
-                        BEQ .skip_word
+                        JEQ .skip_word
 
                         ;Invert selected row
                         LDA #0
@@ -2504,7 +2521,7 @@
                         BNE .not_selected_row
                             LDA #$FF
                             STA font_inverted
-                            CALL LCD_print, "                     "
+                            CALL LCD_print, "                "
                             LDA #0
                             STA screen_ptr
                         .not_selected_row:
@@ -2522,14 +2539,27 @@
                             LDA (R0+3),Y
                             CMP R0+6
                         BCS .word_draw_chars
-                       
+
                         ;Draw size
+                        JSR WORD_SIZE_STUB
+                        STY R1+4
                         LDA #WORDS_SIZE_X
                         STA screen_ptr
+                        LDA #'$'
+                        STA R0+7
+                        CALL LCD_char, R0+7
                         CALL HexHigh, R1+3
                         CALL HexLow, R1+3
                         CALL HexHigh, R1+2
                         CALL HexLow, R1+2
+
+                        ;Mark line as drawn
+                        INC R1+5
+
+                        ;WORD_SIZE_STUB determines if done printing
+                        LDA R1+4
+                        CMP #WORDS_WORDS_DONE
+                        BEQ .word_draw_done
 
                         ;Next line on screen
                         LDA #0
@@ -2600,16 +2630,34 @@
                 .not_c:
                 CMP #'+'    ;Selection down
                 BNE .not_down
-                    LDA R1+0
-                    EOR R1+1
-                    BEQ .input_loop ;At end of word list
-                    INC R0+1
-
+                    LDA R1+5    ;Rows drawn to screen
+                    CLC
+                    SBC R0+5    ;Selected row on screen
+                    BNE .not_at_end
+                        ;Last line selected
+                        LDA R1+4
+                        CMP #WORDS_WORDS_DONE
+                        BEQ .input_loop
+                        ;Advance scroll
+                        INC R0+1
+                        JMP .display
+                    .not_at_end:
+                    INC R0+5
                     JMP .display
                 .not_down:
                 CMP #'-'    ;Selection up
                 BNE .not_up
-                    TODO: selection up
+                    LDA R0+5    ;Selected row on screen
+                    BEQ .at_top
+                        ;Not at top - move up one
+                        DEC R0+5
+                        JMP .display
+                    .at_top:
+                    LDA R0+1    ;Rows to skip
+                    JEQ .input_loop
+                    DEC R0+1
+                    JMP .display
+
                 .not_up:
                 CMP #KEY_ON
                 BNE .not_on
@@ -2621,6 +2669,8 @@
                 FCB " A-PRIM",0
                 FCB " B-VARS",0
                 FCB " C-USER",0
+
+    FORTH_WORDS_END:
 
 	JUMP_TABLE:
 		FDB CODE_DUP				;2

@@ -26,6 +26,7 @@
     TODO: better error messages if room left
     TODO: combine improvements.asm with this file
     TODO: merge system.asm
+    TODO: reuse FP registers to replace temp variables in other functions
 
     ;Size related - only if necessary
     ;================================
