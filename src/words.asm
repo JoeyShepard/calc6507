@@ -2420,6 +2420,8 @@
     ;R1+3 - difference between next word (R1+0) and current (R0+3)
     ;R1+4 - whether word left to draw after last drawn
     ;R1+5 - rows drawn to screen
+    ;R1+6 - address of highlighted word
+    ;R1+7 - address of highlighted word
 	WORD_WORDS:
 		FCB 5,"WORDS"			;Name
 		FDB dict_begin			;Next word
@@ -2432,20 +2434,20 @@
             .display_new:   ;New screen - reset offset into list
                 STA R0      ;What to display - primary words, variables, or user-defined words
                 LDA #0
-                TODO: delete
-                LDA #49
                 STA R0+1    ;Words to skip before printing
-                TODO: delete
-                LDA #6
                 STA R0+5    ;Selected row on screen
             .display:
-                CALL LCD_clrscr
 
                 ;Print out list of words
+                CALL LCD_clrscr
                 LDA R0+1    ;Words to skip before printing
                 STA R0+2    ;Counter of words to skip
                 LDA #0
                 STA R1+5    ;Rows drawn to screen
+                STA R1+6    ;Address of selected word
+                STA R1+7    ;Address of selected word
+
+                ;Whether primitive, variable, or user-defined word
                 LDA R0
                 CMP #WORDS_PRIM
                 JNE .not_prim
@@ -2458,7 +2460,6 @@
                 .type_done:
 
                 TODO: see if loops below can be consolidated
-
                 .word_skip_loop:
                     JSR NEXT_WORD_STUB
 
@@ -2487,6 +2488,11 @@
                     MOV.W R1,R0+3
                     JMP .word_skip_loop
                 .word_skip_done:
+
+                ;Check if any words to draw - vars and user-defined only
+                LDA R1+0
+                ORA R1+1
+                JEQ .word_draw_done
 
                 LDA #WORDS_ROWS
                 STA R0+2
@@ -2521,9 +2527,14 @@
                         LDA #$FF
                         STA font_inverted
                         CALL LCD_print, "                "
-                        
                         LDA #0
                         STA screen_ptr
+
+                        ;Save address of selected row
+                        LDA R0+3
+                        STA R1+6
+                        LDA R0+4
+                        STA R1+7
                     .not_selected_row:
 
                     ;Draw characters in word
@@ -2630,12 +2641,31 @@
                     SBC R0+5    ;Selected row on screen
                     BNE .not_at_end
                         ;Last line selected
-                        LDA R1+4
-                        CMP #WORDS_WORDS_DONE
-                        BEQ .input_loop
-                        ;Advance scroll
-                        INC R0+1
-                        JMP .display
+                        LDA R0+0
+                        CMP #WORDS_PRIM
+                        BNE .last_not_prim
+                            ;Primary selected 
+                            LDA R1+4
+                            CMP #WORDS_WORDS_DONE
+                            BEQ .input_loop
+                            ;Advance scroll
+                            INC R0+1
+                            JMP .display
+                        .last_not_prim:
+                            ;Var or user-defined selected
+                            MOV.W R1+6,R0+3
+                            .down_loop:
+                                JSR NEXT_WORD_STUB
+                                JSR WORD_SIZE_STUB
+                                CPY #WORDS_WORDS_DONE
+                                BEQ .input_loop
+                                MOV.W R1,R0+3
+                                JSR WORD_TYPE_STUB
+                                CMP R0+0
+                                JNE .down_loop 
+                                ;Advance scroll
+                                INC R0+1
+                                JMP .display
                     .not_at_end:
                     INC R0+5
                     JMP .display

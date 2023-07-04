@@ -209,8 +209,8 @@ Line numbers
 6692: FUNC HexFalse
 6699: FUNC HexTrue
 6718: include words.asm
-9538: include word_stubs.asm
-9865: FUNC main BEGIN
+9568: include word_stubs.asm
+9895: FUNC main BEGIN
        VARS: WORD dest, BYTE arg, BYTE type
        4 bytes used
 
