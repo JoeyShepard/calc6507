@@ -2406,6 +2406,7 @@
     TODO: placed before last word in primitives?
     FORTH_LAST_WORD:
     TODO: variable names
+    TODO: optimizer?
     ;R0+0 - mode: primary, variables, or user-defined words
     ;R0+1 - words to skip before starting to print words. for scrolling.
     ;R0+2 - counter of words to skip then counter of words to print
@@ -2413,7 +2414,7 @@
     ;R0+4 - pointer to word list
     ;R0+5 - selected row on screen
     ;R0+6 - index into word characters for word 
-    ;R0+7 - temp for calling LCD_char. temp for next word status.
+    ;R0+7 - temp storage in multiple places
     ;R1+0 - pointer to next word in word list
     ;R1+1 - pointer to next word in word list
     ;R1+2 - difference between next word (R1+0) and current (R0+3)
@@ -2422,6 +2423,8 @@
     ;R1+5 - rows drawn to screen
     ;R1+6 - address of highlighted word
     ;R1+7 - address of highlighted word
+    ;R2+0 - counter for garbage collection
+    ;R2+1 - counter for garbage collection
 	WORD_WORDS:
 		FCB 5,"WORDS"			;Name
 		FDB dict_begin			;Next word
@@ -2586,10 +2589,7 @@
                 .word_draw_done:
 
                 ;Print modes out along bottom of screen
-                LDA #lo(WORDS_MSG)
-                STA R0+3
-                LDA #WORDS_MSG / 256
-                STA R0+4
+                MOV.W #WORDS_MSG, R0+3
                 MOV.W #WORDS_Y,screen_ptr
                 LDA #WORDS_PRIM
                 STA R0+2
@@ -2636,6 +2636,7 @@
                 .not_c:
                 CMP #'+'    ;Selection down
                 BNE .not_down
+
                     LDA R1+5    ;Rows drawn to screen
                     CLC
                     SBC R0+5    ;Selected row on screen
@@ -2682,18 +2683,189 @@
                     JEQ .input_loop
                     DEC R0+1
                     JMP .display
-
                 .not_up:
                 CMP #KEY_ON
                 BNE .not_on
                     RTS
                 .not_on:
+                CMP #KEY_BACKSPACE
+                JNE .not_backspace
+                    LDA R0+0
+                    CMP #WORDS_PRIM
+                    JEQ .cant_delete
+
+                        ;Anything to delete selected?
+                        LDA R1+6
+                        ORA R1+7
+                        JEQ .input_loop
+
+                        ;Calculate size of bytes to delete
+                        MOV.W R1+6,R0+3
+                        JSR NEXT_WORD_STUB
+                        JSR WORD_SIZE_SHORT_STUB
+
+                        ;Calculate count of bytes to shift
+                        SEC
+                        LDA dict_ptr
+                        SBC R1+0
+                        STA R2+0
+                        LDA dict_ptr+1
+                        SBC R1+1
+                        STA R2+1
+                       
+                        ;Adjust dict ptr
+                        CLC
+                        LDA R0+3
+                        ADC R2+0
+                        STA dict_ptr
+                        STA dict_save
+                        LDA R0+4
+                        ADC R2+1
+                        STA dict_ptr+1
+                        STA dict_save+1
+                        
+                        ;Add 3 so final 0-length item is copied too
+                        CLC
+                        LDA R2+0
+                        ADC #3 
+                        STA R2+0
+                        BNE .gc_no_carry
+                            INC R2+1
+                        .gc_no_carry:
+                        
+                        ;Copy bytes
+                        LDY #0
+                        .gc_copy_loop:
+                            LDA (R1+0),Y
+                            STA (R0+3),Y
+                            DEC R2+0
+                            BNE .no_underflow
+                                LDA R2+1
+                                BEQ .gc_copy_done
+                                DEC R2+1
+                            .no_underflow: 
+                            INY
+                            BNE .gc_copy_loop
+                            INC R1+1
+                            INC R0+4
+                            JMP .gc_copy_loop
+                        .gc_copy_done:
+                       
+                        ;Fix addresses in word headers
+                        MOV.W R1+6,R0+3
+                        .gc_address_loop:
+                            LDY #0
+                            LDA (R0+3),Y
+                            TAY
+                            INY
+                            LDA (R0+3),Y
+                            STA R1+0
+                            INY
+                            LDA (R0+3),Y
+                            STA R1+1
+                            ORA R1+0
+                            BEQ .gc_address_done
+                            DEY
+                            SEC
+                            LDA R1+0
+                            SBC R1+2
+                            STA (R0+3),Y
+                            STA R0+7
+                            INY
+                            LDA R1+1
+                            SBC R1+3
+                            STA (R0+3),Y
+                            STA R0+4
+                            LDA R0+7
+                            STA R0+3
+                            JMP .gc_address_loop
+                        .gc_address_done:
+
+                        TODO: keep list index?
+                        LDA R0
+                        JMP .display_new
+                    .cant_delete:
+                .not_backspace:
             JMP .input_loop
             
             WORDS_MSG:
                 FCB " A-PRIM",0
                 FCB " B-USER",0
                 FCB " C-VARS",0
+            TODO: full list or only list of GC?
+            GC_TABLE:
+                FCB WORDS_NO_GC ; CODE_DUP				;2
+                FCB WORDS_NO_GC ; CODE_SWAP				;4
+                FCB WORDS_NO_GC ; CODE_DROP				;6
+                FCB WORDS_NO_GC ; CODE_OVER				;8
+                FCB WORDS_NO_GC ; CODE_ROT				;10
+                FCB WORDS_NO_GC ; CODE_MIN_ROT			;12
+                FCB WORDS_NO_GC ; CODE_CLEAR			;14
+                FCB WORDS_NO_GC ; CODE_ADD				;16
+                FCB WORDS_NO_GC ; CODE_SUB				;18
+                FCB WORDS_NO_GC ; CODE_MULT				;20
+                FCB WORDS_NO_GC ; CODE_DIV				;22
+                FCB WORDS_NO_GC ; CODE_TICK				;24 ?
+                FCB WORDS_NO_GC ; CODE_EXEC				;26 ?
+                FCB WORDS_NO_GC ; CODE_STORE			;28 ?
+                FCB WORDS_NO_GC ; CODE_FETCH			;30 ?
+                FCB WORDS_NO_GC ; CODE_CSTORE			;32 ?
+                FCB WORDS_NO_GC ; CODE_CFETCH			;34 ?
+                FCB WORDS_NO_GC ; CODE_COLON			;36 ?
+                FCB WORDS_NO_GC ; CODE_SEMI				;38
+                FCB WORDS_NO_GC ; CODE_FLOAT			;40 ?
+                FCB WORDS_NO_GC ; CODE_HEX				;42 ?
+                FCB WORDS_NO_GC ; CODE_STRING			;44 ?
+                FCB WORDS_NO_GC ; CODE_HALT				;46
+                FCB WORDS_NO_GC ; CODE_VAR				;48 ?
+                FCB WORDS_NO_GC ; CODE_VAR_THREAD		;50 ?
+                FCB WORDS_NO_GC ; CODE_STO				;52 ?
+                FCB WORDS_NO_GC ; CODE_FREE				;54
+                FCB WORDS_NO_GC ; CODE_SECONDARY		;56 ?
+                FCB WORDS_NO_GC ; CODE_EXIT				;58 ?
+                FCB WORDS_NO_GC ; CODE_BREAK			;60 ?
+                FCB WORDS_NO_GC ; CODE_QUIT				;62 ?
+                FCB WORDS_NO_GC ; CODE_STO_THREAD		;64 ?
+                FCB WORDS_NO_GC ; CODE_DO				;66 ?
+                FCB WORDS_NO_GC ; CODE_DO_THREAD		;68 ?
+                FCB WORDS_NO_GC ; CODE_LOOP				;70 ?
+                FCB WORDS_NO_GC ; CODE_LOOP_THREAD		;72 ?
+                FCB WORDS_NO_GC ; CODE_EQUAL			;74
+                FCB WORDS_NO_GC ; CODE_GT				;76
+                FCB WORDS_NO_GC ; CODE_LT				;78
+                FCB WORDS_NO_GC ; CODE_NEQ				;80
+                FCB WORDS_NO_GC ; CODE_I				;82 ?
+                FCB WORDS_NO_GC ; CODE_J				;84 ?
+                FCB WORDS_NO_GC ; CODE_K				;86 ?
+                FCB WORDS_NO_GC ; CODE_EXIT_THREAD		;88 ?
+                FCB WORDS_NO_GC ; CODE_BEGIN			;90 ?
+                FCB WORDS_NO_GC ; CODE_AGAIN			;92 ?
+                FCB WORDS_NO_GC ; CODE_AGAIN_THREAD		;94 ?
+                FCB WORDS_NO_GC ; CODE_UNTIL			;96 ?
+                FCB WORDS_NO_GC ; CODE_UNTIL_THREAD		;98 ?
+                FCB WORDS_NO_GC ; CODE_MAX				;100
+                FCB WORDS_NO_GC ; CODE_MIN				;102
+                FCB WORDS_NO_GC ; CODE_AND				;104
+                FCB WORDS_NO_GC ; CODE_OR				;106
+                FCB WORDS_NO_GC ; CODE_XOR				;108
+                FCB WORDS_NO_GC ; CODE_NOT				;110
+                FCB WORDS_NO_GC ; CODE_LEAVE			;112 ?
+                FCB WORDS_NO_GC ; CODE_LEAVE_THREAD	    ;114 ?
+                FCB WORDS_NO_GC ; CODE_IF				;116 ?
+                FCB WORDS_NO_GC ; CODE_THEN				;118 ? 
+                FCB WORDS_NO_GC ; CODE_ELSE				;120 ?
+                FCB WORDS_NO_GC ; CODE_LSHIFT			;122 
+                FCB WORDS_NO_GC ; CODE_RSHIFT			;124
+                FCB WORDS_NO_GC ; CODE_ABS				;126
+                FCB WORDS_NO_GC ; CODE_PI				;128
+                FCB WORDS_NO_GC ; CODE_SIN				;130
+                FCB WORDS_NO_GC ; CODE_COS				;132
+                FCB WORDS_NO_GC ; CODE_TAN				;134
+                FCB WORDS_NO_GC ; CODE_ASIN				;136
+                FCB WORDS_NO_GC ; CODE_ACOS				;138
+                FCB WORDS_NO_GC ; CODE_ATAN				;140
+                FCB WORDS_NO_GC ; CODE_DEG				;142
+                FCB WORDS_NO_GC ; CODE_WORDS            ;144
 
     FORTH_WORDS_END:
 

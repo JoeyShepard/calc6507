@@ -79,6 +79,8 @@
     equ WORDS_SIZE_X,       16*CHAR_WIDTH
     equ WORDS_WORDS_LEFT,   0
     equ WORDS_WORDS_DONE,   1
+    equ WORDS_NO_GC,        0
+    equ WORDS_GC,           1
 
 	;Error codes
 	equ ERROR_NONE,					0

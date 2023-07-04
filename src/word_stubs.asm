@@ -260,6 +260,7 @@
                 LDY #WORDS_WORDS_DONE
         .not_dict_end:
 
+    WORD_SIZE_SHORT_STUB:
         ;Calculate size
         SEC
         LDA R1+0

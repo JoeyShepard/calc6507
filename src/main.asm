@@ -98,7 +98,8 @@
 	;Math
 	WORD math_ptr1
 	WORD math_ptr2
-	
+
+    TODO: one constant in const.asm
 	;Don't need header byte, +1 for guard and round, +1 for exp sign
 	R0: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
 	R1: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
