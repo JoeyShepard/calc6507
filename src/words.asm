@@ -117,7 +117,6 @@
 			TAX
 			RTS
 	
-	TODO: could be smaller by rotating twice
 	WORD_MIN_ROT:
 		FCB 4, "-ROT" 			;Name
 		FDB	WORD_CLEAR			;Next word
@@ -717,7 +716,7 @@
 				BNE .error_exit
 			.word_not_found:
 			
-			;Is word a value
+			;Is word a value?
 			CALL CheckData
 			LDA R_ans
 			CMP #OBJ_ERROR
@@ -764,7 +763,6 @@
 			LDA #DICT_END_SIZE+1
 			JMP DictEnd
 			
-	TODO: separate 6 and 12 digit floats?
 	WORD_FLOAT:
 		FCB 0,""				;Name
 		FDB WORD_HEX			;Next word
@@ -778,8 +776,6 @@
 			LDA #OBJ_FLOAT
 			JMP COPY_STUB
 	
-	TODO: shorter for raw_hex
-	TODO: more efficient way than sharing stub?
 	WORD_HEX:
 		FCB 0,""
 		FDB WORD_STRING			;Next word
@@ -818,17 +814,24 @@
 			halt
 			RTS
 	
-	;needed? instead use 0 STO varname
-	TODO: remove to save space?
-	TODO: alternate behavior inside word?
 	WORD_VAR:
 		FCB 3,"VAR"				;Name
 		FDB WORD_VAR_THREAD		;Next word
 		FCB TOKEN_VAR			;ID - 48
 		CODE_VAR:
 			FCB OBJ_PRIMITIVE	;Type
-			FCB NONE			;Flags
+			FCB IMMED			;Flags
 			
+			TODO: abstract
+			;immediate mode only
+			LDA mode
+			CMP #MODE_COMPILE
+			BNE .not_compile
+				LDA #ERROR_IMMED_ONLY
+				STA ret_val
+				RTS
+			.not_compile:
+
 			TODO: Share this with TICK
 			CALL LineWord
 			LDA new_word_len
@@ -839,7 +842,6 @@
 				JMP CODE_DROP+EXEC_HEADER
 			.word_found:
 			
-			TODO: overwrite instead
 			;Check if name already exists
 			CALL FindWord
 			LDA ret_val
@@ -1045,8 +1047,6 @@
 			
 			JMP CODE_STO
 	
-	TODO: this is called UNUSED in forth
-	TODO: not needed if shown in interface
 	WORD_FREE:
 		FCB 4,"FREE"			;Name
 		FDB WORD_SECONDARY		;Next word
@@ -1757,6 +1757,7 @@
 			
 			LDY #1
 			LDA (exec_ptr),Y
+            TODO: use R0-R7 in all words and eliminate stack?
 			PHA
 			INY
 			LDA (exec_ptr),Y
@@ -1836,7 +1837,7 @@
 				JMP .handle
 				
 			.string:
-				
+			    
 				;String
 				LDA 1,X
 			
@@ -2425,6 +2426,8 @@
     ;R1+7 - address of highlighted word
     ;R2+0 - counter for garbage collection
     ;R2+1 - counter for garbage collection
+    ;R2+2 - storage for object size
+    ;R2+3 - storage for object size
 	WORD_WORDS:
 		FCB 5,"WORDS"			;Name
 		FDB dict_begin			;Next word
@@ -2781,6 +2784,54 @@
                             JMP .gc_address_loop
                         .gc_address_done:
 
+                        TODO: combine with above?
+                        ;Fix addresses in word bodies
+                        MOV.W #dict_begin,R0+3
+                        MOV.W R1+2,R2+2     ;Save size of deleted object
+                        .gc_words_loop:
+
+                            JSR NEXT_WORD_STUB  
+                            ORA R1+0
+                            BEQ .gc_words_done
+                            JSR WORD_SIZE_STUB
+                            LDY #0
+                            LDA (R0+3),Y
+                            CLC
+                            ADC R0+3
+                            STA R0+3
+                            BCC .gc_words_carry
+                                INC R0+4
+                            .gc_words_carry:
+                            LDA R0+3
+                            CLC
+                            ADC #WORD_HEADER_SIZE
+                            STA R0+3
+                            BCC .gc_words_carry2
+                                INC R0+4
+                            .gc_words_carry2:
+
+                            START HERE
+                            Still need to setup counter in R2+0
+
+                            LDY #0
+                            LDA (R0+3),Y
+                            INY
+                            LDA (R0+3),Y
+                            INY
+                            LDA (R0+3),Y
+                            INY
+                            LDA (R0+3),Y
+                           
+                            MOV.W R1+0,R0+3
+
+                            JMP .gc_words_loop
+
+                        .gc_words_done:
+
+                        ;Fix addresses on stack
+                        
+
+
                         TODO: keep list index?
                         LDA R0
                         JMP .display_new
@@ -2792,7 +2843,7 @@
                 FCB " A-PRIM",0
                 FCB " B-USER",0
                 FCB " C-VARS",0
-            TODO: full list or only list of GC?
+
             GC_TABLE:
                 FCB WORDS_NO_GC ; CODE_DUP				;2
                 FCB WORDS_NO_GC ; CODE_SWAP				;4
@@ -2805,55 +2856,56 @@
                 FCB WORDS_NO_GC ; CODE_SUB				;18
                 FCB WORDS_NO_GC ; CODE_MULT				;20
                 FCB WORDS_NO_GC ; CODE_DIV				;22
-                FCB WORDS_NO_GC ; CODE_TICK				;24 ?
-                FCB WORDS_NO_GC ; CODE_EXEC				;26 ?
-                FCB WORDS_NO_GC ; CODE_STORE			;28 ?
-                FCB WORDS_NO_GC ; CODE_FETCH			;30 ?
-                FCB WORDS_NO_GC ; CODE_CSTORE			;32 ?
-                FCB WORDS_NO_GC ; CODE_CFETCH			;34 ?
-                FCB WORDS_NO_GC ; CODE_COLON			;36 ?
+                FCB WORDS_NO_GC ; CODE_TICK				;24
+                FCB WORDS_NO_GC ; CODE_EXEC				;26
+                FCB WORDS_NO_GC ; CODE_STORE			;28
+                FCB WORDS_NO_GC ; CODE_FETCH			;30
+                FCB WORDS_NO_GC ; CODE_CSTORE			;32
+                FCB WORDS_NO_GC ; CODE_CFETCH			;34
+                FCB WORDS_NO_GC ; CODE_COLON			;36
                 FCB WORDS_NO_GC ; CODE_SEMI				;38
-                FCB WORDS_NO_GC ; CODE_FLOAT			;40 ?
-                FCB WORDS_NO_GC ; CODE_HEX				;42 ?
-                FCB WORDS_NO_GC ; CODE_STRING			;44 ?
+                FCB WORDS_SKIP8 ; CODE_FLOAT			;40
+                FCB WORDS_SKIP8|WORDS_GC
+                                ; CODE_HEX				;42
+                FCB WORDS_SKIP8 ; CODE_STRING			;44
                 FCB WORDS_NO_GC ; CODE_HALT				;46
-                FCB WORDS_NO_GC ; CODE_VAR				;48 ?
-                FCB WORDS_NO_GC ; CODE_VAR_THREAD		;50 ?
-                FCB WORDS_NO_GC ; CODE_STO				;52 ?
+                FCB WORDS_NO_GC ; CODE_VAR				;48
+                FCB WORDS_GC    ; CODE_VAR_THREAD		;50 Yes
+                FCB WORDS_NO_GC ; CODE_STO				;52 
                 FCB WORDS_NO_GC ; CODE_FREE				;54
-                FCB WORDS_NO_GC ; CODE_SECONDARY		;56 ?
-                FCB WORDS_NO_GC ; CODE_EXIT				;58 ?
-                FCB WORDS_NO_GC ; CODE_BREAK			;60 ?
-                FCB WORDS_NO_GC ; CODE_QUIT				;62 ?
-                FCB WORDS_NO_GC ; CODE_STO_THREAD		;64 ?
-                FCB WORDS_NO_GC ; CODE_DO				;66 ?
-                FCB WORDS_NO_GC ; CODE_DO_THREAD		;68 ?
-                FCB WORDS_NO_GC ; CODE_LOOP				;70 ?
-                FCB WORDS_NO_GC ; CODE_LOOP_THREAD		;72 ?
+                FCB WORDS_GC    ; CODE_SECONDARY		;56 Yes
+                FCB WORDS_NO_GC ; CODE_EXIT				;58 
+                FCB WORDS_NO_GC ; CODE_BREAK			;60 
+                FCB WORDS_NO_GC ; CODE_QUIT				;62 
+                FCB WORDS_GC    ; CODE_STO_THREAD		;64 Yes
+                FCB WORDS_NO_GC ; CODE_DO				;66 
+                FCB WORDS_NO_GC ; CODE_DO_THREAD		;68 No!!!
+                FCB WORDS_NO_GC ; CODE_LOOP				;70 
+                FCB WORDS_GC    ; CODE_LOOP_THREAD		;72 Yes
                 FCB WORDS_NO_GC ; CODE_EQUAL			;74
                 FCB WORDS_NO_GC ; CODE_GT				;76
                 FCB WORDS_NO_GC ; CODE_LT				;78
                 FCB WORDS_NO_GC ; CODE_NEQ				;80
-                FCB WORDS_NO_GC ; CODE_I				;82 ?
-                FCB WORDS_NO_GC ; CODE_J				;84 ?
-                FCB WORDS_NO_GC ; CODE_K				;86 ?
-                FCB WORDS_NO_GC ; CODE_EXIT_THREAD		;88 ?
-                FCB WORDS_NO_GC ; CODE_BEGIN			;90 ?
-                FCB WORDS_NO_GC ; CODE_AGAIN			;92 ?
-                FCB WORDS_NO_GC ; CODE_AGAIN_THREAD		;94 ?
-                FCB WORDS_NO_GC ; CODE_UNTIL			;96 ?
-                FCB WORDS_NO_GC ; CODE_UNTIL_THREAD		;98 ?
+                FCB WORDS_NO_GC ; CODE_I				;82
+                FCB WORDS_NO_GC ; CODE_J				;84
+                FCB WORDS_NO_GC ; CODE_K				;86
+                FCB WORDS_NO_GC ; CODE_EXIT_THREAD		;88
+                FCB WORDS_NO_GC ; CODE_BEGIN			;90
+                FCB WORDS_NO_GC ; CODE_AGAIN			;92
+                FCB WORDS_GC    ; CODE_AGAIN_THREAD		;94 Yes
+                FCB WORDS_NO_GC ; CODE_UNTIL			;96 
+                FCB WORDS_GC    ; CODE_UNTIL_THREAD		;98 Yes
                 FCB WORDS_NO_GC ; CODE_MAX				;100
                 FCB WORDS_NO_GC ; CODE_MIN				;102
                 FCB WORDS_NO_GC ; CODE_AND				;104
                 FCB WORDS_NO_GC ; CODE_OR				;106
                 FCB WORDS_NO_GC ; CODE_XOR				;108
                 FCB WORDS_NO_GC ; CODE_NOT				;110
-                FCB WORDS_NO_GC ; CODE_LEAVE			;112 ?
-                FCB WORDS_NO_GC ; CODE_LEAVE_THREAD	    ;114 ?
-                FCB WORDS_NO_GC ; CODE_IF				;116 ?
-                FCB WORDS_NO_GC ; CODE_THEN				;118 ? 
-                FCB WORDS_NO_GC ; CODE_ELSE				;120 ?
+                FCB WORDS_NO_GC ; CODE_LEAVE			;112 
+                FCB WORDS_GC    ; CODE_LEAVE_THREAD	    ;114 Yes
+                FCB WORDS_NO_GC ; CODE_IF				;116
+                FCB WORDS_NO_GC ; CODE_THEN				;118 
+                FCB WORDS_NO_GC ; CODE_ELSE				;120
                 FCB WORDS_NO_GC ; CODE_LSHIFT			;122 
                 FCB WORDS_NO_GC ; CODE_RSHIFT			;124
                 FCB WORDS_NO_GC ; CODE_ABS				;126

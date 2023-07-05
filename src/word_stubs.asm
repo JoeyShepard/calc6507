@@ -216,7 +216,7 @@
         TAY
         INY
         LDA (R0+3),Y
-        STA R1
+        STA R1+0
         INY
         LDA (R0+3),Y
         STA R1+1
@@ -259,6 +259,8 @@
                 ;Next word is end of dictionary
                 LDY #WORDS_WORDS_DONE
         .not_dict_end:
+        
+        ;*FALLTHROUGH HERE!*
 
     WORD_SIZE_SHORT_STUB:
         ;Calculate size

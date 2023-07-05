@@ -81,6 +81,7 @@
     equ WORDS_WORDS_DONE,   1
     equ WORDS_NO_GC,        0
     equ WORDS_GC,           1
+    equ WORDS_SKIP8,        2
 
 	;Error codes
 	equ ERROR_NONE,					0
@@ -120,7 +121,7 @@
 		equ STRINGS,		16  ;Minimum items on stack must be strings
 		equ HEX,			24  ;Minimum items on stack must be hex
 		equ SAME,			32  ;Minimum items on stack must be of same type
-		equ IMMED,			64
+		equ IMMED,			64  ;Immediate only (can't be compiled)
 		equ COMPILE,		128 ;Compile-only
 		
 		;Word tokens
@@ -228,6 +229,7 @@
 			;2 - next word
 			;1 - token
 			;1 - type
+            TODO: planned but was this used after gc inplemented???
 			;2 - old address
 		
 		;Auxilliary stack for DO loops and IF addresses	in compile mode

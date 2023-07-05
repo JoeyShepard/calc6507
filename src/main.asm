@@ -267,14 +267,8 @@
 					.compile_word:
 					
 					;Compile mode
-					LDA ret_val
-                    CMP #TOKEN_VAR
-                    BNE .compile_not_var
-                        ;Do not allow VAR to be compiled 
-                        LDA #ERROR_INPUT
-                        JMP .error_sub
-                    .compile_not_var:
-					TAY
+                    LDA ret_val
+                    TAY
 					LDA JUMP_TABLE-2,Y
 					STA ret_address
 					LDA JUMP_TABLE-1,Y

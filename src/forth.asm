@@ -860,14 +860,10 @@
 			
 	
 	;Token in A
+    ;OK to use R0 here since only jump is out of function with no return
 	set flags,	R0+0
 	set temp, 	R0+1
 	FUNC ExecToken
-		TODO: add support to optimizer. wont work since gets here from word
-		;VARS
-		;	BYTE flags
-		;	BYTE temp
-		;END
 		
 		;No error unless set below
 		LDY #ERROR_NONE
