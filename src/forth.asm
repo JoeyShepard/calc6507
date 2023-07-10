@@ -332,7 +332,7 @@
 			STA ret_val
 			RTS
 		.word_found:
-	    
+	   
         ;Load token
 		LDY #0
 		LDA (ret_address),Y
@@ -1162,7 +1162,8 @@
 			TODO: add 3 here then sub 3 later. why? just for var?
 			CLC 
 			LDA obj_address
-			ADC #3
+			;ADC #3
+			ADC #1
 			INY
 			STA (dict_ptr),Y
 			LDA obj_address+1
@@ -1191,9 +1192,7 @@
 		;	BYTE src_index, dest_index
 		;	WORD ptr
 		;END
-		
-		
-		
+
 		PLA
 		STA ptr
 		PLA
@@ -1241,7 +1240,7 @@
 			LDY src_index
 			DEC count
 			BNE .header_loop
-		
+	
 		.return:
 		LDA #WORD_HEADER_SIZE
 		CLC

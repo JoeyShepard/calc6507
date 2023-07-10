@@ -249,10 +249,11 @@
 							STY temp_thread+1
 							JMP .jump_thread
 						.insert_address:
+
 						;Secondaries and variables need address in stream
 						CLC
 						LDA obj_address ;Beginning of CODE
-						ADC #3
+						ADC #1
 						STA temp_thread+1
 						LDA obj_address+1
 						ADC #0
@@ -355,10 +356,6 @@
 			LDY #0
 			STA (dict_ptr),Y
 			
-			TODO: smaller than calling MemCopy here?
-			TODO: compare this to MemCpy to MemCpy passing in A to VM with 16 bit address following to...
-			TODO: ...to final: two 4 bit address indexes in byte then counter byte and count in second byte
-			TODO: actually, not 16 bit addresses here, hmm
 			.loop:
 				INY
 				LDA R_ans,Y

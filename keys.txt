@@ -1,4 +1,1 @@
-: foo dup swap 1.23 ;
-: bar foo ;
-words
-b+
+

@@ -224,13 +224,11 @@
 		equ DICT_END_SIZE,		3
 		
 		;Header for new dictionary words
-		equ WORD_HEADER_SIZE,	7
+		equ WORD_HEADER_SIZE,	5
 			;1 - name length
 			;2 - next word
 			;1 - token
 			;1 - type
-            TODO: planned but was this used after gc inplemented???
-			;2 - old address
 		
 		;Auxilliary stack for DO loops and IF addresses	in compile mode
 		

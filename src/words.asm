@@ -734,9 +734,7 @@
 			FDB 0					;Next address
 			FCB TOKEN_SECONDARY		;Token
 			FCB OBJ_SECONDARY		;Type header
-			TODO: old address is always blank?
-			FDB 0					;Old address
-			
+
 			;Adjust dict pointer
 			MOV.W new_dict_ptr,dict_ptr
 			
@@ -862,7 +860,6 @@
 			FDB 0					;Next address
 			FCB TOKEN_VAR_THREAD	;Token
 			FCB OBJ_VAR				;Type header
-			FDB 0					;Old address
 			
 			;Check if WriteHeader ran out of memory
 			LDA ret_val
@@ -875,13 +872,13 @@
 			CLC
 			ADC #WORD_HEADER_SIZE
 			CALL IncDictPtr
-			
+		
 			TODO: still needed?
 			;WORD_STO, which may call this, needs obj_address 
 			SEC
 			LDA dict_ptr
 			TODO: magic number. same 3 offset in STO
-			SBC #3	
+			SBC #1	
 			STA obj_address
 			LDA dict_ptr+1
 			SBC #0
@@ -913,14 +910,14 @@
 		CODE_VAR_THREAD:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
-			
+		
 			LDY #1
 			LDA (exec_ptr),Y
 			STA ret_address
 			INY
 			LDA (exec_ptr),Y
 			STA ret_address+1
-			
+		
 			TXA
 			PHA
 			LDY #0
@@ -992,7 +989,7 @@
 				.word_found:
 				
 				CALL FindWord
-				
+
 				;word not found. try to create variable
 				LDA ret_val
 				BNE .word_exists
@@ -1014,8 +1011,8 @@
 					STA ret_val
 					RTS
 				.type_good:
-				
-				LDY #3
+			
+				LDY #1
 				;Entry point for STO_THREAD
 				.copy_data:
 				LDA #OBJ_SIZE
@@ -1105,7 +1102,7 @@
 			STA exec_ptr+1
 			PLA 
 			STA exec_ptr
-			
+
 			JMP ExecThread
 			
 	WORD_EXIT:
@@ -2810,8 +2807,7 @@
                                 INC R0+4
                             .gc_words_carry2:
 
-                            START HERE
-                            Still need to setup counter in R2+0
+                            halt
 
                             LDY #0
                             LDA (R0+3),Y
