@@ -161,7 +161,7 @@
 	include forth.asm
 	include words.asm
 	include word_stubs.asm
-	
+
 ;Main function
 ;=============
 	FUNC main BEGIN
@@ -169,7 +169,7 @@
 			WORD dest
 			BYTE arg,type
 		END
-		
+
 		CALL setup
 		CALL tests
 		;CALL file_tests
