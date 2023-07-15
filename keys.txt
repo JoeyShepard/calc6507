@@ -1,4 +1,8 @@
 : foo dup swap 1.23 ;
 : bar foo ;
+: cat rot drop bar ;
+: dog ls cat ;
+' drop sto fox
+' bar sto elk
 words
 b+

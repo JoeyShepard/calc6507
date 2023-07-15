@@ -532,7 +532,9 @@
 			LDA HEX_SUM+1,X
 			STA ret_address+1
 			JSR CODE_DROP+EXEC_HEADER
-			
+		
+            halt
+
 			TODO: check token instead?
 			;primitve or word?
 			LDY #0
@@ -580,8 +582,6 @@
 				
 				;Load new thread address
 				LDY R0
-				INY
-				INY
 				INY
 				TYA
 				CLC
@@ -2805,14 +2805,18 @@
 
                             halt
 
-                            LDY #0
-                            LDA (word_list),Y
-                            INY
-                            LDA (word_list),Y
-                            INY
-                            LDA (word_list),Y
-                            INY
-                            LDA (word_list),Y
+                            ;Loop through tokens in word
+                            .gc_token_loop:
+                                LDY #0
+                                LDA (word_list),Y
+                                
+                                LDA GC_TABLE,Y
+                                INY
+                                LDA (word_list),Y
+                                INY
+                                LDA (word_list),Y
+                                INY
+                                LDA (word_list),Y
                            
                             MOV.W next_word,word_list
 
