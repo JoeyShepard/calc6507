@@ -209,69 +209,6 @@
 		JSR PUSH_STUB
 		FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00
 		RTS
-	
-    NEXT_WORD_STUB:
-        LDY #0                  ;Point to next word
-        LDA (R0+3),Y
-        TAY
-        INY
-        LDA (R0+3),Y
-        STA R1+0
-        INY
-        LDA (R0+3),Y
-        STA R1+1
-        RTS
-
-    WORD_TYPE_STUB:
-        LDY #0
-        LDA (R0+3),Y
-        CLC
-        ADC #4  ;point past name to word type
-        TAY
-        LDA (R0+3),Y
-        RTS
-
-    WORD_SIZE_STUB:
-        ;Check if next word is beginning of dictionary - only possible when searching primitives
-        LDY #WORDS_WORDS_LEFT
-        LDA R1+0
-        CMP #lo(dict_begin)
-        BNE .not_dict_begin
-            LDA R1+1
-            CMP #hi(dict_begin)
-            BNE .not_dict_begin
-                ;Next word is dict_begin! Adjust calculation
-                LDA #lo(FORTH_WORDS_END-FORTH_LAST_WORD)
-                STA R1+2
-                LDA #hi(FORTH_WORDS_END-FORTH_LAST_WORD)
-                STA R1+3
-                LDY #WORDS_WORDS_DONE
-                RTS
-        .not_dict_begin:
-
-        ;Check if next word is last word in dictionary
-        LDA R1+1
-        CMP dict_ptr+1
-        BNE .not_dict_end
-            LDA R1+0
-            CMP dict_ptr
-            BNE .not_dict_end
-                ;Next word is end of dictionary
-                LDY #WORDS_WORDS_DONE
-        .not_dict_end:
-        
-        ;*FALLTHROUGH HERE!*
-
-    WORD_SIZE_SHORT_STUB:
-        ;Calculate size
-        SEC
-        LDA R1+0
-        SBC R0+3
-        STA R1+2
-        LDA R1+1
-        SBC R0+4
-        STA R1+3
-        RTS 
 
 	TODO: delete?
 	TODO: check that BCD_CopyConst is smaller than this - seems only 19 bytes

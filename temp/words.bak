@@ -2433,32 +2433,32 @@
 			FCB NONE     					;Flags	
 
             LDA #WORDS_PRIM
-            .display_new:           ;New screen - reset offset into list
-                STA words_mode      ;What to display - primary words, variables, or user-defined words
+            .display_new:   ;New screen - reset offset into list
+                STA R0      ;What to display - primary words, variables, or user-defined words
                 LDA #0
-                STA skip_count      ;Words to skip before printing
-                STA sel_row         ;Selected row on screen
+                STA R0+1    ;Words to skip before printing
+                STA R0+5    ;Selected row on screen
             .display:
 
                 ;Print out list of words
                 CALL LCD_clrscr
-                LDA skip_count      ;Words to skip before printing
-                STA word_count      ;Counter of words to skip
+                LDA R0+1    ;Words to skip before printing
+                STA R0+2    ;Counter of words to skip
                 LDA #0
-                STA rows_drawn      ;Rows drawn to screen
-                STA sel_address     ;Address of selected word
-                STA sel_address+1   ;Address of selected word
+                STA R1+5    ;Rows drawn to screen
+                STA R1+6    ;Address of selected word
+                STA R1+7    ;Address of selected word
 
                 ;Whether primitive, variable, or user-defined word
-                LDA words_mode
+                LDA R0
                 CMP #WORDS_PRIM
                 JNE .not_prim
                     ;Showing primary words
-                    MOV.W #FORTH_WORDS,word_list
+                    MOV.W #FORTH_WORDS,R0+3
                     JMP .type_done
                 .not_prim:
                     ;Showing variables and user-defined words
-                    MOV.W #dict_begin,word_list
+                    MOV.W #dict_begin,R0+3
                 .type_done:
 
                 TODO: see if loops below can be consolidated
@@ -2466,7 +2466,7 @@
                     JSR NEXT_WORD_STUB
 
                     ;No words left to skip?
-                    LDA word_count
+                    LDA R0+2
                     BEQ .word_skip_done     
                    
                     ;End of list?
@@ -2476,46 +2476,46 @@
 
                     ;Skip word if not same type?
                     JSR WORD_TYPE_STUB
-                    CMP words_mode
+                    CMP R0
                     BNE .skip_word
 
                     ;Skip words with no name
                     LDY #0
-                    LDA (word_list),Y
+                    LDA (R0+3),Y
                     BEQ .skip_word
-                        DEC word_count
+                        DEC R0+2
                     .skip_word:
                     
                     ;Update pointer to next word
-                    MOV.W next_word,word_list
+                    MOV.W R1,R0+3
                     JMP .word_skip_loop
                 .word_skip_done:
 
                 ;Check if any words to draw - vars and user-defined only
-                LDA next_word
-                ORA next_word+1
+                LDA R1+0
+                ORA R1+1
                 JEQ .word_draw_done
 
                 LDA #WORDS_ROWS
-                STA word_count
+                STA R0+2
                 .word_draw_loop:  
 
                     ;No words left to draw?
-                    LDA word_count
+                    LDA R0+2
                     JEQ .word_draw_done
 
                     ;End of list?
                     JSR WORD_SIZE_STUB
-                    STY words_left
+                    STY R1+4
 
                     ;Skip word if not same type?
                     JSR WORD_TYPE_STUB
-                    CMP words_mode
+                    CMP R0
                     JNE .next_word
 
                     ;Skip words with no name
                     LDY #0
-                    LDA (word_list),Y
+                    LDA (R0+3),Y
                     JEQ .next_word
 
                     ;Invert selected row
@@ -2523,8 +2523,8 @@
                     STA font_inverted
                     LDA #WORDS_ROWS
                     SEC
-                    SBC word_count  ;Rows left to print
-                    CMP sel_row     ;Selected row
+                    SBC R0+2    ;Rows left to print
+                    CMP R0+5    ;Selected row
                     BNE .not_selected_row
                         LDA #$FF
                         STA font_inverted
@@ -2533,36 +2533,39 @@
                         STA screen_ptr
 
                         ;Save address of selected row
-                        MOV.W word_list,sel_address
+                        LDA R0+3
+                        STA R1+6
+                        LDA R0+4
+                        STA R1+7
                     .not_selected_row:
 
                     ;Draw characters in word
                     LDA #1
-                    STA index
+                    STA R0+6
                     .word_draw_chars:
-                        LDY index
-                        LDA (word_list),Y
-                        STA words_temp
-                        CALL LCD_char, words_temp
-                        INC index
+                        LDY R0+6
+                        LDA (R0+3),Y
+                        STA R0+7
+                        CALL LCD_char, R0+7
+                        INC R0+6
                         LDY #0
-                        LDA (word_list),Y
-                        CMP index
+                        LDA (R0+3),Y
+                        CMP R0+6
                     BCS .word_draw_chars
 
                     ;Draw size
                     LDA #WORDS_SIZE_X
                     STA screen_ptr
                     LDA #'$'
-                    STA words_temp
-                    CALL LCD_char, words_temp
-                    CALL HexHigh, word_diff+1
-                    CALL HexLow, word_diff+1
-                    CALL HexHigh, word_diff
-                    CALL HexLow, word_diff
+                    STA R0+7
+                    CALL LCD_char, R0+7
+                    CALL HexHigh, R1+3
+                    CALL HexLow, R1+3
+                    CALL HexHigh, R1+2
+                    CALL HexLow, R1+2
 
                     ;Mark line as drawn
-                    INC rows_drawn
+                    INC R1+5
 
                     ;Next line on screen
                     LDA #0
@@ -2573,43 +2576,43 @@
                     STA screen_ptr+1
                    
                     ;Next word to draw
-                    DEC word_count
+                    DEC R0+2
                     .next_word:
-                    LDA words_left    ;Set above by WORD_SIZE_STUB
+                    LDA R1+4    ;Set above by WORD_SIZE_STUB
                     CMP #WORDS_WORDS_DONE
                     BEQ .word_draw_done
-                    MOV.W next_word,word_list
+                    MOV.W R1,R0+3
                     JSR NEXT_WORD_STUB 
                     JMP .word_draw_loop
 
                 .word_draw_done:
 
                 ;Print modes out along bottom of screen
-                MOV.W #WORDS_MSG, word_list
+                MOV.W #WORDS_MSG, R0+3
                 MOV.W #WORDS_Y,screen_ptr
                 LDA #WORDS_PRIM
-                STA word_count
+                STA R0+2
                 .mode_loop:
                     LDA #0
                     STA font_inverted
-                    LDA words_mode
-                    CMP word_count
+                    LDA R0
+                    CMP R0+2
                     BNE .not_selected
                         LDA #$FF
                         STA font_inverted
                     .not_selected:
-                    CALL LCD_print, word_list
+                    CALL LCD_print, R0+3
 
                     CLC
-                    LDA word_list
+                    LDA R0+3
                     ADC #WORD_MSG_LEN
-                    STA word_list
+                    STA R0+3
                     BCC .no_carry
-                        INC word_list+1
+                        INC R0+4
                     .no_carry:
 
-                    INC word_count
-                    LDA word_count
+                    INC R0+2
+                    LDA R0+2
                     CMP #WORDS_LAST_MODE
                     BNE .mode_loop
 
@@ -2633,51 +2636,51 @@
                 CMP #'+'    ;Selection down
                 BNE .not_down
 
-                    LDA rows_drawn  ;Rows drawn to screen
+                    LDA R1+5    ;Rows drawn to screen
                     CLC
-                    SBC sel_row     ;Selected row on screen
+                    SBC R0+5    ;Selected row on screen
                     BNE .not_at_end
                         ;Last line selected
-                        LDA words_mode
+                        LDA R0+0
                         CMP #WORDS_PRIM
                         BNE .last_not_prim
                             ;Primary selected 
-                            LDA words_left
+                            LDA R1+4
                             CMP #WORDS_WORDS_DONE
                             BEQ .input_loop
                             ;Advance scroll
-                            INC skip_count
+                            INC R0+1
                             JMP .display
                         .last_not_prim:
                             ;Var or user-defined selected
-                            MOV.W sel_address,word_list
+                            MOV.W R1+6,R0+3
                             .down_loop:
                                 JSR NEXT_WORD_STUB
                                 JSR WORD_SIZE_STUB
                                 CPY #WORDS_WORDS_DONE
                                 BEQ .input_loop
-                                MOV.W next_word,word_list
+                                MOV.W R1,R0+3
                                 JSR WORD_TYPE_STUB
-                                CMP words_mode
+                                CMP R0+0
                                 JNE .down_loop 
                                 ;Advance scroll
-                                INC skip_count
+                                INC R0+1
                                 JMP .display
                     .not_at_end:
-                    INC sel_row
+                    INC R0+5
                     JMP .display
                 .not_down:
                 CMP #'-'    ;Selection up
                 BNE .not_up
-                    LDA sel_row     ;Selected row on screen
+                    LDA R0+5    ;Selected row on screen
                     BEQ .at_top
                         ;Not at top - move up one
-                        DEC sel_row
+                        DEC R0+5
                         JMP .display
                     .at_top:
-                    LDA skip_count    ;Rows to skip
+                    LDA R0+1    ;Rows to skip
                     JEQ .input_loop
-                    DEC skip_count
+                    DEC R0+1
                     JMP .display
                 .not_up:
                 CMP #KEY_ON
@@ -2686,135 +2689,135 @@
                 .not_on:
                 CMP #KEY_BACKSPACE
                 JNE .not_backspace
-                    LDA words_mode
+                    LDA R0+0
                     CMP #WORDS_PRIM
                     JEQ .cant_delete
 
                         ;Anything to delete selected?
-                        LDA sel_address
-                        ORA sel_address+1
+                        LDA R1+6
+                        ORA R1+7
                         JEQ .input_loop
 
                         ;Calculate size of bytes to delete
-                        MOV.W sel_address,word_list
+                        MOV.W R1+6,R0+3
                         JSR NEXT_WORD_STUB
                         JSR WORD_SIZE_SHORT_STUB
 
                         ;Calculate count of bytes to shift
                         SEC
                         LDA dict_ptr
-                        SBC next_word
-                        STA gc_counter
+                        SBC R1+0
+                        STA R2+0
                         LDA dict_ptr+1
-                        SBC next_word+1
-                        STA gc_counter+1
+                        SBC R1+1
+                        STA R2+1
                        
                         ;Adjust dict ptr
                         CLC
-                        LDA word_list
-                        ADC gc_counter
+                        LDA R0+3
+                        ADC R2+0
                         STA dict_ptr
                         STA dict_save
-                        LDA word_list+1
-                        ADC gc_counter+1
+                        LDA R0+4
+                        ADC R2+1
                         STA dict_ptr+1
                         STA dict_save+1
                         
                         ;Add 3 so final 0-length item is copied too
                         CLC
-                        LDA gc_counter
+                        LDA R2+0
                         ADC #3 
-                        STA gc_counter
+                        STA R2+0
                         BNE .gc_no_carry
-                            INC gc_counter+1
+                            INC R2+1
                         .gc_no_carry:
                         
                         ;Copy bytes
                         LDY #0
                         .gc_copy_loop:
-                            LDA (next_word),Y
-                            STA (word_list),Y
-                            DEC gc_counter
+                            LDA (R1+0),Y
+                            STA (R0+3),Y
+                            DEC R2+0
                             BNE .no_underflow
-                                LDA gc_counter+1
+                                LDA R2+1
                                 BEQ .gc_copy_done
-                                DEC gc_counter+1
+                                DEC R2+1
                             .no_underflow: 
                             INY
                             BNE .gc_copy_loop
-                            INC next_word+1
-                            INC word_list+1
+                            INC R1+1
+                            INC R0+4
                             JMP .gc_copy_loop
                         .gc_copy_done:
                        
                         ;Fix addresses in word headers
-                        MOV.W sel_address,word_list
+                        MOV.W R1+6,R0+3
                         .gc_address_loop:
                             LDY #0
-                            LDA (word_list),Y
+                            LDA (R0+3),Y
                             TAY
                             INY
-                            LDA (word_list),Y
-                            STA next_word
+                            LDA (R0+3),Y
+                            STA R1+0
                             INY
-                            LDA (word_list),Y
-                            STA next_word+1
-                            ORA next_word
+                            LDA (R0+3),Y
+                            STA R1+1
+                            ORA R1+0
                             BEQ .gc_address_done
                             DEY
                             SEC
-                            LDA next_word
-                            SBC word_diff
-                            STA (word_list),Y
-                            STA words_temp
+                            LDA R1+0
+                            SBC R1+2
+                            STA (R0+3),Y
+                            STA R0+7
                             INY
-                            LDA next_word+1
-                            SBC word_diff+1
-                            STA (word_list),Y
-                            STA word_list+1
-                            LDA words_temp
-                            STA word_list
+                            LDA R1+1
+                            SBC R1+3
+                            STA (R0+3),Y
+                            STA R0+4
+                            LDA R0+7
+                            STA R0+3
                             JMP .gc_address_loop
                         .gc_address_done:
 
                         TODO: combine with above?
                         ;Fix addresses in word bodies
-                        MOV.W #dict_begin,word_list
-                        MOV.W word_diff,gc_obj_size     ;Save size of deleted object
+                        MOV.W #dict_begin,R0+3
+                        MOV.W R1+2,R2+2     ;Save size of deleted object
                         .gc_words_loop:
 
                             JSR NEXT_WORD_STUB  
-                            ORA next_word
+                            ORA R1+0
                             BEQ .gc_words_done
                             JSR WORD_SIZE_STUB
                             LDY #0
-                            LDA (word_list),Y
+                            LDA (R0+3),Y
                             CLC
-                            ADC word_list
-                            STA word_list
+                            ADC R0+3
+                            STA R0+3
                             BCC .gc_words_carry
-                                INC word_list+1
+                                INC R0+4
                             .gc_words_carry:
-                            LDA word_list
+                            LDA R0+3
                             CLC
                             ADC #WORD_HEADER_SIZE
-                            STA word_list
+                            STA R0+3
                             BCC .gc_words_carry2
-                                INC word_list+1
+                                INC R0+4
                             .gc_words_carry2:
 
                             halt
 
                             LDY #0
-                            LDA (word_list),Y
+                            LDA (R0+3),Y
                             INY
-                            LDA (word_list),Y
+                            LDA (R0+3),Y
                             INY
-                            LDA (word_list),Y
+                            LDA (R0+3),Y
                             INY
-                            LDA (word_list),Y
+                            LDA (R0+3),Y
                            
-                            MOV.W next_word,word_list
+                            MOV.W R1+0,R0+3
 
                             JMP .gc_words_loop
 
@@ -2825,7 +2828,7 @@
 
 
                         TODO: keep list index?
-                        LDA words_mode
+                        LDA R0
                         JMP .display_new
                     .cant_delete:
                 .not_backspace:
@@ -2835,48 +2838,48 @@
             ;since stubs not reused by anything else.
             NEXT_WORD_STUB:
                 LDY #0                  ;Point to next word
-                LDA (word_list),Y
+                LDA (R0+3),Y
                 TAY
                 INY
-                LDA (word_list),Y
-                STA next_word
+                LDA (R0+3),Y
+                STA R1+0
                 INY
-                LDA (word_list),Y
-                STA next_word+1
+                LDA (R0+3),Y
+                STA R1+1
                 RTS
 
             WORD_TYPE_STUB:
                 LDY #0
-                LDA (word_list),Y
+                LDA (R0+3),Y
                 CLC
                 ADC #4  ;point past name to word type
                 TAY
-                LDA (word_list),Y
+                LDA (R0+3),Y
                 RTS
 
             WORD_SIZE_STUB:
                 ;Check if next word is beginning of dictionary - only possible when searching primitives
                 LDY #WORDS_WORDS_LEFT
-                LDA next_word
+                LDA R1+0
                 CMP #lo(dict_begin)
                 BNE .not_dict_begin
-                    LDA next_word+1
+                    LDA R1+1
                     CMP #hi(dict_begin)
                     BNE .not_dict_begin
                         ;Next word is dict_begin! Adjust calculation
                         LDA #lo(FORTH_WORDS_END-FORTH_LAST_WORD)
-                        STA word_diff
+                        STA R1+2
                         LDA #hi(FORTH_WORDS_END-FORTH_LAST_WORD)
-                        STA word_diff+1
+                        STA R1+3
                         LDY #WORDS_WORDS_DONE
                         RTS
                 .not_dict_begin:
 
                 ;Check if next word is last word in dictionary
-                LDA next_word+1
+                LDA R1+1
                 CMP dict_ptr+1
                 BNE .not_dict_end
-                    LDA next_word
+                    LDA R1+0
                     CMP dict_ptr
                     BNE .not_dict_end
                         ;Next word is end of dictionary
@@ -2888,12 +2891,12 @@
             WORD_SIZE_SHORT_STUB:
                 ;Calculate size
                 SEC
-                LDA next_word
-                SBC word_list
-                STA word_diff
-                LDA next_word+1
-                SBC word_list+1
-                STA word_diff+1
+                LDA R1+0
+                SBC R0+3
+                STA R1+2
+                LDA R1+1
+                SBC R0+4
+                STA R1+3
                 RTS 
 
             WORDS_MSG:
