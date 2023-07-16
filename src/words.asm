@@ -2422,8 +2422,6 @@
     ;set sel_address,        R1+7 ;address of highlighted word
     set gc_counter,         R2+0 ;counter for garbage collection
     ;set gc_counter,         R2+1 ;counter for garbage collection
-    set gc_obj_size,        R2+2 ;storage for object size
-    ;set gc_obj_size,        R2+3 ;storage for object size
 	WORD_WORDS:
 		FCB 5,"WORDS"			;Name
 		FDB dict_begin			;Next word
@@ -2775,35 +2773,34 @@
                         ;Fix addresses in variables and word bodies
                         MOV.W #dict_begin,word_list
                         TODO: still needed?
-                        MOV.W word_diff,gc_obj_size     ;Save size of deleted object
                         .gc_obj_loop:
                             JSR NEXT_WORD_STUB  
                             ORA next_word
                             JEQ .gc_objs_done
-                            TODO: not needed if comparing to next word address
-                            JSR WORD_SIZE_STUB
                             LDY #0
                             LDA (word_list),Y
                             JSR WORD_SKIP_STUB
-                            LDA #WORD_HEADER_SIZE-1
+                            LDY #WORD_HEADER_OBJ_TYPE
+                            LDA (word_list),Y
+                            TAY
+                            LDA #WORD_HEADER_SIZE
                             JSR WORD_SKIP_STUB
 
                             halt
 
                             ;Word or variable?
-                            LDA (word_list),Y
-                            CMP #OBJ_SECONDARY
+                            CPY #OBJ_SECONDARY
                             BEQ .gc_secondary
-                            CMP #OBJ_VAR
+                            CPY #OBJ_VAR
                             BEQ .gc_variable
                             ;Object other than secondary or var
                             ;Something is very wrong
                             TODO: error - corrupt dictionary
                             
-                            ;Current object is variables
+                            ;Current object is variable
                             .gc_variable:
                             ;Only need to adjust smart hex
-                            LDY #1
+                            LDY #0
                             LDA (word_list),Y
                             CMP #OBJ_HEX
                             BNE .gc_var_next
@@ -2813,23 +2810,17 @@
                             BNE .gc_var_next
                             ;Smart hex - adjust if necessary
 
-                            START HERE - OFFSET BY 1 MEANS DON'T MATCH HERE
-
                             .gc_var_next:
+                            TODO: magic number
                             LDA #9
                             JSR WORD_SKIP_STUB
-                            LDA word_list
-                            CMP next_word
-                            BNE .gc_obj_loop
-                            LDA word_list+1
-                            CMP next_word+1
-                            BNE .gc_obj_loop
+                            JMP .gc_obj_loop
 
                             ;Current object is secondary word
                             .gc_secondary:
                             ;Loop through tokens in word
                             .gc_token_loop:
-                                LDY #1  ;Point past object type byte
+                                LDY #0
                                 LDA (word_list),Y
                                 CMP #TOKEN_HEX
                                 BNE .not_hex
@@ -2864,11 +2855,11 @@
                                 
                                 ;Check if word list pointer has reached next word
                                 .gc_token_next:
-                                LDA word_list
-                                CMP next_word
+                                LDA next_word
+                                CMP word_list
                                 BNE .gc_token_loop
-                                LDA word_list+1
-                                CMP next_word+1
+                                LDA next_word+1
+                                CMP word_list+1
                                 BNE .gc_token_loop
                                 
                                 ;Done processing word - advance to next word

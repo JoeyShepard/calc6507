@@ -229,7 +229,8 @@
 			;2 - next word
 			;1 - token
 			;1 - type
-		
+	    equ WORD_HEADER_OBJ_TYPE,   WORD_HEADER_SIZE-1
+
 		;Auxilliary stack for DO loops and IF addresses	in compile mode
 		
 		;v1
