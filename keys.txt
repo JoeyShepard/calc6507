@@ -1,3 +1,4 @@
+5 sto ant
 : foo dup swap 1.23 ;
 : bar foo ;
 : cat rot drop bar ;

@@ -2600,14 +2600,8 @@
                     .not_selected:
                     CALL LCD_print, word_list
 
-                    CLC
-                    LDA word_list
-                    ADC #WORD_MSG_LEN
-                    STA word_list
-                    BCC .no_carry
-                        INC word_list+1
-                    .no_carry:
-
+                    LDA #WORD_MSG_LEN
+                    JSR WORD_SKIP_STUB
                     INC word_count
                     LDA word_count
                     CMP #WORDS_LAST_MODE
@@ -2778,51 +2772,109 @@
                         .gc_address_done:
 
                         TODO: combine with above?
-                        ;Fix addresses in word bodies
+                        ;Fix addresses in variables and word bodies
                         MOV.W #dict_begin,word_list
+                        TODO: still needed?
                         MOV.W word_diff,gc_obj_size     ;Save size of deleted object
-                        .gc_words_loop:
-
+                        .gc_obj_loop:
                             JSR NEXT_WORD_STUB  
                             ORA next_word
-                            BEQ .gc_words_done
+                            JEQ .gc_objs_done
+                            TODO: not needed if comparing to next word address
                             JSR WORD_SIZE_STUB
                             LDY #0
                             LDA (word_list),Y
-                            CLC
-                            ADC word_list
-                            STA word_list
-                            BCC .gc_words_carry
-                                INC word_list+1
-                            .gc_words_carry:
-                            LDA word_list
-                            CLC
-                            ADC #WORD_HEADER_SIZE
-                            STA word_list
-                            BCC .gc_words_carry2
-                                INC word_list+1
-                            .gc_words_carry2:
+                            JSR WORD_SKIP_STUB
+                            LDA #WORD_HEADER_SIZE-1
+                            JSR WORD_SKIP_STUB
 
                             halt
 
+                            ;Word or variable?
+                            LDA (word_list),Y
+                            CMP #OBJ_SECONDARY
+                            BEQ .gc_secondary
+                            CMP #OBJ_VAR
+                            BEQ .gc_variable
+                            ;Object other than secondary or var
+                            ;Something is very wrong
+                            TODO: error - corrupt dictionary
+                            
+                            ;Current object is variables
+                            .gc_variable:
+                            ;Only need to adjust smart hex
+                            LDY #1
+                            LDA (word_list),Y
+                            CMP #OBJ_HEX
+                            BNE .gc_var_next
+                            LDY #HEX_TYPE
+                            LDA (word_list),Y
+                            CMP #HEX_SMART
+                            BNE .gc_var_next
+                            ;Smart hex - adjust if necessary
+
+                            START HERE - OFFSET BY 1 MEANS DON'T MATCH HERE
+
+                            .gc_var_next:
+                            LDA #9
+                            JSR WORD_SKIP_STUB
+                            LDA word_list
+                            CMP next_word
+                            BNE .gc_obj_loop
+                            LDA word_list+1
+                            CMP next_word+1
+                            BNE .gc_obj_loop
+
+                            ;Current object is secondary word
+                            .gc_secondary:
                             ;Loop through tokens in word
                             .gc_token_loop:
-                                LDY #0
+                                LDY #1  ;Point past object type byte
                                 LDA (word_list),Y
-                                
+                                CMP #TOKEN_HEX
+                                BNE .not_hex
+                                    ;Adjust smart hex
+                                    JMP .skip8
+                                .not_hex:
+                                LSR
+                                TAY
+                                TODO: compress table
                                 LDA GC_TABLE,Y
-                                INY
-                                LDA (word_list),Y
-                                INY
-                                LDA (word_list),Y
-                                INY
-                                LDA (word_list),Y
-                           
-                            MOV.W next_word,word_list
+                                STA words_temp  ;Save copy of byte from lookup table
+                                AND #WORDS_GC
+                                BEQ .no_gc
+                                    ;Garbage collect address
+                                    ;Advance past token and address that follows
+                                    LDA #3
+                                    JSR WORD_SKIP_STUB
+                                    JMP .gc_token_next
+                                .no_gc:
+                                LDA words_temp
+                                AND #WORDS_SKIP8
+                                BEQ .no_skip8
+                                    ;Token with 8 bytes of data embedded after it
+                                    .skip8:
+                                    LDA #9
+                                    JSR WORD_SKIP_STUB
+                                    JMP .gc_token_next
+                                .no_skip8:
+                                ;Single-byte token, increment by one
+                                LDA #1
+                                JSR WORD_SKIP_STUB
+                                
+                                ;Check if word list pointer has reached next word
+                                .gc_token_next:
+                                LDA word_list
+                                CMP next_word
+                                BNE .gc_token_loop
+                                LDA word_list+1
+                                CMP next_word+1
+                                BNE .gc_token_loop
+                                
+                                ;Done processing word - advance to next word
+                                JMP .gc_obj_loop
 
-                            JMP .gc_words_loop
-
-                        .gc_words_done:
+                        .gc_objs_done:
 
                         ;Fix addresses on stack
                         
@@ -2900,13 +2952,24 @@
                 STA word_diff+1
                 RTS 
 
+            WORD_SKIP_STUB:
+                CLC
+                ADC word_list
+                STA word_list
+                BNE .no_carry
+                    INC word_list+1
+                .no_carry:
+                RTS
+
             WORDS_MSG:
                 FCB " A-PRIM",0
                 FCB " B-USER",0
                 FCB " C-VARS",0
 
+            TODO: more efficient table format
             GC_TABLE:
-                FCB WORDS_NO_GC ; CODE_DUP				;2
+                FCB WORDS_NO_GC ;                       ;0
+                FCB WORDS_NO_GC ; CODE_DUP			    ;2
                 FCB WORDS_NO_GC ; CODE_SWAP				;4
                 FCB WORDS_NO_GC ; CODE_DROP				;6
                 FCB WORDS_NO_GC ; CODE_OVER				;8
@@ -2926,8 +2989,7 @@
                 FCB WORDS_NO_GC ; CODE_COLON			;36
                 FCB WORDS_NO_GC ; CODE_SEMI				;38
                 FCB WORDS_SKIP8 ; CODE_FLOAT			;40
-                FCB WORDS_SKIP8|WORDS_GC
-                                ; CODE_HEX				;42
+                FCB WORDS_SKIP8 ; CODE_HEX				;42
                 FCB WORDS_SKIP8 ; CODE_STRING			;44
                 FCB WORDS_NO_GC ; CODE_HALT				;46
                 FCB WORDS_NO_GC ; CODE_VAR				;48
