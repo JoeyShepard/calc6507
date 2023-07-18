@@ -69,7 +69,10 @@
 		;Emulator only!
 		MOV #BANK_GEN_RAM2,RAM_BANK2		
 		MOV #BANK_GEN_RAM3,RAM_BANK3		
-		
+	    
+        LDA #$42    ;Debug null handling
+        STA null
+
 	END
 
 	FUNC GfxSetup

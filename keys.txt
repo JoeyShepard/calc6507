@@ -1,9 +1,8 @@
-5 sto ant
-: foo dup swap 1.23 ;
-: bar foo ;
-: cat rot drop bar ;
-: dog ls cat ;
-' drop sto fox
-' bar sto elk
-words
-b+
+5 sto v1
+"hi!" sto v2
+$200 sto v3
+: w1 dup swap ;
+: w2 $123 + ;
+: w3 w2 ;
+: w4 v1 2 + ;
+: w5 v3 $34 + ;

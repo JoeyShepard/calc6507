@@ -70,7 +70,9 @@
 	TODO: assign unused locals space
 	
 	;Locals usage
-	LOCALS_BEGIN	$0
+	BYTE null       ;Reserve for use as null. Nothing stored here.
+
+    LOCALS_BEGIN	$1
 	LOCALS_END		$1F
 	
 	TODO: double check all used and move variables out of globals to here

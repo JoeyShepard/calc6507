@@ -41,7 +41,6 @@
     TODO: WORD browser
     TODO: GRAPH
     TODO: XMAX, YMAX
-    TODO: SEE
     TODO: ACOS
     TODO: ASIN
     TODO: ATAN
@@ -75,6 +74,7 @@
     TODO: see list in words.asm
     TODO: [ ] and LIT
     TODO: CHR
+    TODO: SEE
 
     ;Known bugs from website
     ;=======================

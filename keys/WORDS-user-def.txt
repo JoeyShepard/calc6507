@@ -1,0 +1,13 @@
+5 sto v1
+"hi!" sto v2
+$200 sto v3
+: w1 dup swap ;     #no gc
+: w2 $123 + ;       #delete this first
+: w3 w2 ;           #gc - should become broken ref
+: w4 v1 2 + ;       #gc - should become broken ref
+: w5 v3 $34 + ;
+
+#1. test v1, v2, v3, w1, w2, w3, w4, w5
+#2. delete w2. w3 should become broken ref
+#3. delete v1. w4 should become broken ref
+#4. test v2, v3, w1, w3, w4, w5

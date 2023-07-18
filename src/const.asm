@@ -66,6 +66,7 @@
 	equ HEX_TYPE,			7
 	
 	;Hex constants
+    equ HEX_NORMAL,         0
 	equ HEX_SMART,			1
 
     ;Constants for WORDS
@@ -81,7 +82,8 @@
     equ WORDS_WORDS_DONE,   1
     equ WORDS_NO_GC,        0
     equ WORDS_GC,           1
-    equ WORDS_SKIP8,        2
+    equ WORDS_SKIP2,        2
+    equ WORDS_SKIP8,        4
 
 	;Error codes
 	equ ERROR_NONE,					0
@@ -102,6 +104,7 @@
 	equ ERROR_OUT_OF_MEM, 			20
 	equ ERROR_STRUCTURE, 			22
 	equ ERROR_RANGE, 				24
+    equ ERROR_BROKEN_REF,           26
 	
 	;Forth
 	;=====
@@ -198,6 +201,7 @@
 		equ TOKEN_ATAN,				140
 		equ TOKEN_DEG,				142
         equ TOKEN_WORDS,            144
+        equ TOKEN_BROKEN_REF,       146
 		
 		;Execution modes
 		equ EXEC_INPUT,			0

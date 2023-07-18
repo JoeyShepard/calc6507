@@ -1111,9 +1111,9 @@
 		STA new_dict_ptr+1
 		
 		SEC
-		LDA #dict_end # 256
+		LDA #lo(dict_end)
 		SBC new_dict_ptr
-		LDA #dict_end / 256
+		LDA #hi(dict_end)
 		SBC new_dict_ptr+1
 		
 		BCS .mem_good

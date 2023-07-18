@@ -3,6 +3,15 @@
 
 	;Used by smart hex
 	HEX_RECALC:
+        ;Ignore any offsets if base is null - ie points to deleted object
+        LDA OBJ_SIZE+HEX_BASE,X
+        ORA OBJ_SIZE+HEX_BASE+1,X
+        BNE .not_null
+            ;Base is null
+            STA OBJ_SIZE+HEX_SUM,X
+            STA OBJ_SIZE+HEX_SUM+1,X
+            BEQ .done
+        .not_null:
 		CLC
 		LDA OBJ_SIZE+HEX_BASE,X
 		ADC OBJ_SIZE+HEX_OFFSET,X
@@ -11,6 +20,7 @@
 		ADC OBJ_SIZE+HEX_OFFSET+1,X
 		STA OBJ_SIZE+HEX_SUM+1,X
 				
+        .done:
 		JMP CODE_DROP+EXEC_HEADER
 	
 	;Copy data from thread to stack

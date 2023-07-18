@@ -525,22 +525,24 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
 			
-			;Do not drop address!
-			
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
 			STA ret_address+1
 			JSR CODE_DROP+EXEC_HEADER
-		
-            halt
 
-			TODO: check token instead?
+            LDA ret_address
+            ORA ret_address+1
+            BNE .not_null
+				LDA #ERROR_BROKEN_REF
+				STA ret_val
+				RTS
+            .not_null:
 			;primitve or word?
 			LDY #0
 			LDA (ret_address),Y
 			CLC
-			ADC #4
+			ADC #WORD_HEADER_OBJ_TYPE
 			TAY
 			LDA (ret_address),Y
 			CMP #OBJ_PRIMITIVE
@@ -600,7 +602,11 @@
 		CODE_STORE:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|HEX		;Flags
-	
+            
+            LDA HEX_SUM,X
+            ORA HEX_SUM+1,X
+            BEQ .null_exit  ;Don't write to null address
+            
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
@@ -612,6 +618,7 @@
 			INY
 			STA (ret_address),Y
 			
+            .null_exit:
 			JSR CODE_DROP+EXEC_HEADER
 			JMP CODE_DROP+EXEC_HEADER
 	
@@ -623,6 +630,11 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
 	
+            LDA HEX_SUM,X
+            ORA HEX_SUM+1,X
+            BEQ .null_read  ;Don't read from null address
+            
+            ;Read from address
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
@@ -633,6 +645,15 @@
 			INY
 			LDA (ret_address),Y
 			STA HEX_SUM+1,X
+            JMP .done
+
+            ;Read from null - return 0
+            .null_read:
+            LDA #0
+            STA HEX_SUM,X
+            STA HEX_SUM+1,X
+            
+            .done:
 			LDA #0
 			STA HEX_TYPE,X
 			RTS
@@ -645,6 +666,10 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|HEX		;Flags
 	
+            LDA HEX_SUM,X
+            ORA HEX_SUM+1,X
+            BEQ .null_exit  ;Don't write to null address
+
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
@@ -653,6 +678,7 @@
 			LDA OBJ_SIZE+HEX_SUM,X
 			STA (ret_address),Y
 			
+            .null_exit:
 			JSR CODE_DROP+EXEC_HEADER
 			JMP CODE_DROP+EXEC_HEADER
 	
@@ -664,16 +690,27 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
 	
+            LDA HEX_SUM,X
+            ORA HEX_SUM+1,X
+            BEQ .null_read  ;Don't read from null address
+            
+            ;Read from address
 			LDA HEX_SUM,X
 			STA ret_address
 			LDA HEX_SUM+1,X
 			STA ret_address+1
 			LDY #0
 			LDA (ret_address),Y
-			STA HEX_SUM,X
+            JMP .done
+
+            ;Read from null - return 0
+            .null_read:
+            LDA #0
+            .done: 
+            STA HEX_SUM,X
 			LDA #0
 			STA HEX_SUM+1,X
-			LDA #0
+			LDA #HEX_NORMAL
 			STA HEX_TYPE,X
 			RTS
 	
@@ -2414,8 +2451,8 @@
     set words_temp,         R0+7 ;temp storage in multiple places
     set next_word,          R1+0 ;pointer to next word in word list
     ;set next_word,          R1+1 ;pointer to next word in word list
-    set word_diff,          R1+2 ;difference between next word (R1+0) and current (R0+3)
-    ;set word_diff,          R1+3 ;difference between next word (R1+0) and current (R0+3)
+    set word_diff,          R1+2 ;difference between next_word (R1+0) and current word in word_list (R0+3)
+    ;set word_diff,          R1+3 ;difference between next_word (R1+0) and current word in word_list (R0+3)
     set words_left,         R1+4 ;whether word left to draw after last drawn
     set rows_drawn,         R1+5 ;rows drawn to screen
     set sel_address,        R1+6 ;address of highlighted word
@@ -2423,9 +2460,9 @@
     set gc_counter,         R2+0 ;counter for garbage collection
     ;set gc_counter,         R2+1 ;counter for garbage collection
 	WORD_WORDS:
-		FCB 5,"WORDS"			;Name
-		FDB dict_begin			;Next word
-		FCB TOKEN_WORDS			;ID - 144
+		FCB 5,"WORDS"			    ;Name
+		FDB WORD_BROKEN_REF	        ;Next word
+		FCB TOKEN_WORDS			    ;ID - 144
 		CODE_WORDS:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB NONE     					;Flags	
@@ -2472,7 +2509,7 @@
                     CPY #WORDS_WORDS_DONE
                     BEQ .word_skip_done
 
-                    ;Skip word if not same type?
+                    ;Skip word if not same type
                     JSR WORD_TYPE_STUB
                     CMP words_mode
                     BNE .skip_word
@@ -2772,11 +2809,21 @@
                         TODO: combine with above?
                         ;Fix addresses in variables and word bodies
                         MOV.W #dict_begin,word_list
-                        TODO: still needed?
                         .gc_obj_loop:
                             JSR NEXT_WORD_STUB  
                             ORA next_word
                             JEQ .gc_objs_done
+
+                            TODO: remove
+                            LDY #1
+                            LDA (word_list),Y
+                            STA DEBUG
+                            INY
+                            LDA (word_list),Y
+                            STA DEBUG
+                            LDA #' '
+                            STA DEBUG
+
                             LDY #0
                             LDA (word_list),Y
                             JSR WORD_SKIP_STUB
@@ -2787,7 +2834,7 @@
                             JSR WORD_SKIP_STUB
 
                             halt
-
+                            
                             ;Word or variable?
                             CPY #OBJ_SECONDARY
                             BEQ .gc_secondary
@@ -2796,6 +2843,8 @@
                             ;Object other than secondary or var
                             ;Something is very wrong
                             TODO: error - corrupt dictionary
+
+                            halt
                             
                             ;Current object is variable
                             .gc_variable:
@@ -2808,11 +2857,13 @@
                             LDA (word_list),Y
                             CMP #HEX_SMART
                             BNE .gc_var_next
-                            ;Smart hex - adjust if necessary
+                            
+                            ;Smart hex found
+                            JSR GC_HEX_STUB
 
+                            ;Advance to next object
                             .gc_var_next:
-                            TODO: magic number
-                            LDA #9
+                            LDA #9  ;Size of variable
                             JSR WORD_SKIP_STUB
                             JMP .gc_obj_loop
 
@@ -2822,20 +2873,46 @@
                             .gc_token_loop:
                                 LDY #0
                                 LDA (word_list),Y
-                                CMP #TOKEN_HEX
-                                BNE .not_hex
-                                    ;Adjust smart hex
-                                    JMP .skip8
-                                .not_hex:
                                 LSR
                                 TAY
                                 TODO: compress table
                                 LDA GC_TABLE,Y
                                 STA words_temp  ;Save copy of byte from lookup table
+                                AND #WORDS_SKIP2
+                                BNE .skip2
+                                LDA words_temp
                                 AND #WORDS_GC
                                 BEQ .no_gc
                                     ;Garbage collect address
+                                    LDY #1
+                                    LDA (word_list),Y
+                                    STA gc_counter
+                                    INY
+                                    LDA (word_list),Y
+                                    STA gc_counter+1
+                                    JSR GC_ADDRESS_STUB
+                                    LDA gc_counter
+                                    ORA gc_counter+1
+                                    BNE .not_null
+
+                                        start here - addresses don't match!
+                                        strore body address instead of head address in sel_address?
+
+                                        ;Address is same as deleted object
+                                        LDA #TOKEN_BROKEN_REF
+                                        LDY #0
+                                        STA (word_list),Y
+                                        JMP .skip2
+                                    .not_null:
+                                    LDA gc_counter
+                                    LDY #1
+                                    STA (word_list),Y
+                                    LDA gc_counter+1
+                                    INY
+                                    STA (word_list),Y
+                                
                                     ;Advance past token and address that follows
+                                    .skip2:
                                     LDA #3
                                     JSR WORD_SKIP_STUB
                                     JMP .gc_token_next
@@ -2844,7 +2921,6 @@
                                 AND #WORDS_SKIP8
                                 BEQ .no_skip8
                                     ;Token with 8 bytes of data embedded after it
-                                    .skip8:
                                     LDA #9
                                     JSR WORD_SKIP_STUB
                                     JMP .gc_token_next
@@ -2952,6 +3028,85 @@
                 .no_carry:
                 RTS
 
+            GC_ADDRESS_STUB:
+                ;Check if garbage collecting address of deleted object
+                LDA gc_counter
+                CMP sel_address
+                BNE .not_same
+                LDA gc_counter+1
+                CMP sel_address+1
+                BNE .not_same
+                    ;Garbage collected address is same as deleted object
+                    LDA #0
+                    STA gc_counter
+                    STA gc_counter+1
+                    RTS
+                .not_same:
+                
+                ;Check if address is in range
+                SEC 
+                LDA gc_counter
+                SBC sel_address
+                LDA gc_counter+1
+                SBC sel_address+1
+                BCC .no_adjustment
+                SEC
+                LDA #lo(dict_end)
+                SBC gc_counter
+                LDA #hi(dict_end)
+                SBC gc_counter+1
+                BCC .no_adjustment
+                    ;Address in range - adjust
+                    LDA gc_counter
+                    SBC word_diff
+                    STA gc_counter
+                    LDA gc_counter+1
+                    SBC word_diff+1
+                    STA gc_counter+1
+                .no_adjustment:
+                RTS
+
+            GC_HEX_STUB:
+                LDY #HEX_BASE
+                LDA (word_list),Y
+                STA gc_counter
+                INY
+                LDA (word_list),Y
+                STA gc_counter+1
+                JSR GC_ADDRESS_STUB
+                
+                LDA gc_counter
+                ORA gc_counter
+                BNE .not_null
+                    ;Set hex to null if pointed to deleted object
+                    LDA #0
+                    LDY #HEX_SUM
+                    STA (word_list),Y
+                    INY
+                    STA (word_list),Y
+                    LDY #HEX_BASE
+                    STA (word_list),Y
+                    INY
+                    STA (word_list),Y
+                    RTS
+                .not_null:
+                CLC
+                LDA gc_counter
+                LDY #HEX_BASE
+                STA (word_list),Y
+                LDY #HEX_OFFSET
+                ADC (word_list),Y
+                LDY #HEX_SUM
+                STA (word_list),Y
+                LDA gc_counter+1
+                LDY #HEX_BASE+1
+                STA (word_list),Y
+                LDY #HEX_OFFSET+1
+                ADC (word_list),Y
+                LDY #HEX_SUM+1
+                STA (word_list),Y
+                RTS
+
             WORDS_MSG:
                 FCB " A-PRIM",0
                 FCB " B-USER",0
@@ -3032,6 +3187,20 @@
                 FCB WORDS_NO_GC ; CODE_ATAN				;140
                 FCB WORDS_NO_GC ; CODE_DEG				;142
                 FCB WORDS_NO_GC ; CODE_WORDS            ;144
+                FCB WORDS_SKIP2 ; CODE_BROKEN_REF       ;146
+
+	WORD_BROKEN_REF:
+		FCB 0,""		            ;Name
+		FDB dict_begin              ;Next word
+		FCB TOKEN_BROKEN_REF        ;ID - 146
+		CODE_BROKEN_REF:
+			FCB OBJ_PRIMITIVE				;Type
+			FCB NONE     					;Flags	
+
+            LDA #ERROR_BROKEN_REF
+            STA ret_val
+            
+            JMP CODE_QUIT+EXEC_HEADER
 
     FORTH_WORDS_END:
 
@@ -3108,3 +3277,5 @@
 		FDB CODE_ATAN				;140 $8C
 		FDB CODE_DEG				;142 $8E
 		FDB CODE_WORDS              ;144 $90
+        FDB CODE_BROKEN_REF         ;146 $92
+        

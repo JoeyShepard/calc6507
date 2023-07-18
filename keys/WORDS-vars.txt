@@ -1,0 +1,6 @@
+' drop sto v1   #not gc
+' v1 sto v2     #gc - should become $0 when v1 deleted
+: w1 dup ;      #
+' w1 sto v3     #gc - should become $0 when w1 deleted
+words
+c
