@@ -864,7 +864,7 @@
 	set flags,	R0+0
 	set temp, 	R0+1
 	FUNC ExecToken
-		
+	
 		;No error unless set below
 		LDY #ERROR_NONE
 		STY ret_val

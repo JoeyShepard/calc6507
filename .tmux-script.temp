@@ -21,5 +21,8 @@ tmux rename-window -t 5 math
 tmux new-window -c ./ 'vim src/words.asm'
 tmux rename-window -t 6 words
 
+tmux new-window -c ./ 'vim src/const.asm'
+tmux rename-window -t 7 const
+
 tmux select-window -t 0
 tmux attach-session -d

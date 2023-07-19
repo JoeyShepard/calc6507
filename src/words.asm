@@ -2457,8 +2457,12 @@
     set rows_drawn,         R1+5 ;rows drawn to screen
     set sel_address,        R1+6 ;address of highlighted word
     ;set sel_address,        R1+7 ;address of highlighted word
-    set gc_counter,         R2+0 ;counter for garbage collection
-    ;set gc_counter,         R2+1 ;counter for garbage collection
+    set gc_counter,         R2+0 ;counter for garbage collection. reused to hold address to check for gc
+    ;set gc_counter,         R2+1 ;counter for garbage collection. reused to hold address to check for gc
+    set sel_address_body,   R2+2 ;address of garbage collected word body as embedded in other words
+    ;set sel_address_body,   R2+3 ;address of garbage collected word body as embedded in other words
+    set gc_check,           R2+4 ;sel_address or sel_address_body depending on if var or word
+    ;set gc_check,           R2+5 ;sel_address or sel_address_body depending on if var or word
 	WORD_WORDS:
 		FCB 5,"WORDS"			    ;Name
 		FDB WORD_BROKEN_REF	        ;Next word
@@ -2806,8 +2810,19 @@
                             JMP .gc_address_loop
                         .gc_address_done:
 
+                        halt
+                        
                         TODO: combine with above?
                         ;Fix addresses in variables and word bodies
+                        LDY #0
+                        LDA (sel_address),Y
+                        CLC
+                        ADC #WORD_HEADER_SIZE
+                        ADC sel_address
+                        STA sel_address_body
+                        LDA sel_address+1
+                        ADC #0
+                        STA sel_address_body+1
                         MOV.W #dict_begin,word_list
                         .gc_obj_loop:
                             JSR NEXT_WORD_STUB  
@@ -2859,6 +2874,7 @@
                             BNE .gc_var_next
                             
                             ;Smart hex found
+                            MOV.W sel_address,gc_check
                             JSR GC_HEX_STUB
 
                             ;Advance to next object
@@ -2869,6 +2885,7 @@
 
                             ;Current object is secondary word
                             .gc_secondary:
+                            MOV.W sel_address_body,gc_check
                             ;Loop through tokens in word
                             .gc_token_loop:
                                 LDY #0
@@ -2894,10 +2911,6 @@
                                     LDA gc_counter
                                     ORA gc_counter+1
                                     BNE .not_null
-
-                                        start here - addresses don't match!
-                                        strore body address instead of head address in sel_address?
-
                                         ;Address is same as deleted object
                                         LDA #TOKEN_BROKEN_REF
                                         LDY #0
@@ -3031,10 +3044,10 @@
             GC_ADDRESS_STUB:
                 ;Check if garbage collecting address of deleted object
                 LDA gc_counter
-                CMP sel_address
+                CMP gc_check
                 BNE .not_same
                 LDA gc_counter+1
-                CMP sel_address+1
+                CMP gc_check+1
                 BNE .not_same
                     ;Garbage collected address is same as deleted object
                     LDA #0
@@ -3046,9 +3059,9 @@
                 ;Check if address is in range
                 SEC 
                 LDA gc_counter
-                SBC sel_address
+                SBC gc_check
                 LDA gc_counter+1
-                SBC sel_address+1
+                SBC gc_check+1
                 BCC .no_adjustment
                 SEC
                 LDA #lo(dict_end)
@@ -3199,8 +3212,7 @@
 
             LDA #ERROR_BROKEN_REF
             STA ret_val
-            
-            JMP CODE_QUIT+EXEC_HEADER
+            RTS
 
     FORTH_WORDS_END:
 
