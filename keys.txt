@@ -1,8 +1,7 @@
-5 sto v1
-"hi!" sto v2
-$200 sto v3
-: w1 dup swap ;
-: w2 $123 + ;
-: w3 w2 ;
-: w4 v1 2 + ;
-: w5 v3 $34 + ;
+: w1 5 ;
+: w2 7 ;
+: w3 9 ;
+11 sto v1
+' w1 ' w2 ' w3 ' v1
+words
+b+

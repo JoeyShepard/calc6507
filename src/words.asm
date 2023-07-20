@@ -2810,8 +2810,6 @@
                             JMP .gc_address_loop
                         .gc_address_done:
 
-                        halt
-                        
                         TODO: combine with above?
                         ;Fix addresses in variables and word bodies
                         LDY #0
@@ -2829,16 +2827,6 @@
                             ORA next_word
                             JEQ .gc_objs_done
 
-                            TODO: remove
-                            LDY #1
-                            LDA (word_list),Y
-                            STA DEBUG
-                            INY
-                            LDA (word_list),Y
-                            STA DEBUG
-                            LDA #' '
-                            STA DEBUG
-
                             LDY #0
                             LDA (word_list),Y
                             JSR WORD_SKIP_STUB
@@ -2848,8 +2836,6 @@
                             LDA #WORD_HEADER_SIZE
                             JSR WORD_SKIP_STUB
 
-                            halt
-                            
                             ;Word or variable?
                             CPY #OBJ_SECONDARY
                             BEQ .gc_secondary
@@ -2859,8 +2845,6 @@
                             ;Something is very wrong
                             TODO: error - corrupt dictionary
 
-                            halt
-                            
                             ;Current object is variable
                             .gc_variable:
                             ;Only need to adjust smart hex
@@ -2879,7 +2863,7 @@
 
                             ;Advance to next object
                             .gc_var_next:
-                            LDA #9  ;Size of variable
+                            LDA #OBJ_SIZE
                             JSR WORD_SKIP_STUB
                             JMP .gc_obj_loop
 
@@ -2934,7 +2918,7 @@
                                 AND #WORDS_SKIP8
                                 BEQ .no_skip8
                                     ;Token with 8 bytes of data embedded after it
-                                    LDA #9
+                                    LDA #OBJ_SIZE
                                     JSR WORD_SKIP_STUB
                                     JMP .gc_token_next
                                 .no_skip8:
@@ -2953,14 +2937,38 @@
                                 
                                 ;Done processing word - advance to next word
                                 JMP .gc_obj_loop
-
                         .gc_objs_done:
 
                         ;Fix addresses on stack
-                        
+                        STX stack_X
+                        LDA #0
+                        STA word_list+1
+                        .gc_stack_loop:
+                            ;Only need to adjust smart hex
+                            CPX #0
+                            BEQ .gc_stack_done
+                            LDA OBJ_TYPE,X
+                            CMP #OBJ_HEX
+                            BNE .gc_stack_next
+                            LDA HEX_TYPE,X
+                            CMP #HEX_SMART
+                            BNE .gc_stack_next
+                            
+                            ;Smart hex found
+                            STX word_list
+                            MOV.W sel_address,gc_check
+                            JSR GC_HEX_STUB
 
+                            ;Advance to next stack object
+                            .gc_stack_next:
+                            TXA
+                            CLC
+                            ADC #OBJ_SIZE
+                            TAX
+                            JMP .gc_stack_loop
+                        .gc_stack_done:
+                        LDX stack_X
 
-                        TODO: keep list index?
                         LDA words_mode
                         JMP .display_new
                     .cant_delete:

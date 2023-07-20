@@ -1,0 +1,13 @@
+: w1 5 ; #don't delete
+: w2 7 ; #delete
+: w3 9 ;
+11 sto v1
+' w1 ' w2 ' w3 ' v1
+words
+b+
+
+#1. delete w2
+
+#try with empty stack
+#try with primitives
+#try with other data types
