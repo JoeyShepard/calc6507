@@ -183,8 +183,6 @@
 		
 		.input_loop:
 			
-			TODO: if unknown word in uncompleted definition, errors then jumps here and errors again
-			
 			;Colon definitions must fit on one line
             ;Error message handled below
 			LDA mode
@@ -238,7 +236,10 @@
 					LDA mode
 					CMP #MODE_IMMEDIATE
 					BNE .compile_word
-						
+					
+                        halt
+                        LDA aux_word_counter
+
 						;Immediate mode - insert word token into temp thread and execute
 						.immediate:
 						LDY #TOKEN_BREAK
@@ -262,9 +263,9 @@
 						STA temp_thread+2
 						STY temp_thread+3
 						.jump_thread:
-						LDA #temp_thread # 256
+						LDA #lo(temp_thread)
 						STA exec_ptr
-						LDA #temp_thread / 256
+						LDA #hi(temp_thread)
 						STA exec_ptr+1
 						JMP ExecThread ;BREAK inserted above returns to main loop
 					.compile_word:
@@ -323,20 +324,20 @@
 				
 				;Compile mode - compile value
 				LDA R_ans
-				;float?
+				;Float?
 				LDY #TOKEN_FLOAT
 				CMP #OBJ_FLOAT
 				BEQ .value_compile
-				;hex?
+				;Hex?
 				LDY #TOKEN_HEX
 				CMP #OBJ_HEX
 				BEQ .value_compile
-				;string?
+				;String?
 				LDY #TOKEN_STRING
 				CMP #OBJ_STR
 				BEQ .value_compile
 				
-				;unknown type - something is very wrong
+				;Unknown type - something is very wrong
 				TODO: handle error
 				halt
 					

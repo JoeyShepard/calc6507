@@ -112,20 +112,20 @@
 					BNE .special_next
 						STA arg
 						
-						;;recode m for minus as c since c assigned to minus sign
+						;;Recode m for minus as c since c assigned to minus sign
 						;CMP #'m'
 						;BNE .key_done
 						;	LDA #CHAR_MINUS
 						;	STA arg
 						
-						;recode uppercase S for STO as d which is store arrow. s is letter s
+						;Recode uppercase S for STO as d which is store arrow. s is letter s
 						CMP #'S'
 						BNE .key_E
 							LDA #CHAR_STO
 							STA arg
 							BNE .key_done
 							
-						;recode uppercase E for exponent. e is letter e
+						;Recode uppercase E for exponent. e is letter e
 						.key_E:
 						CMP #'E'
 						BNE .key_done
@@ -304,7 +304,7 @@
                 ;Loop through letters of word in dictionary
 				.str_loop:
 					LDA (ret_address),Y
-					CMP new_word_buff-1,Y	;offset by 1 since string starts one byte in
+					CMP new_word_buff-1,Y	;Offset by 1 since string starts one byte in
 					BNE .no_match
 						CPY new_word_len
 						BEQ .word_found
@@ -394,14 +394,14 @@
 		LDA new_word_buff
 		CMP #'"'
 		BNE .not_string
-			;string
+			;String
 			LDA new_word_len
 			CMP #1
 			BNE .not_single_quote
-				;single quote - invalid string
+				;Single quote - invalid string
 				RTS
 			.not_single_quote:
-			;reduce by one so can compare to Y below
+			;Reduce by one so can compare to Y below
 			DEC new_word_len
 			.loop_str:
 				LDA new_word_buff+1,y	;+1 to skip first quote
@@ -415,27 +415,28 @@
 				BEQ .string_unterminated
 				BNE .loop_str
 				.string_too_long:
-				;string longer than 8!
+				;String longer than 8!
 				.string_unterminated:
-				;no matching quote on end!
+				;No matching quote on end!
 				
-				;optional - could cut to save space
+				;Optional - could cut to save space
+                TODO: delete?
 				;LDA #ERROR_STRING
 				;STA global_error
 				
 				;item type already set to OBJ_ERROR
 				RTS
 			.str_done:
-			;was closing quote also last character?
+			;Was closing quote also last character?
 			INY
 			CPY new_word_len
 			BNE .str_return
 			
-			;all successful
+			;All successful
 			LDA #OBJ_STR
 			STA R_ans
 			.str_return:
-			;item type already set to OBJ_ERROR
+			;Item type already set to OBJ_ERROR
 			RTS
 		.not_string:
 		
@@ -443,14 +444,14 @@
 		BNE .not_hex
 			;hex
 			LDA new_word_len
-			;single dollar sign - invalid hex
+			;Single dollar sign - invalid hex
 			CMP #1
 			BEQ .hex_error
-			;limit to 16 bits - 4 digits
+			;Limit to 16 bits - 4 digits
 			CMP #6
 			BCS .hex_error
 			
-			;decrease to make easier to compare to Y below
+			;Decrease to make easier to compare to Y below
 			DEC new_word_len
 			LDY #0
 			.loop_hex:
@@ -484,7 +485,7 @@
 				CPY #4
 				BNE .loop_hex
 				
-				;success
+				;Success
 				.hex_done:
 				LDA #OBJ_HEX
 				STA R_ans
@@ -496,7 +497,7 @@
 		TODO: this whole routine should use R1 so it can share functionality!
 		
 		TODO: give name to numbers
-		;not string or hex, so must be float
+		;Not string or hex, so must be float
 		LDA #7
 		STA index
 		LDA #0
@@ -511,12 +512,12 @@
 		STA exp_found
 		STA digit_found
 		
-		;first character is negative or digit?
+		;First character is negative or digit?
 		LDA new_word_buff
 		;CMP #CHAR_MINUS
 		CMP #'-'
 		BNE .float_no_neg
-			;neg sign
+			;Neg sign
 			LDA #$FF
 			STA negative
 			INY
@@ -538,20 +539,20 @@
 				PHA
 				LDA nonzero_found
 				BNE .digit_good
-					;mark at least one digit found in case all 0(s)
-					;otherwise, can't tell e from 0e
+					;Mark at least one digit found in case all 0(s)
+					;Otherwise, can't tell e from 0e
 					LDA #$FF
 					STA digit_found
 					PLA
 					PHA
 					BEQ .digit_zero
-						;non zero digit
+						;Non zero digit
 						LDA #$FF
 						STA nonzero_found
 						BNE .digit_good
 						
 					.digit_zero:
-					;only zeroes so far, so just count exponent
+					;Only zeroes so far, so just count exponent
 					
 					PLA
 					LDA exp_found
@@ -571,7 +572,7 @@
 						LDA digit_count
 						CMP #MAX_DIGITS+1	;one extra digit for input rounding
 						BCC .digit_ok
-							;;max digits exceeded!
+							;;Max digits exceeded!
 							;PLA
 							;RTS
 							PLA
@@ -596,7 +597,7 @@
 						LDA exp_digit_count
 						CMP #3
 						BNE .exp_digit_ok
-							;max exp digits exceeded!
+							;Max exp digits exceeded!
 							PLA
 							RTS
 						.exp_digit_ok:
@@ -617,20 +618,20 @@
 						JMP .float_next
 			.float_not_digit:
 			
-			;not digit
+			;Not digit
 			CMP #'.'
 			BNE .not_decimal_point
 				LDA dec_found
 				BEQ .decimal_good
-					;second decimal found!
+					;Second decimal found!
 					RTS
 				.decimal_good:
 				LDA exp_found
 				BEQ .exp_good
-					;decimal in exponent!
+					;Decimal in exponent!
 					RTS
 				.exp_good:
-				;if starts with . or only zeroes
+				;If starts with . or only zeroes
 				LDA nonzero_found
 				BNE .no_implied_0
 					DEC exp_count
@@ -645,7 +646,7 @@
 			BNE .not_exp
 				LDA exp_found
 				BEQ .first_exp
-					;second e found, error!
+					;Second e found, error!
 					RTS
 				.first_exp:
 				
@@ -661,13 +662,13 @@
 			;CMP #CHAR_MINUS
 			CMP #'-'
 			BNE .not_minus
-				;only allowed if exp_found and at first character:
+				;Only allowed if exp_found and at first character:
 				LDA exp_found
 				EOR #$FF
 				ORA index
 				ORA exp_negative
 				BEQ .minus_good
-					;minus in wrong place!
+					;Minus in wrong place!
 					RTS
 				.minus_good:
 				LDA #$FF
@@ -675,7 +676,7 @@
 				BNE .float_next
 			.not_minus:
 			
-			;character not recognized - invalid input!
+			;Character not recognized - invalid input!
 			RTS
 		.float_done:
 		
@@ -686,7 +687,7 @@
 			BNE .zero_ret
 				RTS
 			.zero_ret:
-				;if input is zero, clear exponent
+				;If input is zero, clear exponent
 				LDA #0
 				STA R_ans+GR_OFFSET+EXP_LO
 				STA R_ans+GR_OFFSET+EXP_HI
@@ -708,7 +709,7 @@
 		LDA #0
 		LDY exp_count
 		BMI .exp_count_neg
-			DEY				;count of digits, so -1 since 5 is e0 not e1
+			DEY				;Count of digits, so -1 since 5 is e0 not e1
 			BEQ .exp_count_done
 			CPY #$FF
 			BEQ .exp_count_neg
@@ -743,7 +744,7 @@
 		STA R_ans+GR_OFFSET+EXP_HI
 		CLD
 		
-		;round if necessary
+		;Round if necessary
 		TXA
 		PHA
 		LDX #R_ans+1
@@ -786,7 +787,7 @@
 			STA R_ans+GR_OFFSET+EXP_HI
 		.positive:
 		
-		;shift everything one byte left - slow but fine since input
+		;Shift everything one byte left - slow but fine since input
 		TODO: replace with CopyRegs?
 		TODO: change offset to -1 so shifting not necessary
 		LDY #1
@@ -797,14 +798,14 @@
 			CPY #OBJ_SIZE
 			BNE .shift_loop
 		
-		;success - mark object type as float and return
+		;Success - mark object type as float and return
 		.float_success:
 		LDA #OBJ_FLOAT
 		STA R_ans
 		
 		RTS
 		
-		;helper routines
+		;Helper routines
 		.hex_rotate:
 			STY y_buff
 			LDY #4
@@ -838,7 +839,7 @@
 			EOR #$FF
 			STA which_digit
 			BEQ .second_digit
-				;first digit
+				;First digit
 				PLA
 				ASL
 				ASL
@@ -857,7 +858,6 @@
 			
 	END
 	
-			
 	
 	;Token in A
     ;OK to use R0 here since only jump is out of function with no return
@@ -999,9 +999,6 @@
 	
 	;Thread in exec_ptr
 	FUNC ExecThread
-		;Can't allocate any locals since JMPed here
-		;Modify optimizer if necessary
-		
 		.loop:
 			LDY #0
 			LDA (exec_ptr),Y
@@ -1042,6 +1039,7 @@
 		
 		LDY #0
 		PLA
+        TODO: magic number
 		CMP #4
 		BNE .no_end_token
 			LDA #TOKEN_EXIT_THREAD
@@ -1184,14 +1182,6 @@
 	set dest_index,	R0+2
 	set ptr,		R0+3
 	FUNC WriteHeader
-		TODO: stop relying on optimizer then?
-		TODO: or add functionality to optimizer? not trivial
-		;Optimizer doesn't work unless function called from function!
-		;VARS
-		;	BYTE count
-		;	BYTE src_index, dest_index
-		;	WORD ptr
-		;END
 
 		PLA
 		STA ptr

@@ -153,9 +153,8 @@
 		.hex_raw:
 		
 		;If >=16, return 0
-		SEC
 		LDA HEX_SUM,X
-		SBC #16
+		CMP #16
 		LDA HEX_SUM+1,X
 		SBC #0
 		BCC .zero_check
@@ -219,6 +218,28 @@
 		JSR PUSH_STUB
 		FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00
 		RTS
+    
+    IMMED_ONLY_STUB:
+        LDA mode
+        CMP #MODE_COMPILE
+        BNE .not_compile
+            LDA #ERROR_IMMED_ONLY
+            STA ret_val
+            PLA
+            PLA
+            RTS
+        .not_compile:
+        RTS
+
+    ESC_CHECK_STUB:
+        JSR ReadKey
+        CMP #KEY_ESCAPE
+        BNE .no_escape
+            PLA
+            PLA
+            JMP CODE_QUIT+EXEC_HEADER
+        .no_escape:
+        RTS
 
 	TODO: delete?
 	TODO: check that BCD_CopyConst is smaller than this - seems only 19 bytes

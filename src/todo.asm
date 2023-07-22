@@ -20,6 +20,7 @@
     TODO: copyright
     TODO: double check not relying on flags from BCD which are not valid for NMOS
     TODO: - N and V invalid. Z also invalid if roll over from addition. check for BNE/BEQ
+    TODO: - modify emulator?
     TODO: - math.asm, words.asm, word_stubs.asm
     TODO: remove trailing zeroes?
     TODO: draw smart hex differently? M$1234
@@ -28,6 +29,8 @@
     TODO: merge system.asm
     TODO: reuse FP registers to replace temp variables in other functions
     TODO: prevent WORDS from being inserted into word
+    TODO: capitalize comments. done: main, emu6507, forth, math, words
+    TODO: until test in keys/ stopped working after replacing PLA with stack_X: WRONG TYPE
 
     ;Size related - only if necessary
     ;================================
@@ -77,3 +80,7 @@
     ;=======================
     TODO: limit return stack
     TODO: check if IF and DO have closing structures
+
+    ;Finished - only what might be forgotten and waste time redoing
+    ;==============================================================
+    DONE:

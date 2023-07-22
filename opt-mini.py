@@ -265,6 +265,9 @@ while running:
                     elif first_word[:5]=="TODO:":
                         line=";"+line
                         print_line=True
+                    elif first_word[:5]=="DONE:":
+                        line=";"+line
+                        print_line=True
                     elif first_word=="STRING_LITERALS":
                         final_text+=[[TYPE_TEXT,file_output]]
                         file_output=""

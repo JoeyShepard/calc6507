@@ -198,8 +198,8 @@
 			DEC lc1
 			BNE .loop	
 		
-		;blank line after character
-		;looks fine on actual LCD since room around edge
+		;Blank line after character
+		;Looks fine on actual LCD since room around edge
 		LDA #16
 		STA lc1
 		LDA #BG_COLOR

@@ -12,18 +12,17 @@
 			FCB MIN1|ADD1		;Flags
 			
 			LDY #OBJ_SIZE
-			TXA
-			PHA
+			STX stack_X
 			.dup_loop:
 				LDA OBJ_SIZE,X
 				STA 0,X
 				INX
 				DEY
 				BNE .dup_loop
-			PLA
-			TAX
+			LDX stack_X
 			RTS
-	
+
+    set word_temp,  R0
 	WORD_SWAP:
 		FCB 4, "SWAP" 			;Name
 		FDB	WORD_DROP			;Next word
@@ -33,20 +32,18 @@
 			FCB MIN2			;Flags
 			
 			LDY #OBJ_SIZE
-			TXA
-			PHA
+			STX stack_X
 			.swap_loop:
 				LDA OBJ_SIZE,X
-				PHA
+                STA word_temp
 				LDA 0,X
 				STA OBJ_SIZE,X
-				PLA
+				LDA word_temp
 				STA 0,X
 				INX
 				DEY
 				BNE .swap_loop
-			PLA
-			TAX
+			LDX stack_X
 			RTS	
 	
 	WORD_DROP:
@@ -71,22 +68,20 @@
 		CODE_OVER:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|ADD1		;Flags
-			
-			TXA
-			PHA
+		
 			LDY #OBJ_SIZE
+            STX stack_X
 			.over_loop:
 				LDA OBJ_SIZE*2,X
 				STA 0,X
 				INX
 				DEY
 				BNE .over_loop
-			
-			PLA
-			TAX
-			
+			LDX stack_X
 			RTS
-			
+		
+    set word_temp1, R0+0
+    set word_temp2, R0+1
 	WORD_ROT:
 		FCB 3, "ROT" 			;Name
 		FDB	WORD_MIN_ROT		;Next word
@@ -96,27 +91,27 @@
 			FCB MIN3			;Flags
 			
 			LDY #OBJ_SIZE
-			TXA
-			PHA
+            STX stack_X
 			.rot_loop:
 				LDA OBJ_SIZE*2,X
-				PHA
+				STA word_temp1
 				LDA OBJ_SIZE,X
-				PHA
+				STA word_temp2
 				LDA 0,X
 				STA OBJ_SIZE,X
-				PLA 
+				LDA word_temp2
 				STA OBJ_SIZE*2,X
-				PLA 
+				LDA word_temp1
 				STA 0,X
 				
 				INX
 				DEY
 				BNE .rot_loop
-			PLA
-			TAX
+            LDX stack_X
 			RTS
 	
+    set word_temp1, R0+0
+    set word_temp2, R0+1
 	WORD_MIN_ROT:
 		FCB 4, "-ROT" 			;Name
 		FDB	WORD_CLEAR			;Next word
@@ -126,25 +121,23 @@
 			FCB MIN3			;Flags
 			
 			LDY #OBJ_SIZE
-			TXA
-			PHA
+            STX stack_X
 			.min_rot_loop:
 				LDA OBJ_SIZE*2,X
-				PHA
+				STA word_temp1
 				LDA OBJ_SIZE,X
-				PHA
+				STA word_temp2
 				LDA 0,X
 				STA OBJ_SIZE*2,X
-				PLA 
+				LDA word_temp2
 				STA 0,X
-				PLA 
+				LDA word_temp1
 				STA OBJ_SIZE,X
 				
 				INX
 				DEY
 				BNE .min_rot_loop
-			PLA
-			TAX
+            LDX stack_X
 			RTS
 	
 	WORD_CLEAR:
@@ -357,7 +350,7 @@
 			STA ret_val
 			RTS
 			
-	
+	TODO: variable names for registers
 	WORD_DIV:
 		FCB 1,"/"				;Name
 		FDB WORD_TICK			;Next word
@@ -381,14 +374,15 @@
 					JSR CODE_DROP+EXEC_HEADER
 					JMP RansTos
 			div_not_float:
-			
+		    
+            TODO: variable names for regs
+            TODO: refine algorithm?
 			;Dividing hex objects
 			LDA HEX_TYPE,X
 			ASL
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex
 				;Both raw hex
-				
 				LDA HEX_SUM,X
 				STA R0
 				LDA HEX_SUM+1,X
@@ -513,7 +507,7 @@
 				STA ret_val
 				RTS
             .not_null:
-			;primitve or word?
+			;Primitve or word?
 			LDY #0
 			LDA (ret_address),Y
 			CLC
@@ -577,10 +571,11 @@
 		CODE_STORE:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|HEX		;Flags
-            
+
+            ;Don't write to null address
             LDA HEX_SUM,X
             ORA HEX_SUM+1,X
-            BEQ .null_exit  ;Don't write to null address
+            BEQ .null_exit
             
 			LDA HEX_SUM,X
 			STA ret_address
@@ -604,10 +599,11 @@
 		CODE_FETCH:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
-	
+
+            ;Don't read from null address
             LDA HEX_SUM,X
             ORA HEX_SUM+1,X
-            BEQ .null_read  ;Don't read from null address
+            BEQ .null_read  
             
             ;Read from address
 			LDA HEX_SUM,X
@@ -640,10 +636,11 @@
 		CODE_CSTORE:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|HEX		;Flags
-	
+
+            ;Don't write to null address
             LDA HEX_SUM,X
             ORA HEX_SUM+1,X
-            BEQ .null_exit  ;Don't write to null address
+            BEQ .null_exit
 
 			LDA HEX_SUM,X
 			STA ret_address
@@ -664,10 +661,11 @@
 		CODE_CFETCH:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN1|HEX		;Flags
-	
+
+            ;Don't read from null address
             LDA HEX_SUM,X
             ORA HEX_SUM+1,X
-            BEQ .null_read  ;Don't read from null address
+            BEQ .null_read
             
             ;Read from address
 			LDA HEX_SUM,X
@@ -696,17 +694,10 @@
 		CODE_COLON:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB IMMED			;Flags
-			
-			TODO: abstract
-			;immediate mode only
-			LDA mode
-			CMP #MODE_COMPILE
-			BNE .not_compile
-				LDA #ERROR_IMMED_ONLY
-				STA ret_val
-				RTS
-			.not_compile:
-			
+		
+            ;Immediate mode only
+			JSR IMMED_ONLY_STUB
+
 			TODO: abstract - used for var as well
 			;Get next word in stream
 			CALL LineWord
@@ -724,7 +715,6 @@
 			LDA ret_val
 			BEQ .word_not_found
 				;Word exists - error instead of redefining word
-				TODO: delete then redefine?
 				BNE .error_exit
 			.word_not_found:
 			
@@ -832,15 +822,8 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB IMMED			;Flags
 			
-			TODO: abstract
-			;immediate mode only
-			LDA mode
-			CMP #MODE_COMPILE
-			BNE .not_compile
-				LDA #ERROR_IMMED_ONLY
-				STA ret_val
-				RTS
-			.not_compile:
+			;Immediate mode only
+            JSR IMMED_ONLY_STUB
 
 			TODO: Share this with TICK
 			CALL LineWord
@@ -922,7 +905,7 @@
 		CODE_VAR_THREAD:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
-		
+	
 			LDY #1
 			LDA (exec_ptr),Y
 			STA ret_address
@@ -930,8 +913,7 @@
 			LDA (exec_ptr),Y
 			STA ret_address+1
 		
-			TXA
-			PHA
+            STX stack_X
 			LDY #0
 			.loop:
 				LDA (ret_address),Y
@@ -940,8 +922,7 @@
 				INY
 				CPY #OBJ_SIZE
 				BNE .loop
-			PLA
-			TAX
+            LDX stack_X
 			
 			LDA #2
 			JMP IncExecPtr
@@ -1002,7 +983,7 @@
 				
 				CALL FindWord
 
-				;word not found. try to create variable
+				;Word not found. try to create variable
 				LDA ret_val
 				BNE .word_exists
 					JSR CODE_VAR.var_create
@@ -1013,7 +994,7 @@
 						RTS
 				.word_exists:
 				
-				;word found. is it a variable?
+				;Word found. Is it a variable?
 				LDY #0
 				LDA (obj_address),Y
 				CMP #OBJ_VAR
@@ -1029,8 +1010,7 @@
 				.copy_data:
 				LDA #OBJ_SIZE
 				STA R0
-				TXA
-				PHA
+                STX stack_X
 				.loop:
 					LDA 0,X
 					STA (obj_address),Y
@@ -1038,8 +1018,7 @@
 					INY
 					DEC R0
 					BNE .loop
-				PLA
-				TAX
+                LDX stack_X
 				
 				LDA #ERROR_NONE
 				STA ret_val
@@ -1066,17 +1045,18 @@
 			
 			LDA #OBJ_HEX
 			STA 0,X
-			LDA #dict_end # 256
+			LDA #lo(dict_end)
 			SEC
 			SBC dict_ptr
 			STA HEX_SUM,X
-			LDA #dict_end/256
+			LDA #hi(dict_end)
 			SBC dict_ptr+1
 			STA HEX_SUM+1,X
 			LDA #0
 			STA HEX_TYPE,X
 			RTS
-	
+    
+    set word_temp,  R0
 	WORD_SECONDARY:
 		FCB 0,""					;Name
 		FDB WORD_EXIT				;Next word
@@ -1097,7 +1077,7 @@
 			;Push current thread address to stack
 			LDA exec_ptr
 			CLC
-			ADC #3
+			ADC #3 ;Size of current token and address
 			TAY
 			LDA exec_ptr+1
 			ADC #0
@@ -1108,11 +1088,11 @@
 			;Load new thread address
 			LDY #1
 			LDA (exec_ptr),Y
-			PHA
+            STA word_temp
 			INY
 			LDA (exec_ptr),Y
 			STA exec_ptr+1
-			PLA 
+			LDA word_temp
 			STA exec_ptr
 
 			JMP ExecThread
@@ -1173,9 +1153,6 @@
 			STA aux_word_counter
 			LDA #AUX_STACK_SIZE-1
 			STA aux_stack_ptr
-			
-			;Continues processing input so can't use
-			;JMP CODE_BREAK+EXEC_HEADER
 			
 			TODO: combine with above?
 			;Reset R stack
@@ -1367,8 +1344,7 @@
 			TODO: abstract
 			;Copy aux stack item to temp register
 			LDY aux_stack_ptr
-			TXA
-			PHA
+            STX stack_X
 			LDX #OBJ_SIZE-TYPE_SIZE
 			.loop:
 				;ie, end of pair which is last byte of iterator in limit/iterator pair
@@ -1379,8 +1355,7 @@
 				DEY
 				DEX
 				BNE .loop
-			PLA
-			TAX
+            LDX stack_X
 			
 			;Set leading digit of R1 to 1, ie 1e0
 			LDA #$10
@@ -1391,8 +1366,7 @@
 			
 			;Copy iterator back to aux stack and iterator and limit to temp regs
 			LDY aux_stack_ptr
-			TXA
-			PHA
+            STX stack_X
 			LDX #OBJ_SIZE-TYPE_SIZE
 			.copy_loop:
 				LDA R_ans,X
@@ -1403,9 +1377,8 @@
 				DEY
 				DEX
 				BNE .copy_loop
-			PLA
-			TAX
-			
+			LDX stack_X
+
 			;Compare iterator to limit
 			LDA R0+EXP_HI
 			EOR #SIGN_BIT
@@ -1420,20 +1393,7 @@
 			LDA R_ans+EXP_HI
 			AND #SIGN_BIT
 			BNE .loop_done
-			
-				;;Haven't reached limit. Jump to head of loop
-				;LDY #1
-				;LDA (exec_ptr),Y
-				;PHA
-				;INY
-				;LDA (exec_ptr),Y
-				;STA exec_ptr+1
-				;PLA 
-				;STA exec_ptr
-				;RTS
-			
 				JMP CODE_AGAIN_THREAD+EXEC_HEADER
-			
 			.loop_done:
 			
 			;Pop limit and iterator off aux stack
@@ -1497,7 +1457,7 @@
 				BCC .hex_false
 				ORA R0
 				BEQ .hex_false
-				;Could call once but then stack item doesn't exist! not safe for interrupts
+				;Could call once but then stack item doesn't exist! Not safe for interrupts
 				JSR CODE_DROP+EXEC_HEADER
 				JMP HexTrue
 				.hex_false:
@@ -1747,8 +1707,8 @@
 			STA obj_address+1
 			LDA #TOKEN_AGAIN_THREAD
 			JMP TokenArgThread
-			
-	TODO: remove all 0 length words from dictionary - dont need dict header
+		
+    set word_temp,  R0
 	WORD_AGAIN_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_UNTIL			;Next word
@@ -1758,20 +1718,15 @@
 			FCB NONE					;Flags
 			
 			;Check if Escape was pressed
-			JSR ReadKey
-			CMP #KEY_ESCAPE
-			BNE .no_exit_early
-				JMP CODE_QUIT+EXEC_HEADER
-			.no_exit_early:
+            JSR ESC_CHECK_STUB
 			
 			LDY #1
 			LDA (exec_ptr),Y
-            TODO: use R0-R7 in all words and eliminate stack?
-			PHA
+			STA word_temp
 			INY
 			LDA (exec_ptr),Y
 			STA exec_ptr+1
-			PLA 
+			LDA word_temp
 			STA exec_ptr
 			RTS
 	
@@ -1819,15 +1774,10 @@
 		CODE_UNTIL_THREAD:
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1						;Flags
-			
-			TODO: abstract?
-			;Check if Escape was pressed
-			JSR ReadKey
-			CMP #KEY_ESCAPE
-			BNE .no_exit_early
-				JMP CODE_QUIT+EXEC_HEADER
-			.no_exit_early:
-			
+		
+			;Check if escape was pressed
+		    JSR ESC_CHECK_STUB
+
 			LDA 0,X
 			CMP #OBJ_FLOAT
 			BNE .not_float
@@ -2415,7 +2365,6 @@
 
     TODO: placed before last word in primitives?
     FORTH_LAST_WORD:
-    TODO: optimizer?
     set words_mode,         R0+0 ;mode: primary, variables, or user-defined words
     set skip_count,         R0+1 ;words to skip before starting to print words. for scrolling.
     set word_count,         R0+2 ;counter of words to skip then counter of words to print
@@ -2444,7 +2393,9 @@
 		FCB TOKEN_WORDS			    ;ID - 144
 		CODE_WORDS:
 			FCB OBJ_PRIMITIVE				;Type
-			FCB NONE     					;Flags	
+			FCB IMMED    					;Flags	
+
+            start here - immed only check
 
             LDA #WORDS_PRIM
             .display_new:           ;New screen - reset offset into list
@@ -2475,7 +2426,6 @@
                     MOV.W #dict_begin,word_list
                 .type_done:
 
-                TODO: see if loops below can be consolidated
                 .word_skip_loop:
                     JSR NEXT_WORD_STUB
 
@@ -2785,7 +2735,6 @@
                             JMP .gc_address_loop
                         .gc_address_done:
 
-                        TODO: combine with above?
                         ;Fix addresses in variables and word bodies
                         LDY #0
                         LDA (sel_address),Y
@@ -2851,7 +2800,6 @@
                                 LDA (word_list),Y
                                 LSR
                                 TAY
-                                TODO: compress table
                                 LDA GC_TABLE,Y
                                 STA words_temp  ;Save copy of byte from lookup table
                                 AND #WORDS_SKIP2
@@ -2953,7 +2901,7 @@
             ;Stubs used in WORDS. Better here than word_stubs.asm
             ;since stubs not reused by anything else.
             NEXT_WORD_STUB:
-                LDY #0                  ;Point to next word
+                LDY #0  ;Point to next word
                 LDA (word_list),Y
                 TAY
                 INY
@@ -2968,7 +2916,8 @@
                 LDY #0
                 LDA (word_list),Y
                 CLC
-                ADC #4  ;point past name to word type
+                TODO: magic number
+                ADC #4  ;Point past name to word type
                 TAY
                 LDA (word_list),Y
                 RTS
@@ -3108,7 +3057,6 @@
                 FCB " B-USER",0
                 FCB " C-VARS",0
 
-            TODO: more efficient table format
             GC_TABLE:
                 FCB WORDS_NO_GC ;                       ;0
                 FCB WORDS_NO_GC ; CODE_DUP			    ;2

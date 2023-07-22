@@ -1,0 +1,2 @@
+: test 0 begin over + swap 1 - swap over 0 = until swap drop ;
+5 test
