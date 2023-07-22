@@ -14,17 +14,17 @@
 
     ;General
     ;=======
-    TODO: replace calculated jump with JMP (addr)
     TODO: add aux stack check to semi colon
 	TODO: github readme
     TODO: checking - p110 in Handbook of Floating Point Arithmetic
     TODO: copyright
     TODO: double check not relying on flags from BCD which are not valid for NMOS
+    TODO: - N and V invalid. Z also invalid if roll over from addition. check for BNE/BEQ
+    TODO: - math.asm, words.asm, word_stubs.asm
     TODO: remove trailing zeroes?
     TODO: draw smart hex differently? M$1234
     TODO: double check list on webpage
     TODO: better error messages if room left
-    TODO: combine improvements.asm with this file
     TODO: merge system.asm
     TODO: reuse FP registers to replace temp variables in other functions
     TODO: prevent WORDS from being inserted into word
@@ -37,8 +37,6 @@
 
     ;Necessary words
     ;===============
-    TODO: DEL including garbage collection
-    TODO: WORD browser
     TODO: GRAPH
     TODO: XMAX, YMAX
     TODO: ACOS
@@ -52,7 +50,6 @@
     ;Optional words
     ;==============
     TODO: +, *, = for strings
-    TODO: * for strings
     TODO: some type of MID
     TODO: TYPE of stack item
     TODO: JUMP to address

@@ -168,10 +168,7 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|SAME		;Flags
 			
-			TODO: 0 = OBJ_TYPE
-			LDA 0,X
-			
-			TODO: add flag for checking these types (room for 3 more flags)
+			LDA OBJ_TYPE,X
 			
 			;Adding floats
 			CMP #OBJ_FLOAT
@@ -240,7 +237,7 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|SAME		;Flags
 			
-			LDA 0,X
+			LDA OBJ_TYPE,X
 			
 			;Subtracting floats
 			CMP #OBJ_FLOAT
@@ -285,7 +282,13 @@
 			LDA #ERROR_WRONG_TYPE
 			STA ret_val
 			RTS
-	
+
+    set     hex_mult_sum,       R0+0
+    ;set     hex_mult_sum,       R0+1
+    set     hex_mult_double,    R0+2
+    ;set     hex_mult_double,    R0+3
+    set     hex_mult_half,      R0+4
+    ;set     hex_mult_half,      R0+5
 	WORD_MULT:
 		FCB 1,"*"				;Name
 		FDB WORD_DIV			;Next word
@@ -294,7 +297,7 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB MIN2|SAME		;Flags
 	
-			LDA 0,X
+			LDA OBJ_TYPE,X
 			
 			;Multiplying floats
 			CMP #OBJ_FLOAT
@@ -308,73 +311,45 @@
 			
 			;Multiplying hex objects
 			LDA HEX_TYPE,X
-			TODO: why?
 			ASL
 			ORA HEX_TYPE+OBJ_SIZE,X
 			BNE .not_raw_hex
 				;Both raw hex
-				
-				TODO: 16 bit multiply faster than bytes?
-				
-				TODO: smaller in loop? calculated high bytes wasted?
-				
 				LDA #0
-				STA R0+2	;Low byte of sum
-				STA R0+3	;High byte of sum
-				
-				;bb*dd of aabb*ccdd
-				LDA HEX_SUM,X
-				STA R0
+				STA hex_mult_sum
+				STA hex_mult_sum+1
+                LDA HEX_SUM,X
+                STA hex_mult_double
+                LDA HEX_SUM+1,X
+                STA hex_mult_double+1
 				LDA OBJ_SIZE+HEX_SUM,X
-				JSR .mult_sub
-				LDA R0+2	;Low byte of sum
-				STA R0+5	;Save
-				LDA R0+3	;High byte of sum
-				STA R0+2	;To low byte of sum
-				LDA #0
-				STA R0+3	;High byte of sum
-				
-				;aa*dd of aabb*ccdd
-				LDA HEX_SUM,X
-				STA R0
+                STA hex_mult_half
 				LDA OBJ_SIZE+HEX_SUM+1,X
-				JSR .mult_sub
-				
-				;cc*bb of aabb*ccdd
-				LDA HEX_SUM+1,X
-				STA R0
-				LDA OBJ_SIZE+HEX_SUM,X
-				JSR .mult_sub
-				
-				;Write to destination
-				LDA R0+5
-				STA OBJ_SIZE+HEX_SUM,X
-				LDA R0+2
-				STA OBJ_SIZE+HEX_SUM+1,X
-				JMP CODE_DROP+EXEC_HEADER
-				
-				.mult_sub:
-					STA R0+4	;Halved value
-					LDA #0
-					STA R0+1	;High byte of doubled value
-					LDY #8
-					.loop:
-						LSR R0+4
-						BCC .loop_next
-							CLC
-							LDA R0+2	;Low byte of sum
-							ADC R0		;Low byte of doubled value
-							STA R0+2
-							LDA R0+3	;High byte of sum
-							ADC R0+1	;High byte of doubled value
-							STA R0+3
-						.loop_next:
-						ASL R0
-						ROL R0+1
-						DEY
-						BNE .loop
-					RTS
-				
+                STA hex_mult_half+1
+                LDY #16
+                .mult_loop:
+                    LSR hex_mult_half+1
+                    ROR hex_mult_half
+                    BCC .no_add
+                        CLC
+                        LDA hex_mult_sum
+                        ADC hex_mult_double
+                        STA hex_mult_sum
+                        LDA hex_mult_sum+1
+                        ADC hex_mult_double+1
+                        STA hex_mult_sum+1
+                    .no_add:
+                    ASL hex_mult_double
+                    ROL hex_mult_double+1
+                    DEY
+                    BNE .mult_loop
+
+			    ;Write to destination
+                LDA hex_mult_sum
+                STA OBJ_SIZE+HEX_SUM,X
+                LDA hex_mult_sum+1
+                STA OBJ_SIZE+HEX_SUM+1,X
+                JMP CODE_DROP+EXEC_HEADER
 			.not_raw_hex:
 			
 			;Either strings or at least one smart hex
