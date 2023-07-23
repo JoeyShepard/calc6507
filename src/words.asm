@@ -22,8 +22,10 @@
 			LDX stack_X
 			RTS
 
-    set word_temp,  R0
-	WORD_SWAP:
+    REGS
+        BYTE word_temp
+	END
+    WORD_SWAP:
 		FCB 4, "SWAP" 			;Name
 		FDB	WORD_DROP			;Next word
 		FCB TOKEN_SWAP			;ID - 4
@@ -80,8 +82,10 @@
 			LDX stack_X
 			RTS
 		
-    set word_temp1, R0+0
-    set word_temp2, R0+1
+    REGS
+        BYTE word_temp1
+        BYTE word_temp2
+	END
 	WORD_ROT:
 		FCB 3, "ROT" 			;Name
 		FDB	WORD_MIN_ROT		;Next word
@@ -110,8 +114,10 @@
             LDX stack_X
 			RTS
 	
-    set word_temp1, R0+0
-    set word_temp2, R0+1
+    REGS
+        BYTE word_temp1
+        BYTE word_temp2
+	END
 	WORD_MIN_ROT:
 		FCB 4, "-ROT" 			;Name
 		FDB	WORD_CLEAR			;Next word
@@ -276,12 +282,11 @@
 			STA ret_val
 			RTS
 
-    set     hex_mult_sum,       R0+0
-    ;set     hex_mult_sum,       R0+1
-    set     hex_mult_double,    R0+2
-    ;set     hex_mult_double,    R0+3
-    set     hex_mult_half,      R0+4
-    ;set     hex_mult_half,      R0+5
+    REGS
+        WORD hex_mult_sum
+        WORD hex_mult_double
+        WORD hex_mult_half
+    END
 	WORD_MULT:
 		FCB 1,"*"				;Name
 		FDB WORD_DIV			;Next word
@@ -785,7 +790,6 @@
 			LDA #OBJ_HEX
 			JMP COPY_STUB
 	
-	TODO: more efficient way than sharing stub?	
 	WORD_STRING:
 		FCB 0,""
 		FDB WORD_HALT			;Next word
@@ -1049,8 +1053,9 @@
 			LDA #0
 			STA HEX_TYPE,X
 			RTS
-    
-    set word_temp,  R0
+    REGS
+        BYTE word_temp
+    END
 	WORD_SECONDARY:
 		FCB 0,""					;Name
 		FDB WORD_EXIT				;Next word
@@ -1699,9 +1704,11 @@
 			STA obj_address+1
 			LDA #TOKEN_AGAIN_THREAD
 			JMP TokenArgThread
-		
-    set word_temp,  R0
-	WORD_AGAIN_THREAD:
+	
+    REGS	
+        BYTE word_temp
+	END
+    WORD_AGAIN_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_UNTIL			;Next word
 		FCB TOKEN_AGAIN_THREAD	;ID - 94
@@ -2357,29 +2364,24 @@
 
     TODO: placed before last word in primitives?
     FORTH_LAST_WORD:
-    set words_mode,         R0+0 ;mode: primary, variables, or user-defined words
-    set skip_count,         R0+1 ;words to skip before starting to print words. for scrolling.
-    set word_count,         R0+2 ;counter of words to skip then counter of words to print
-    set word_list,          R0+3 ;pointer to word list
-    ;set word_list,          R0+4 ;pointer to word list
-    set sel_row,            R0+5 ;selected row on screen
-    set index,              R0+6 ;index into word characters for word 
-    set words_temp,         R0+7 ;temp storage in multiple places
-    set next_word,          R1+0 ;pointer to next word in word list
-    ;set next_word,          R1+1 ;pointer to next word in word list
-    set word_diff,          R1+2 ;difference between next_word (R1+0) and current word in word_list (R0+3)
-    ;set word_diff,          R1+3 ;difference between next_word (R1+0) and current word in word_list (R0+3)
-    set words_left,         R1+4 ;whether word left to draw after last drawn
-    set rows_drawn,         R1+5 ;rows drawn to screen
-    set sel_address,        R1+6 ;address of highlighted word
-    ;set sel_address,        R1+7 ;address of highlighted word
-    set gc_counter,         R2+0 ;counter for garbage collection. reused to hold address to check for gc
-    ;set gc_counter,         R2+1 ;counter for garbage collection. reused to hold address to check for gc
-    set sel_address_body,   R2+2 ;address of garbage collected word body as embedded in other words
-    ;set sel_address_body,   R2+3 ;address of garbage collected word body as embedded in other words
-    set gc_check,           R2+4 ;sel_address or sel_address_body depending on if var or word
-    ;set gc_check,           R2+5 ;sel_address or sel_address_body depending on if var or word
-	WORD_WORDS:
+    REGS
+        BYTE words_mode         ;Mode: primary, variables, or user-defined words
+        BYTE skip_count         ;Words to skip before starting to print words. For scrolling.
+        BYTE word_count         ;Counter of words to skip then counter of words to print
+        WORD word_list          ;Pointer to word list
+        BYTE sel_row            ;Selected row on screen
+        BYTE index              ;Index into word characters for word 
+        BYTE words_temp         ;Temp storage in multiple places
+        WORD next_word          ;Pointer to next word in word list
+        WORD word_diff          ;Difference between next_word (R1+0) and current word in word_list (R0+3)
+        BYTE words_left         ;Whether word left to draw after last drawn
+        BYTE rows_drawn         ;Rows drawn to screen
+        WORD sel_address        ;Address of highlighted word
+        WORD gc_counter         ;Counter for garbage collection. Reused to hold address to check for gc
+        WORD sel_address_body   ;Address of garbage collected word body as embedded in other words
+        WORD gc_check           ;sel_address or sel_address_body depending on if var or word
+	END
+    WORD_WORDS:
 		FCB 5,"WORDS"			    ;Name
 		FDB WORD_BROKEN_REF	        ;Next word
 		FCB TOKEN_WORDS			    ;ID - 144

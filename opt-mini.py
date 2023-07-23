@@ -75,6 +75,8 @@ string_assignments_written=False    #Whether string literals from CALL written t
 string_index=1                      #ID number assigned for string literals from CALL
 func_name_inserted=False            #Whether label for FUNC name has been inserted into text
 assignments=[]                      #List of zero page assignments made by optimizer
+regs_counter=0                      #Counter for floating point registers reused for temp mem
+
 
 #Constants
 #=========
@@ -91,7 +93,7 @@ while running:
     except:
         error_exit(f"unable to open {file_name}",error_obj)
         
-    #Process lines of  course
+    #Process lines of source
     while True:
         line=file_list[-1].readline()
         if line=="":
@@ -108,7 +110,7 @@ while running:
             #Python does not always add a newline even when characters are read!
             #Strip off newline and add manually below since Python is not consistent
             if line[-1]=="\n": line=line[:-1]
-            
+           
             #Step through line character by character splitting into list of strings
             word=""
             line_objs=[]
@@ -169,6 +171,9 @@ while running:
                 file_name=line_objs[1]
                 filename_list+=[file_name]
                 break
+            elif first_word[:5] in ["TODO:","DONE:"]:
+                line=";"+line
+                print_line=True
             elif first_word=="CALL":
                 #Only useful if within FUNC. No harm if outside of FUNC.
                 if line_objs[1] not in calls_list:
@@ -203,7 +208,7 @@ while running:
             #These words depend on state machine state
             else:
                 #Check argument counts regardless of input state machine
-                if file_state in ["FUNC","ARGS","VARS"]:
+                if file_state in ["FUNC","ARGS","VARS","REGS"]:
                     if first_word in ["END"]:
                         if len(line_objs)!=1:
                             error_exit(f"bad argument to {first_word} - {line.lstrip()}",error_obj)
@@ -220,9 +225,9 @@ while running:
                         error_exit(f"{first_word} invalid outside of FUNC block - {line.lstrip()}",error_obj)
                      
                     #Check for words that should have no arguments
-                    if first_word in ["STRING_LITERALS"]:
+                    if first_word in ["STRING_LITERALS","REGS"]:
                         if len(line_objs)!=1:
-                            error_exit(f"STRING_LITERALS does not take arguments - {line.lstrip()}",error_obj)
+                            error_exit(f"{first_word} does not take arguments - {line.lstrip()}",error_obj)
                      
                     #Handle special words the optimizer looks out for
                     if first_word in ["BYTE","WORD","STRING"]:
@@ -262,22 +267,21 @@ while running:
                                 func_begin=True
                             else:
                                 error_exit(f"unknown FUNC attribute {attrib} - {line.lstrip()}",error_obj)                        
-                    elif first_word[:5]=="TODO:":
-                        line=";"+line
-                        print_line=True
-                    elif first_word[:5]=="DONE:":
-                        line=";"+line
-                        print_line=True
                     elif first_word=="STRING_LITERALS":
                         final_text+=[[TYPE_TEXT,file_output]]
                         file_output=""
                         final_text+=[[TYPE_STRINGS]]
+                    elif first_word=="REGS":
+                        file_state="REGS"
+                        regs_counter=0
                     else:
                         print_line=True
                 #State machine state FUNC - inside a function but not in an ARGS or VARS block
                 elif file_state=="FUNC":
                     if first_word in ["ARGS","VARS"]:
                         file_state=first_word
+                    elif first_word=="REGS":
+                        error_exit("REGS not allowed inside FUNC block",error_obj)
                     elif first_word=="END":
                         #END reached - output names assigned to local variables and text of function
                         func_dict[func_name]={}
@@ -288,6 +292,8 @@ while running:
                         func_dict[func_name]["BEGIN"]=func_begin
                         func_dict[func_name]["TOUCHES"]=set()
                         byte_total=0
+                        
+                        #Insert ARGS definitions before function begin
                         debug_str="ARGS: "
                         for k,v in args_dict.items():
                             vars_temp+=f"\tset {k}, _{func_name}.{k} ;ARG {v} {k}\n"
@@ -299,6 +305,8 @@ while running:
                                 byte_total+=2
                         if debug_str!="ARGS: ":
                             debug_output+=[[-1,debug_str,0]]
+
+                        #Insert VARS definitions before function begin
                         debug_str="VARS: "
                         for k,v in vars_dict.items():
                             vars_temp+=f"\tset {k}, _{func_name}.{k} ;VAR {v} {k}\n"
@@ -310,6 +318,7 @@ while running:
                                 byte_total+=2
                         if debug_str!="VARS: ":
                             debug_output+=[[-1,debug_str,0]]
+
                         if byte_total!=0:
                             debug_output+=[[-1,f"{byte_total} byte{'s' if byte_total>1 else ''} used",0]]
                         func_dict[func_name]["BYTES"]=byte_total
@@ -322,16 +331,15 @@ while running:
                         final_text+=[[TYPE_TEXT,func_temp]]
                         final_text[func_index]=[TYPE_VARS,vars_temp]
                         file_state="None"
-                    elif first_word[:5]=="TODO:":
-                        func_temp+=";"+line+"\n"
                     else:
                         if func_name_inserted==False:
                             func_temp+=f"\t{func_name}:\n"
                             func_name_inserted=True
                         func_temp+=line+"\n"
+
                 #State machine state in ARGS or VARS block
                 elif file_state in ["ARGS","VARS"]:
-                    #Only variables declarations allowed in ARGS or VARS block
+                    #Only variable declarations allowed in ARGS or VARS block
                     if first_word not in ["BYTE","WORD","STRING","END"]:
                         if not (file_state=="ARGS" and first_word=="VARS"):
                             error_exit(f"invalid in {file_state} block - {line.lstrip()}",error_obj)
@@ -344,9 +352,30 @@ while running:
                                 args_list+=[arg]
                             elif file_state=="VARS":
                                 vars_dict[arg]=first_word
+
                     #End of ARGS or VARS block
                     elif first_word=="END":
                         file_state="FUNC"
+
+                #State machine state in REGS block
+                elif file_state=="REGS":
+                    #Only register variable declarations allowed in REGS block
+                    if first_word not in ["BYTE","WORD","END"]: 
+                        error_exit(f"invalid in {file_state} block - {line.lstrip()}",error_obj)
+
+                    #Register variable declarations
+                    if first_word in ["BYTE","WORD"]:
+                        for arg in arg_parse(line_objs,error_obj):    
+                            file_output+=f"\tset {arg}, (R{int(regs_counter/8)}+{regs_counter%8}) ;REGS {first_word} {arg}\n"
+                            if first_word=="BYTE":
+                                regs_counter+=1
+                            elif first_word=="WORD":
+                                regs_counter+=2
+
+                    #End of REGS block
+                    elif first_word=="END":
+                        file_state="None"
+
             #No match to optimizer word above - output line to file        
             if print_line:
                 file_output+=line+"\n"
@@ -421,7 +450,7 @@ for func in func_used_list:
                     elif var_type in["WORD","STRING"]:
                         #Two bytes needed - check that next byte is free too before assigning memory
                         if address+1>=len(assigned_mem):
-                            error_exit(f"Error: end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
+                            error_exit(f"end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
                         for address_func in assigned_mem[address+1]:
                             if address_func in func_touched_list:
                                #Memory address already assigned to function that touches current function - skip address
@@ -434,7 +463,7 @@ for func in func_used_list:
                             #Skip to next var to assign
                             break 
             else:
-                error_exit(f"Error: end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
+                error_exit(f"end of locals memory reached but couldn't assign {var_type} {var} in {var_arg} of {func}",error_obj)
             
 #Output debug html file
 assignment_debug=[[] for _ in range(locals_end-locals_begin)]

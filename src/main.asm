@@ -166,6 +166,12 @@
 
 ;Main function
 ;=============
+    REGS
+        WORD t1,t2,t3
+        BYTE t4
+        WORD t5
+        BYTE t6
+    END
 	FUNC main BEGIN
 		VARS
 			WORD dest

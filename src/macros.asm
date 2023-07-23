@@ -67,3 +67,4 @@ MOV.W MACRO src, dst
 		STA (dst)+1
 	ENDIF
 	ENDM
+
