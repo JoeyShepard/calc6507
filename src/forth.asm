@@ -858,7 +858,7 @@
 			
 	END
 	
-	
+
 	;Token in A
     ;OK to use R0 here since only jump is out of function with no return
 	set flags,	R0+0

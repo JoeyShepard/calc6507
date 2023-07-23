@@ -188,7 +188,7 @@
 			LDA mode
 			CMP #MODE_IMMEDIATE
 			BEQ .mode_good
-			
+		        
 				;Colon writes new words length and name. Blank out
 				LDY #0
 				TYA
@@ -236,10 +236,7 @@
 					LDA mode
 					CMP #MODE_IMMEDIATE
 					BNE .compile_word
-					
-                        halt
-                        LDA aux_word_counter
-
+				
 						;Immediate mode - insert word token into temp thread and execute
 						.immediate:
 						LDY #TOKEN_BREAK

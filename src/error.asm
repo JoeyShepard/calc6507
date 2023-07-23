@@ -80,11 +80,8 @@
 		CALL LCD_print, "           [OK]"
 		MOV #0,font_inverted
 		
-		;halt
-		
 		.loop:
 			CALL ReadKey
 			CMP #KEY_ENTER
 			BNE .loop
-		RTS
 	END

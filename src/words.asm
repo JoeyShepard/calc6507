@@ -771,8 +771,6 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 			
-			TXA
-			PHA
 			LDA #OBJ_FLOAT
 			JMP COPY_STUB
 	
@@ -784,8 +782,6 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 			
-			TXA
-			PHA
 			LDA #OBJ_HEX
 			JMP COPY_STUB
 	
@@ -798,8 +794,6 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 
-			TXA
-			PHA
 			LDA #OBJ_STR
 			JMP COPY_STUB
 		
@@ -1160,12 +1154,10 @@
 			LDX #R_STACK_SIZE-1
 			TXS
 			TAX
-			
-			LDA #MODE_IMMEDIATE
-			STA mode
-			
-			JMP main.mode_good
 	
+	        JMP main.input_loop
+
+
 	WORD_STO_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_DO				;Next word
@@ -2395,7 +2387,7 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB IMMED    					;Flags	
 
-            start here - immed only check
+            JSR IMMED_ONLY_STUB
 
             LDA #WORDS_PRIM
             .display_new:           ;New screen - reset offset into list

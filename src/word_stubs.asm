@@ -25,6 +25,7 @@
 	
 	;Copy data from thread to stack
 	COPY_STUB:
+        STX stack_X
 		STA 0,X
 		LDY #1
 		.loop:
@@ -34,8 +35,7 @@
 			INY
 			CPY #OBJ_SIZE
 			BNE .loop
-		PLA
-		TAX
+        LDX stack_X
 		
 		LDA #OBJ_SIZE-1
 		JMP IncExecPtr

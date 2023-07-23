@@ -31,6 +31,7 @@
     TODO: prevent WORDS from being inserted into word
     TODO: capitalize comments. done: main, emu6507, forth, math, words
     TODO: until test in keys/ stopped working after replacing PLA with stack_X: WRONG TYPE
+    TODO: macro for reg usage as locals
 
     ;Size related - only if necessary
     ;================================
