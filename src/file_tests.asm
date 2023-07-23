@@ -1,13 +1,13 @@
 ;Tests from file input
 ;=====================
 
-	;should never run from ROM, so ok to put variables here
+	;Should never run from ROM, so ok to put variables here
 	WORD counter1, counter2
 	WORD failed1, failed2
 	
 	FUNC line_num
 		CALL DebugText, "\\l"
-		LDA #13		;new line for node.j
+		LDA #13		;New line for node.j
 		STA DEBUG
 		LDA counter2+1
 		STA DEBUG_HEX
@@ -214,7 +214,7 @@
 					BNE .loop_comment
 					
 					.file_end:
-					;file ended on comment!
+					;File ended on comment!
 					halt
 			.not_comment:
 			
@@ -228,11 +228,11 @@
 			;End of file marker
 			CMP #'Z'
 			BNE .not_Z
-				;done with file
+				;Done with file
 				JMP .done
 			.not_Z:
 			
-			;unrecognized mode!
+			;Unrecognized mode!
 			PHA
 			CALL DebugText,"\\n\\rUnrecognized input code: $"
 			PLA

@@ -1,0 +1,140 @@
+
+**********
+ macros.asm
+**********
+
+**********
+ todo.asm
+**********
+
+**********
+ const.asm
+**********
+	;equ CHAR_MINUS,			'c'	;Actually, better to use - for this
+		;v1
+		;v2
+		;v3
+		;equ AUX_TYPE_ELSE,			5	;Reuse AUX_TYPE_IF since behavior is the same
+
+**********
+ emu.asm
+**********
+
+**********
+ globals.asm
+**********
+	;new_stack_item:		DFS OBJ_SIZE+GR_OFFSET
+
+**********
+ debug.asm
+**********
+	;but banked out after all tests pass
+
+**********
+ tests.asm
+**********
+
+**********
+ file_tests.asm
+**********
+
+**********
+ stats.asm
+**********
+
+**********
+ font_5x8.asm
+**********
+
+**********
+ font_custom.asm
+**********
+;a - left arrow
+  ;shifted left one space
+;b - dark square bottom
+;c - minus sign (todo if needed)
+;d - store arrow
+  ;FCB $10, $38, $7C, $FE, $00	;mirror of left arrow
+  ;FCB $10, $38, $7C, $FE, $38	;mirror of left arrow with stem
+  FCB $10, $38, $54, $92, $10	;single line outline
+;e - exponent
+	;include calc6507.asm
+
+**********
+ emu6507.asm
+**********
+
+**********
+ system.asm
+**********
+
+**********
+ math.asm
+**********
+			;ie, just compare diff in exponents
+		;halt
+
+**********
+ cordic.asm
+**********
+;https://www.hpmuseum.org/forum/thread-12180.html
+;https://archived.hpcalc.org/laporte/Trigonometry.htm
+;https://archived.hpcalc.org/laporte/TheSecretOfTheAlgorithms.htm
+;http://www.voidware.com/cordic.htm
+;https://people.sc.fsu.edu/~jburkardt/c_src/cordic/cordic.c
+		;bc shows cos(pi/6) as 86602540 37844
+		;halt
+				;halt
+				LDX R3+DEC_COUNT/2+1	;sign of Y
+		;sin(0)=0, cos(0)=1
+		;x <= pi/2?
+		;pi/2 rounds up to the below. use this otherwise sin(pi/2) causes range error
+		;sin(pi/2)=1, cos(pi/2)=0
+		;x > pi/2 - range error
+		;atan(0)=0
+		;if exp 0:
+		;if exp neg:
+		;if exp pos:
+		;exp is 0 or negative
+		;asin(0)=0, acos(0)=pi/2
+		;x <= 1? for asin and acos but not atan
+		;asin(1)=pi/2, acos(1)=0
+		;x > 1 - range error
+
+**********
+ output.asm
+**********
+
+**********
+ error.asm
+**********
+
+**********
+ aux_stack.asm
+**********
+
+**********
+ forth.asm
+**********
+                ;when loading key input from file, but newline in Linux is just 10, 
+                ;so doesn't work when loading key input in Linux.
+                ;in Windows doesn't insert 13, so ok to edit existing files but
+                ;not to create file on Windows.
+                ;keys.txt created in Windows as would be read as two new lines.
+                ;edited in Windows.
+			;ie tried to EXEC variable or random address
+
+**********
+ words.asm
+**********
+				;ie, end of pair which is last byte of iterator in limit/iterator pair
+			;v1 - does not work with LEAVE
+			;v2 - changes address type from IF to NONE and leaves in place
+					;tan(pi/2)=infinity
+					;tan(0)=0
+            ;since stubs not reused by anything else.
+
+**********
+ word_stubs.asm
+**********
+55 lines in total

@@ -255,7 +255,7 @@
 				.not_float:
 				CMP #OBJ_STR
 				BNE .not_str
-					;one space after colon
+					;One space after colon
 					;LDA #CHAR_WIDTH*3
 					;STA screen_ptr
 					CALL DrawString, address
@@ -263,7 +263,7 @@
 				.not_str:
 				CMP #OBJ_HEX
 				BNE .not_hex
-					;one space after colon
+					;One space after colon
 					;LDA #CHAR_WIDTH*3
 					;STA screen_ptr
 					CALL DrawHex, address

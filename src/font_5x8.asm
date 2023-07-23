@@ -178,7 +178,7 @@
 ;[
   FCB $0, $82, $82, $fe, $0
 
-;back slash
+;Back slash
   FCB $4, $8, $10, $20, $40
 
 ;]

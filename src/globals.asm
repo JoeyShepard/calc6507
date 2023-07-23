@@ -29,7 +29,7 @@
 	dict_end:
 	
 	RIOT_mem_begin:
-	;extra RAM in RIOT - not preserved by backup battery
+	;Extra RAM in RIOT - not preserved by backup battery
 	TODO: what else will fit in RIOT RAM?
 	
 	TODO: if stored here, must exit thread to sleep

@@ -47,7 +47,7 @@
 		FDB ERROR_MSG_NULL
 
 	TODO: adjust display and messages for new 5x8 font
-	;error code in A
+	;Error code in A
 	FUNC ErrorMsg
 		VARS
 			WORD msg

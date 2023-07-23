@@ -11,34 +11,34 @@
 		;1 low battery indicator from Vreg
 		;1 EEPROM bank
 		;0 EEPROM lock
-			;built into EEPROM
+			;Built into EEPROM
 		;1 keyboard buffer OE (74HCT244)
-			;can't be driven from latch!
+			;Can't be driven from latch!
 		;1 read ON button?
-			;should be easy if button is grounding pull-up
+			;Should be easy if button is grounding pull-up
 		;*1 free
 	;RIOT B
 		;8 LCD data bus to latch 2
-		;also, 8 keyboard inputs
-			;inputs are pulled up, so just need diodes
+		;Also, 8 keyboard inputs
+			;Inputs are pulled up, so just need diodes
 	;Latch 1
 		;1 LCD DI
 		;1 LCD E
 		;1 LCD CS1
 		;1 LCD CS2
 		;1 LCD RST? may not be necessary
-		;1 power transistor
-			;must be driven by latch for MOSFET for voltage level
+		;1 Power transistor
+			;Must be driven by latch for MOSFET for voltage level
 			TODO: latch not Z stated at beginning though! pull-up and ON grounds?
 		;1 TX
 			;4v min output, so must drive through latch
-			;alternative is level shift transistor on RIOT
+			;Alternative is level shift transistor on RIOT
 		;*1 free
 	;Latch 2
 		;8 LCD data bus out
 	;Chips to add:
-		;keyboard buffer
-		;power transistor
+		;Keyboard buffer
+		;Power transistor
 	
 	TODO: drive RDY with 6532 interrupt
 	TODO:    seems allowed as long as transitions in phi1 not phi2. lower current though? posted on forum
@@ -113,7 +113,7 @@
 	R7: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
 	R_ans:	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
 	
-	;reg before R_ans in case double wide reg needed
+	;Reg before R_ans in case double wide reg needed
 	;+3 since only need 6 of 9 bytes 
 	equ R_ans_wide, R7+3
 	
@@ -132,11 +132,11 @@
 ;================
 	;ORG $C000
 	ORG $D000
-	;should be visible to tests below which overflow $C000
+	;Should be visible to tests below which overflow $C000
 	include debug.asm
 	
 	ORG $8900	;RAM + ROM size
-	;overlaps with video memory, no video output
+	;Overlaps with video memory, no video output
 	;but banked out after all tests pass
 	include tests.asm
 	include file_tests.asm
@@ -145,7 +145,7 @@
 	
 	ORG $900
 	code_begin:
-	JMP main	;static entry address for emulator
+	JMP main	;Static entry address for emulator
 	
 	font_table:
 	include font_5x8.asm

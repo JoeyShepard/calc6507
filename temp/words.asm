@@ -22,10 +22,8 @@
 			LDX stack_X
 			RTS
 
-    REGS
-        BYTE word_temp
-	END
-    WORD_SWAP:
+    set word_temp,  R0
+	WORD_SWAP:
 		FCB 4, "SWAP" 			;Name
 		FDB	WORD_DROP			;Next word
 		FCB TOKEN_SWAP			;ID - 4
@@ -82,10 +80,8 @@
 			LDX stack_X
 			RTS
 		
-    REGS
-        BYTE word_temp1
-        BYTE word_temp2
-	END
+    set word_temp1, R0+0
+    set word_temp2, R0+1
 	WORD_ROT:
 		FCB 3, "ROT" 			;Name
 		FDB	WORD_MIN_ROT		;Next word
@@ -114,10 +110,8 @@
             LDX stack_X
 			RTS
 	
-    REGS
-        BYTE word_temp1
-        BYTE word_temp2
-	END
+    set word_temp1, R0+0
+    set word_temp2, R0+1
 	WORD_MIN_ROT:
 		FCB 4, "-ROT" 			;Name
 		FDB	WORD_CLEAR			;Next word
@@ -282,11 +276,12 @@
 			STA ret_val
 			RTS
 
-    REGS
-        WORD hex_mult_sum
-        WORD hex_mult_double
-        WORD hex_mult_half
-    END
+    set     hex_mult_sum,       R0+0
+    ;set     hex_mult_sum,       R0+1
+    set     hex_mult_double,    R0+2
+    ;set     hex_mult_double,    R0+3
+    set     hex_mult_half,      R0+4
+    ;set     hex_mult_half,      R0+5
 	WORD_MULT:
 		FCB 1,"*"				;Name
 		FDB WORD_DIV			;Next word
@@ -776,6 +771,8 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 			
+			TXA
+			PHA
 			LDA #OBJ_FLOAT
 			JMP COPY_STUB
 	
@@ -787,9 +784,12 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 			
+			TXA
+			PHA
 			LDA #OBJ_HEX
 			JMP COPY_STUB
 	
+	TODO: more efficient way than sharing stub?	
 	WORD_STRING:
 		FCB 0,""
 		FDB WORD_HALT			;Next word
@@ -798,6 +798,8 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
 
+			TXA
+			PHA
 			LDA #OBJ_STR
 			JMP COPY_STUB
 		
@@ -946,11 +948,11 @@
 				BEQ .error_exit
 				
 				CALL FindWord
-				;Var not found, error
+				;var not found, error
 				LDA ret_val
 				BEQ .error_exit
 			
-				;Word found. is it a variable?
+				;word found. is it a variable?
 				LDY #0
 				LDA (obj_address),Y
 				CMP #OBJ_VAR
@@ -1053,9 +1055,8 @@
 			LDA #0
 			STA HEX_TYPE,X
 			RTS
-    REGS
-        BYTE word_temp
-    END
+    
+    set word_temp,  R0
 	WORD_SECONDARY:
 		FCB 0,""					;Name
 		FDB WORD_EXIT				;Next word
@@ -1159,10 +1160,12 @@
 			LDX #R_STACK_SIZE-1
 			TXS
 			TAX
+			
+			LDA #MODE_IMMEDIATE
+			STA mode
+			
+			JMP main.mode_good
 	
-	        JMP main.input_loop
-
-
 	WORD_STO_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_DO				;Next word
@@ -1658,7 +1661,7 @@
 			SEC
 			LDA dict_ptr
 			;SBC #3		;LOOP skips DO_THREAD token
-			SBC #4		;No BEGIN_THREAD token to skip when jumping back
+			SBC #4		;no BEGIN_THREAD token to skip when jumping back
 			STA AUX_STACK+1,Y
 			LDA dict_ptr+1
 			SBC #0
@@ -1704,11 +1707,9 @@
 			STA obj_address+1
 			LDA #TOKEN_AGAIN_THREAD
 			JMP TokenArgThread
-	
-    REGS	
-        BYTE word_temp
-	END
-    WORD_AGAIN_THREAD:
+		
+    set word_temp,  R0
+	WORD_AGAIN_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_UNTIL			;Next word
 		FCB TOKEN_AGAIN_THREAD	;ID - 94
@@ -1982,7 +1983,7 @@
 			STA AUX_STACK+2,Y
 			
 			;Lay down IF_THREAD TOKEN
-			LDA  #TOKEN_UNTIL_THREAD ;Identical to IF_THREAD
+			LDA  #TOKEN_UNTIL_THREAD ;identical to IF_THREAD
 			JMP TokenArgThread
 			
 	WORD_THEN:
@@ -2123,7 +2124,7 @@
 			STA (ret_address),Y
 			
 			;Lay down ELSE_THREAD TOKEN
-			LDA  #TOKEN_AGAIN_THREAD ;Identical to ELSE_THREAD
+			LDA  #TOKEN_AGAIN_THREAD ;identical to ELSE_THREAD
 			JMP TokenArgThread
 	
 	WORD_LSHIFT:
@@ -2175,7 +2176,7 @@
 			FCB MIN1|FLOATS					;Flags	
 			
 			LDA EXP_HI,X
-			AND #$7F	;Zero sign bit
+			AND #$7F	;zero sign bit
 			STA EXP_HI,X
 			
 			RTS
@@ -2192,7 +2193,7 @@
 			;3.1 41 59 26 53 58 97
 			FCB OBJ_FLOAT, $59, $53, $26, $59, $41, $31, $00, $00
 			
-			;Do not optimize out! PUSH_STUB calculates return to here
+			;do not optimize out! PUSH_STUB calculates return to here
 			TODO: where else is PUSH_STUB used? return to caller?
 			RTS
 				
@@ -2208,7 +2209,7 @@
 			
 			JSR CORDIC_Trig
 			
-			;Push CORDIC Y reg (R3) to stack
+			;push CORDIC Y reg (R3) to stack
 			LDX #R3
 			JSR CORDIC_Pack
 			JMP CORDIC_Push
@@ -2225,14 +2226,14 @@
 			
 			JSR CORDIC_Trig
 			
-			;Clear sign if set since cos(-x) = cos(x)
+			;clear sign if set since cos(-x) = cos(x)
 			LDX #0
 			STX CORDIC_end_sign
 			
-			;Push CORDIC X reg (R2) to stack
+			;push CORDIC X reg (R2) to stack
 			LDX #R2
 			JSR CORDIC_Pack
-			;Clear sign if set since cos(-x) = cos(x)
+			;clear sign if set since cos(-x) = cos(x)
 			JMP CORDIC_Push
 			
 	WORD_TAN:
@@ -2267,14 +2268,14 @@
 					JMP CORDIC_Push
 			.divide:
 			
-			;Pack cosine and copy to R0 for dividing
+			;pack cosine and copy to R0 for dividing
 			LDX #R2
 			JSR CORDIC_Pack
 			LDA #R_ans
 			LDY #R0
 			JSR CopyRegs
 			
-			;Pack sine and copy to R0 for dividing
+			;pack sine and copy to R0 for dividing
 			LDA #CORDIC_CLEANUP
 			LDX #R3
 			JSR CORDIC_Pack
@@ -2282,7 +2283,7 @@
 			LDY #R1
 			JSR CopyRegs
 			
-			;Divide sine by cosine
+			;divide sine by cosine
 			JSR BCD_Div
 			TODO: check for div by 0 error?
 			JMP CORDIC_Push
@@ -2339,7 +2340,7 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			;Divide by 90
+			;divide by 90
 			JSR StackAddItem
 			JSR PUSH_STUB
 			FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $90, $01, $00
@@ -2362,24 +2363,31 @@
 			JSR CODE_DROP+EXEC_HEADER
 			JMP RansTos
 
-    REGS
-        BYTE words_mode         ;Mode: primary, variables, or user-defined words
-        BYTE skip_count         ;Words to skip before starting to print words. For scrolling.
-        BYTE word_count         ;Counter of words to skip then counter of words to print
-        WORD word_list          ;Pointer to word list
-        BYTE sel_row            ;Selected row on screen
-        BYTE index              ;Index into word characters for word 
-        BYTE words_temp         ;Temp storage in multiple places
-        WORD next_word          ;Pointer to next word in word list
-        WORD word_diff          ;Difference between next_word (R1+0) and current word in word_list (R0+3)
-        BYTE words_left         ;Whether word left to draw after last drawn
-        BYTE rows_drawn         ;Rows drawn to screen
-        WORD sel_address        ;Address of highlighted word
-        WORD gc_counter         ;Counter for garbage collection. Reused to hold address to check for gc
-        WORD sel_address_body   ;Address of garbage collected word body as embedded in other words
-        WORD gc_check           ;sel_address or sel_address_body depending on if var or word
-    END
-    WORD_WORDS:
+    TODO: placed before last word in primitives?
+    FORTH_LAST_WORD:
+    set words_mode,         R0+0 ;mode: primary, variables, or user-defined words
+    set skip_count,         R0+1 ;words to skip before starting to print words. for scrolling.
+    set word_count,         R0+2 ;counter of words to skip then counter of words to print
+    set word_list,          R0+3 ;pointer to word list
+    ;set word_list,          R0+4 ;pointer to word list
+    set sel_row,            R0+5 ;selected row on screen
+    set index,              R0+6 ;index into word characters for word 
+    set words_temp,         R0+7 ;temp storage in multiple places
+    set next_word,          R1+0 ;pointer to next word in word list
+    ;set next_word,          R1+1 ;pointer to next word in word list
+    set word_diff,          R1+2 ;difference between next_word (R1+0) and current word in word_list (R0+3)
+    ;set word_diff,          R1+3 ;difference between next_word (R1+0) and current word in word_list (R0+3)
+    set words_left,         R1+4 ;whether word left to draw after last drawn
+    set rows_drawn,         R1+5 ;rows drawn to screen
+    set sel_address,        R1+6 ;address of highlighted word
+    ;set sel_address,        R1+7 ;address of highlighted word
+    set gc_counter,         R2+0 ;counter for garbage collection. reused to hold address to check for gc
+    ;set gc_counter,         R2+1 ;counter for garbage collection. reused to hold address to check for gc
+    set sel_address_body,   R2+2 ;address of garbage collected word body as embedded in other words
+    ;set sel_address_body,   R2+3 ;address of garbage collected word body as embedded in other words
+    set gc_check,           R2+4 ;sel_address or sel_address_body depending on if var or word
+    ;set gc_check,           R2+5 ;sel_address or sel_address_body depending on if var or word
+	WORD_WORDS:
 		FCB 5,"WORDS"			    ;Name
 		FDB WORD_BROKEN_REF	        ;Next word
 		FCB TOKEN_WORDS			    ;ID - 144
@@ -2387,7 +2395,7 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB IMMED    					;Flags	
 
-            JSR IMMED_ONLY_STUB
+            start here - immed only check
 
             LDA #WORDS_PRIM
             .display_new:           ;New screen - reset offset into list
@@ -2506,7 +2514,7 @@
                         CMP index
                     BCS .word_draw_chars
 
-                    ;Draw word size
+                    ;Draw size
                     LDA #WORDS_SIZE_X
                     STA screen_ptr
                     LDA #'$'
@@ -3124,11 +3132,10 @@
                 FCB WORDS_NO_GC ; CODE_DEG				;142
                 FCB WORDS_NO_GC ; CODE_WORDS            ;144
                 FCB WORDS_SKIP2 ; CODE_BROKEN_REF       ;146
-                FCB WORDS_NO_GC ; CODE_LN               ;148
 
 	WORD_BROKEN_REF:
 		FCB 0,""		            ;Name
-		FDB WORD_LN                 ;Next word
+		FDB dict_begin              ;Next word
 		FCB TOKEN_BROKEN_REF        ;ID - 146
 		CODE_BROKEN_REF:
 			FCB OBJ_PRIMITIVE				;Type
@@ -3136,18 +3143,6 @@
 
             LDA #ERROR_BROKEN_REF
             STA ret_val
-            RTS
-
-    TODO: placed before last word in primitives?
-    FORTH_LAST_WORD:
-	WORD_LN:
-		FCB 2,"LN"		            ;Name
-		FDB dict_begin              ;Next word
-		FCB TOKEN_LN                ;ID - 148
-		CODE_LN:
-			FCB OBJ_PRIMITIVE				;Type
-			FCB MIN1|FLOATS     			;Flags	
-
             RTS
 
     FORTH_WORDS_END:
@@ -3226,5 +3221,4 @@
 		FDB CODE_DEG				;142 $8E
 		FDB CODE_WORDS              ;144 $90
         FDB CODE_BROKEN_REF         ;146 $92
-        FDB CODE_LN                 ;148 $94
         

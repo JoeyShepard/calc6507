@@ -424,7 +424,7 @@
 				;LDA #ERROR_STRING
 				;STA global_error
 				
-				;item type already set to OBJ_ERROR
+				;Item type already set to OBJ_ERROR
 				RTS
 			.str_done:
 			;Was closing quote also last character?
@@ -442,7 +442,7 @@
 		
 		CMP #'$'
 		BNE .not_hex
-			;hex
+			;Hex
 			LDA new_word_len
 			;Single dollar sign - invalid hex
 			CMP #1
@@ -570,7 +570,7 @@
 					BNE .exp_digit
 						
 						LDA digit_count
-						CMP #MAX_DIGITS+1	;one extra digit for input rounding
+						CMP #MAX_DIGITS+1	;One extra digit for input rounding
 						BCC .digit_ok
 							;;Max digits exceeded!
 							;PLA
@@ -1248,7 +1248,7 @@
 	FUNC TokenArgThread
 		
 		PHA
-		LDA #3	;token and 16 bit address
+		LDA #3	;Token and 16 bit address
 		CALL AllocMem
 		LDA ret_val
 		BEQ .success

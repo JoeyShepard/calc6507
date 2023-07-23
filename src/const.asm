@@ -11,12 +11,12 @@
 	equ CHAR_SCREEN_HEIGHT, 8
 	
 	;Special characters
-	equ CHAR_ARROW,				'a'	;cursor arrow
-	equ CHAR_BOX,				'b'	;box for drawing error message
-	;equ CHAR_MINUS,			'c'	;actually, better to use - for this
-	equ CHAR_STO,				'd'	;store arrow
-	equ CHAR_EXP,				'e'	;lowercase e exponent
-	equ CHAR_QUOTE, 			34	;double quote
+	equ CHAR_ARROW,				'a'	;Cursor arrow
+	equ CHAR_BOX,				'b'	;Box for drawing error message
+	;equ CHAR_MINUS,			'c'	;Actually, better to use - for this
+	equ CHAR_STO,				'd'	;Store arrow
+	equ CHAR_EXP,				'e'	;Lowercase e exponent
+	equ CHAR_QUOTE, 			34	;Double quote
 	
 	;Object types
 	equ OBJ_FLOAT,				1
@@ -30,7 +30,7 @@
 	
 	equ TYPE_SIZE,				1
 	equ OBJ_SIZE,				9
-	equ OBJ_TYPE,				0	;first bytes of stack item is type
+	equ OBJ_TYPE,				0	;First bytes of stack item is type
 	
 	;Input
 	TODO: increase size?
@@ -202,6 +202,7 @@
 		equ TOKEN_DEG,				142
         equ TOKEN_WORDS,            144
         equ TOKEN_BROKEN_REF,       146
+        equ TOKEN_LN,               148
 		
 		;Execution modes
 		equ EXEC_INPUT,			0
@@ -243,7 +244,7 @@
 		;AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
 		
 		;v2
-		;only LOOP values on stack so no type byte!
+		;Only LOOP values on stack so no type byte!
 		;AUX_STACK_ITEM_SIZE =	9		;1 func ID, 8 data
 		;AUX_STACK_COUNT =		8
 		;AUX_STACK_SIZE =		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
@@ -253,8 +254,8 @@
 		equ AUX_STACK_ITEM_SIZE,	(1+8+8)	;1 func ID, 8 for limit, 8 for iterator
 		equ AUX_STACK_COUNT,		4
 		equ AUX_STACK_SIZE,		AUX_STACK_COUNT*AUX_STACK_ITEM_SIZE
-		equ AUX_LIMIT_OFFSET,		1		;limit data begins after type byte
-		equ AUX_ITER_OFFSET,		9		;iterator data begins after limit data
+		equ AUX_LIMIT_OFFSET,		1		;Limit data begins after type byte
+		equ AUX_ITER_OFFSET,		9		;Iterator data begins after limit data
 		
 		;Reused at compile time to hold addresses
 		equ AUX_STACK_SHORT_SIZE,	AUX_STACK_SIZE / 3
@@ -264,6 +265,6 @@
 		equ AUX_TYPE_BEGIN,			2
 		equ AUX_TYPE_LEAVE,			3
 		equ AUX_TYPE_IF,			4
-		;equ AUX_TYPE_ELSE,			5	;reuse AUX_TYPE_IF since behavior is the same
-		equ AUX_TYPE_CLEARED,		6	;set AUX_TYPE_IF to CLEARED instead of popping
+		;equ AUX_TYPE_ELSE,			5	;Reuse AUX_TYPE_IF since behavior is the same
+		equ AUX_TYPE_CLEARED,		6	;Set AUX_TYPE_IF to CLEARED instead of popping
 		

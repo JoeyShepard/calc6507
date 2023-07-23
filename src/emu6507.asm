@@ -137,7 +137,7 @@
 	
 		LDA pixel_ptr
 		ASL pixel_ptr
-		;ROL pixel_ptr+1	;highest char <128
+		;ROL pixel_ptr+1	;Highest char <128
 		ASL pixel_ptr
 		ROL pixel_ptr+1
 		;CLC ;16-bit can't overflow

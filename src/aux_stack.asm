@@ -30,7 +30,7 @@ FUNC AuxPopShort
 	BNE .stack_good
 		LDA #ERROR_STRUCTURE
 		STA ret_val
-		RTS 		;could omit
+		RTS 		;Could omit
 	.stack_good:
 	DEC aux_stack_count
 	CLC

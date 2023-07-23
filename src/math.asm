@@ -50,7 +50,7 @@
 		;PHP
 		;SED
 		
-		;reverse significand
+		;Reverse significand
 		;LDA #DEC_COUNT/2+GR_OFFSET
 		;STA math_a
 		LDY #DEC_COUNT/2+GR_OFFSET
@@ -154,8 +154,8 @@
 		TXA
 		PHA
 		
-		;not here - numbers may reach R0 by different route
-		;guard and round
+		;Not here - numbers may reach R0 by different route
+		;Guard and round
 		;LDA #0
 		;STA R0
 		;STA R1
@@ -423,7 +423,7 @@
 		BEQ .adjust_exp
 		PHA
 		LDA #(DEC_COUNT/2)
-		STA math_c	;dest
+		STA math_c	;Dest
 		SEC
 		SBC math_a
 		STA math_a
@@ -606,7 +606,7 @@
 				JSR IncRansExp
 				LDX #R_ans
 				TODO: slow! set MS nibble explicitly?
-				LDA #$10		;fill byte
+				LDA #$10		;Fill byte
 				JSR HalfShift
 			.round_done:
 		.no_round:
@@ -662,7 +662,7 @@
 			;-14+
 			JCC .ignore
 			
-			;swap
+			;Swap
 			CALL SwapR0R1
 			JSR BCD_Exp_diff
 			JMP .do_shift
@@ -734,7 +734,7 @@
 				ORA math_sticky
 				STA math_sticky
 				LDX #R_ans
-				LDA #$10		;fill byte
+				LDA #$10		;Fill byte
 				JSR HalfShift
 			.no_carry:
 			JMP .carry_done

@@ -14,10 +14,10 @@ TODO: clear up these notes
 TODO: at some point, sin(x)=x so escape?
 
 TODO: improve division then?
-;btw, figured out how to - then + division 
+;Btw, figured out how to - then + division 
 	
-TODO: more precision to X and Y below would probably give more accurate answer
-;at cost of added complexity
+TODO: more precision to X and Y below would probably give
+TODO: more accurate answer at cost of added complexity
 	
 	
 	;Fixed point version:
@@ -48,7 +48,7 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	INV_K:
 		;1/k = 1/23.674377006269683 = 0.0 42 23 97 59 87 | 77 43 35
 		;FCB $88, $59, $97, $23, $42, $00
-		;added decimal of precision
+		;Added decimal of precision
 		FCB $77, $87, $59, $97, $23, $42, $00
 	
 	TODO: smaller to generate later rows of form 1E-X?	
@@ -94,12 +94,12 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	;Comparison routines for BCD_CORDIC
 	;(reached by JMP (xxxx) so don't end in RTS)
 	CORDIC_Compare_Z:
-		LDA R4+FIRST_DIGIT+1 ;sign of Z
+		LDA R4+FIRST_DIGIT+1 ;Sign of Z
 		EOR #$99
 		JMP BCD_CORDIC.compare_done
 		
 	CORDIC_Compare_Y:
-		LDA R3+FIRST_DIGIT+1 ;sign of Y
+		LDA R3+FIRST_DIGIT+1 ;Sign of Y
 		JMP BCD_CORDIC.compare_done
 	
 	TODO: could store in globals instead of R5 in ZP
@@ -123,21 +123,21 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		;STATS:
 		;bc shows cos(pi/6) as 86602540 37844
 		;HP-48GX shows         86602540 3785
-		;without sticky:       86602540 418
-		;with sticky (v1):     86602540 426 (worse)
-		;with sticky (v2):     86602540 469 (even worse)
-		;with sticky (v3):     86602540 378 68
+		;Without sticky:       86602540 418
+		;With sticky (v1):     86602540 426 (worse)
+		;With sticky (v2):     86602540 469 (even worse)
+		;With sticky (v3):     86602540 378 68
 		;C64 shows             86602540 4
 		
-		;currently (without sticky) ~187,000 cycles
-			;copying for shift is probably big slow down
-			;add without copying if aligned?
+		;Currently (without sticky) ~187,000 cycles
+			;Copying for shift is probably big slow down
+			;Add without copying if aligned?
 		;C64 can do for i=1 to 100: x+=sin(45) in 4 seconds ie ~40,000 cycles
 		
 		TODO: replace halt here with code that will return if accidentally left in
 		TODO: halt assembling if halt ever invoked
 		
-		TAY	;save flags
+		TAY	;Save flags
 		
 		;Compare mode
 		AND #CORDIC_CMP_MASK
@@ -171,8 +171,8 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		.load_done:
 		STA CORDIC_loop_outer
 		
-		;sign - always starts positive
-		;move outside of BCD_CORDIC if not always positive
+		;Sign - always starts positive
+		;Move outside of BCD_CORDIC if not always positive
 		LDA #0
 		STA R4+FIRST_DIGIT+1
 		STA R3+FIRST_DIGIT+1
@@ -250,7 +250,7 @@ TODO: more precision to X and Y below would probably give more accurate answer
 						STA R4+DEC_COUNT/2+1	
 				.z_done:
 				
-				;calculate X and Y
+				;Calculate X and Y
 				;=================
 				
 				TODO: remove
@@ -262,11 +262,11 @@ TODO: more precision to X and Y below would probably give more accurate answer
 				;Add X to Y>> and store in X'
 				TODO: magic number - GRS set to need to copy one byte earlier
 				TODO: swap CopyRegs for something general purpose
-				LDA #R3-1	;source - Y
-				LDY #R0-1	;dest - shifter
+				LDA #R3-1	;Source - Y
+				LDY #R0-1	;Dest - shifter
 				JSR CopyRegs
 				
-				;shift Y
+				;Shift Y
 				LDA CORDIC_shift_count
 				TODO: remove
 				;BEQ .no_debug
@@ -309,13 +309,13 @@ TODO: more precision to X and Y below would probably give more accurate answer
 				.X_done:
 				
 				;Add Y to X/d and store in Y
-				LDA #R2-1	;source - X
-				LDY #R0-1	;dest - shifter
+				LDA #R2-1	;Source - X
+				LDY #R0-1	;Dest - shifter
 				JSR CopyRegs
 				
-				;shift X
+				;Shift X
 				LDA CORDIC_shift_count
-				LDX R2+DEC_COUNT/2+1	;sign of X
+				LDX R2+DEC_COUNT/2+1	;Sign of X
 				JSR CORDIC_ShiftR0
 				
 				LDX #0
@@ -346,8 +346,8 @@ TODO: more precision to X and Y below would probably give more accurate answer
 				.Y_done:
 				
 				;Copy X' to X
-				LDA #R1-1	;source - X'
-				LDY #R2-1	;dest - X
+				LDA #R1-1	;Source - X'
+				LDY #R2-1	;Dest - X
 				JSR CopyRegs
 				
 				DEC CORDIC_loop_inner
@@ -407,10 +407,10 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	
 	FUNC CORDIC_Trig
 		
-		;save stack pointer here and restore in cleanup
+		;Save stack pointer here and restore in cleanup
 		STX stack_X
 		
-		;sign: sin(-x) = -sin(x) though cos(-x) = cos(x)
+		;Sign: sin(-x) = -sin(x) though cos(-x) = cos(x)
 		JSR CORDIC_MarkSign
 		
 		;sin(0)=0, cos(0)=1
@@ -477,7 +477,7 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			LDX stack_X
 			CLD
 			
-			PLA		;drop return to word
+			PLA		;Drop return to word
 			PLA
 			
 			RTS
@@ -510,20 +510,20 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			DEC CORDIC_loop_inner
 			BNE .loop
 			
-		;calculate exp difference (seems hard to abstract)
-		;exp is 0 or negative
+		;Calculate exp difference (seems hard to abstract)
+		;Exp is 0 or negative
 		TODO: test!
-		LDA 2,X				;high byte of exponent
+		LDA 2,X			;High byte of exponent
 		AND #$F
 		STA math_hi	
-		;LDA 1,X				;low byte of exponent
+		;LDA 1,X		;Low byte of exponent
 		;STA math_lo
 		;ORA math_hi
-		ORA 1,X				;low byte of exponent
+		ORA 1,X			;Low byte of exponent
 		BEQ .no_shift
 			
 			TODO: test
-			;exponent <= -100, return sin(0)=0
+			;Exponent <= -100, return sin(0)=0
 			LDA math_hi
 			BEQ .no_ret_zero
 				.ret_zero:
@@ -534,13 +534,13 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			.no_ret_zero:
 			
 			TODO: test
-			;exponent <= -12,  return sin(0)=0
+			;Exponent <= -12,  return sin(0)=0
 			LDA 1,X
 			CMP #$12
 			BCS .ret_zero
 			
 			TODO: test
-			;shift arg
+			;Shift arg
 			LDY #0
 			STY R0
 			TAY
@@ -563,10 +563,10 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	TODO: share with CORDIC_Trig?
 	FUNC CORDIC_Atrig1
 		
-		;save stack pointer here and restore in cleanup
+		;Save stack pointer here and restore in cleanup
 		STX stack_X
 		
-		;sign: asin(-x) = -asin(x), acos(-x) = pi-arccos(x), atan(-x) = -atan(x)
+		;Sign: asin(-x) = -asin(x), acos(-x) = pi-arccos(x), atan(-x) = -atan(x)
 		JMP CORDIC_MarkSign
 		
 	END
@@ -634,7 +634,7 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		;	LDX stack_X
 		;	CLD
 		;	
-		;	PLA		;drop return to word
+		;	PLA		;Drop return to word
 		;	PLA
 		;	
 		;	RTS
@@ -680,21 +680,21 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		LDA #$10
 		STA R2+FIRST_DIGIT
 			
-		;calculate exp difference (seems hard to abstract)
+		;Calculate exp difference (seems hard to abstract)
 		;exp is 0 or negative
 		TODO: can abstract with above CORDIC_Trig
 		TODO: test!
-		LDA 2,X				;high byte of exponent
+		LDA 2,X				;High byte of exponent
 		AND #$F
 		STA math_hi	
-		;LDA 1,X				;low byte of exponent
+		;LDA 1,X			;Low byte of exponent
 		;STA math_lo
 		;ORA math_hi
-		ORA 1,X				;low byte of exponent
+		ORA 1,X				;Low byte of exponent
 		BEQ .no_shift
 			
 			TODO: test
-			;exponent <= -100, return asin(0)=0
+			;Exponent <= -100, return asin(0)=0
 			LDA math_hi
 			BEQ .no_ret_zero
 				.ret_zero:
@@ -704,13 +704,13 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			.no_ret_zero:
 			
 			TODO: test
-			;exponent <= -12,  return sin(0)=0
+			;Exponent <= -12,  return sin(0)=0
 			LDA 1,X
 			CMP #$12
 			BCS .ret_zero
 			
 			TODO: test
-			;shift arg
+			;Shift arg
 			LDY #0
 			STY R0
 			TAY
@@ -795,7 +795,7 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			LDX stack_X
 			CLD
 			
-			PLA		;drop return to word
+			PLA		;Drop return to word
 			PLA
 			
 			RTS
@@ -831,21 +831,21 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		LDA #$10
 		STA R2+FIRST_DIGIT
 			
-		;calculate exp difference (seems hard to abstract)
-		;exp is 0 or negative
+		;Calculate exp difference (seems hard to abstract)
+		;Exp is 0 or negative
 		TODO: can abstract with above CORDIC_Trig
 		TODO: test!
-		LDA 2,X				;high byte of exponent
+		LDA 2,X			;High byte of exponent
 		AND #$F
 		STA math_hi	
-		;LDA 1,X				;low byte of exponent
+		;LDA 1,X		;Low byte of exponent
 		;STA math_lo
 		;ORA math_hi
-		ORA 1,X				;low byte of exponent
+		ORA 1,X			;Low byte of exponent
 		BEQ .no_shift
 			
 			TODO: test
-			;exponent <= -100, return asin(0)=0
+			;Exponent <= -100, return asin(0)=0
 			LDA math_hi
 			BEQ .no_ret_zero
 				.ret_zero:
@@ -855,13 +855,13 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			.no_ret_zero:
 			
 			TODO: test
-			;exponent <= -12,  return sin(0)=0
+			;Exponent <= -12,  return sin(0)=0
 			LDA 1,X
 			CMP #$12
 			BCS .ret_zero
 			
 			TODO: test
-			;shift arg
+			;Shift arg
 			LDY #0
 			STY R0
 			TAY
@@ -896,20 +896,20 @@ TODO: more precision to X and Y below would probably give more accurate answer
 			LDY #R_ans
 			JSR CopyRegs
 			
-			;shift forward
+			;Shift forward
 			LDA #0
 			STA R_ans+EXP_LO
 			STA R_ans+EXP_HI
 			JSR NormRans
 			
 			TODO: not BCD_Round?
-			;clear sticky and round
+			;Clear sticky and round
 			LDA #0
 			STA math_sticky
 			JSR BCD_StickyRound
 			
 			TODO: test with negative zero!
-			;set sign for BCD_Pack to use
+			;Set sign for BCD_Pack to use
 			LDA CORDIC_end_sign
 			STA R_ans+SIGN_INFO
 			LDX #R_ans
@@ -926,9 +926,9 @@ TODO: more precision to X and Y below would probably give more accurate answer
 		TODO: Replace all DEC_PLACE/2 with LAST_DIGIT
 		TODO: Replace all with new constant FIRST_DIGIT
 		LDA R_ans+FIRST_DIGIT
-		BEQ .no_sign			;don't set sign if zero
+		BEQ .no_sign			;Don't set sign if zero
 			LDA CORDIC_end_sign
-			;ORA R_ans+EXP_HI	;always zero?
+			;ORA R_ans+EXP_HI	;Always zero?
 			STA R_ans+EXP_HI
 		.no_sign:
 		
@@ -936,11 +936,11 @@ TODO: more precision to X and Y below would probably give more accurate answer
 	
 	FUNC CORDIC_Push
 		
-		;restore stack pointer
+		;Restore stack pointer
 		LDX stack_X
 		CLD
 			
-		;copy answer to stack
+		;Copy answer to stack
 		JMP RansTos
 	
 	END
