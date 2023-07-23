@@ -356,6 +356,12 @@
 			RTS
 			
 	TODO: variable names for registers
+    REGS
+        WORD hex_div_low
+        WORD hex_div_high
+        WORD hex_div_divisor
+        WORD hex_div_temp
+    END
 	WORD_DIV:
 		FCB 1,"/"				;Name
 		FDB WORD_TICK			;Next word
@@ -380,8 +386,6 @@
 					JMP RansTos
 			div_not_float:
 		    
-            TODO: variable names for regs
-            TODO: refine algorithm?
 			;Dividing hex objects
 			LDA HEX_TYPE,X
 			ASL
@@ -389,11 +393,11 @@
 			BNE .not_raw_hex
 				;Both raw hex
 				LDA HEX_SUM,X
-				STA R0
+				STA hex_div_divisor
 				LDA HEX_SUM+1,X
-				STA R0+1
+				STA hex_div_divisor+1
 				
-				ORA R0
+				ORA hex_div_divisor
 				BNE .div_zero_check
 					LDA #ERROR_DIV_ZERO
 					STA ret_val
@@ -401,46 +405,39 @@
 				.div_zero_check:
 				
 				LDA OBJ_SIZE+HEX_SUM,X
-				STA R0+2
+				STA hex_div_low
 				LDA OBJ_SIZE+HEX_SUM+1,X
-				STA R0+3
+				STA hex_div_low+1
 				
 				LDA #0
-				STA R0+4
-				STA R0+5
+				STA hex_div_high
+				STA hex_div_high+1
 				
 				LDY #16
 				.loop:
-					ASL R0+2
-					ROL R0+3
-					ROL R0+4
-					ROL R0+5
+					ASL hex_div_low
+					ROL hex_div_low+1
+					ROL hex_div_high
+					ROL hex_div_high+1
 					
 					SEC
-					LDA R0+4
-					SBC R0
-					PHA
-					LDA R0+5
-					SBC R0+1
-					PHA
+					LDA hex_div_high
+					SBC hex_div_divisor
+					STA hex_div_temp
+					LDA hex_div_high+1
+					SBC hex_div_divisor+1
+					STA hex_div_temp+1
 					BCC .div_underflow
-						LDA R0+2
+						LDA hex_div_low
 						ORA #1
-						STA R0+2
-						PLA
-						STA R0+5
-						PLA
-						STA R0+4
-						JMP .loop_next
+                        STA hex_div_low
+						MOV.W hex_div_temp,hex_div_high
 					.div_underflow:
-					PLA
-					PLA
-					.loop_next:
 					DEY
 					BNE .loop
-				LDA R0+2
+				LDA hex_div_low
 				STA OBJ_SIZE+HEX_SUM,X
-				LDA R0+3
+				LDA hex_div_low+1
 				STA OBJ_SIZE+HEX_SUM+1,X
 				JMP CODE_DROP+EXEC_HEADER
 			.not_raw_hex:
@@ -490,7 +487,10 @@
 			LDA #ERROR_NONE
 			STA ret_val
 			RTS
-	
+
+    REGS
+        BYTE offset
+    END
 	WORD_EXEC:
 		FCB 4,"EXEC"			;Name
 		FDB WORD_STORE			;Next word
@@ -538,7 +538,7 @@
 			.secondary:
 				
 				;Save offset into word
-				STY R0
+				STY offset
 				
 				;Drop return address
 				PLA
@@ -557,7 +557,7 @@
 				PHA
 				
 				;Load new thread address
-				LDY R0
+				LDY offset
 				INY
 				TYA
 				CLC
@@ -759,7 +759,12 @@
 			FCB OBJ_PRIMITIVE	;Type
 			FCB IMMED|COMPILE	;Flags
 			
-			TODO: check if addresses on aux stack
+            LDA aux_stack_count
+            BEQ .no_aux_items
+				LDA #ERROR_STRUCTURE
+				STA ret_val
+				RTS
+            .no_aux_items:
 			
 			LDA #MODE_IMMEDIATE
 			STA mode
@@ -925,6 +930,9 @@
 			LDA #2
 			JMP IncExecPtr
 
+    REGS
+        WORD counter
+    END
 	WORD_STO:
 		FCB 3,"STO"				;Name
 		FDB WORD_STO_CHAR		;Next word
@@ -1007,14 +1015,14 @@
 				;Entry point for STO_THREAD
 				.copy_data:
 				LDA #OBJ_SIZE
-				STA R0
+				STA counter
                 STX stack_X
 				.loop:
 					LDA 0,X
 					STA (obj_address),Y
 					INX
 					INY
-					DEC R0
+					DEC counter
 					BNE .loop
                 LDX stack_X
 				
@@ -1222,7 +1230,10 @@
 			LDA #TOKEN_DO_THREAD
 			STA ret_val
 			JMP main.compile_word
-			
+		
+    REGS
+        BYTE counter
+    END
 	WORD_DO_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_LOOP			;Next word
@@ -1252,7 +1263,7 @@
 			
 			;Copy values from stack to aux stack
 			LDA #OBJ_SIZE-TYPE_SIZE
-			STA R0
+			STA counter
 			.loop:
 				LDA TYPE_SIZE,X
 				STA AUX_STACK+AUX_ITER_OFFSET,Y
@@ -1260,7 +1271,7 @@
 				STA AUX_STACK+AUX_LIMIT_OFFSET,Y
 				INX
 				INY
-				DEC R0
+				DEC counter
 				BNE .loop
 			
 			;Reset data stack pointer
@@ -1430,6 +1441,9 @@
 			BNE .false
 			JMP HexTrue
 			
+    REGS
+        BYTE word_temp
+    END
 	WORD_GT:
 		FCB 1,">"				;Name
 		FDB WORD_LT				;Next word
@@ -1448,11 +1462,11 @@
 				SEC
 				LDA HEX_SUM+OBJ_SIZE,X
 				SBC HEX_SUM,X
-				STA R0
+				STA word_temp
 				LDA HEX_SUM+OBJ_SIZE+1,X
 				SBC HEX_SUM+1,X
 				BCC .hex_false
-				ORA R0
+				ORA word_temp
 				BEQ .hex_false
 				;Could call once but then stack item doesn't exist! Not safe for interrupts
 				JSR CODE_DROP+EXEC_HEADER
@@ -1508,7 +1522,11 @@
 			STA HEX_SUM+1,X
 			
 			RTS
-				
+			
+
+    REGS
+        BYTE counter
+    END
 	WORD_I:
 		FCB 1,"I"				;Name
 		FDB WORD_J				;Next word
@@ -1536,13 +1554,13 @@
 			LDA #OBJ_FLOAT
 			STA 0,X
 			LDA #OBJ_SIZE-TYPE_SIZE
-			STA R0
+			STA counter
 			.loop:
 				LDA AUX_STACK+AUX_ITER_OFFSET,Y
 				STA 1,X
 				INX
 				INY
-				DEC R0
+				DEC counter
 				BNE .loop
 			
 			TODO: abstract
@@ -1593,6 +1611,9 @@
 			
 			JMP CODE_I.push_stack
 	
+    REGS
+        BYTE counter
+    END
 	WORD_EXIT_THREAD:
 		FCB 0,""				;Name
 		FDB WORD_BEGIN			;Next word
@@ -1604,7 +1625,7 @@
 			;Dump any DO values
 			LDA aux_stack_count
 			BEQ .done
-			STA R0
+			STA counter
 			.loop:
 				LDY aux_stack_ptr			
 				LDA AUX_STACK,Y
@@ -1615,7 +1636,7 @@
 					ADC #AUX_STACK_ITEM_SIZE
 					STA aux_stack_ptr
 					DEC aux_stack_count
-					DEC R0
+					DEC counter
 					BNE .loop
 			.done:
 			
@@ -2371,7 +2392,7 @@
         BYTE index              ;Index into word characters for word 
         BYTE words_temp         ;Temp storage in multiple places
         WORD next_word          ;Pointer to next word in word list
-        WORD word_diff          ;Difference between next_word (R1+0) and current word in word_list (R0+3)
+        WORD word_diff          ;Difference between next_word and current word in word_list
         BYTE words_left         ;Whether word left to draw after last drawn
         BYTE rows_drawn         ;Rows drawn to screen
         WORD sel_address        ;Address of highlighted word
@@ -2759,7 +2780,7 @@
                             BEQ .gc_variable
                             ;Object other than secondary or var
                             ;Something is very wrong
-                            TODO: error - corrupt dictionary
+                            JMP ERROR_RESTART_STUB
 
                             ;Current object is variable
                             .gc_variable:

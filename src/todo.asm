@@ -7,14 +7,8 @@
     ;Implement necessary words
     ;Implement optional words as space allows
 
-    ;To fix
-    ;======
-    TODO: out of memory error then gives input error
-    TODO: out of memory error also seems to freeze with too much keys.txt input. retry with halt in error msg enabled
-
     ;General
     ;=======
-    TODO: add aux stack check to semi colon
 	TODO: github readme
     TODO: checking - p110 in Handbook of Floating Point Arithmetic
     TODO: copyright
@@ -23,12 +17,13 @@
     TODO: - modify emulator?
     TODO: - math.asm, words.asm, word_stubs.asm
     TODO: remove trailing zeroes?
-    TODO: draw smart hex differently? M$1234
     TODO: double check list on webpage
-    TODO: better error messages if room left
     TODO: merge system.asm
-    TODO: capitalize comments. done: main, emu6507, forth, math, words
-    TODO: macro for reg usage as locals
+
+    ;Optional
+    ;========
+    TODO: draw smart hex differently? M$1234
+    TODO: better error messages if room left - Unkown in addition to input error
 
     ;Size related - only if necessary
     ;================================
@@ -76,9 +71,8 @@
 
     ;Known bugs from website
     ;=======================
-    TODO: limit return stack
-    TODO: check if IF and DO have closing structures
+    TODO: limit return stack - easy in EXEC but need to determine other usage
 
     ;Finished - only what might be forgotten and waste time redoing
     ;==============================================================
-    DONE:
+    DONE: capitalize comments

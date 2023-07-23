@@ -241,6 +241,13 @@
         .no_escape:
         RTS
 
+    ERROR_RESTART_STUB:
+        LDA #ERROR_SYSTEM
+        STA ret_val
+        CALL ErrorMsg
+        ;Restart system
+        JMP main
+
 	TODO: delete?
 	TODO: check that BCD_CopyConst is smaller than this - seems only 19 bytes
 	TODO: eliminate PUSH_STUB too?

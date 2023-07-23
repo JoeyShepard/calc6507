@@ -1,0 +1,6 @@
+123 sto foo
+$11
+' foo
+dup c@ +
+$4 + c!
+: bar foo ;

@@ -324,7 +324,7 @@
 					CALL MemCopy, #R_ans, dest, #OBJ_SIZE
 					JMP .process_loop
 				.compile_value:
-				
+			
 				;Compile mode - compile value
 				LDA R_ans
 				;Float?
@@ -341,11 +341,8 @@
 				BEQ .value_compile
 				
 				;Unknown type - something is very wrong
-				TODO: handle error
-				halt
-					
-				JMP .process_loop
-				
+				JMP ERROR_RESTART_STUB
+
 		.error_sub:	
 			CALL ErrorMsg
 			JMP .input_loop

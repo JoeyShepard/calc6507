@@ -105,6 +105,7 @@
 	equ ERROR_STRUCTURE, 			22
 	equ ERROR_RANGE, 				24
     equ ERROR_BROKEN_REF,           26
+    equ ERROR_SYSTEM,               28
 	
 	;Forth
 	;=====

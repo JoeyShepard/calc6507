@@ -29,6 +29,8 @@
 	FCB " RANGE ERROR  ",0		;24
 	ERROR_MSG_NULL:
 	FCB "  BROKEN REF  ",0		;26
+    ERROR_MSG_SYSTEM:
+    FCB " SYSTEM ERROR ",0      ;28
 	
 	TODO: table smaller than fixed length strings?
 	ERROR_TABLE:
@@ -45,6 +47,7 @@
 		FDB ERROR_MSG_STRUCTURE
 		FDB ERROR_MSG_RANGE
 		FDB ERROR_MSG_NULL
+        FDB ERROR_MSG_SYSTEM
 
 	TODO: adjust display and messages for new 5x8 font
 	;Error code in A
