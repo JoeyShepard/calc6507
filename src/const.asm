@@ -222,6 +222,7 @@
 		equ SYS_STACK_SIZE,		3
 		equ R_STACK_SIZE,		$30
 	    equ HW_STACK_BEGIN,     $100
+        equ R_STACK_MARGIN,     10      ;Extra space for subroutine calls
 
 		;Two byte header of each word
 		equ EXEC_HEADER,		2

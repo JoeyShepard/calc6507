@@ -24,3 +24,6 @@ rename words
 window vim src/const.asm
 rename const
 
+window vim src/word_wtubs.asm
+rename word_stubs
+

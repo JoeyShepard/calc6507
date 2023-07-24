@@ -62,6 +62,7 @@
                 ;not to create file on Windows.
                 ;Check for 13 and 10 below, though note could cause problems if
                 ;keys.txt created in Windows as would be read as two new lines.
+                ;edited in Windows.
 				CMP #KEY_ENTER
 				BEQ .key_enter
                 CMP #KEY_ENTER_ALT
@@ -859,12 +860,9 @@
 	
 
 	;Token in A
-    ;OK to use reg memory here since only jump is out of function with no return
-    REGS
-        BYTE flags
-        BYTE word_temp
-        BYTE type
-    END
+    ;OK to use R0 here since only jump is out of function with no return
+	set flags,	R0+0
+	set temp, 	R0+1
 	FUNC ExecToken
 	
 		;No error unless set below
@@ -906,9 +904,9 @@
 			
 			;Check min stack size
 			AND #FLAG_MIN
-			STA word_temp
+			STA temp
 			LDA stack_count
-			CMP word_temp
+			CMP temp
 			BCS .no_underflow
 				LDA #ERROR_STACK_UNDERFLOW
 				STA ret_val
@@ -933,16 +931,16 @@
 			LDA flags
 			AND #FLAG_TYPES
 			BEQ .type_check_done
-				STA word_temp
+				PHA
 				LDA flags
 				AND #FLAG_MIN
 				TAY
-				LDA word_temp
+				PLA
 				
 				CMP #SAME
 				BNE .not_same
 					LDA 0,x
-					STA type
+					STA temp
 					;Adjusting X here would eliminate 1 redundant check below
 					JMP .type_check
 				.not_same:
@@ -950,15 +948,17 @@
 					LSR
 					LSR
 					LSR
-					STA type
+					STA temp
 				.type_check:
 				
-                STX word_temp
+				TXA
+				PHA
 				.type_loop:
 					LDA 0,X
-					CMP type
+					CMP temp
 					BEQ .type_good
-                        LDX word_temp
+						PLA
+						TAX
 						LDA #ERROR_WRONG_TYPE
 						STA ret_val
 						RTS
@@ -969,7 +969,8 @@
 					TAX
 					DEY
 					BNE .type_loop
-                LDX word_temp
+				PLA
+				TAX
 			.type_check_done:
 			
 			;Check if compile only
@@ -1156,8 +1157,10 @@
 		LDA user_defined
 		CMP #1
 		BEQ .return
+			TODO: add 3 here then sub 3 later. why? just for var?
 			CLC 
 			LDA obj_address
+			;ADC #3
 			ADC #1
 			INY
 			STA (dict_ptr),Y
@@ -1174,12 +1177,10 @@
 	
 	
 	;Allocate room for word header
-    REGS
-	    BYTE count
-        BYTE src_index
-        BYTE dest_index
-        WORD ptr
-    END
+	set count,		R0+0
+	set src_index,	R0+1
+	set dest_index,	R0+2
+	set ptr,		R0+3
 	FUNC WriteHeader
 
 		PLA
@@ -1203,7 +1204,7 @@
 			BNE .return
 		.alloc_good:
 		
-		;Set up header for new word
+		;Setup header for new word
 		LDA new_word_len
 		LDY #0
 		STA (dict_ptr),Y
