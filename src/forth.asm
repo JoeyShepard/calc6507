@@ -29,6 +29,7 @@
 			BYTE cursor, cursor_timer
 			BYTE arg
 			BYTE index, str_index
+            BYTE screen_ptr_temp
 		END
 		
 		LDA #0
@@ -84,15 +85,14 @@
 						DEC index
 						CMP #CHAR_SCREEN_WIDTH
 						BCS .backspace_scroll
-							TODO: pass input in register?
 							CALL LCD_char, #' '
 							LDA screen_ptr
 							SEC
 							SBC #CHAR_WIDTH*2
 							STA screen_ptr
-							PHA
+							STA screen_ptr_temp
 							CALL LCD_char, #CHAR_ARROW
-							PLA
+                            LDA screen_ptr_temp
 							STA screen_ptr
 							JMP .draw_done
 						.backspace_scroll:
@@ -179,9 +179,9 @@
 						BCS .scroll_buffer
 							CALL LCD_char, arg
 							LDA screen_ptr
-							PHA
+							STA screen_ptr_temp
 							CALL LCD_char, #CHAR_ARROW
-							PLA
+                            LDA screen_ptr_temp
 							STA screen_ptr
 							JMP .draw_done
 						.scroll_buffer:
@@ -201,9 +201,9 @@
 								CMP str_index
 								BNE .scroll_loop
 							LDA screen_ptr
-							PHA
+							STA screen_ptr_temp
 							CALL LCD_char, #CHAR_ARROW
-							PLA
+                            LDA screen_ptr_temp
 							STA screen_ptr
 						.draw_done:
 					.buffer_full:
@@ -290,6 +290,9 @@
     ;- ret_address: last searched word (not useful)
     ;- obj_address: unchanged
 	FUNC FindWord
+        VARS
+            BYTE address_temp
+        END
 		LDA new_word_len    ;Set by LineWord
 		BEQ .not_found
 		MOV.W #FORTH_WORDS,ret_address
@@ -317,11 +320,11 @@
 			TAY
 			INY
 			LDA (ret_address),Y
-			PHA
+            STA address_temp
 			INY 
 			LDA (ret_address),Y
 			STA ret_address+1
-			PLA
+			LDA address_temp
 			STA ret_address
             ;Check for end of dictionary
 			ORA ret_address+1
@@ -356,19 +359,21 @@
     TODO: use registers instead?
 	FUNC CheckData
 		VARS
-			BYTE input_mode			;input mode for float - pre decimal, post decimal, or exponent
-			BYTE y_buff				;temporary storage for y
-			BYTE index				;generic index
-			BYTE which_digit		;whether first or second digit of BCD byte
-			BYTE negative			;whether float is negative number
-			BYTE exp_negative		;whether exp is negative number
-			BYTE exp_count			;offset from decimal place in float
-			BYTE exp_found			;whether e encountered yet in float
-			BYTE dec_found			;whether decimal point encountered yet in float
-			BYTE nonzero_found		;whether non-zero encountered yet in float
-			BYTE digit_count		;count of digits during float input
-			BYTE exp_digit_count	;count of digits during float input
-			BYTE digit_found		;whether digit found yet
+			BYTE input_mode			;Iinput mode for float - pre decimal, post decimal, or exponent
+			BYTE y_buff				;Temporary storage for y
+			BYTE index				;Generic index
+			BYTE which_digit		;Whether first or second digit of BCD byte
+			BYTE negative			;Whether float is negative number
+			BYTE exp_negative		;Whether exp is negative number
+			BYTE exp_count			;Offset from decimal place in float
+			BYTE exp_found			;Whether e encountered yet in float
+			BYTE dec_found			;Whether decimal point encountered yet in float
+			BYTE nonzero_found		;Whether non-zero encountered yet in float
+			BYTE digit_count		;Count of digits during float input
+			BYTE exp_digit_count	;Count of digits during float input
+			BYTE digit_found		;Whether digit found yet
+            BYTE num_buff           ;Temp storage for .add_digit
+            BYTE float_buff         ;Temp storage for .loop_float
 		END
 		
 		TODO: check that reading in hex and strings still works since switching to R_ans
@@ -535,15 +540,14 @@
 			LDA new_word_buff,Y
 			JSR .digit
 			BCC .float_not_digit
-				PHA
+				STA float_buff
 				LDA nonzero_found
 				BNE .digit_good
 					;Mark at least one digit found in case all 0(s)
 					;Otherwise, can't tell e from 0e
 					LDA #$FF
 					STA digit_found
-					PLA
-					PHA
+                    LDA float_buff
 					BEQ .digit_zero
 						;Non zero digit
 						LDA #$FF
@@ -553,7 +557,6 @@
 					.digit_zero:
 					;Only zeroes so far, so just count exponent
 					
-					PLA
 					LDA exp_found
 					BNE .float_next
 						LDA dec_found
@@ -571,14 +574,12 @@
 						LDA digit_count
 						CMP #MAX_DIGITS+1	;One extra digit for input rounding
 						BCC .digit_ok
-							;;Max digits exceeded!
-							;PLA
-							;RTS
-							PLA
+                            ;Max digits exceeded
+							LDA float_buff
 							JMP .exp_check
 						.digit_ok:
 						
-						PLA
+						LDA float_buff
 						JSR .add_digit
 						
 						.exp_check:
@@ -597,11 +598,11 @@
 						CMP #3
 						BNE .exp_digit_ok
 							;Max exp digits exceeded!
-							PLA
+                            LDA float_buff
 							RTS
 						.exp_digit_ok:
 						
-						PLA
+                        LDA float_buff
 						STY y_buff
 						LDY #4
 						.exp_loop:
@@ -744,12 +745,10 @@
 		CLD
 		
 		;Round if necessary
-		TXA
-		PHA
+        STX stack_X
 		LDX #R_ans+1
 		JSR BCD_Round
-		PLA
-		TAX
+        LDX stack_X
 		
 		;Reverse exponent bytes
 		LDA #0
@@ -830,7 +829,7 @@
 				RTS
 				
 		.add_digit:
-			PHA
+			STA num_buff
 			STY y_buff
 			LDY index
 			INC digit_count
@@ -839,7 +838,7 @@
 			STA which_digit
 			BEQ .second_digit
 				;First digit
-				PLA
+				LDA num_buff
 				ASL
 				ASL
 				ASL
@@ -848,7 +847,7 @@
 				LDY y_buff
 				RTS
 			.second_digit:
-				PLA
+				LDA num_buff
 				ORA R_ans,Y
 				STA R_ans,Y
 				DEC index
@@ -1026,18 +1025,20 @@
 	END
 	
 	;Put placeholder stop word at dictionary pointer and increment
+    REGS
+        BYTE size 
+    END
 	FUNC DictEnd
 		
-		PHA
+		STA size
 		JSR AllocMem
 		LDA ret_val
 		BEQ .alloc_good
-			PLA
 			RTS
 		.alloc_good:
 		
 		LDY #0
-		PLA
+		LDA size
         TODO: magic number
 		CMP #4
 		BNE .no_end_token
@@ -1093,7 +1094,6 @@
 		.done:
 	END
 	
-	TODO: return value in A too?
 	;Amount in A
 	FUNC AllocMem
 		
@@ -1244,19 +1244,21 @@
 	END
 	
 	;Token in A
+    REGS
+        BYTE token
+    END
 	FUNC TokenArgThread
 		
-		PHA
+		STA token
 		LDA #3	;Token and 16 bit address
 		CALL AllocMem
 		LDA ret_val
 		BEQ .success
-			PLA
 			RTS
 		.success:
 		
 		;Store token
-		PLA
+		LDA token
 		LDY #0
 		STA (dict_ptr),Y
 		

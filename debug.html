@@ -10,6 +10,7 @@
 <td>BYTE DrawHex.arg</td>
 <td>BYTE DrawString.arg</td>
 <td>WORD ErrorMsg.msg</td>
+<td>BYTE FindWord.address_temp</td>
 <td>BYTE LCD_clrscr.counter</td>
 <td>BYTE MemCopy.count</td>
 <td>BYTE ReadLine.arg</td>
@@ -81,62 +82,65 @@
 <td>0x9</td>
 <td>BYTE CheckData.exp_found</td>
 <td>WORD DrawStack.address</td>
-<td>BYTE ReadLine.str_index</td>
+<td>BYTE ReadLine.screen_ptr_temp</td>
 </tr
 
 ><tr>
 <td>0xa</td>
 <td>BYTE CheckData.exp_negative</td>
 <td>WORD DrawStack.address</td>
+<td>BYTE ReadLine.str_index</td>
 </tr
 
 ><tr>
 <td>0xb</td>
-<td>BYTE CheckData.index</td>
+<td>BYTE CheckData.float_buff</td>
 <td>BYTE DrawStack.character</td>
 </tr
 
 ><tr>
 <td>0xc</td>
-<td>BYTE CheckData.input_mode</td>
+<td>BYTE CheckData.index</td>
 <td>BYTE DrawStack.counter</td>
 </tr
 
 ><tr>
 <td>0xd</td>
-<td>BYTE CheckData.negative</td>
+<td>BYTE CheckData.input_mode</td>
 <td>BYTE LCD_char.c_out</td>
 <td>WORD MemCopy.dest</td>
 </tr
 
 ><tr>
 <td>0xe</td>
-<td>BYTE CheckData.nonzero_found</td>
+<td>BYTE CheckData.negative</td>
 <td>BYTE LCD_char.lc1</td>
 <td>WORD MemCopy.dest</td>
 </tr
 
 ><tr>
 <td>0xf</td>
-<td>BYTE CheckData.which_digit</td>
+<td>BYTE CheckData.nonzero_found</td>
 <td>BYTE LCD_char.lc2</td>
 <td>WORD MemCopy.source</td>
 </tr
 
 ><tr>
 <td>0x10</td>
-<td>BYTE CheckData.y_buff</td>
+<td>BYTE CheckData.num_buff</td>
 <td>BYTE LCD_char.pixel</td>
 <td>WORD MemCopy.source</td>
 </tr
 
 ><tr>
 <td>0x11</td>
+<td>BYTE CheckData.which_digit</td>
 <td>BYTE LCD_char.pixel_index</td>
 </tr
 
 ><tr>
 <td>0x12</td>
+<td>BYTE CheckData.y_buff</td>
 <td>WORD LCD_char.pixel_ptr</td>
 </tr
 

@@ -51,7 +51,6 @@ TODO: more accurate answer at cost of added complexity
 		;Added decimal of precision
 		FCB $77, $87, $59, $97, $23, $42, $00
 	
-	TODO: smaller to generate later rows of form 1E-X?	
 	ATAN_TABLE:
 		FCB $74, $39, $63, $81, $39, $85, $07
 		FCB $12, $49, $52, $86, $66, $99, $00
