@@ -2247,13 +2247,13 @@
 			JSR CORDIC_Trig
 			
 			;Clear sign if set since cos(-x) = cos(x)
+            ;(at least for x=[-pi/2,pi/2])
 			LDX #0
 			STX CORDIC_end_sign
 			
 			;Push CORDIC X reg (R2) to stack
 			LDX #R2
 			JSR CORDIC_Pack
-			;Clear sign if set since cos(-x) = cos(x)
 			JMP CORDIC_Push
 			
 	WORD_TAN:

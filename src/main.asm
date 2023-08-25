@@ -6,44 +6,32 @@
 ;=====
 ;GPIO
 	;RIOT A
-		;2 latch enables
-		;1 RX
+        ;5 keypad inputs
 		;1 low battery indicator from Vreg
-		;1 EEPROM bank
-		;0 EEPROM lock
-			;Built into EEPROM
-		;1 keyboard buffer OE (74HCT244)
-			;Can't be driven from latch!
-		;1 read ON button?
-			;Should be easy if button is grounding pull-up
-		;*1 free
+        ;1 LCD E
+		;1 latch enable
 	;RIOT B
-		;8 LCD data bus to latch 2
-		;Also, 8 keyboard inputs
-			;Inputs are pulled up, so just need diodes
+		;8 LCD data bus 
+        ;8 keyboard output drivers
+            ;One diode per row is enough on drivers
+                ;Diode base points to pull up and input
+                ;Arrow points to output
 	;Latch 1
 		;1 LCD DI
-		;1 LCD E
 		;1 LCD CS1
 		;1 LCD CS2
 		;1 LCD RST? may not be necessary
-		;1 Power transistor
-			;Must be driven by latch for MOSFET for voltage level
-			TODO: latch not Z stated at beginning though! pull-up and ON grounds?
-		;1 TX
-			;4v min output, so must drive through latch
-			;Alternative is level shift transistor on RIOT
-		;*1 free
+		;3 EEPROM bank
+        ;*1 free
 	;Latch 2
-		;8 LCD data bus out
-	;Chips to add:
-		;Keyboard buffer
-		;Power transistor
+        ;NOT NEEDED!
+        ;diodes off RIOT B to input pins should work
+        
+    ;Keypad
+        ;WON'T WORK:
+            ;RIOT B for input and Latch 2 output through resistors
+            ;Latch 2 through resistors will fight pull ups on RIOT B
 	
-	TODO: drive RDY with 6532 interrupt
-	TODO:    seems allowed as long as transitions in phi1 not phi2. lower current though? posted on forum
-	TODO: one output of latch to GAL to diable RAM writes for shutdown? may not be enough
-
 ;General TODO items stored in separate file. Included here so todo.py can find it.
     include todo.asm
 
@@ -166,12 +154,6 @@
 
 ;Main function
 ;=============
-    REGS
-        WORD t1,t2,t3
-        BYTE t4
-        WORD t5
-        BYTE t6
-    END
 	FUNC main BEGIN
 		VARS
 			WORD dest

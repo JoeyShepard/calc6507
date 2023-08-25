@@ -1,0 +1,17 @@
+Line numbers
+============
+1: Zero page assignments
+9: include macros.asm
+83: include riot.asm
+130: FUNC main BEGIN
+
+Call graph
+==========
+
+Functions outside of call graph
+===============================
+
+String literals from CALL
+=========================
+
+

@@ -15,6 +15,7 @@
     TODO: double check list on webpage
     TODO: merge system.asm
     TODO: limit return stack - easy in EXEC but need to determine other usage
+    TODO: IF/THEN causes structure error now. left on aux stack? yes, see WORD_THEN
 
     ;Optional
     ;========

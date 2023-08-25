@@ -27,15 +27,12 @@ src/*.err
 #actually, randomized tests moved to node.js port
 #input.txt
 
-#documents downloaded from elsewhere
-ref\ docs/
-
 #randomized test data
 decimal\ test/input*.txt
 decimal\ test/*/input*.txt
 
 #examples that I did not create myself
-CORDIC/
+CORDIC/ref-docs/
 
 #tmux configuration files
 *.tmux

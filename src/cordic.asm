@@ -11,8 +11,6 @@
 
 TODO: clear up these notes
 
-TODO: at some point, sin(x)=x so escape?
-
 TODO: improve division then?
 ;Btw, figured out how to - then + division 
 	
@@ -127,7 +125,8 @@ TODO: more accurate answer at cost of added complexity
 		;With sticky (v2):     86602540 469 (even worse)
 		;With sticky (v3):     86602540 378 68
 		;C64 shows             86602540 4
-		
+	
+        TODO: resolve or remove
 		;Currently (without sticky) ~187,000 cycles
 			;Copying for shift is probably big slow down
 			;Add without copying if aligned?
@@ -259,7 +258,7 @@ TODO: more accurate answer at cost of added complexity
 				;.no_debug2:
 				
 				;Add X to Y>> and store in X'
-				TODO: magic number - GRS set to need to copy one byte earlier
+				TODO: magic number - GRS set to need so copy one byte earlier
 				TODO: swap CopyRegs for something general purpose
 				LDA #R3-1	;Source - Y
 				LDY #R0-1	;Dest - shifter

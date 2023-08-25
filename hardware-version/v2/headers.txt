@@ -1,0 +1,45 @@
+Left side
+=========
+1  
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15 PA6 - LCD E (PA5 is low batt)
+16 PA4 - Keypad
+17 PA3 - Keypad
+18 PA2 - Keypad
+19 PA1 - Keypad
+20 PA0 - Keypad
+
+Right side
+==========
+1 
+2
+3
+4
+5  
+6  GND
+7  VCC
+8  PB0
+9  PB1
+10 PB2
+11 PB3
+12 PB4
+13 PB5
+14 PB6
+15 PB7
+16 LATCH.Q3 - LCD.DI
+17 LATCH.Q4 - LCD.CS1
+18 LATCH.Q5 - LCD.CS2
+19 LATCH.Q6 - LCD.RST
+20 
