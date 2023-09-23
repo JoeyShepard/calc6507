@@ -1,0 +1,37 @@
+Line numbers
+============
+1: Zero page assignments
+9: include macros.asm
+83: include riot.asm
+114: include const.asm
+419: include lcd.asm
+464: FUNC LCD_Data
+477: FUNC LCD_Instruction
+489: FUNC LCD_Row
+499: FUNC LCD_Col
+508: FUNC LCD_Setup
+553: FUNC LCD_clrscr
+     VARS: BYTE row_count, BYTE col_count
+     2 bytes used
+610: include font_5x8_flipped.asm
+809: include font_custom_flipped.asm
+844: FUNC main BEGIN
+
+Call graph
+==========
+main(0) > LCD_Setup(0) - (0 bytes)
+main(0) > LCD_Setup(0) > LCD_Instruction(0) - (0 bytes)
+main(0) > LCD_Setup(0) > LCD_Row(0) - (0 bytes)
+main(0) > LCD_Setup(0) > LCD_Col(0) - (0 bytes)
+main(0) > LCD_clrscr(2) - (2 bytes)
+main(0) > LCD_clrscr(2) > LCD_Row(0) - (2 bytes)
+main(0) > LCD_clrscr(2) > LCD_Data(0) - (2 bytes)
+main(0) > LCD_Data(0) - (0 bytes)
+
+Functions outside of call graph
+===============================
+
+String literals from CALL
+=========================
+
+

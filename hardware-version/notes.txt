@@ -1,0 +1,13 @@
+v1 - first circuit board
+     - basically just because voltage sagged on breadboard
+     - worked fine but not enough room for power supply
+v2 - second circuit board. did not work correctly then crystal died.
+     - later, turned out crystal was not dead
+       - replaced crystal and system still unstable. turned out to be power supply.
+v3 - second circuit board. replaced crystal then started over with tests.
+     - same problems as before
+     - last test with new power supply worked
+v4 - second circuit board. replaced power supply with tps61023 and seems to work.
+     - still had problems with reliability
+     - stopped using EEPROM adapter and now LCD and RAM good
+v5 - second circuit board. should be done with tests

@@ -1,36 +1,10 @@
+;Main file
+;=========
+;Note different for emulated and hardware versions!
+
 ;Macros
 ;======
 	include macros.asm
-	
-;Notes
-;=====
-;GPIO
-	;RIOT A
-        ;5 keypad inputs
-		;1 low battery indicator from Vreg
-        ;1 LCD E
-		;1 latch enable
-	;RIOT B
-		;8 LCD data bus 
-        ;8 keyboard output drivers
-            ;One diode per row is enough on drivers
-                ;Diode base points to pull up and input
-                ;Arrow points to output
-	;Latch 1
-		;1 LCD DI
-		;1 LCD CS1
-		;1 LCD CS2
-		;1 LCD RST? may not be necessary
-		;3 EEPROM bank
-        ;*1 free
-	;Latch 2
-        ;NOT NEEDED!
-        ;diodes off RIOT B to input pins should work
-        
-    ;Keypad
-        ;WON'T WORK:
-            ;RIOT B for input and Latch 2 output through resistors
-            ;Latch 2 through resistors will fight pull ups on RIOT B
 	
 ;General TODO items stored in separate file. Included here so todo.py can find it.
     include todo.asm
@@ -54,65 +28,11 @@
 ;Variables in zero page
 ;======================
 	ORG $0000
-	
-	TODO: assign unused locals space
-	
-	;Locals usage
-	BYTE null       ;Reserve for use as null. Nothing stored here.
-
-    LOCALS_BEGIN	$1
-	LOCALS_END		$1F
-	
-	TODO: double check all used and move variables out of globals to here
-	
-	ORG $20
-	;For macros
-	WORD dummy
-	WORD ret_val
-	
-	;Temp address for variables
-	WORD ret_address
-	
-	;Output
-	WORD screen_ptr
-	
-	;Forth
-	WORD dict_ptr
-	WORD new_dict_ptr
-	TODO: has to be in zero page?
-	WORD dict_save
-	WORD exec_ptr
-	TODO: share with ret_address?
-	WORD obj_address
-	
-	;Math
-	WORD math_ptr1
-	WORD math_ptr2
-
-    TODO: one constant in const.asm
-	;Don't need header byte, +1 for guard and round, +1 for exp sign
-	R0: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R1: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R2: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R3: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R4: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R5: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R6: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R7: 	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	R_ans:	DFS OBJ_SIZE-TYPE_SIZE+GR_OFFSET+1
-	
-	;Reg before R_ans in case double wide reg needed
-	;+3 since only need 6 of 9 bytes 
-	equ R_ans_wide, R7+3
-	
-	Regs_end:
-		
+	include zp.asm
 	
 ;Variables in main RAM
 ;=====================
     ORG HW_STACK_BEGIN+R_STACK_SIZE
-
-	;Must come after include const.asm for constants
 	include globals.asm
 
 	
@@ -151,14 +71,11 @@
 	include forth.asm
 	include words.asm
 	include word_stubs.asm
+    include forth_loop.asm
 
 ;Main function
 ;=============
-	FUNC main BEGIN
-		VARS
-			WORD dest
-			BYTE arg,type
-		END
+	FUNC main
 
 		CALL setup
 		CALL tests
@@ -167,191 +84,8 @@
 		CALL stats
 		CALL GfxSetup
 		
-		CALL InitForth
-		
-		.input_loop:
-			
-			;Colon definitions must fit on one line
-            ;Error message handled below
-			LDA mode
-			CMP #MODE_IMMEDIATE
-			BEQ .mode_good
-		        
-				;Colon writes new words length and name. Blank out
-				LDY #0
-				TYA
-				STA (dict_save),Y
-				INY
-				STA (dict_save),Y
-				INY
-				STA (dict_save),Y				
-				
-				LDA #MODE_IMMEDIATE
-				STA mode
-			.mode_good:
-			
-			;Reset dict_ptr in case anything went wrong below
-			MOV.W dict_save,dict_ptr
-			
-			CALL DrawStack
-			CALL ReadLine
-			
-			.process_loop:
-				
-				CALL LineWord
-				LDA ret_val
-				BEQ .no_word_error
-                    ;Only error should be if word was too long
-					JMP .error_sub
-				.no_word_error:
-				LDA new_word_len
-
-                BNE .still_processing
-                    ;Out of words to process
-                    ;Error if still in compile mode
-                    LDA mode
-                    CMP #MODE_IMMEDIATE
-                    BEQ .input_loop
-                    LDA #ERROR_INPUT
-                    JMP .error_sub
-				.still_processing:
-
-				CALL FindWord
-				LDA ret_val
-				BEQ .word_not_found
-					
-					;Word found
-					LDA mode
-					CMP #MODE_IMMEDIATE
-					BNE .compile_word
-				
-						;Immediate mode - insert word token into temp thread and execute
-						.immediate:
-						LDY #TOKEN_BREAK
-						LDA ret_val
-						STA temp_thread
-						CMP #TOKEN_SECONDARY
-						BEQ .insert_address
-						CMP #TOKEN_VAR_THREAD
-						BEQ .insert_address
-							STY temp_thread+1
-							JMP .jump_thread
-						.insert_address:
-
-						;Secondaries and variables need address in stream
-						CLC
-						LDA obj_address ;Beginning of CODE
-						ADC #1
-						STA temp_thread+1
-						LDA obj_address+1
-						ADC #0
-						STA temp_thread+2
-						STY temp_thread+3
-						.jump_thread:
-						LDA #lo(temp_thread)
-						STA exec_ptr
-						LDA #hi(temp_thread)
-						STA exec_ptr+1
-						JMP ExecThread ;BREAK inserted above returns to main loop
-					.compile_word:
-					
-					;Compile mode
-                    LDA ret_val
-                    TAY
-					LDA JUMP_TABLE-2,Y
-					STA ret_address
-					LDA JUMP_TABLE-1,Y
-					STA ret_address+1
-					LDY #1
-					LDA (ret_address),Y
-					AND #IMMED
-					BNE .immediate
-					;Not immediate so compile
-					LDA ret_val
-					CALL WriteToken
-					LDA ret_val
-					BEQ .no_compile_error
-						JMP .error_sub
-					.no_compile_error:
-					JMP .process_loop
-				.word_not_found:
-				
-				;Word not found, so check if data
-				CALL CheckData
-				LDA R_ans
-				CMP #OBJ_ERROR
-				BNE .input_good
-                    ;Unrecognized input
-                    LDA #ERROR_INPUT
-					JMP .error_sub
-				.input_good:
-				
-				LDA mode
-				CMP #MODE_IMMEDIATE
-				BNE .compile_value
-				
-					;Immediate mode - add value to stack
-					LDA #STACK_SIZE-1
-					CMP stack_count
-					BCS .no_overflow
-						LDA #ERROR_STACK_OVERFLOW
-						JMP .error_sub
-					.no_overflow:
-					
-					JSR StackAddItem
-					
-					STX dest
-					LDA #0
-					STA dest+1
-					CALL MemCopy, #R_ans, dest, #OBJ_SIZE
-					JMP .process_loop
-				.compile_value:
-			
-				;Compile mode - compile value
-				LDA R_ans
-				;Float?
-				LDY #TOKEN_FLOAT
-				CMP #OBJ_FLOAT
-				BEQ .value_compile
-				;Hex?
-				LDY #TOKEN_HEX
-				CMP #OBJ_HEX
-				BEQ .value_compile
-				;String?
-				LDY #TOKEN_STRING
-				CMP #OBJ_STR
-				BEQ .value_compile
-				
-				;Unknown type - something is very wrong
-				JMP ERROR_RESTART_STUB
-
-		.error_sub:	
-			CALL ErrorMsg
-			JMP .input_loop
-			
-		.value_compile:
-			STY type
-			LDA #OBJ_SIZE
-			JSR AllocMem
-			LDA ret_val
-			BEQ .float_alloc_good
-				JMP .error_sub
-			.float_alloc_good:
-			LDA type
-			LDY #0
-			STA (dict_ptr),Y
-			
-			.loop:
-				INY
-				LDA R_ans,Y
-				STA (dict_ptr),Y
-				CPY #8
-				BNE .loop
-			
-			;Adjust dict pointer
-			MOV.W new_dict_ptr,dict_ptr
-			
-			JMP .process_loop
+		;Jump to ForthLoop function and never return
+        JMP ForthLoop
 	END
 
 ;Insertion point for string literals

@@ -1,0 +1,25 @@
+original forum post:
+
+old/ is original tests from hpcalc forum before figured out how to do atan and asin
+
+new/ is copy of that much later to make sure base 10 calculation works before implementing in assembly
+- cordic-modified.py
+  - atan works but asin gives wrong answers
+  - compiled original file from voidware and confirms asin works
+  - is problem that this way won't work with base 10?
+    - tried in cordic-base-2-modified.py below and didn't work
+  - posted on forum
+- cordic-base-2-modified.py
+  - tried making equivalent changes to base 2 version to see if error is in method or how implemented
+  - correct answer except negative so problem must by in method not implementation
+
+- cordic-double.py
+  - other example showed double method for arcsin so try that
+    - https://people.sc.fsu.edu/~jburkardt/c_src/cordic/cordic.c
+
+linked-pdf
+- pdf linked in hpcalc thread
+    - not sure if it's the pdf mentioned in source
+- second pdf from other thread "best on decimal CORDIC"
+    - https://www.hpmuseum.org/forum/post-13347.html
+    - actually, not that useful

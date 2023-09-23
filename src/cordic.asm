@@ -117,6 +117,16 @@ TODO: more accurate answer at cost of added complexity
 	;R4 - Z
 	FUNC BCD_CORDIC
 		
+        ;Current algorithm:
+            ;Add +a or -a from table to Z(R4)
+            ;Copy Y(R3) to shifter(R0)
+            ;Shift R0 which holds Y
+            ;Add +R0 or -R0 to X(R2) and store in X'(R1)
+            ;Copy X(R2) to shifter(R0)  < wasted copy
+            ;Shift R0 which holds X
+            ;Add Y(R3) +R0 or -R0 to Y(R3)
+            ;Copy X'(R1) to X(R2)       < leave number in place
+
 		;STATS:
 		;bc shows cos(pi/6) as 86602540 37844
 		;HP-48GX shows         86602540 3785
@@ -128,13 +138,14 @@ TODO: more accurate answer at cost of added complexity
 	
         TODO: resolve or remove
 		;Currently (without sticky) ~187,000 cycles
+        ;Later, up to ~224,000 cycles
 			;Copying for shift is probably big slow down
 			;Add without copying if aligned?
 		;C64 can do for i=1 to 100: x+=sin(45) in 4 seconds ie ~40,000 cycles
 		
 		TODO: replace halt here with code that will return if accidentally left in
 		TODO: halt assembling if halt ever invoked
-		
+
 		TAY	;Save flags
 		
 		;Compare mode
@@ -172,9 +183,9 @@ TODO: more accurate answer at cost of added complexity
 		;Sign - always starts positive
 		;Move outside of BCD_CORDIC if not always positive
 		LDA #0
-		STA R4+FIRST_DIGIT+1
-		STA R3+FIRST_DIGIT+1
-		STA R2+FIRST_DIGIT+1
+		STA R4+FIRST_DIGIT+1    ;Z
+		STA R3+FIRST_DIGIT+1    ;Y
+		STA R2+FIRST_DIGIT+1    ;X
 		
 		TODO: remove after debugging
 		;LDA #0
@@ -207,7 +218,10 @@ TODO: more accurate answer at cost of added complexity
 				;halt
 				
 				TODO: shortcut to recognize flip flopping?
-				
+			
+                ;Calculate Z: +a or -a from table
+                ;================================
+
 				JMP (CORDIC_comparator)
 				;CORDIC_comparator returns here:
 				.compare_done:
@@ -227,6 +241,7 @@ TODO: more accurate answer at cost of added complexity
 						DEX
 						BNE .sub_Z_loop
 						
+                        TODO: magic number
 						LDA R4+DEC_COUNT/2+1
 						SBC #0
 						STA R4+DEC_COUNT/2+1
@@ -243,6 +258,7 @@ TODO: more accurate answer at cost of added complexity
 						DEX
 						BNE .add_Z_loop
 						
+                        TODO: magic number
 						LDA R4+DEC_COUNT/2+1
 						ADC #0
 						STA R4+DEC_COUNT/2+1	
@@ -257,14 +273,14 @@ TODO: more accurate answer at cost of added complexity
 				;	halt
 				;.no_debug2:
 				
-				;Add X to Y>> and store in X'
-				TODO: magic number - GRS set to need so copy one byte earlier
+				;Add X to shifted Y and store in X'
+				TODO: magic number - GRS set so need to copy one byte earlier
 				TODO: swap CopyRegs for something general purpose
 				LDA #R3-1	;Source - Y
 				LDY #R0-1	;Dest - shifter
 				JSR CopyRegs
 				
-				;Shift Y
+				;Shift Y in R0
 				LDA CORDIC_shift_count
 				TODO: remove
 				;BEQ .no_debug
@@ -277,6 +293,7 @@ TODO: more accurate answer at cost of added complexity
 				
 				;NOTE: skips adding GRS since would be zero
 				
+                ;Add X to shifted Y and store in X'
 				LDX #0
 				TODO: magic_number
 				TODO: store elsewhere to reuse math functions?
@@ -288,9 +305,9 @@ TODO: more accurate answer at cost of added complexity
 					TODO: abstract
 					SEC
 					.sub_X_loop:
-						LDA R2,X
-						SBC R0,X
-						STA R1,X
+						LDA R2,X ;X
+						SBC R0,X ;Shifted Y
+						STA R1,X ;X'
 						INX
 						DEY
 						BNE .sub_X_loop	
@@ -298,15 +315,15 @@ TODO: more accurate answer at cost of added complexity
 				.add_X:
 					CLC
 					.add_X_loop:
-						LDA R2,X
-						ADC R0,X
-						STA R1,X
+						LDA R2,X ;X
+						ADC R0,X ;Shifted Y
+						STA R1,X ;X'
 						INX
 						DEY
 						BNE .add_X_loop
 				.X_done:
 				
-				;Add Y to X/d and store in Y
+				;Add Y to shifted X and store in Y
 				LDA #R2-1	;Source - X
 				LDY #R0-1	;Dest - shifter
 				JSR CopyRegs
@@ -316,6 +333,7 @@ TODO: more accurate answer at cost of added complexity
 				LDX R2+DEC_COUNT/2+1	;Sign of X
 				JSR CORDIC_ShiftR0
 				
+                ;Add X to shifted Y and store in X'
 				LDX #0
 				TODO: magic_number
 				LDY #DEC_COUNT/2+2	;+1 for sign byte, +1 for extra precision byte
@@ -325,9 +343,9 @@ TODO: more accurate answer at cost of added complexity
 					TODO: abstract
 					SEC
 					.sub_Y_loop:
-						LDA R3,X
-						SBC R0,X
-						STA R3,X
+						LDA R3,X ;Y
+						SBC R0,X ;Shifted X
+						STA R3,X ;Y
 						INX
 						DEY
 						BNE .sub_Y_loop	
@@ -335,9 +353,9 @@ TODO: more accurate answer at cost of added complexity
 				.add_Y:
 					CLC
 					.add_Y_loop:
-						LDA R3,X
-						ADC R0,X
-						STA R3,X
+						LDA R3,X ;Y
+						ADC R0,X ;Shifted X
+						STA R3,X ;Y
 						INX
 						DEY
 						BNE .add_Y_loop
@@ -449,7 +467,6 @@ TODO: more accurate answer at cost of added complexity
 		;sin(pi/2)=1, cos(pi/2)=0
 		LDA R_ans+FIRST_DIGIT
 		BNE .not_one
-			TODO: abstract!!!
 			TODO: test
 			
 			LDX #R2
@@ -511,6 +528,7 @@ TODO: more accurate answer at cost of added complexity
 		;Calculate exp difference (seems hard to abstract)
 		;Exp is 0 or negative
 		TODO: test!
+        TODO: magic number
 		LDA 2,X			;High byte of exponent
 		AND #$F
 		STA math_hi	
@@ -549,8 +567,8 @@ TODO: more accurate answer at cost of added complexity
 		.no_shift:
 		
 		;Z(R4)=arg
-		LDA #R0-1
-		LDY #R4-1
+		LDA #R0-1 ;Source - shifter
+		LDY #R4-1 ;Dest - Z
 		JSR CopyRegs
 		
 		LDA #CORDIC_CMP_Z|CORDIC_ADD_Y|CORDIC_ATAN
@@ -564,7 +582,7 @@ TODO: more accurate answer at cost of added complexity
 		;Save stack pointer here and restore in cleanup
 		STX stack_X
 		
-		;Sign: asin(-x) = -asin(x), acos(-x) = pi-arccos(x), atan(-x) = -atan(x)
+		;Sign: asin(-x) = -asin(x), acos(-x) = pi-acos(x), atan(-x) = -atan(x)
 		JMP CORDIC_MarkSign
 		
 	END

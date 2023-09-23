@@ -355,7 +355,6 @@
 			STA ret_val
 			RTS
 			
-	TODO: variable names for registers
     REGS
         WORD hex_div_low
         WORD hex_div_high
@@ -1119,7 +1118,7 @@
 			;Lay down EXIT_THREAD TOKEN
 			LDA #TOKEN_EXIT_THREAD
 			STA ret_val
-			JMP main.compile_word
+			JMP ForthLoop.compile_word
 	
 	TODO: necessary to reset stack?
 	;Break out of all threads but continue processing input
@@ -1138,7 +1137,7 @@
 			TXS
 			TAX
 			
-			JMP main.process_loop
+			JMP ForthLoop.process_loop
 	
 	;Reset buffers and r and aux stacks
 	WORD_QUIT:
@@ -1168,7 +1167,7 @@
 			TXS
 			TAX
 	
-	        JMP main.input_loop
+	        JMP ForthLoop.input_loop
 
 
 	WORD_STO_THREAD:
@@ -1229,7 +1228,7 @@
 			;Lay down DO_THREAD TOKEN
 			LDA #TOKEN_DO_THREAD
 			STA ret_val
-			JMP main.compile_word
+			JMP ForthLoop.compile_word
 		
     REGS
         BYTE counter
@@ -2243,8 +2242,12 @@
 			FCB MIN1|FLOATS					;Flags	
 			
 			TODO: smaller to convert cos to sin with identity?
-			
+		
+            halt
+
 			JSR CORDIC_Trig
+
+            halt
 			
 			;Clear sign if set since cos(-x) = cos(x)
             ;(at least for x=[-pi/2,pi/2])
@@ -2255,11 +2258,10 @@
 			LDX #R2
 			JSR CORDIC_Pack
 			JMP CORDIC_Push
-			
+
 	WORD_TAN:
 		FCB 3,"TAN"				;Name
-		;FDB WORD_ASIN			;Next word
-		FDB WORD_DEG			;Next word
+		FDB WORD_ASIN			;Next word
 		FCB TOKEN_TAN			;ID - 134
 		CODE_TAN:
 			FCB OBJ_PRIMITIVE				;Type
@@ -2308,7 +2310,6 @@
 			TODO: check for div by 0 error?
 			JMP CORDIC_Push
 	
-	TODO: re-enable by setting next word in header of TAN
 	WORD_ASIN:
 		FCB 4,"ASIN"			;Name
 		FDB WORD_ACOS			;Next word
@@ -2344,10 +2345,17 @@
 			FCB OBJ_PRIMITIVE				;Type
 			FCB MIN1|FLOATS					;Flags	
 			
-			;START HERE: make sure 0.1<=Y<1 and it wont overflow!!!
-			;-actually 0.01-0.09 in testing - see Python version
-			;-good news is atan tends to pi/2
-			
+            ;tan(pi/2)      = tan(1.5707)=infinity
+            ;tan(1.5)       = 14.1  - too big to fit into CORDIC registers
+            ;tan(1.4)       = 5.79  - fits in theory but intermediate might overflow
+            ;tan(pi/4=0.78) = 1     - good
+            ;atan(1)        = pi/4
+            ;atan(1/x)      = pi/2-atan(x)
+            ;atan(x)        = pi/2-atan(1/x)
+
+            ;IMPORTANT: X goes up to 30 when Y (atan arg) is 0.8 which is highest needed
+            ;           down to 20 or so with 0.0001
+
 			JSR CORDIC_Atan
 			
 			RTS

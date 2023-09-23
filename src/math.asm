@@ -294,7 +294,6 @@
 	;Number in A
 	;ASSUMES X IS SAVED ON STACK!!!
 	FUNC ShiftR0
-		TODO: consider byte by byte - slower but smaller
 		
 		;Fill 0 by default
 		LDY #0
@@ -347,6 +346,94 @@
 		;Shift bytes
 		LDA math_a	;Bytes to shift
 		BEQ .done
+        TODO: replace with math_c?
+		PHA
+		LDA #(DEC_COUNT/2)+GR_OFFSET
+		SEC
+		SBC math_a
+		TAY			;Counter
+		LDA #0
+		STA math_b	;Dest
+		.loop:
+			LDX math_a
+			LDA R0,X
+			LDX math_b
+			STA R0,X
+			INC math_a
+			INC math_b
+			DEY
+			BNE .loop
+		
+		;Fill empty bytes with fill byte
+		LDX math_b
+		PLA
+		TAY
+		LDA math_fill
+		.fill_loop:
+			STA R0,X
+			INX
+			DEY
+			BNE .fill_loop
+		.done:
+	END
+
+    TODO: combine with ShiftR0?
+	;Number in A
+    ;Register in X
+	FUNC ShiftRx
+		
+		;Fill 0 by default
+		LDY #0
+		STY math_fill
+		
+		TAY
+		LDA hex_table,Y		
+		STA math_a
+		
+		;Calculate sticky first
+		TAY
+		DEY
+		DEY
+		DEY
+		BMI .sticky_done	;No sticky if shift is 1 or 2
+			LDX #R0+GR_OFFSET
+			.sticky_loop:
+				LDA 0,X
+				CPY #0
+				BNE .both_digits
+					AND #$F
+				.both_digits:
+				ORA math_sticky
+				STA math_sticky
+				INX
+				DEY
+				DEY
+				BPL .sticky_loop
+		.sticky_done:
+		
+		
+		;Shift by half byte?
+		TODO: abstract?
+		LDA math_a
+		
+		;Entry point for CORDIC
+		.CORDIC:
+		
+		LSR
+		STA math_a
+		BCC .no_half_shift
+			LDX #R0
+			;LDA #0
+			LDA math_fill
+			TODO: works for CORDIC but messes up addition?
+			AND #$F0	;$99 -> $90
+			JSR HalfShift
+		.no_half_shift:
+		
+		;Shift bytes
+		LDA math_a	;Bytes to shift
+		BEQ .done
+        TODO: replace with math_c?
 		PHA
 		LDA #(DEC_COUNT/2)+GR_OFFSET
 		SEC

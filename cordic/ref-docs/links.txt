@@ -1,0 +1,36 @@
+Most useful
+===========
+Thread I started asking on hpcalc
+- https://www.hpmuseum.org/forum/thread-12180.html
+
+Laporte on HP-35
+- https://archived.hpcalc.org/laporte/TheSecretOfTheAlgorithms.htm
+- also see Laporte on CORDIC in general
+
+C example showing all forms
+- http://www.voidware.com/cordic.htm
+
+Other C source examples including acos and asin
+- https://people.math.sc.edu/Burkardt/c_src/cordic/cordic.c
+- WikiPedia article mentions double iterations for asin and acos as here
+
+Found what I needed in google doc for MSP430 CORDIC post
+- https://stackoverflow.com/questions/25976656/cordic-arcsine-implementation-fails
+  - about inaccuracy
+  - mentions double method to fix this
+
+Not used much
+=============
+http://dspguru.com/dsp/faqs/cordic/
+
+asin and acos calculated with identity only?
+- https://en.wikibooks.org/wiki/Digital_Circuits/CORDIC
+
+PDR - important
+- https://www.eng.auburn.edu/~agrawvd/COURSE/E7950_Fall09/TALK/cordic_presentation.pdf
+
+Different types of CORDIC
+- https://repositories.lib.utexas.edu/bitstream/handle/2152/1472/arbaughj20424.pdf
+
+More C examples
+- https://web.archive.org/web/20070228134251/http://people.csail.mit.edu/hqm/imode/fplib/cordic_code.html

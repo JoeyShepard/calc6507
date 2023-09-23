@@ -24,5 +24,8 @@ tmux rename-window -t 6 words
 tmux new-window -c ./ 'vim src/const.asm'
 tmux rename-window -t 7 const
 
+tmux new-window -c ./ 'vim src/word_wtubs.asm'
+tmux rename-window -t 8 word_stubs
+
 tmux select-window -t 0
 tmux attach-session -d
