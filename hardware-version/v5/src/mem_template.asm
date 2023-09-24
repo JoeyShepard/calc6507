@@ -19,7 +19,7 @@ comma_ret set "\{substr(comma_ret,0,strlen(comma_ret)-3)},\{substr(comma_ret,str
 	MESSAGE "Memory usage"
 	MESSAGE "============"
 	AddCommas EEPROM-$900
-	MESSAGE "ROM size:	\{comma_ret} bytes (\{100*(EEPROM-$900)/$4000}%) of 16k ROM"
+	MESSAGE "ROM size:	\{comma_ret} bytes (\{100*(EEPROM-$900)/$8000}%) of 32k ROM"
 	;AddCommas GENRAM-$200
 	;MESSAGE "RAM size:	\{comma_ret} bytes (\{100*(GENRAM-$200)/($4000-$200)}%) of 15.8k bank"
 	;Tell script that prints assembler output to stop outputting

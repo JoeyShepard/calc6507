@@ -214,12 +214,13 @@
 		
 		TODO: shrink
 		CALL LCD_clrscr
+
 		LDA #CHAR_WIDTH*8
 		STA screen_ptr
 		CALL LCD_char, #'['
 		CALL DrawHex, address
 		CALL LCD_print, " FREE]"
-		
+	
 		JSR CODE_DROP+EXEC_HEADER
 		
 		MOV #'5',character

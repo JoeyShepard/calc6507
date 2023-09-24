@@ -4,8 +4,7 @@ starttime=$(date +"%T")
 echo "[$starttime] Updating files..."
 ./update-files.sh
 
-starttime=$(date +"%T")
-echo "[$starttime] Running optimizer..."
+echo "Running optimizer..."
 cd src
 ../opt-mini.py main.asm
 mv processed.asm ../
@@ -37,6 +36,11 @@ echo Generating hex file...
 p2hex processed.p -F Intel -l 32 -r 0x0000-0xFFFF > hex.txt
 cp processed.hex hardware.hex
 
+#EEPROM writing software started erroring with hex so switched to bin
+echo Generating bin file...
+p2bin processed.p -r 0-0x7FFF > bin.txt
+cp processed.bin hardware.bin
+
 echo Copying...
 emu_path=~/"projects/6502/emu6502/local-copy/"
 cp processed.lst "${emu_path}/listing.lst"
@@ -52,4 +56,4 @@ rm errors.txt
 rm processed.hex
 rm processed.i
 rm processed.p
-
+rm processed.bin

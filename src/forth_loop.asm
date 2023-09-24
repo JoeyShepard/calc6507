@@ -3,11 +3,15 @@
 ;abstracted here so emulated and hardware main functions can
 ;be different
 
-    FUNC ForthLoop BEGIN
+    FUNC ForthLoop
         VARS
             WORD dest
             BYTE arg,type
         END
+
+        ;Reached here from main by CALL but never return so drop return address
+        PLA
+        PLA
 
         CALL InitForth
 

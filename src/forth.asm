@@ -673,7 +673,7 @@
 				.minus_good:
 				LDA #$FF
 				STA exp_negative
-				BNE .float_next
+				JNE .float_next
 			.not_minus:
 			
 			;Character not recognized - invalid input!

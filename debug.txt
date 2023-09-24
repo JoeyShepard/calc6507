@@ -180,87 +180,94 @@ Line numbers
 5064: FUNC DrawStack
        VARS: BYTE character, BYTE counter, WORD address
        4 bytes used
-5225: include error.asm
-5279: FUNC ErrorMsg
+5226: include error.asm
+5280: FUNC ErrorMsg
        VARS: WORD msg
        2 bytes used
-5343: include aux_stack.asm
-5348: FUNC AuxPushShort
-5372: FUNC AuxPopShort
-5395: include forth.asm
-5398: FUNC InitForth
-5424: FUNC ReadLine
+5344: include aux_stack.asm
+5349: FUNC AuxPushShort
+5373: FUNC AuxPopShort
+5396: include forth.asm
+5399: FUNC InitForth
+5425: FUNC ReadLine
        VARS: BYTE cursor, BYTE cursor_timer, BYTE arg, BYTE index, BYTE str_index, BYTE screen_ptr_temp
        6 bytes used
-5673: FUNC LineWord
-5729: FUNC FindWord
+5674: FUNC LineWord
+5730: FUNC FindWord
        VARS: BYTE address_temp
        1 byte used
-5797: FUNC CheckData
+5798: FUNC CheckData
        VARS: BYTE input_mode, BYTE y_buff, BYTE index, BYTE which_digit, BYTE negative, BYTE exp_negative, BYTE exp_count, BYTE exp_found, BYTE dec_found, BYTE nonzero_found, BYTE digit_count, BYTE exp_digit_count, BYTE digit_found, BYTE num_buff, BYTE float_buff
        15 bytes used
-6318: FUNC ExecToken
-6452: FUNC ExecThread
-6478: FUNC StackAddItem
-6490: FUNC DictEnd
-6539: FUNC IncDictPtr
-6551: FUNC IncExecPtr
-6563: FUNC AllocMem
-6592: FUNC WriteToken
+6319: FUNC ExecToken
+6453: FUNC ExecThread
+6479: FUNC StackAddItem
+6491: FUNC DictEnd
+6540: FUNC IncDictPtr
+6552: FUNC IncExecPtr
+6564: FUNC AllocMem
+6593: FUNC WriteToken
        VARS: BYTE token, BYTE user_defined
        2 bytes used
-6650: FUNC WriteHeader
-6717: FUNC TokenArgThread
-6754: FUNC HexFalse
-6761: FUNC HexTrue
-6780: include words.asm
+6651: FUNC WriteHeader
+6718: FUNC TokenArgThread
+6755: FUNC HexFalse
+6762: FUNC HexTrue
+6781: include words.asm
 10088: include word_stubs.asm
 10394: include forth_loop.asm
-10400: FUNC ForthLoop BEGIN
+10400: FUNC ForthLoop
        VARS: WORD dest, BYTE arg, BYTE type
        4 bytes used
-10625: FUNC main
+10629: FUNC main BEGIN
 
 Call graph
 ==========
-ForthLoop(4) > InitForth(0) - (4 bytes)
-ForthLoop(4) > DrawStack(4) - (8 bytes)
-ForthLoop(4) > DrawStack(4) > LCD_clrscr(1) - (9 bytes)
-ForthLoop(4) > DrawStack(4) > LCD_char(7) - (15 bytes)
-ForthLoop(4) > DrawStack(4) > DrawHex(3) - (11 bytes)
-ForthLoop(4) > DrawStack(4) > DrawHex(3) > LCD_char(7) - (18 bytes)
-ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexHigh(2) - (13 bytes)
-ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexHigh(2) > LCD_char(7) - (20 bytes)
-ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexLow(2) - (13 bytes)
-ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexLow(2) > LCD_char(7) - (20 bytes)
-ForthLoop(4) > DrawStack(4) > LCD_print(4) - (12 bytes)
-ForthLoop(4) > DrawStack(4) > LCD_print(4) > LCD_char(7) - (19 bytes)
-ForthLoop(4) > DrawStack(4) > DrawFloat(7) - (15 bytes)
-ForthLoop(4) > DrawStack(4) > DrawFloat(7) > MemCopy(5) - (20 bytes)
-ForthLoop(4) > DrawStack(4) > DrawFloat(7) > LCD_char(7) - (22 bytes)
-ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitHigh(1) - (16 bytes)
-ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitHigh(1) > LCD_char(7) - (23 bytes)
-ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitLow(1) - (16 bytes)
-ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitLow(1) > LCD_char(7) - (23 bytes)
-ForthLoop(4) > DrawStack(4) > DrawString(4) - (12 bytes)
-ForthLoop(4) > DrawStack(4) > DrawString(4) > LCD_char(7) - (19 bytes)
-ForthLoop(4) > ReadLine(6) - (10 bytes)
-ForthLoop(4) > ReadLine(6) > LCD_print(4) - (14 bytes)
-ForthLoop(4) > ReadLine(6) > LCD_print(4) > LCD_char(7) - (21 bytes)
-ForthLoop(4) > ReadLine(6) > ReadKey(0) - (10 bytes)
-ForthLoop(4) > ReadLine(6) > LCD_char(7) - (17 bytes)
-ForthLoop(4) > LineWord(0) - (4 bytes)
-ForthLoop(4) > FindWord(1) - (5 bytes)
-ForthLoop(4) > WriteToken(2) - (6 bytes)
-ForthLoop(4) > WriteToken(2) > AllocMem(0) - (6 bytes)
-ForthLoop(4) > CheckData(15) - (19 bytes)
-ForthLoop(4) > CheckData(15) > BCD_Reverse(3) - (22 bytes)
-ForthLoop(4) > MemCopy(5) - (9 bytes)
-ForthLoop(4) > ErrorMsg(2) - (6 bytes)
-ForthLoop(4) > ErrorMsg(2) > LCD_print(4) - (10 bytes)
-ForthLoop(4) > ErrorMsg(2) > LCD_print(4) > LCD_char(7) - (17 bytes)
-ForthLoop(4) > ErrorMsg(2) > LCD_char(7) - (13 bytes)
-ForthLoop(4) > ErrorMsg(2) > ReadKey(0) - (6 bytes)
+main(0) > setup(0) - (0 bytes)
+main(0) > tests(0) - (0 bytes)
+main(0) > tests(0) > DebugText(2) - (2 bytes)
+main(0) > stats(0) - (0 bytes)
+main(0) > stats(0) > DebugText(2) - (2 bytes)
+main(0) > GfxSetup(0) - (0 bytes)
+main(0) > ForthLoop(4) - (4 bytes)
+main(0) > ForthLoop(4) > InitForth(0) - (4 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) - (8 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > LCD_clrscr(1) - (9 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > LCD_char(7) - (15 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) - (11 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > LCD_char(7) - (18 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexHigh(2) - (13 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexHigh(2) > LCD_char(7) - (20 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexLow(2) - (13 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexLow(2) > LCD_char(7) - (20 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > LCD_print(4) - (12 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > LCD_print(4) > LCD_char(7) - (19 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) - (15 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > MemCopy(5) - (20 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > LCD_char(7) - (22 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitHigh(1) - (16 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitHigh(1) > LCD_char(7) - (23 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitLow(1) - (16 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitLow(1) > LCD_char(7) - (23 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawString(4) - (12 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > DrawString(4) > LCD_char(7) - (19 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) - (10 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) > LCD_print(4) - (14 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) > LCD_print(4) > LCD_char(7) - (21 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) > ReadKey(0) - (10 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) > LCD_char(7) - (17 bytes)
+main(0) > ForthLoop(4) > LineWord(0) - (4 bytes)
+main(0) > ForthLoop(4) > FindWord(1) - (5 bytes)
+main(0) > ForthLoop(4) > WriteToken(2) - (6 bytes)
+main(0) > ForthLoop(4) > WriteToken(2) > AllocMem(0) - (6 bytes)
+main(0) > ForthLoop(4) > CheckData(15) - (19 bytes)
+main(0) > ForthLoop(4) > CheckData(15) > BCD_Reverse(3) - (22 bytes)
+main(0) > ForthLoop(4) > MemCopy(5) - (9 bytes)
+main(0) > ForthLoop(4) > ErrorMsg(2) - (6 bytes)
+main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_print(4) - (10 bytes)
+main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_print(4) > LCD_char(7) - (17 bytes)
+main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_char(7) - (13 bytes)
+main(0) > ForthLoop(4) > ErrorMsg(2) > ReadKey(0) - (6 bytes)
 
 Functions outside of call graph
 ===============================
@@ -291,13 +298,11 @@ CopyNew(2 bytes)
 CopyRegs(0 bytes)
 DebugBuff(0 bytes)
 DebugRans(0 bytes)
-DebugText(2 bytes)
 DictEnd(0 bytes)
 DivTest(6 bytes)
 ExecThread(0 bytes)
 ExecToken(0 bytes)
 FileInputTest(1 bytes)
-GfxSetup(0 bytes)
 HalfShift(0 bytes)
 HalfShiftBackward(0 bytes)
 HalfShiftForward(0 bytes)
@@ -330,12 +335,8 @@ halt_no_test(0 bytes)
 halt_test(2 bytes)
 inc_line(0 bytes)
 line_num(0 bytes)
-main(0 bytes)
 read2(0 bytes)
 read_file_line(0 bytes)
-setup(0 bytes)
-stats(0 bytes)
-tests(0 bytes)
 
 String literals from CALL
 =========================

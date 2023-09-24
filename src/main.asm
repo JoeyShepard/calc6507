@@ -75,7 +75,7 @@
 
 ;Main function
 ;=============
-	FUNC main
+	FUNC main BEGIN
 
 		CALL setup
 		CALL tests
@@ -83,9 +83,10 @@
 		TODO: remove
 		CALL stats
 		CALL GfxSetup
-		
+	
 		;Jump to ForthLoop function and never return
-        JMP ForthLoop
+        ;(Needs to be CALL for optimizer)
+        CALL ForthLoop
 	END
 
 ;Insertion point for string literals
