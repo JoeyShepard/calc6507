@@ -2,11 +2,6 @@
 ;=========
 	
 	;Screen
-	equ SCREEN_ADDRESS,		$4000
-	equ SCREEN_WIDTH,		256
-	equ SCREEN_HEIGHT,		128
-	equ CHAR_WIDTH,			12
-	equ CHAR_HEIGHT, 		16
 	equ CHAR_SCREEN_WIDTH, 	21
 	equ CHAR_SCREEN_HEIGHT, 8
 	
@@ -74,7 +69,6 @@
     equ WORDS_USER,         OBJ_SECONDARY
     equ WORDS_VARS,         OBJ_VAR
     equ WORDS_LAST_MODE,    WORDS_VARS+1
-    equ WORDS_Y,            SCREEN_ADDRESS+(SCREEN_HEIGHT-CHAR_HEIGHT)*SCREEN_WIDTH
     equ WORD_MSG_LEN,       8
     equ WORDS_ROWS,         7
     equ WORDS_SIZE_X,       16*CHAR_WIDTH

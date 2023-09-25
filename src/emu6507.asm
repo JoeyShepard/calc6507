@@ -1,9 +1,15 @@
 ;I/O and setup for emulator
 ;==========================
     ;Screen	
-	equ BG_COLOR,	$2A
-	equ FG_COLOR,	$0
-	
+	equ BG_COLOR,	        $2A
+	equ FG_COLOR,	        $0
+	equ SCREEN_ADDRESS,		$4000
+	equ SCREEN_WIDTH,		256
+	equ SCREEN_HEIGHT,		128
+	equ CHAR_WIDTH,			12
+	equ CHAR_HEIGHT, 		16
+    equ WORDS_Y,            SCREEN_ADDRESS+(SCREEN_HEIGHT-CHAR_HEIGHT)*SCREEN_WIDTH
+
 	;Layout
 	equ INPUT_Y,	(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*7
 	equ ERROR_X,	3*CHAR_WIDTH
