@@ -1,7 +1,6 @@
 ;Hardware specific functions
 ;===========================
 
-
 ;Constants
 ;=========
 ;LCD commands
@@ -15,9 +14,40 @@ LCD_BOTH        = 0
 LCD_LEFT        = $20
 LCD_RIGHT       = $10
 
-;LCD Constants
-LCD_WIDTH       = 128   ;Note SCREEN_WIDTH is 256 for emulator
-LCD_HEIGHT      = 64
+;Screen constants
+SCREEN_WIDTH    = 128   ;Note SCREEN_WIDTH is 256 for emulator
+SCREEN_HEIGHT   = 64
+CHAR_WIDTH      = 6
+CHAR_HEIGHT     = 8
+WORDS_Y         = 7
+
+;Keypad constants
+KEY_MASK            = $1F
+KEY_ALPHA           = 20
+KEY_SETTLE_CYCLES   = 100
+KEY_DEBOUNCE_CYCLES = 5
+
+;Data
+;====
+keypad_table:
+    FCB "ABCDE"
+    FCB ":;[],"
+    FCB "'<=>^"
+    FCB KEY_ENTER,"$\"ed"   ;e=exponent, a=left arrow
+    FCB 0,"789/"
+    FCB "d456*"             ;d=store arrow
+    FCB "@123-"
+    FCB KEY_ON,"0. +"
+
+keypad_alpha_table:
+    FCB "ABCDE"
+    FCB "FGHIJ"
+    FCB "KLMNO"
+    FCB KEY_ENTER,"PQRa"    ;a=left arrow
+    FCB 0,"STU/"
+    FCB "!VWX*"
+    FCB "?YZ_-"
+    FCB KEY_ON,"0. +"
 
 ;Macros
 ;======
@@ -48,10 +78,33 @@ LCD_Pulse MACRO
 
 ;Functions
 ;=========
+    FUNC setup
+        SEI        
+        CLD
+        ;Stack
+        LDX #$FF
+        TXS
+        ;RIOT pins
+        LDA #0 ;LCD_E low, RW=W=0, latch cp low
+        STA PORT_A
+        LDA #(LCD_E|LCD_RW|LATCH_CP)
+        STA PORT_A_DIR
+        LDA #$FF
+        STA PORT_B_DIR
+        ;Banking
+        CALL SetBank, #BANK1
+        ;Alpha keys
+        LDA #0
+        STA keys_alpha
+
+        JMP main.setup_return
+    END
+
     ;CS in A
     ;Data in Y
     FUNC LCD_Data
-        EOR #LCD_DI|LCD_RST
+        ORA #LCD_DI|LCD_RST
+        ORA sys_bank
         STA PORT_B
         LatchLoad
 
@@ -62,7 +115,8 @@ LCD_Pulse MACRO
     ;CS in A
     ;Data in Y
     FUNC LCD_Instruction
-        EOR #LCD_RST ;DI=I=0
+        ORA #LCD_RST ;DI=I=0
+        ORA sys_bank
         STA PORT_B
         LatchLoad
 
@@ -81,7 +135,7 @@ LCD_Pulse MACRO
     ;Col in A
     FUNC LCD_Col
         STA screen_ptr
-        CMP #LCD_WIDTH/2
+        CMP #SCREEN_WIDTH/2
         BCS .right_side
             ;Left LCD
             ORA #LCD_COL
@@ -96,7 +150,7 @@ LCD_Pulse MACRO
         .right_side:
             ;Right LCD
             SEC
-            SBC #LCD_WIDTH/2
+            SBC #SCREEN_WIDTH/2
             ORA #LCD_COL
             TAY
             LDA #LCD_RIGHT
@@ -107,20 +161,15 @@ LCD_Pulse MACRO
     END
 
     FUNC LCD_Setup
-        ;Set up pins
-        LDA #0 ;LCD_E low, RW=W=0, latch cp low
-        STA PORT_A
-        LDA #(LCD_E|LCD_RW|LATCH_CP)
-        STA PORT_A_DIR
-        LDA #$FF
-        STA PORT_B_DIR
 
         ;Reset LCD
         LDA #0 ;Bank=0, DI=I=0, both CS, RST=0
+        ORA sys_bank
         STA PORT_B
         LatchLoad
         delay   ;Necessary?
         LDA #LCD_RST ;Bank=0, DI=I=0, both CS, RST=1
+        ORA sys_bank
         STA PORT_B
         LatchLoad
         delay   ;Necessary?
@@ -229,7 +278,7 @@ LCD_Pulse MACRO
             CALL LCD_Data
             INC screen_ptr
             LDA screen_ptr
-            CMP #SCREEN_HEIGHT/2
+            CMP #SCREEN_WIDTH/2
             BNE .loop_inner
             ;Next byte will be on second half of LCD
             LSR screen_ptr+1 ;LCD_LEFT > LCD_RIGHT, ie $20 > $10
@@ -256,55 +305,125 @@ LCD_Pulse MACRO
 		.done:
     END
 
-    ;Old - known working. does not rely on optimizer.
-    LCD_Test1:
-        LDA #0
-        STA 0
-        .row_loop:
-            LDA 0
-            ORA #LCD_ROW
-            TAY
-            LDA #LCD_BOTH
-            JSR LCD_Instruction
-            LDX #64
+    FUNC ReadKey
+        VARS
+            BYTE mask
+            BYTE row_count,col_count
+            BYTE key,cycles
+        END
+       
+        MOV #0, key
+        .loop_outer:
+            MOV #7, row_count
+            MOV #$7F, mask
             .loop:
-                CLC
-                TXA
-                ADC 0
-                TAY
-                LDA #LCD_BOTH
-                JSR LCD_Data
-                DEX
+                LDA mask
+                STA PORT_B
+
+                ;Worked fine then became unreliable. Added NOPS. No effect.
+                ;Added delay loop instead. RIOT needs time to sink pull-up?
+                LDY #KEY_SETTLE_CYCLES
+                .delay_loop:
+                    DEY
+                    BNE .delay_loop
+
+                LDA PORT_A
+                AND #KEY_MASK
+                CMP #KEY_MASK
+                BEQ .continue
+                    ;Key found
+                    LDY #4
+                    STY col_count
+                    .key_loop:
+                        LSR
+                        BCS .no_match
+                            ;Found column
+                            LDA row_count
+                            ASL
+                            ASL
+                            CLC
+                            ADC row_count
+                            ADC col_count
+                            ADC #1
+                            ;Debounce
+                            STA key
+                            MOV #0, cycles
+                            JMP .loop_outer
+                        .no_match:
+                        DEC col_count
+                        JMP .key_loop
+                .continue:
+                DEC row_count
+                SEC
+                ROR mask
+                LDA mask
+                CMP #$FF
                 BNE .loop
-            INC 0
-            LDA 0
-            CMP #8
-            BNE .row_loop
+            ;No key held down
+            LDA key
+            BNE .debounce
+                ;No key found, return
+                LDA #0
+                RTS
+            .debounce:
+            INC cycles
+            LDA cycles
+            CMP #KEY_DEBOUNCE_CYCLES
+            BNE .loop_outer
 
-        RTS
+        ;Key debounced
+        LDY key
+        DEY
+        CPY #KEY_ALPHA
+        BNE .not_alpha
+            ;Alpha pressed - invert state but return no key code
+            LDA keys_alpha
+            EOR #$FF
+            STA keys_alpha
+            LDA #0
+            RTS
+        .not_alpha:
+        ;Return alpha or non-alpha key
+        LDA keys_alpha
+        BNE .alpha_key
+            ;Non-alpha key
+            LDA keypad_table,Y
+            RTS
+        .alpha_key:
+            ;Alpha key
+            LDA keypad_alpha_table,Y
+            RTS
+    END
 
-    LCD_Test2:
-        LDA #0
-        STA 0
-        LDA #5
-        STA 1
-        .loop:
-            LDY 0
-            LDA font_table+(65-32)*5,Y
-            TAY
-            LDA #LCD_LEFT
-            CALL LCD_Data
+    FUNC Delay1s
+        VARS
+            BYTE counter
+        END
 
-            DEC 1
-            BNE .no_space
-                LDY #0
-                LDA #LCD_LEFT
-                CALL LCD_Data
-                LDA #5
-                STA 1
-            .no_space:
+        LDY #0
+        STY counter
+        .delay_loop:
+            NOP             ;2 cycles
+            NOP             ;2 cycles
+            NOP             ;2 cycles
+            NOP             ;2 cycles
+            NOP             ;2 cycles
+            DEY             ;2 cycles
+            BNE .delay_loop ;3 cycles
+            DEC counter
+            BNE .delay_loop
+    END
 
-            INC 0
-            LDA 0
-            CMP #30
-            BNE .loop
+    ;Better to make this macro but can't access sys_bank from macro
+    FUNC SetBank
+        ARGS
+            BYTE bank
+        END
+        
+        LDA bank
+        STA sys_bank
+        ORA #LCD_RST
+        STA PORT_B
+        LatchLoad
+    END
+

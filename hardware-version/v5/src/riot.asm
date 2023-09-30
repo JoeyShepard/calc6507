@@ -17,9 +17,9 @@ LCD_E       set $40
 LATCH_CP    set $80
 
 ;Latch - driven by PORT B
-BANK0       set 1
-BANK1       set 2
-BANK2       set 4
+LATCH_BANK0 set 1
+LATCH_BANK1 set 2
+LATCH_BANK2 set 4
 LCD_DI      set 8
 LCD_CS1     set $10
 LCD_CS2     set $20

@@ -15,7 +15,11 @@
 	;For macros
 	WORD dummy
 	WORD ret_val
-	
+
+    ;System
+    BYTE keys_alpha ;Only used on hardware version!
+    BYTE sys_bank   ;Only used on hardware version!
+
 	;Temp address for variables
 	WORD ret_address
 	

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 starttime=$(date +"%T")
-echo "[$starttime] Updating files..."
+echo "[$starttime]"
+echo "Updating files..."
 ./update-files.sh
 
 echo "Running optimizer..."

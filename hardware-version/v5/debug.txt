@@ -4,93 +4,112 @@ Line numbers
 9: include macros.asm
 83: include riot.asm
 114: include const.asm
-399: include zp.asm
-407: GLOBAL BYTE null
-415: GLOBAL WORD dummy
-417: GLOBAL WORD ret_val
-421: GLOBAL WORD ret_address
-425: GLOBAL WORD screen_ptr
-429: GLOBAL WORD dict_ptr
-431: GLOBAL WORD new_dict_ptr
-434: GLOBAL WORD dict_save
-436: GLOBAL WORD exec_ptr
-439: GLOBAL WORD obj_address
-443: GLOBAL WORD math_ptr1
-445: GLOBAL WORD math_ptr2
-471: include globals.asm
-487: GLOBAL BYTE font_inverted
-491: GLOBAL BYTE stack_count
-493: GLOBAL BYTE mode
-497: GLOBAL WORD test_count
-517: GLOBAL BYTE stack_X
-523: GLOBAL BYTE math_lo
-525: GLOBAL BYTE math_hi
-527: GLOBAL BYTE math_a
-529: GLOBAL BYTE math_b
-531: GLOBAL BYTE math_c
-534: GLOBAL BYTE math_d
-537: GLOBAL BYTE math_signs
-539: GLOBAL BYTE math_sticky
-541: GLOBAL BYTE math_max
-544: GLOBAL BYTE math_fill
-549: GLOBAL BYTE shift_counter
-551: GLOBAL BYTE CORDIC_sign
-553: GLOBAL BYTE CORDIC_halve
-555: GLOBAL BYTE CORDIC_loop_inner
-557: GLOBAL BYTE CORDIC_loop_outer
-559: GLOBAL BYTE CORDIC_shift_count
-561: GLOBAL BYTE CORDIC_sign_temp
-563: GLOBAL BYTE CORDIC_end_sign
-565: GLOBAL WORD CORDIC_comparator
-575: GLOBAL BYTE aux_stack_ptr
-577: GLOBAL BYTE aux_stack_count
-579: GLOBAL BYTE aux_word_counter
-613: include lcd.asm
-662: FUNC LCD_Data
-675: FUNC LCD_Instruction
-687: FUNC LCD_Row
-697: FUNC LCD_Col
-732: FUNC LCD_Setup
-776: FUNC LCD_clrscr
+384: include const_hardware.asm
+419: include zp.asm
+427: GLOBAL BYTE null
+435: GLOBAL WORD dummy
+437: GLOBAL WORD ret_val
+441: GLOBAL BYTE keys_alpha
+443: GLOBAL BYTE sys_bank
+447: GLOBAL WORD ret_address
+451: GLOBAL WORD screen_ptr
+455: GLOBAL WORD dict_ptr
+457: GLOBAL WORD new_dict_ptr
+460: GLOBAL WORD dict_save
+462: GLOBAL WORD exec_ptr
+465: GLOBAL WORD obj_address
+469: GLOBAL WORD math_ptr1
+471: GLOBAL WORD math_ptr2
+497: include globals.asm
+513: GLOBAL BYTE font_inverted
+517: GLOBAL BYTE stack_count
+519: GLOBAL BYTE mode
+523: GLOBAL WORD test_count
+543: GLOBAL BYTE stack_X
+549: GLOBAL BYTE math_lo
+551: GLOBAL BYTE math_hi
+553: GLOBAL BYTE math_a
+555: GLOBAL BYTE math_b
+557: GLOBAL BYTE math_c
+560: GLOBAL BYTE math_d
+563: GLOBAL BYTE math_signs
+565: GLOBAL BYTE math_sticky
+567: GLOBAL BYTE math_max
+570: GLOBAL BYTE math_fill
+575: GLOBAL BYTE shift_counter
+577: GLOBAL BYTE CORDIC_sign
+579: GLOBAL BYTE CORDIC_halve
+581: GLOBAL BYTE CORDIC_loop_inner
+583: GLOBAL BYTE CORDIC_loop_outer
+585: GLOBAL BYTE CORDIC_shift_count
+587: GLOBAL BYTE CORDIC_sign_temp
+589: GLOBAL BYTE CORDIC_end_sign
+591: GLOBAL WORD CORDIC_comparator
+601: GLOBAL BYTE aux_stack_ptr
+603: GLOBAL BYTE aux_stack_count
+605: GLOBAL BYTE aux_word_counter
+666: include hardware.asm
+747: FUNC setup
+777: FUNC LCD_Data
+791: FUNC LCD_Instruction
+804: FUNC LCD_Row
+814: FUNC LCD_Col
+849: FUNC LCD_Setup
+888: FUNC LCD_clrscr
       VARS: BYTE row_count, BYTE col_count
       2 bytes used
-811: FUNC LCD_char
+923: FUNC LCD_char
       ARGS: BYTE c_out, WORD pixel_ptr, BYTE char_counter
       4 bytes used
-883: FUNC LCD_print
+995: FUNC LCD_print
       ARGS: STRING source, BYTE index, BYTE arg
       4 bytes used
-966: include font_5x8_flipped.asm
-1165: include font_custom_flipped.asm
-1200: FUNC main BEGIN
+1018: FUNC ReadKey
+      VARS: BYTE mask, BYTE row_count, BYTE col_count, BYTE key, BYTE cycles
+      5 bytes used
+1110: FUNC Delay1s
+      VARS: BYTE counter
+      1 byte used
+1130: FUNC SetBank
+      ARGS: BYTE bank
+      1 byte used
+1146: include font_5x8_flipped.asm
+1345: include font_custom_flipped.asm
+1383: FUNC main BEGIN
+      VARS: BYTE arg
+      1 byte used
 
 Call graph
 ==========
-main(0) > LCD_Setup(0) - (0 bytes)
-main(0) > LCD_Setup(0) > LCD_Instruction(0) - (0 bytes)
-main(0) > LCD_Setup(0) > LCD_Row(0) - (0 bytes)
-main(0) > LCD_Setup(0) > LCD_Col(0) - (0 bytes)
-main(0) > LCD_Setup(0) > LCD_Col(0) > LCD_Instruction(0) - (0 bytes)
-main(0) > LCD_clrscr(2) - (2 bytes)
-main(0) > LCD_clrscr(2) > LCD_Row(0) - (2 bytes)
-main(0) > LCD_clrscr(2) > LCD_Data(0) - (2 bytes)
-main(0) > LCD_clrscr(2) > LCD_Col(0) - (2 bytes)
-main(0) > LCD_clrscr(2) > LCD_Col(0) > LCD_Instruction(0) - (2 bytes)
-main(0) > LCD_char(4) - (4 bytes)
-main(0) > LCD_char(4) > LCD_Data(0) - (4 bytes)
-main(0) > LCD_Row(0) - (0 bytes)
-main(0) > LCD_print(4) - (4 bytes)
-main(0) > LCD_print(4) > LCD_char(4) - (8 bytes)
-main(0) > LCD_print(4) > LCD_char(4) > LCD_Data(0) - (8 bytes)
-main(0) > LCD_print(4) > LCD_Data(0) - (4 bytes)
-main(0) > LCD_Col(0) - (0 bytes)
-main(0) > LCD_Col(0) > LCD_Instruction(0) - (0 bytes)
+main(1) > setup(0) - (1 bytes)
+main(1) > setup(0) > SetBank(1) - (2 bytes)
+main(1) > LCD_Setup(0) - (1 bytes)
+main(1) > LCD_Setup(0) > LCD_Instruction(0) - (1 bytes)
+main(1) > LCD_Setup(0) > LCD_Row(0) - (1 bytes)
+main(1) > LCD_Setup(0) > LCD_Col(0) - (1 bytes)
+main(1) > LCD_Setup(0) > LCD_Col(0) > LCD_Instruction(0) - (1 bytes)
+main(1) > LCD_clrscr(2) - (3 bytes)
+main(1) > LCD_clrscr(2) > LCD_Row(0) - (3 bytes)
+main(1) > LCD_clrscr(2) > LCD_Data(0) - (3 bytes)
+main(1) > LCD_clrscr(2) > LCD_Col(0) - (3 bytes)
+main(1) > LCD_clrscr(2) > LCD_Col(0) > LCD_Instruction(0) - (3 bytes)
+main(1) > ReadKey(5) - (6 bytes)
+main(1) > LCD_print(4) - (5 bytes)
+main(1) > LCD_print(4) > LCD_char(4) - (9 bytes)
+main(1) > LCD_print(4) > LCD_char(4) > LCD_Data(0) - (9 bytes)
+main(1) > LCD_Col(0) - (1 bytes)
+main(1) > LCD_Col(0) > LCD_Instruction(0) - (1 bytes)
+main(1) > LCD_Row(0) - (1 bytes)
+main(1) > LCD_char(4) - (5 bytes)
+main(1) > LCD_char(4) > LCD_Data(0) - (5 bytes)
+main(1) > SetBank(1) - (2 bytes)
 
 Functions outside of call graph
 ===============================
+Delay1s(1 bytes)
 
 String literals from CALL
 =========================
-_string_literal00001: FCB "HELLO, WORLD!",0
+_string_literal00001: FCB "TESTING",0
 
 
