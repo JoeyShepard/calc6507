@@ -11,71 +11,78 @@ Line numbers
 437: GLOBAL WORD ret_val
 441: GLOBAL BYTE keys_alpha
 443: GLOBAL BYTE sys_bank
-447: GLOBAL WORD ret_address
-451: GLOBAL WORD screen_ptr
-455: GLOBAL WORD dict_ptr
-457: GLOBAL WORD new_dict_ptr
-460: GLOBAL WORD dict_save
-462: GLOBAL WORD exec_ptr
-465: GLOBAL WORD obj_address
-469: GLOBAL WORD math_ptr1
-471: GLOBAL WORD math_ptr2
-497: include globals.asm
-513: GLOBAL BYTE font_inverted
-517: GLOBAL BYTE stack_count
-519: GLOBAL BYTE mode
-523: GLOBAL WORD test_count
-543: GLOBAL BYTE stack_X
-549: GLOBAL BYTE math_lo
-551: GLOBAL BYTE math_hi
-553: GLOBAL BYTE math_a
-555: GLOBAL BYTE math_b
-557: GLOBAL BYTE math_c
-560: GLOBAL BYTE math_d
-563: GLOBAL BYTE math_signs
-565: GLOBAL BYTE math_sticky
-567: GLOBAL BYTE math_max
-570: GLOBAL BYTE math_fill
-575: GLOBAL BYTE shift_counter
-577: GLOBAL BYTE CORDIC_sign
-579: GLOBAL BYTE CORDIC_halve
-581: GLOBAL BYTE CORDIC_loop_inner
-583: GLOBAL BYTE CORDIC_loop_outer
-585: GLOBAL BYTE CORDIC_shift_count
-587: GLOBAL BYTE CORDIC_sign_temp
-589: GLOBAL BYTE CORDIC_end_sign
-591: GLOBAL WORD CORDIC_comparator
-601: GLOBAL BYTE aux_stack_ptr
-603: GLOBAL BYTE aux_stack_count
-605: GLOBAL BYTE aux_word_counter
-666: include hardware.asm
-747: FUNC setup
-777: FUNC LCD_Data
-791: FUNC LCD_Instruction
-804: FUNC LCD_Row
-814: FUNC LCD_Col
-849: FUNC LCD_Setup
-888: FUNC LCD_clrscr
+445: GLOBAL BYTE bank_temp_A
+447: GLOBAL BYTE bank_temp_Y
+451: GLOBAL WORD ret_address
+455: GLOBAL WORD screen_ptr
+459: GLOBAL WORD dict_ptr
+461: GLOBAL WORD new_dict_ptr
+464: GLOBAL WORD dict_save
+466: GLOBAL WORD exec_ptr
+469: GLOBAL WORD obj_address
+473: GLOBAL WORD math_ptr1
+475: GLOBAL WORD math_ptr2
+501: include globals.asm
+517: GLOBAL BYTE font_inverted
+521: GLOBAL BYTE stack_count
+523: GLOBAL BYTE mode
+527: GLOBAL WORD test_count
+547: GLOBAL BYTE stack_X
+553: GLOBAL BYTE math_lo
+555: GLOBAL BYTE math_hi
+557: GLOBAL BYTE math_a
+559: GLOBAL BYTE math_b
+561: GLOBAL BYTE math_c
+564: GLOBAL BYTE math_d
+567: GLOBAL BYTE math_signs
+569: GLOBAL BYTE math_sticky
+571: GLOBAL BYTE math_max
+574: GLOBAL BYTE math_fill
+579: GLOBAL BYTE shift_counter
+581: GLOBAL BYTE CORDIC_sign
+583: GLOBAL BYTE CORDIC_halve
+585: GLOBAL BYTE CORDIC_loop_inner
+587: GLOBAL BYTE CORDIC_loop_outer
+589: GLOBAL BYTE CORDIC_shift_count
+591: GLOBAL BYTE CORDIC_sign_temp
+593: GLOBAL BYTE CORDIC_end_sign
+595: GLOBAL WORD CORDIC_comparator
+605: GLOBAL BYTE aux_stack_ptr
+607: GLOBAL BYTE aux_stack_count
+609: GLOBAL BYTE aux_word_counter
+646: FUNC opt_test1
+661: FUNC opt_test2
+676: FUNC opt_test3
+694: FUNC opt_test4
+711: include hardware.asm
+792: FUNC setup
+823: FUNC LCD_Data
+838: FUNC LCD_Instruction
+852: FUNC LCD_Row
+863: FUNC LCD_Col
+899: FUNC LCD_Setup
+939: FUNC LCD_clrscr
       VARS: BYTE row_count, BYTE col_count
       2 bytes used
-923: FUNC LCD_char
+975: FUNC LCD_char
       ARGS: BYTE c_out, WORD pixel_ptr, BYTE char_counter
       4 bytes used
-995: FUNC LCD_print
+1048: FUNC LCD_print
       ARGS: STRING source, BYTE index, BYTE arg
       4 bytes used
-1018: FUNC ReadKey
+1072: FUNC ReadKey
       VARS: BYTE mask, BYTE row_count, BYTE col_count, BYTE key, BYTE cycles
       5 bytes used
-1110: FUNC Delay1s
+1165: FUNC Delay1s
       VARS: BYTE counter
       1 byte used
-1130: FUNC SetBank
+1186: FUNC SetBank
       ARGS: BYTE bank
       1 byte used
-1146: include font_5x8_flipped.asm
-1345: include font_custom_flipped.asm
-1383: FUNC main BEGIN
+1202: include banking.asm
+1381: include font_5x8_flipped.asm
+1580: include font_custom_flipped.asm
+1618: FUNC main BEGIN
       VARS: BYTE arg
       1 byte used
 
@@ -93,6 +100,10 @@ main(1) > LCD_clrscr(2) > LCD_Row(0) - (3 bytes)
 main(1) > LCD_clrscr(2) > LCD_Data(0) - (3 bytes)
 main(1) > LCD_clrscr(2) > LCD_Col(0) - (3 bytes)
 main(1) > LCD_clrscr(2) > LCD_Col(0) > LCD_Instruction(0) - (3 bytes)
+main(1) > opt_test1(0) - (1 bytes)
+main(1) > opt_test2(0) - (1 bytes)
+main(1) > opt_test3(0) - (1 bytes)
+main(1) > opt_test3(0) > opt_test4(0) - (1 bytes)
 main(1) > ReadKey(5) - (6 bytes)
 main(1) > LCD_print(4) - (5 bytes)
 main(1) > LCD_print(4) > LCD_char(4) - (9 bytes)
@@ -112,4 +123,10 @@ String literals from CALL
 =========================
 _string_literal00001: FCB "TESTING",0
 
+
+Banked functions
+================
+opt_test4 > __opt_test4_BANK_JUMP
+opt_test2 > __opt_test2_BANK_JUMP
+opt_test3 > __opt_test3_BANK_JUMP
 

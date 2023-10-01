@@ -31,14 +31,11 @@ then
     exit 1
 fi
 ./remove-escape.py asm.txt
-echo
 
-echo Generating hex file...
+echo Generating output files...
 p2hex processed.p -F Intel -l 32 -r 0x0000-0xFFFF > hex.txt
 cp processed.hex hardware.hex
-
 #EEPROM writing software started erroring with hex so switched to bin
-echo Generating bin file...
 p2bin processed.p -r 0-0x7FFF > bin.txt
 cp processed.bin hardware.bin
 

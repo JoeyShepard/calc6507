@@ -76,6 +76,8 @@ string_index=1                      #ID number assigned for string literals from
 func_name_inserted=False            #Whether label for FUNC name has been inserted into text
 assignments=[]                      #List of zero page assignments made by optimizer
 regs_counter=0                      #Counter for floating point registers reused for temp mem
+bank_funcs=[]                       #List of functions reached by bank jump
+banking_enabled=False               #Whether BCALL should generate banked call or normal call
 
 
 #Constants
@@ -84,6 +86,7 @@ TYPE_TEXT=0                 #Constants for final_text - source text block
 TYPE_CALL=1                 #Constants for final_text - call to be filled in
 TYPE_VARS=2                 #Constants for final_text - function args and vars declaration
 TYPE_STRINGS=3              #Constants for final_text - string literals from CALL
+TYPE_BCALL=4                #Constants for final_text - banked call to be filled in
 
 #Process file lines until last line of last included file
 while running:
@@ -159,7 +162,7 @@ while running:
             print_line=False
             first_word="" if len(line_objs)==0 else line_objs[0]
             #These words work the same in all modes
-            if first_word in ["include","LOCALS_BEGIN","LOCALS_END"]:
+            if first_word in ["include","LOCALS_BEGIN","LOCALS_END","BANKING"]:
                 if len(line_objs)!=2:
                     error_exit(f"bad argument to {first_word} - {line.lstrip()}",error_obj)
             if first_word=="include":
@@ -174,7 +177,7 @@ while running:
             elif first_word[:5] in ["TODO:","DONE:"]:
                 line=";"+line
                 print_line=True
-            elif first_word=="CALL":
+            elif first_word in ["CALL","BCALL"]:
                 #Only useful if within FUNC. No harm if outside of FUNC.
                 if line_objs[1] not in calls_list:
                     calls_list+=[line_objs[1]]
@@ -189,7 +192,10 @@ while running:
                         func_name_inserted=True
                     final_text+=[[TYPE_TEXT,func_temp]]
                     func_temp=""
-                final_text+=[[TYPE_CALL,line+"\n",line_objs[:]]]
+                if first_word=="CALL":
+                    final_text+=[[TYPE_CALL,line+"\n",line_objs[:]]]
+                elif first_word=="BCALL":
+                    final_text+=[[TYPE_BCALL,line+"\n",line_objs[:]]]
             elif first_word in ["LOCALS_BEGIN","LOCALS_END"]:
                 num=line_objs[1]
                 if num.isnumeric():
@@ -205,6 +211,13 @@ while running:
                     locals_begin=num
                 else:
                     locals_end=num
+            elif first_word=="BANKING":
+                if line_objs[1]=="ON":
+                    banking_enabled=True
+                elif line_objs[1]=="OFF":
+                    banking_enabled=False
+                else:
+                    error_exit(f"invalid value for {first_word} - {num}",error_obj)
             #These words depend on state machine state
             else:
                 #Check argument counts regardless of input state machine
@@ -249,7 +262,6 @@ while running:
                         #file_output+=f"{padding}{line_objs[1]}:\n"
                         
                         final_text+=[[TYPE_TEXT,file_output]]
-                        file_output=""
                         func_temp=""
                         file_state="FUNC"
                         func_name=line_objs[1]
@@ -528,7 +540,7 @@ for i,text_block in enumerate(final_text):
     elif text_block[0]==TYPE_STRINGS:
         output_f.write(string_assignments)
         string_assignments_written=True
-    elif text_block[0]==TYPE_CALL:
+    elif text_block[0] in [TYPE_CALL,TYPE_BCALL]:
         #Formulate CALL statement - do here at end after all functions read in
         func=text_block[2][1]
         func_args=func_dict[func]["ARGS"]
@@ -601,7 +613,12 @@ for i,text_block in enumerate(final_text):
             comma=not comma
         if comma==False:
             error_exit(f"missing value in CALL - {text_block[1].lstrip()}",error_obj)
-        call_text+=f"\tJSR {func}\n\n"
+        if text_block[0]==TYPE_CALL or (TYPE_BCALL and banking_enabled==False):
+            call_text+=f"\tJSR {func}\n\n"
+        elif text_block[0]==TYPE_BCALL and banking_enabled:
+            call_text+=f"\tJSR __{func}_BANK_JUMP\n\n"
+            if func not in bank_funcs:
+                bank_funcs+=[func]
         #Replace TYPE_CALL block in final_text with generated text
         final_text[i]=[TYPE_TEXT,call_text]
         output_f.write(call_text)        
@@ -651,6 +668,13 @@ debug_f.write("String literals from CALL\n")
 debug_f.write("=========================\n")
 for assignment in string_assignments.split("\n"):
     debug_f.write(assignment.lstrip()+"\n")
+debug_f.write("\n")
+
+#Banked functions
+debug_f.write("Banked functions\n")
+debug_f.write("================\n")
+for func in bank_funcs:
+    debug_f.write(f"{func} > __{func}_BANK_JUMP\n")
 debug_f.write("\n")
 
 #Close output and debug files
