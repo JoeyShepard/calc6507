@@ -55,9 +55,9 @@ Align4 MACRO num
    
     ;v3
     MESSAGE "Fixed ROM size: \{code_end-FIXED_EEPROM} of \{BANKED_EEPROM-FIXED_EEPROM} bytes"
+    MESSAGE "- Banking code: \{banking_end-banking_begin} bytes (7+1+2 bytes per function)"
     MESSAGE "Banks 1:\{BANK1_END-BANKED_EEPROM} | 2:\{BANK2_END-BANKED_EEPROM} | 3:\{BANK3_END-BANKED_EEPROM} | 4:\{BANK4_END-BANKED_EEPROM} of 4096 bytes"
     MESSAGE "Size check: \{size_check_end-size_check_begin} bytes"
-
 
 	;Tell script that prints assembler output to stop outputting
 	;Eliminates double output (because of multiple passes???)

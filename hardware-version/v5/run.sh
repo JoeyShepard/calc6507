@@ -2,10 +2,10 @@
 
 starttime=$(date +"%T")
 echo "[$starttime]"
-echo "Updating files..."
+#echo "Updating files..."
 ./update-files.sh
 
-echo "Running optimizer..."
+#echo "Running optimizer... "
 cd src
 ../opt-mini.py main.asm
 mv processed.asm ../
@@ -14,7 +14,7 @@ mv debug.html ../
 cd ..
 cat src/mem_template.asm >> processed.asm
 
-echo Assembling...
+#echo "Assembling..."
 #P - write macro processor output
 #G - produce code
 #U - case-sensitive operation

@@ -7,8 +7,8 @@
 ;=============================
 	include macros.asm
     include riot.asm
-    include const.asm
-    include const_hardware.asm
+    include const.asm           ;Shared between both versions
+    include const_hardware.asm  ;Hardware version only
 
 ;Variables in zero page
 ;======================
@@ -71,27 +71,6 @@
         FUNC opt_test3
             LDA #'W'
             BCALL opt_test4
-
-            ;A=FI=88='X' - good
-
-            STA R0
-            LSR
-            LSR
-            LSR
-            LSR
-            CLC
-            ADC #'A'
-            STA arg
-            CALL LCD_char, arg
-            LDA R0
-            AND #$F
-            CLC
-            ADC #'A'
-            STA arg
-            CALL LCD_char, arg
-            LDA #'2'
-            STA arg
-            CALL LCD_char, arg
         END
 
     EQU BANK3_END,*
@@ -102,33 +81,8 @@
     PHASE BANKED_EEPROM
 
         FUNC opt_test4
-
-            ;A=AC=2 but should be 'W'
-
-            STA R0
-            LSR
-            LSR
-            LSR
-            LSR
             CLC
-            ADC #'A'
-            STA arg
-            CALL LCD_char, arg
-            LDA R0
-            AND #$F
-            CLC
-            ADC #'A'
-            STA arg
-            CALL LCD_char, arg
-            LDA #'1'
-            STA arg
-            CALL LCD_char, arg
-            
-            ;CLC
-            ;ADC #1
-
-            LDA #'X'
-
+            ADC #1
         END
 
     EQU BANK4_END,*
@@ -139,7 +93,9 @@
     size_check_begin:
     
     include hardware.asm
+    banking_begin:
     include banking.asm
+    banking_end:
     font_table:
     include font_5x8_flipped.asm
     include font_custom_flipped.asm
@@ -200,27 +156,9 @@
             CALL LCD_char, arg
 
             BCALL opt_test3 ;Should switch banks twice, call twice, then return to here
+            STA arg
+            CALL LCD_char, arg
 
-            ;A=DA=48='0' but did not set expected value
-
-            STA R0
-            LSR
-            LSR
-            LSR
-            LSR
-            CLC
-            ADC #'A'
-            STA arg
-            CALL LCD_char, arg
-            LDA R0
-            AND #$F
-            CLC
-            ADC #'A'
-            STA arg
-            CALL LCD_char, arg
-            LDA #'3'
-            STA arg
-            CALL LCD_char, arg
 
             JMP .loop
 

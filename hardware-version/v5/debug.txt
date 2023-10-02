@@ -5,84 +5,84 @@ Line numbers
 83: include riot.asm
 114: include const.asm
 384: include const_hardware.asm
-419: include zp.asm
-427: GLOBAL BYTE null
-435: GLOBAL WORD dummy
-437: GLOBAL WORD ret_val
-441: GLOBAL BYTE keys_alpha
-443: GLOBAL BYTE sys_bank
-445: GLOBAL BYTE bank_temp_A
-447: GLOBAL BYTE bank_temp_Y
-451: GLOBAL WORD ret_address
-455: GLOBAL WORD screen_ptr
-459: GLOBAL WORD dict_ptr
-461: GLOBAL WORD new_dict_ptr
-464: GLOBAL WORD dict_save
-466: GLOBAL WORD exec_ptr
-469: GLOBAL WORD obj_address
-473: GLOBAL WORD math_ptr1
-475: GLOBAL WORD math_ptr2
-501: include globals.asm
-517: GLOBAL BYTE font_inverted
-521: GLOBAL BYTE stack_count
-523: GLOBAL BYTE mode
-527: GLOBAL WORD test_count
-547: GLOBAL BYTE stack_X
-553: GLOBAL BYTE math_lo
-555: GLOBAL BYTE math_hi
-557: GLOBAL BYTE math_a
-559: GLOBAL BYTE math_b
-561: GLOBAL BYTE math_c
-564: GLOBAL BYTE math_d
-567: GLOBAL BYTE math_signs
-569: GLOBAL BYTE math_sticky
-571: GLOBAL BYTE math_max
-574: GLOBAL BYTE math_fill
-579: GLOBAL BYTE shift_counter
-581: GLOBAL BYTE CORDIC_sign
-583: GLOBAL BYTE CORDIC_halve
-585: GLOBAL BYTE CORDIC_loop_inner
-587: GLOBAL BYTE CORDIC_loop_outer
-589: GLOBAL BYTE CORDIC_shift_count
-591: GLOBAL BYTE CORDIC_sign_temp
-593: GLOBAL BYTE CORDIC_end_sign
-595: GLOBAL WORD CORDIC_comparator
-605: GLOBAL BYTE aux_stack_ptr
-607: GLOBAL BYTE aux_stack_count
-609: GLOBAL BYTE aux_word_counter
-644: FUNC opt_test1
-658: FUNC opt_test2
-672: FUNC opt_test3
-722: FUNC opt_test4
-776: include hardware.asm
-857: FUNC setup
-888: FUNC LCD_Data
-903: FUNC LCD_Instruction
-917: FUNC LCD_Row
-928: FUNC LCD_Col
-964: FUNC LCD_Setup
-1004: FUNC LCD_clrscr
+472: include zp.asm
+480: GLOBAL BYTE null
+488: GLOBAL WORD dummy
+490: GLOBAL WORD ret_val
+494: GLOBAL BYTE keys_alpha
+496: GLOBAL BYTE sys_bank
+498: GLOBAL BYTE bank_temp_A
+500: GLOBAL BYTE bank_temp_Y
+504: GLOBAL WORD ret_address
+508: GLOBAL WORD screen_ptr
+512: GLOBAL WORD dict_ptr
+514: GLOBAL WORD new_dict_ptr
+517: GLOBAL WORD dict_save
+519: GLOBAL WORD exec_ptr
+522: GLOBAL WORD obj_address
+526: GLOBAL WORD math_ptr1
+528: GLOBAL WORD math_ptr2
+554: include globals.asm
+570: GLOBAL BYTE font_inverted
+574: GLOBAL BYTE stack_count
+576: GLOBAL BYTE mode
+580: GLOBAL WORD test_count
+600: GLOBAL BYTE stack_X
+606: GLOBAL BYTE math_lo
+608: GLOBAL BYTE math_hi
+610: GLOBAL BYTE math_a
+612: GLOBAL BYTE math_b
+614: GLOBAL BYTE math_c
+617: GLOBAL BYTE math_d
+620: GLOBAL BYTE math_signs
+622: GLOBAL BYTE math_sticky
+624: GLOBAL BYTE math_max
+627: GLOBAL BYTE math_fill
+632: GLOBAL BYTE shift_counter
+634: GLOBAL BYTE CORDIC_sign
+636: GLOBAL BYTE CORDIC_halve
+638: GLOBAL BYTE CORDIC_loop_inner
+640: GLOBAL BYTE CORDIC_loop_outer
+642: GLOBAL BYTE CORDIC_shift_count
+644: GLOBAL BYTE CORDIC_sign_temp
+646: GLOBAL BYTE CORDIC_end_sign
+648: GLOBAL WORD CORDIC_comparator
+658: GLOBAL BYTE aux_stack_ptr
+660: GLOBAL BYTE aux_stack_count
+662: GLOBAL BYTE aux_word_counter
+697: FUNC opt_test1
+711: FUNC opt_test2
+725: FUNC opt_test3
+742: FUNC opt_test4
+759: include hardware.asm
+787: FUNC setup
+819: FUNC LCD_Data
+834: FUNC LCD_Instruction
+848: FUNC LCD_Row
+859: FUNC LCD_Col
+895: FUNC LCD_Setup
+935: FUNC LCD_clrscr
       VARS: BYTE row_count, BYTE col_count
       2 bytes used
-1040: FUNC LCD_char
+971: FUNC LCD_char
       ARGS: BYTE c_out, WORD pixel_ptr, BYTE char_counter
       4 bytes used
-1113: FUNC LCD_print
+1044: FUNC LCD_print
       ARGS: STRING source, BYTE index, BYTE arg
       4 bytes used
-1137: FUNC ReadKey
+1068: FUNC ReadKey
       VARS: BYTE mask, BYTE row_count, BYTE col_count, BYTE key, BYTE cycles
       5 bytes used
-1230: FUNC Delay1s
+1161: FUNC Delay1s
       VARS: BYTE counter
       1 byte used
-1251: FUNC SetBank
+1182: FUNC SetBank
       ARGS: BYTE bank
       1 byte used
-1267: include banking.asm
-1450: include font_5x8_flipped.asm
-1649: include font_custom_flipped.asm
-1687: FUNC main BEGIN
+1199: include banking.asm
+1383: include font_5x8_flipped.asm
+1582: include font_custom_flipped.asm
+1620: FUNC main BEGIN
       VARS: BYTE arg
       1 byte used
 
@@ -113,10 +113,6 @@ main(1) > opt_test1(0) - (1 bytes)
 main(1) > opt_test2(0) - (1 bytes)
 main(1) > opt_test3(0) - (1 bytes)
 main(1) > opt_test3(0) > opt_test4(0) - (1 bytes)
-main(1) > opt_test3(0) > opt_test4(0) > LCD_char(4) - (5 bytes)
-main(1) > opt_test3(0) > opt_test4(0) > LCD_char(4) > LCD_Data(0) - (5 bytes)
-main(1) > opt_test3(0) > LCD_char(4) - (5 bytes)
-main(1) > opt_test3(0) > LCD_char(4) > LCD_Data(0) - (5 bytes)
 
 Functions outside of call graph
 ===============================
