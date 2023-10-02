@@ -16,12 +16,12 @@ cat src/mem_template.asm >> processed.asm
 
 echo Assembling...
 #P - write macro processor output
-#G - ???
+#G - produce code
 #U - case-sensitive operation
 #L - listing to file
 #g - write debug info
-#q - quiet mode
-asl processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt 2> errors.txt
+#q - quiet mode - removed since newest asl silences MESSAGE
+asl processed.asm -P -G -U -L -g -cpu 6502 > asm.txt 2> errors.txt
 ./show-errors.py errors.txt
 if [[ ! $? -eq 0  ]] 
 then
@@ -49,7 +49,7 @@ cp input.txt "${emu_path}/input.txt"
 cp keys.txt "${emu_path}/keys.txt"
 
 echo Cleaning up...
-rm asm.txt
+#rm asm.txt
 rm errors.txt
 rm processed.hex
 rm processed.i

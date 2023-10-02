@@ -42,11 +42,9 @@
 	
 ;Functions in ROM
 ;================
-    
+    ;Bank 1    
     ORG BANK1_ADDRESS
     PHASE BANKED_EEPROM
-        test1:
-        FCB "AB"
 
         FUNC opt_test1
             LDA #'Z'
@@ -55,10 +53,9 @@
     EQU BANK1_END,*
     DEPHASE
 
+    ;Bank 2
     ORG BANK2_ADDRESS
     PHASE BANKED_EEPROM
-        test2:
-        FCB "CDE"
 
         FUNC opt_test2
             LDA #'Y'
@@ -67,27 +64,71 @@
     EQU BANK2_END,*
     DEPHASE
 
+    ;Bank 3
     ORG BANK3_ADDRESS
     PHASE BANKED_EEPROM
-        test3:
-        FCB "EFGH"
 
         FUNC opt_test3
             LDA #'W'
             BCALL opt_test4
+
+            ;A=FI=88='X' - good
+
+            STA R0
+            LSR
+            LSR
+            LSR
+            LSR
+            CLC
+            ADC #'A'
+            STA arg
+            CALL LCD_char, arg
+            LDA R0
+            AND #$F
+            CLC
+            ADC #'A'
+            STA arg
+            CALL LCD_char, arg
+            LDA #'2'
+            STA arg
+            CALL LCD_char, arg
         END
 
     EQU BANK3_END,*
     DEPHASE
 
+    ;Bank 4
     ORG BANK4_ADDRESS
     PHASE BANKED_EEPROM
-        test4:
-        FCB "IJKLM"
 
         FUNC opt_test4
+
+            ;A=AC=2 but should be 'W'
+
+            STA R0
+            LSR
+            LSR
+            LSR
+            LSR
             CLC
-            ADC #1
+            ADC #'A'
+            STA arg
+            CALL LCD_char, arg
+            LDA R0
+            AND #$F
+            CLC
+            ADC #'A'
+            STA arg
+            CALL LCD_char, arg
+            LDA #'1'
+            STA arg
+            CALL LCD_char, arg
+            
+            ;CLC
+            ;ADC #1
+
+            LDA #'X'
+
         END
 
     EQU BANK4_END,*
@@ -118,9 +159,6 @@
         CALL LCD_Setup
         CALL LCD_clrscr
      
-        CALL opt_test1  ;No banking change. Points to bank 1 at start up
-        BCALL opt_test2 ;Should switch banks, call, then return to here
-        BCALL opt_test3 ;Should switch banks twice, call twice, then return to here
 
         LDA #0
         STA arg
@@ -153,36 +191,34 @@
             LDA #2
             CALL LCD_Row
 
-            CALL SetBank, #BANK1
-            LDA test1
+            CALL opt_test1  ;No banking change. Points to bank 1 at start up
             STA arg
             CALL LCD_char, arg
 
-            LDA test1+1
+            BCALL opt_test2 ;Should switch banks, call, then return to here
             STA arg
             CALL LCD_char, arg
 
-            CALL SetBank, #BANK2
-            LDA test2
-            STA arg
-            CALL LCD_char, arg
-            LDA test2+1
-            STA arg
-            CALL LCD_char, arg
+            BCALL opt_test3 ;Should switch banks twice, call twice, then return to here
 
-            CALL SetBank, #BANK3
-            LDA test3
-            STA arg
-            CALL LCD_char, arg
-            LDA test3+1
-            STA arg
-            CALL LCD_char, arg
+            ;A=DA=48='0' but did not set expected value
 
-            CALL SetBank, #BANK4
-            LDA test4
+            STA R0
+            LSR
+            LSR
+            LSR
+            LSR
+            CLC
+            ADC #'A'
             STA arg
             CALL LCD_char, arg
-            LDA test4+1
+            LDA R0
+            AND #$F
+            CLC
+            ADC #'A'
+            STA arg
+            CALL LCD_char, arg
+            LDA #'3'
             STA arg
             CALL LCD_char, arg
 
@@ -199,6 +235,10 @@
 ;(should come after all instances of CALL)
 ;=========================================
 	STRING_LITERALS
+
+;Current time (for confirming EEPROM data)
+;=========================================
+    FCC TIME
 
 	code_end:
 	

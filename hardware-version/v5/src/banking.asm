@@ -60,7 +60,7 @@ BANK_ID MACRO funcname
     ENDM
 
 BANK_ADDRESS MACRO funcname
-    FDB funcname
+    FDB funcname-1
         
     IF banknum==1
         SET Bank1TableCount,Bank1TableCount+1
@@ -84,15 +84,19 @@ BANK_ADDRESS MACRO funcname
         ORA #LCD_RST
         STA PORT_B
         LatchLoad
-        TYA
+        LDA #hi(BankJumpReturn-1)   ;Push return address to jump back here
+        PHA
+        LDA #lo(BankJumpReturn-1)   ;Push return address to jump back here
+        PHA
+        TYA                         ;Jump to target address
         ASL
         TAY
-        LDA BankJumpFuncList,Y  ;Look up target address
+        LDA BankJumpFuncList+1,Y  ;Look up target address
         PHA
-        LDA BankJumpFuncList+1,Y
+        LDA BankJumpFuncList,Y
         PHA
         LDA bank_temp_A         ;Restore in case args passed
-        LDA bank_temp_Y         ;Restore in case args passed
+        LDY bank_temp_Y         ;Restore in case args passed
         RTS                     ;Calculated jump
     BankJumpReturn:             ;Calculated jump returns here
         STA bank_temp_A         ;Save A in case return value

@@ -50,39 +50,39 @@ Line numbers
 605: GLOBAL BYTE aux_stack_ptr
 607: GLOBAL BYTE aux_stack_count
 609: GLOBAL BYTE aux_word_counter
-646: FUNC opt_test1
-661: FUNC opt_test2
-676: FUNC opt_test3
-694: FUNC opt_test4
-711: include hardware.asm
-792: FUNC setup
-823: FUNC LCD_Data
-838: FUNC LCD_Instruction
-852: FUNC LCD_Row
-863: FUNC LCD_Col
-899: FUNC LCD_Setup
-939: FUNC LCD_clrscr
+644: FUNC opt_test1
+658: FUNC opt_test2
+672: FUNC opt_test3
+722: FUNC opt_test4
+776: include hardware.asm
+857: FUNC setup
+888: FUNC LCD_Data
+903: FUNC LCD_Instruction
+917: FUNC LCD_Row
+928: FUNC LCD_Col
+964: FUNC LCD_Setup
+1004: FUNC LCD_clrscr
       VARS: BYTE row_count, BYTE col_count
       2 bytes used
-975: FUNC LCD_char
+1040: FUNC LCD_char
       ARGS: BYTE c_out, WORD pixel_ptr, BYTE char_counter
       4 bytes used
-1048: FUNC LCD_print
+1113: FUNC LCD_print
       ARGS: STRING source, BYTE index, BYTE arg
       4 bytes used
-1072: FUNC ReadKey
+1137: FUNC ReadKey
       VARS: BYTE mask, BYTE row_count, BYTE col_count, BYTE key, BYTE cycles
       5 bytes used
-1165: FUNC Delay1s
+1230: FUNC Delay1s
       VARS: BYTE counter
       1 byte used
-1186: FUNC SetBank
+1251: FUNC SetBank
       ARGS: BYTE bank
       1 byte used
-1202: include banking.asm
-1381: include font_5x8_flipped.asm
-1580: include font_custom_flipped.asm
-1618: FUNC main BEGIN
+1267: include banking.asm
+1450: include font_5x8_flipped.asm
+1649: include font_custom_flipped.asm
+1687: FUNC main BEGIN
       VARS: BYTE arg
       1 byte used
 
@@ -100,10 +100,6 @@ main(1) > LCD_clrscr(2) > LCD_Row(0) - (3 bytes)
 main(1) > LCD_clrscr(2) > LCD_Data(0) - (3 bytes)
 main(1) > LCD_clrscr(2) > LCD_Col(0) - (3 bytes)
 main(1) > LCD_clrscr(2) > LCD_Col(0) > LCD_Instruction(0) - (3 bytes)
-main(1) > opt_test1(0) - (1 bytes)
-main(1) > opt_test2(0) - (1 bytes)
-main(1) > opt_test3(0) - (1 bytes)
-main(1) > opt_test3(0) > opt_test4(0) - (1 bytes)
 main(1) > ReadKey(5) - (6 bytes)
 main(1) > LCD_print(4) - (5 bytes)
 main(1) > LCD_print(4) > LCD_char(4) - (9 bytes)
@@ -113,7 +109,14 @@ main(1) > LCD_Col(0) > LCD_Instruction(0) - (1 bytes)
 main(1) > LCD_Row(0) - (1 bytes)
 main(1) > LCD_char(4) - (5 bytes)
 main(1) > LCD_char(4) > LCD_Data(0) - (5 bytes)
-main(1) > SetBank(1) - (2 bytes)
+main(1) > opt_test1(0) - (1 bytes)
+main(1) > opt_test2(0) - (1 bytes)
+main(1) > opt_test3(0) - (1 bytes)
+main(1) > opt_test3(0) > opt_test4(0) - (1 bytes)
+main(1) > opt_test3(0) > opt_test4(0) > LCD_char(4) - (5 bytes)
+main(1) > opt_test3(0) > opt_test4(0) > LCD_char(4) > LCD_Data(0) - (5 bytes)
+main(1) > opt_test3(0) > LCD_char(4) - (5 bytes)
+main(1) > opt_test3(0) > LCD_char(4) > LCD_Data(0) - (5 bytes)
 
 Functions outside of call graph
 ===============================
