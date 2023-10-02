@@ -113,7 +113,7 @@ while running:
             #Python does not always add a newline even when characters are read!
             #Strip off newline and add manually below since Python is not consistent
             if line[-1]=="\n": line=line[:-1]
-           
+          
             #Step through line character by character splitting into list of strings
             word=""
             line_objs=[]
@@ -260,7 +260,7 @@ while running:
                         #Local labels use last defined symbol, so func label comes after all variables
                         #padding=" "+line[:(len(line)-len(line.lstrip()))]
                         #file_output+=f"{padding}{line_objs[1]}:\n"
-                        
+                       
                         final_text+=[[TYPE_TEXT,file_output]]
                         func_temp=""
                         file_state="FUNC"
@@ -411,6 +411,7 @@ byte_total=0
 func_used_list=[first_func]
 while True:
     node=func_nodes[-1]
+
     if node[INDEX]>=len(func_dict[node[NAME]]["CALLS"]):
         #Done with child node - remove from stack
         func_nodes.pop()        

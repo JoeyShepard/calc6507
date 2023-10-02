@@ -25,29 +25,6 @@ keypad_alpha_table:
 
 ;Functions
 ;=========
-    FUNC setup
-        SEI        
-        CLD
-        ;Stack
-        LDX #$FF
-        TXS
-        ;RIOT pins
-        LDA #0 ;LCD_E low, RW=W=0, latch cp low
-        STA PORT_A
-        LDA #(LCD_E|LCD_RW|LATCH_CP)
-        STA PORT_A_DIR
-        LDA #$FF
-        STA PORT_B_DIR
-        ;Banking
-        CALL SetBank, #BANK1
-        ;Alpha keys
-        LDA #0
-        STA keys_alpha
-        
-        ;Fixed return address since stack pointer set above
-        JMP main.setup_return
-    END
-
     ;CS in A
     ;Data in Y
     FUNC LCD_Data
@@ -343,35 +320,4 @@ keypad_alpha_table:
             RTS
     END
 
-    FUNC Delay1s
-        VARS
-            BYTE counter
-        END
-
-        LDY #0
-        STY counter
-        .delay_loop:
-            NOP             ;2 cycles
-            NOP             ;2 cycles
-            NOP             ;2 cycles
-            NOP             ;2 cycles
-            NOP             ;2 cycles
-            DEY             ;2 cycles
-            BNE .delay_loop ;3 cycles
-            DEC counter
-            BNE .delay_loop
-    END
-
-    ;Better to make this macro but can't access sys_bank from macro
-    FUNC SetBank
-        ARGS
-            BYTE bank
-        END
-        
-        LDA bank
-        STA sys_bank
-        ORA #LCD_RST
-        STA PORT_B
-        LatchLoad
-    END
 

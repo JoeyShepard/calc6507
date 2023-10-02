@@ -5,84 +5,77 @@ Line numbers
 83: include riot.asm
 114: include const.asm
 384: include const_hardware.asm
-472: include zp.asm
-480: GLOBAL BYTE null
-488: GLOBAL WORD dummy
-490: GLOBAL WORD ret_val
-494: GLOBAL BYTE keys_alpha
-496: GLOBAL BYTE sys_bank
-498: GLOBAL BYTE bank_temp_A
-500: GLOBAL BYTE bank_temp_Y
-504: GLOBAL WORD ret_address
-508: GLOBAL WORD screen_ptr
-512: GLOBAL WORD dict_ptr
-514: GLOBAL WORD new_dict_ptr
-517: GLOBAL WORD dict_save
-519: GLOBAL WORD exec_ptr
-522: GLOBAL WORD obj_address
-526: GLOBAL WORD math_ptr1
-528: GLOBAL WORD math_ptr2
-554: include globals.asm
-570: GLOBAL BYTE font_inverted
-574: GLOBAL BYTE stack_count
-576: GLOBAL BYTE mode
-580: GLOBAL WORD test_count
-600: GLOBAL BYTE stack_X
-606: GLOBAL BYTE math_lo
-608: GLOBAL BYTE math_hi
-610: GLOBAL BYTE math_a
-612: GLOBAL BYTE math_b
-614: GLOBAL BYTE math_c
-617: GLOBAL BYTE math_d
-620: GLOBAL BYTE math_signs
-622: GLOBAL BYTE math_sticky
-624: GLOBAL BYTE math_max
-627: GLOBAL BYTE math_fill
-632: GLOBAL BYTE shift_counter
-634: GLOBAL BYTE CORDIC_sign
-636: GLOBAL BYTE CORDIC_halve
-638: GLOBAL BYTE CORDIC_loop_inner
-640: GLOBAL BYTE CORDIC_loop_outer
-642: GLOBAL BYTE CORDIC_shift_count
-644: GLOBAL BYTE CORDIC_sign_temp
-646: GLOBAL BYTE CORDIC_end_sign
-648: GLOBAL WORD CORDIC_comparator
-658: GLOBAL BYTE aux_stack_ptr
-660: GLOBAL BYTE aux_stack_count
-662: GLOBAL BYTE aux_word_counter
-697: FUNC opt_test1
-711: FUNC opt_test2
-725: FUNC opt_test3
-742: FUNC opt_test4
-759: include hardware.asm
-787: FUNC setup
-819: FUNC LCD_Data
-834: FUNC LCD_Instruction
-848: FUNC LCD_Row
-859: FUNC LCD_Col
-895: FUNC LCD_Setup
-935: FUNC LCD_clrscr
+471: include zp.asm
+479: GLOBAL BYTE null
+487: GLOBAL WORD dummy
+489: GLOBAL WORD ret_val
+493: GLOBAL BYTE keys_alpha
+495: GLOBAL BYTE sys_bank
+497: GLOBAL BYTE bank_temp_A
+499: GLOBAL BYTE bank_temp_Y
+503: GLOBAL WORD ret_address
+507: GLOBAL WORD screen_ptr
+511: GLOBAL WORD dict_ptr
+513: GLOBAL WORD new_dict_ptr
+516: GLOBAL WORD dict_save
+518: GLOBAL WORD exec_ptr
+521: GLOBAL WORD obj_address
+525: GLOBAL WORD math_ptr1
+527: GLOBAL WORD math_ptr2
+553: include globals.asm
+569: GLOBAL BYTE font_inverted
+573: GLOBAL BYTE stack_count
+575: GLOBAL BYTE mode
+579: GLOBAL WORD test_count
+599: GLOBAL BYTE stack_X
+605: GLOBAL BYTE math_lo
+607: GLOBAL BYTE math_hi
+609: GLOBAL BYTE math_a
+611: GLOBAL BYTE math_b
+613: GLOBAL BYTE math_c
+616: GLOBAL BYTE math_d
+619: GLOBAL BYTE math_signs
+621: GLOBAL BYTE math_sticky
+623: GLOBAL BYTE math_max
+626: GLOBAL BYTE math_fill
+631: GLOBAL BYTE shift_counter
+633: GLOBAL BYTE CORDIC_sign
+635: GLOBAL BYTE CORDIC_halve
+637: GLOBAL BYTE CORDIC_loop_inner
+639: GLOBAL BYTE CORDIC_loop_outer
+641: GLOBAL BYTE CORDIC_shift_count
+643: GLOBAL BYTE CORDIC_sign_temp
+645: GLOBAL BYTE CORDIC_end_sign
+647: GLOBAL WORD CORDIC_comparator
+657: GLOBAL BYTE aux_stack_ptr
+659: GLOBAL BYTE aux_stack_count
+661: GLOBAL BYTE aux_word_counter
+699: include hardware.asm
+729: FUNC LCD_Data
+744: FUNC LCD_Instruction
+758: FUNC LCD_Row
+769: FUNC LCD_Col
+805: FUNC LCD_Setup
+845: FUNC LCD_clrscr
       VARS: BYTE row_count, BYTE col_count
       2 bytes used
-971: FUNC LCD_char
+881: FUNC LCD_char
       ARGS: BYTE c_out, WORD pixel_ptr, BYTE char_counter
       4 bytes used
-1044: FUNC LCD_print
+954: FUNC LCD_print
       ARGS: STRING source, BYTE index, BYTE arg
       4 bytes used
-1068: FUNC ReadKey
+978: FUNC ReadKey
       VARS: BYTE mask, BYTE row_count, BYTE col_count, BYTE key, BYTE cycles
       5 bytes used
-1161: FUNC Delay1s
-      VARS: BYTE counter
-      1 byte used
-1182: FUNC SetBank
+1076: include font_5x8_flipped.asm
+1275: include font_custom_flipped.asm
+1341: include banking.asm
+1522: FUNC setup
+1553: FUNC SetBank
       ARGS: BYTE bank
       1 byte used
-1199: include banking.asm
-1383: include font_5x8_flipped.asm
-1582: include font_custom_flipped.asm
-1620: FUNC main BEGIN
+1566: FUNC main BEGIN
       VARS: BYTE arg
       1 byte used
 
@@ -109,14 +102,9 @@ main(1) > LCD_Col(0) > LCD_Instruction(0) - (1 bytes)
 main(1) > LCD_Row(0) - (1 bytes)
 main(1) > LCD_char(4) - (5 bytes)
 main(1) > LCD_char(4) > LCD_Data(0) - (5 bytes)
-main(1) > opt_test1(0) - (1 bytes)
-main(1) > opt_test2(0) - (1 bytes)
-main(1) > opt_test3(0) - (1 bytes)
-main(1) > opt_test3(0) > opt_test4(0) - (1 bytes)
 
 Functions outside of call graph
 ===============================
-Delay1s(1 bytes)
 
 String literals from CALL
 =========================
@@ -125,7 +113,4 @@ _string_literal00001: FCB "TESTING",0
 
 Banked functions
 ================
-opt_test4 > __opt_test4_BANK_JUMP
-opt_test2 > __opt_test2_BANK_JUMP
-opt_test3 > __opt_test3_BANK_JUMP
 

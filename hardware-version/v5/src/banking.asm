@@ -116,13 +116,12 @@ BANK_ADDRESS MACRO funcname
 
 ;Bank 2
     SET banknum,2
-    BFUNC opt_test2
+    ;BFUNC opt_test2
 ;Bank 3
     SET banknum,3
-    BFUNC opt_test3
+
 ;Bank 4
     SET banknum,4
-    BFUNC opt_test4
 
 
 ;List of bank numbers 
@@ -132,13 +131,12 @@ BANK_ADDRESS MACRO funcname
 
 ;Bank 2
     SET banknum,2
-    BANK_ID opt_test2
+    ;BANK_ID opt_test2
 ;Bank 3
     SET banknum,3
-    BANK_ID opt_test3
+
 ;Bank 4
     SET banknum,4
-    BANK_ID opt_test4
 
 
 ;Jump table
@@ -148,15 +146,13 @@ BANK_ADDRESS MACRO funcname
 
 ;Bank 2
     SET banknum,2
-    BANK_ADDRESS opt_test2
+    ;BANK_ADDRESS opt_test2
 
 ;Bank 3
     SET banknum,3
-    BANK_ADDRESS opt_test3
 
 ;Bank 4
     SET banknum,4
-    BANK_ADDRESS opt_test4
 
 
 ;Check for missing entries from 3 tables above

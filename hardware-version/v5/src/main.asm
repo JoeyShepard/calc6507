@@ -40,16 +40,18 @@
 	ORG RESET_VECTOR-$F000
 	FDB main
 	
-;Functions in ROM
-;================
+;Banked ROM
+;==========
     ;Bank 1    
     ORG BANK1_ADDRESS
     PHASE BANKED_EEPROM
 
-        FUNC opt_test1
-            LDA #'Z'
-        END
-        
+        ;So far, worked with hardware in fixed and font in banked but not like below
+        include hardware.asm
+        font_table:
+        include font_5x8_flipped.asm
+        include font_custom_flipped.asm
+
     EQU BANK1_END,*
     DEPHASE
 
@@ -57,9 +59,6 @@
     ORG BANK2_ADDRESS
     PHASE BANKED_EEPROM
 
-        FUNC opt_test2
-            LDA #'Y'
-        END
 
     EQU BANK2_END,*
     DEPHASE
@@ -68,10 +67,6 @@
     ORG BANK3_ADDRESS
     PHASE BANKED_EEPROM
 
-        FUNC opt_test3
-            LDA #'W'
-            BCALL opt_test4
-        END
 
     EQU BANK3_END,*
     DEPHASE
@@ -80,31 +75,56 @@
     ORG BANK4_ADDRESS
     PHASE BANKED_EEPROM
 
-        FUNC opt_test4
-            CLC
-            ADC #1
-        END
 
     EQU BANK4_END,*
     DEPHASE
 
+;Fixed ROM
+;=========
 	ORG FIXED_EEPROM
-   
-    size_check_begin:
-    
-    include hardware.asm
     banking_begin:
     include banking.asm
     banking_end:
-    font_table:
-    include font_5x8_flipped.asm
-    include font_custom_flipped.asm
-	
+
+    size_check_begin:
     size_check_end:
 
+    FUNC setup
+        SEI        
+        CLD
+        ;Stack
+        LDX #$FF
+        TXS
+        ;RIOT pins
+        LDA #0 ;LCD_E low, RW=W=0, latch cp low
+        STA PORT_A
+        LDA #(LCD_E|LCD_RW|LATCH_CP)
+        STA PORT_A_DIR
+        LDA #$FF
+        STA PORT_B_DIR
+        ;Banking
+        CALL SetBank, #BANK1
+        ;Alpha keys
+        LDA #0
+        STA keys_alpha
+        
+        ;Fixed return address since stack pointer set above
+        JMP main.setup_return
+    END
 
-;Main function
-;=============
+    ;Better to make this macro but can't access sys_bank from macro
+    FUNC SetBank
+        ARGS
+            BYTE bank
+        END
+        
+        LDA bank
+        STA sys_bank
+        ORA #LCD_RST
+        STA PORT_B
+        LatchLoad
+    END
+
 	FUNC main BEGIN
         VARS
             BYTE arg
@@ -114,7 +134,6 @@
         .setup_return:
         CALL LCD_Setup
         CALL LCD_clrscr
-     
 
         LDA #0
         STA arg
@@ -141,24 +160,6 @@
                 STA arg
                 CALL LCD_char, arg
             .not_alpha:
-
-            LDA #0
-            CALL LCD_Col
-            LDA #2
-            CALL LCD_Row
-
-            CALL opt_test1  ;No banking change. Points to bank 1 at start up
-            STA arg
-            CALL LCD_char, arg
-
-            BCALL opt_test2 ;Should switch banks, call, then return to here
-            STA arg
-            CALL LCD_char, arg
-
-            BCALL opt_test3 ;Should switch banks twice, call twice, then return to here
-            STA arg
-            CALL LCD_char, arg
-
 
             JMP .loop
 

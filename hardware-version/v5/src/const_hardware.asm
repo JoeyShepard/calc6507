@@ -8,7 +8,6 @@
 RESET_VECTOR    = $FFFC
 FIXED_EEPROM    = $900
 BANKED_EEPROM   = $1000
-;BANKx already defined by assembler
 BANK0           = 0
 BANK1           = 1
 BANK2           = 2
