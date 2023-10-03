@@ -118,10 +118,12 @@ keypad_alpha_table:
         VARS
             BYTE row_count,col_count
         END
-
-        MOV #0, row_count
+        
+        LDA #0
+        STA font_inverted
+        STA row_count
         .loop_outer:
-            MOV #64, col_count
+            MOV #SCREEN_WIDTH/2, col_count
             LDA row_count
             CALL LCD_Row
             .loop_inner:
@@ -230,6 +232,23 @@ keypad_alpha_table:
 		.done:
     END
 
+    ;Need to pass by optimizer to be compatible with emu version
+    FUNC LCD_Byte
+        ARGS
+            BYTE data
+        END
+        LDY data
+        LDA screen_ptr+1
+        CALL LCD_Data
+        INC screen_ptr
+        LDA screen_ptr
+        CMP #SCREEN_WIDTH/2
+        BNE .done
+        ;Next byte will be on second half of LCD
+        LSR screen_ptr+1 ;LCD_LEFT > LCD_RIGHT, ie $20 > $10
+        .done:
+    END
+
     FUNC ReadKey
         VARS
             BYTE mask
@@ -320,4 +339,6 @@ keypad_alpha_table:
             RTS
     END
 
-
+    FUNC GetTimer
+        LDA #0
+    END

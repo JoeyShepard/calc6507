@@ -17,8 +17,9 @@ echo Assembling...
 #U - case-sensitive operation
 #L - listing to file
 #g - write debug info
-#q - quiet mode
-asl processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt 2> errors.txt
+#q - quiet mode - new version of asl hides MESSAGE if -q
+#asl processed.asm -P -G -U -L -g -q -cpu 6502 > asm.txt 2> errors.txt
+asl processed.asm -P -G -U -L -g -cpu 6502 > asm.txt 2> errors.txt
 ./show-errors.py errors.txt
 if [[ ! $? -eq 0  ]] 
 then
@@ -28,7 +29,6 @@ then
     exit 1
 fi
 ./remove-escape.py asm.txt
-echo
 
 echo Generating hex file...
 p2hex processed.p -F Intel -l 32 -r 0x0000-0xFFFF > hex.txt

@@ -2,15 +2,15 @@
 ;=========
 ;Note different for emulated and hardware versions!
 
+;Unlimited lines per page in listing
+	PAGE 0
+
 ;Macros
 ;======
 	include macros.asm
 	
 ;General TODO items stored in separate file. Included here so todo.py can find it.
     include todo.asm
-
-;Unlimited lines per page in listing
-	PAGE 0
 
 ;Constants
 ;=========

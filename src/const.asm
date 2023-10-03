@@ -2,9 +2,15 @@
 ;=========
 	
 	;Screen
-	equ CHAR_SCREEN_WIDTH, 	21
-	equ CHAR_SCREEN_HEIGHT, 8
-	
+	equ CHAR_SCREEN_WIDTH, 	    21
+	equ CHAR_SCREEN_HEIGHT,     8
+    equ SCREEN_WIDTH_LOGICAL,   128 ;Logical width for emu and hardware. SCREEN_WIDTH is 256 on emu.
+
+    ;Layout
+    equ INPUT_Y,    7
+    equ ERROR_X,    CHAR_WIDTH*3
+    equ ERROR_Y,    2
+
 	;Special characters
 	equ CHAR_ARROW,				'a'	;Cursor arrow
 	equ CHAR_BOX,				'b'	;Box for drawing error message

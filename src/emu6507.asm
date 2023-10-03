@@ -8,13 +8,8 @@
 	equ SCREEN_HEIGHT,		128
 	equ CHAR_WIDTH,			12
 	equ CHAR_HEIGHT, 		16
-    equ WORDS_Y,            SCREEN_ADDRESS+(SCREEN_HEIGHT-CHAR_HEIGHT)*SCREEN_WIDTH
+    equ WORDS_Y,            7
 
-	;Layout
-	equ INPUT_Y,	(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*7
-	equ ERROR_X,	3*CHAR_WIDTH
-	equ ERROR_Y,	(SCREEN_ADDRESS / 256)+CHAR_HEIGHT*2
-	
 	FUNC setup
 		SEI
 		CLD
@@ -70,6 +65,10 @@
 		
 		LDA #MODE_IMMEDIATE
 		STA mode
+
+        ;Alpha not used in emulator version but check functionality
+        LDA #$FF
+        STA keys_alpha
 		
 		;Point to RAM so tests can run
 		;Emulator only!
@@ -253,3 +252,57 @@
 		.done:
 	END
 	
+    ;Col in A
+    FUNC LCD_Col
+        STA screen_ptr
+    END
+
+    ;Row in A
+    FUNC LCD_Row
+        ;Multiply by CHAR_HEIGHT - 16 for emu
+        ASL
+        ASL
+        ASL
+        ASL
+        CLC
+        ADC #hi(SCREEN_ADDRESS)
+        STA screen_ptr+1
+    END
+    
+    FUNC LCD_Byte
+        ARGS
+            BYTE data
+        VARS
+            BYTE counter
+        END
+
+        MOV #8,counter
+        LDY #0
+        .loop:
+            LDA #FG_COLOR
+            LSR data
+            BCS .draw_fg
+                LDA #BG_COLOR
+            .draw_fg:
+            STA (screen_ptr),Y
+            INY
+            STA (screen_ptr),Y
+            INC screen_ptr+1
+            STA (screen_ptr),Y
+            DEY
+            STA (screen_ptr),Y
+            INC screen_ptr+1
+            DEC counter
+            BNE .loop
+        LDA screen_ptr+1
+        SEC
+        SBC #CHAR_HEIGHT
+        STA screen_ptr+1
+        INC screen_ptr
+        INC screen_ptr
+    END
+
+    FUNC GetTimer
+        LDA TIMER_S
+    END
+

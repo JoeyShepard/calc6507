@@ -17,8 +17,10 @@
 	WORD ret_val
 
     ;System
-    BYTE keys_alpha ;Only used on hardware version!
-    BYTE sys_bank   ;Only used on hardware version!
+    BYTE keys_alpha     ;Only used on hardware version!
+    BYTE sys_bank       ;Only used on hardware version!
+    BYTE bank_temp_A    ;Only used on hardware version!
+    BYTE bank_temp_Y    ;Only used on hardware version!
 
 	;Temp address for variables
 	WORD ret_address

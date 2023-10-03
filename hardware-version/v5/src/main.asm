@@ -13,12 +13,12 @@
 ;Variables in zero page
 ;======================
     ORG $0000
-    include zp.asm
+    include zp.asm              ;Shared between both versions
 
 ;Variables in main RAM
 ;=====================
     ORG HW_STACK_BEGIN+R_STACK_SIZE
-    include globals.asm
+    include globals.asm         ;Shared between both versions
 
 ;Reset vectors in ROM
 ;====================
@@ -81,20 +81,66 @@
 
 ;Fixed ROM
 ;=========
+
+    ;Space past used memory. Put code here while
+    ;arranging in banks
+    ORG $C000
+
+    ;Sizes are when when started moving to banking - may increase
+	include system.asm          ;13 bytes
+	include math.asm            ;1416 bytes
+	include cordic.asm          ;1067 bytes
+	include output.asm          ;657 bytes
+    include error.asm           ;346 bytes
+	include aux_stack.asm       ;54 bytes
+	include forth.asm           ;1793 bytes
+	include words.asm           ;4389 bytes
+        ;words 1230
+	include word_stubs.asm      ;289 bytes
+    include forth_loop.asm      ;317 bytes
+
+    ;size_check_begin:
+    ;size_check_end:
+
 	ORG FIXED_EEPROM
     banking_begin:
     include banking.asm
     banking_end:
 
-    size_check_begin:
-    size_check_end:
-
     FUNC setup
         SEI        
         CLD
+
         ;Stack
-        LDX #$FF
+        LDX #R_STACK_SIZE-1
         TXS
+
+		;Stack grows down
+		LDX #0
+		STX stack_count
+		
+		LDA #0
+		STA font_inverted
+		
+		LDA #dict_begin # 256
+		STA dict_ptr
+		STA dict_save
+		LDA #dict_begin / 256
+		STA dict_ptr+1
+		STA dict_save+1
+		
+		LDA #0
+		STA dict_begin
+		STA dict_begin+1
+		STA dict_begin+2
+		
+		LDA #MODE_IMMEDIATE
+		STA mode
+        
+        ;Alpha keys
+        LDA #0
+        STA keys_alpha
+
         ;RIOT pins
         LDA #0 ;LCD_E low, RW=W=0, latch cp low
         STA PORT_A
@@ -102,11 +148,9 @@
         STA PORT_A_DIR
         LDA #$FF
         STA PORT_B_DIR
+
         ;Banking
         CALL SetBank, #BANK1
-        ;Alpha keys
-        LDA #0
-        STA keys_alpha
         
         ;Fixed return address since stack pointer set above
         JMP main.setup_return
@@ -149,6 +193,12 @@
 
             LDA #0
             CALL LCD_Col
+            LDA #2
+            CALL LCD_Row
+            CALL LCD_Byte, #$A9
+
+            LDA #0
+            CALL LCD_Col
             LDA #1
             CALL LCD_Row
             CALL LCD_char, arg
@@ -163,10 +213,9 @@
 
             JMP .loop
 
-        .done:
-            STY PORT_B
-            INY
-            JMP .done
+            ;Jump to ForthLoop function and never return
+            ;(Needs to be CALL for optimizer)
+            ;CALL ForthLoop
 
 	END
 
@@ -180,4 +229,4 @@
     FCC TIME
 
 	code_end:
-	
+

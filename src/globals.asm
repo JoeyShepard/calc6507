@@ -82,6 +82,4 @@
 	
 	RIOT_mem_end:
 	
-	TODO: magical number
-	ORG $880
 	

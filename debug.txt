@@ -1,225 +1,235 @@
 Line numbers
 ============
 1: Zero page assignments
-9: include macros.asm
-85: include todo.asm
+12: include macros.asm
+88: include todo.asm
 168: include const.asm
 444: include emu.asm
 502: include zp.asm
 510: GLOBAL BYTE null
 518: GLOBAL WORD dummy
 520: GLOBAL WORD ret_val
-524: GLOBAL WORD ret_address
-528: GLOBAL WORD screen_ptr
-532: GLOBAL WORD dict_ptr
-534: GLOBAL WORD new_dict_ptr
-537: GLOBAL WORD dict_save
-539: GLOBAL WORD exec_ptr
-542: GLOBAL WORD obj_address
-546: GLOBAL WORD math_ptr1
-548: GLOBAL WORD math_ptr2
-574: include globals.asm
-590: GLOBAL BYTE font_inverted
-594: GLOBAL BYTE stack_count
-596: GLOBAL BYTE mode
-600: GLOBAL WORD test_count
-620: GLOBAL BYTE stack_X
-626: GLOBAL BYTE math_lo
-628: GLOBAL BYTE math_hi
-630: GLOBAL BYTE math_a
-632: GLOBAL BYTE math_b
-634: GLOBAL BYTE math_c
-637: GLOBAL BYTE math_d
-640: GLOBAL BYTE math_signs
-642: GLOBAL BYTE math_sticky
-644: GLOBAL BYTE math_max
-647: GLOBAL BYTE math_fill
-652: GLOBAL BYTE shift_counter
-654: GLOBAL BYTE CORDIC_sign
-656: GLOBAL BYTE CORDIC_halve
-658: GLOBAL BYTE CORDIC_loop_inner
-660: GLOBAL BYTE CORDIC_loop_outer
-662: GLOBAL BYTE CORDIC_shift_count
-664: GLOBAL BYTE CORDIC_sign_temp
-666: GLOBAL BYTE CORDIC_end_sign
-668: GLOBAL WORD CORDIC_comparator
-678: GLOBAL BYTE aux_stack_ptr
-680: GLOBAL BYTE aux_stack_count
-682: GLOBAL BYTE aux_word_counter
-699: include debug.asm
-703: FUNC DebugText
+524: GLOBAL BYTE keys_alpha
+526: GLOBAL BYTE sys_bank
+528: GLOBAL BYTE bank_temp_A
+530: GLOBAL BYTE bank_temp_Y
+534: GLOBAL WORD ret_address
+538: GLOBAL WORD screen_ptr
+542: GLOBAL WORD dict_ptr
+544: GLOBAL WORD new_dict_ptr
+547: GLOBAL WORD dict_save
+549: GLOBAL WORD exec_ptr
+552: GLOBAL WORD obj_address
+556: GLOBAL WORD math_ptr1
+558: GLOBAL WORD math_ptr2
+584: include globals.asm
+600: GLOBAL BYTE font_inverted
+604: GLOBAL BYTE stack_count
+606: GLOBAL BYTE mode
+610: GLOBAL WORD test_count
+630: GLOBAL BYTE stack_X
+636: GLOBAL BYTE math_lo
+638: GLOBAL BYTE math_hi
+640: GLOBAL BYTE math_a
+642: GLOBAL BYTE math_b
+644: GLOBAL BYTE math_c
+647: GLOBAL BYTE math_d
+650: GLOBAL BYTE math_signs
+652: GLOBAL BYTE math_sticky
+654: GLOBAL BYTE math_max
+657: GLOBAL BYTE math_fill
+662: GLOBAL BYTE shift_counter
+664: GLOBAL BYTE CORDIC_sign
+666: GLOBAL BYTE CORDIC_halve
+668: GLOBAL BYTE CORDIC_loop_inner
+670: GLOBAL BYTE CORDIC_loop_outer
+672: GLOBAL BYTE CORDIC_shift_count
+674: GLOBAL BYTE CORDIC_sign_temp
+676: GLOBAL BYTE CORDIC_end_sign
+678: GLOBAL WORD CORDIC_comparator
+688: GLOBAL BYTE aux_stack_ptr
+690: GLOBAL BYTE aux_stack_count
+692: GLOBAL BYTE aux_word_counter
+707: include debug.asm
+711: FUNC DebugText
        ARGS: STRING msg
        2 bytes used
-717: FUNC halt_test
+726: FUNC halt_test
        ARGS: WORD test
        2 bytes used
-733: FUNC halt_no_test
-751: include tests.asm
-761: FUNC InputTest
+743: FUNC halt_no_test
+762: include tests.asm
+772: FUNC InputTest
        ARGS: STRING input, STRING output, BYTE output_index, BYTE calculated_index, BYTE value
        7 bytes used
-915: FUNC NewToR
+927: FUNC NewToR
        ARGS: WORD Rx
        2 bytes used
-929: FUNC CopyNew
+942: FUNC CopyNew
        ARGS: STRING num1
        2 bytes used
-952: FUNC DebugRans
-987: FUNC DebugBuff
-1024: FUNC RansToBuff
-1036: FUNC CompareRans
-1054: FUNC TestFail
+966: FUNC DebugRans
+1002: FUNC DebugBuff
+1040: FUNC RansToBuff
+1053: FUNC CompareRans
+1072: FUNC TestFail
        ARGS: STRING ans
        2 bytes used
-1115: FUNC TestsPassed
-1150: FUNC AddTest
+1134: FUNC TestsPassed
+1170: FUNC AddTest
        ARGS: STRING num1, STRING num2, STRING ans
        6 bytes used
-1216: FUNC MultTest
+1237: FUNC MultTest
        ARGS: STRING num1, STRING num2, STRING ans
        6 bytes used
-1282: FUNC DivTest
+1304: FUNC DivTest
        ARGS: STRING num1, STRING num2, STRING ans
        6 bytes used
-1349: FUNC tests
-1413: include file_tests.asm
-1419: GLOBAL WORD counter1
-1420: GLOBAL WORD counter2
-1422: GLOBAL WORD failed1
-1423: GLOBAL WORD failed2
-1425: FUNC line_num
-1447: FUNC inc_line
-1465: FUNC read_file_line
-1490: FUNC FileInputTest
+1372: FUNC tests
+1437: include file_tests.asm
+1443: GLOBAL WORD counter1
+1444: GLOBAL WORD counter2
+1446: GLOBAL WORD failed1
+1447: GLOBAL WORD failed2
+1449: FUNC line_num
+1472: FUNC inc_line
+1491: FUNC read_file_line
+1517: FUNC FileInputTest
        VARS: BYTE value
        1 byte used
-1600: FUNC read2
-1626: FUNC file_tests
-1914: include stats.asm
-1918: FUNC stats
-1957: include font_5x8.asm
-2156: include font_custom.asm
-2189: include emu6507.asm
-2201: FUNC setup
-2269: FUNC GfxSetup
-2278: FUNC ReadKey
-2284: FUNC LCD_clrscr
+1628: FUNC read2
+1655: FUNC file_tests
+1944: include stats.asm
+1948: FUNC stats
+1988: include font_5x8.asm
+2187: include font_custom.asm
+2220: include emu6507.asm
+2233: FUNC setup
+2306: FUNC GfxSetup
+2316: FUNC ReadKey
+2323: FUNC LCD_clrscr
        VARS: BYTE counter
        1 byte used
-2306: FUNC LCD_char
+2346: FUNC LCD_char
        ARGS: BYTE c_out, WORD pixel_ptr, BYTE pixel_index, BYTE pixel, BYTE lc1, BYTE lc2
        7 bytes used
-2425: FUNC LCD_print
+2466: FUNC LCD_print
        ARGS: STRING source, BYTE index, BYTE arg
        4 bytes used
-2453: include system.asm
-2456: FUNC MemCopy
+2492: FUNC LCD_Col
+2500: FUNC LCD_Row
+2514: FUNC LCD_Byte
+       ARGS: BYTE data, BYTE counter
+       2 bytes used
+2547: FUNC GetTimer
+2558: include system.asm
+2561: FUNC MemCopy
        ARGS: WORD source, WORD dest, BYTE count
        5 bytes used
-2475: include math.asm
-2492: FUNC BCD_Reverse
+2581: include math.asm
+2598: FUNC BCD_Reverse
        ARGS: WORD source, BYTE count
        3 bytes used
-2513: FUNC BCD_RevExp
-2526: FUNC BCD_RevSig
-2549: FUNC ZeroReg
-2562: FUNC MaxReg
-2589: FUNC IncRansExp
-2604: FUNC SwapR0R1
-2624: FUNC CopyRegs
-2642: FUNC TosR0R1
-2668: FUNC RansTos
-2691: FUNC HalfShift
-2712: FUNC HalfShiftForward
-2731: FUNC HalfShiftBackward
-2750: FUNC HalfShiftWide
-2775: FUNC HalfShiftWideForward
-2799: FUNC ShiftR0
-2888: FUNC ShiftRx
-2975: FUNC NormRans
-3065: FUNC BCD_Round
-3103: FUNC BCD_Unpack
-3124: FUNC BCD_Pack
-3166: FUNC BCD_Exp_diff
-3178: FUNC BCD_StickyRound
-3223: FUNC BCD_Add
-3401: FUNC BCD_Mult
-3542: FUNC BCD_Div
-3682: include cordic.asm
-3800: FUNC BCD_CORDIC
-4086: FUNC CORDIC_ShiftR0
-4095: FUNC CORDIC_MarkSign
-4112: FUNC CORDIC_Trig
-4270: FUNC CORDIC_Atrig1
-4282: FUNC CORDIC_Atan
-4443: FUNC CORDIC_AsinAcos
-4599: FUNC CORDIC_Pack
-4651: FUNC CORDIC_Push
-4769: include output.asm
-4773: FUNC DigitHigh
+2620: FUNC BCD_RevExp
+2634: FUNC BCD_RevSig
+2658: FUNC ZeroReg
+2672: FUNC MaxReg
+2700: FUNC IncRansExp
+2716: FUNC SwapR0R1
+2737: FUNC CopyRegs
+2756: FUNC TosR0R1
+2783: FUNC RansTos
+2807: FUNC HalfShift
+2829: FUNC HalfShiftForward
+2849: FUNC HalfShiftBackward
+2869: FUNC HalfShiftWide
+2895: FUNC HalfShiftWideForward
+2920: FUNC ShiftR0
+3010: FUNC ShiftRx
+3098: FUNC NormRans
+3189: FUNC BCD_Round
+3228: FUNC BCD_Unpack
+3250: FUNC BCD_Pack
+3293: FUNC BCD_Exp_diff
+3306: FUNC BCD_StickyRound
+3352: FUNC BCD_Add
+3531: FUNC BCD_Mult
+3673: FUNC BCD_Div
+3814: include cordic.asm
+3932: FUNC BCD_CORDIC
+4219: FUNC CORDIC_ShiftR0
+4229: FUNC CORDIC_MarkSign
+4247: FUNC CORDIC_Trig
+4406: FUNC CORDIC_Atrig1
+4419: FUNC CORDIC_Atan
+4581: FUNC CORDIC_AsinAcos
+4738: FUNC CORDIC_Pack
+4791: FUNC CORDIC_Push
+4910: include output.asm
+4914: FUNC DigitHigh
        ARGS: BYTE digit
        1 byte used
-4793: FUNC DigitLow
+4935: FUNC DigitLow
        ARGS: BYTE digit
        1 byte used
-4810: FUNC DrawFloat
+4953: FUNC DrawFloat
        ARGS: WORD source, BYTE index, BYTE arg, BYTE sign, WORD buff
        7 bytes used
-4932: FUNC HexHigh
+5076: FUNC HexHigh
        ARGS: BYTE digit, BYTE arg
        2 bytes used
-4961: FUNC HexLow
+5106: FUNC HexLow
        ARGS: BYTE digit, BYTE arg
        2 bytes used
-4987: FUNC DrawHex
+5133: FUNC DrawHex
        ARGS: WORD source, BYTE arg
        3 bytes used
-5027: FUNC DrawString
+5174: FUNC DrawString
        ARGS: WORD source, BYTE arg, BYTE index
        4 bytes used
-5064: FUNC DrawStack
+5212: FUNC DrawStack
        VARS: BYTE character, BYTE counter, WORD address
        4 bytes used
-5226: include error.asm
-5280: FUNC ErrorMsg
+5389: include error.asm
+5443: FUNC ErrorMsg
        VARS: WORD msg
        2 bytes used
-5344: include aux_stack.asm
-5349: FUNC AuxPushShort
-5373: FUNC AuxPopShort
-5396: include forth.asm
-5399: FUNC InitForth
-5425: FUNC ReadLine
+5522: include aux_stack.asm
+5527: FUNC AuxPushShort
+5552: FUNC AuxPopShort
+5576: include forth.asm
+5579: FUNC InitForth
+5606: FUNC ReadLine
        VARS: BYTE cursor, BYTE cursor_timer, BYTE arg, BYTE index, BYTE str_index, BYTE screen_ptr_temp
        6 bytes used
-5674: FUNC LineWord
-5730: FUNC FindWord
+5882: FUNC LineWord
+5939: FUNC FindWord
        VARS: BYTE address_temp
        1 byte used
-5798: FUNC CheckData
+6008: FUNC CheckData
        VARS: BYTE input_mode, BYTE y_buff, BYTE index, BYTE which_digit, BYTE negative, BYTE exp_negative, BYTE exp_count, BYTE exp_found, BYTE dec_found, BYTE nonzero_found, BYTE digit_count, BYTE exp_digit_count, BYTE digit_found, BYTE num_buff, BYTE float_buff
        15 bytes used
-6319: FUNC ExecToken
-6453: FUNC ExecThread
-6479: FUNC StackAddItem
-6491: FUNC DictEnd
-6540: FUNC IncDictPtr
-6552: FUNC IncExecPtr
-6564: FUNC AllocMem
-6593: FUNC WriteToken
+6530: FUNC ExecToken
+6665: FUNC ExecThread
+6692: FUNC StackAddItem
+6705: FUNC DictEnd
+6755: FUNC IncDictPtr
+6768: FUNC IncExecPtr
+6781: FUNC AllocMem
+6811: FUNC WriteToken
        VARS: BYTE token, BYTE user_defined
        2 bytes used
-6651: FUNC WriteHeader
-6718: FUNC TokenArgThread
-6755: FUNC HexFalse
-6762: FUNC HexTrue
-6781: include words.asm
-10088: include word_stubs.asm
-10394: include forth_loop.asm
-10400: FUNC ForthLoop
+6870: FUNC WriteHeader
+6938: FUNC TokenArgThread
+6976: FUNC HexFalse
+6984: FUNC HexTrue
+7004: include words.asm
+10326: include word_stubs.asm
+10632: include forth_loop.asm
+10638: FUNC ForthLoop
        VARS: WORD dest, BYTE arg, BYTE type
        4 bytes used
-10629: FUNC main BEGIN
+10868: FUNC main BEGIN
 
 Call graph
 ==========
@@ -233,6 +243,8 @@ main(0) > ForthLoop(4) - (4 bytes)
 main(0) > ForthLoop(4) > InitForth(0) - (4 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) - (8 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > LCD_clrscr(1) - (9 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > LCD_Col(0) - (8 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > LCD_Byte(2) - (10 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > LCD_char(7) - (15 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) - (11 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > LCD_char(7) - (18 bytes)
@@ -242,6 +254,7 @@ main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexLow(2) - (13 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawHex(3) > HexLow(2) > LCD_char(7) - (20 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > LCD_print(4) - (12 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > LCD_print(4) > LCD_char(7) - (19 bytes)
+main(0) > ForthLoop(4) > DrawStack(4) > LCD_Row(0) - (8 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) - (15 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > MemCopy(5) - (20 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > LCD_char(7) - (22 bytes)
@@ -252,8 +265,11 @@ main(0) > ForthLoop(4) > DrawStack(4) > DrawFloat(7) > DigitLow(1) > LCD_char(7)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawString(4) - (12 bytes)
 main(0) > ForthLoop(4) > DrawStack(4) > DrawString(4) > LCD_char(7) - (19 bytes)
 main(0) > ForthLoop(4) > ReadLine(6) - (10 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) > LCD_Col(0) - (10 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) > LCD_Row(0) - (10 bytes)
 main(0) > ForthLoop(4) > ReadLine(6) > LCD_print(4) - (14 bytes)
 main(0) > ForthLoop(4) > ReadLine(6) > LCD_print(4) > LCD_char(7) - (21 bytes)
+main(0) > ForthLoop(4) > ReadLine(6) > GetTimer(0) - (10 bytes)
 main(0) > ForthLoop(4) > ReadLine(6) > ReadKey(0) - (10 bytes)
 main(0) > ForthLoop(4) > ReadLine(6) > LCD_char(7) - (17 bytes)
 main(0) > ForthLoop(4) > LineWord(0) - (4 bytes)
@@ -264,6 +280,8 @@ main(0) > ForthLoop(4) > CheckData(15) - (19 bytes)
 main(0) > ForthLoop(4) > CheckData(15) > BCD_Reverse(3) - (22 bytes)
 main(0) > ForthLoop(4) > MemCopy(5) - (9 bytes)
 main(0) > ForthLoop(4) > ErrorMsg(2) - (6 bytes)
+main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_Col(0) - (6 bytes)
+main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_Row(0) - (6 bytes)
 main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_print(4) - (10 bytes)
 main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_print(4) > LCD_char(7) - (17 bytes)
 main(0) > ForthLoop(4) > ErrorMsg(2) > LCD_char(7) - (13 bytes)
@@ -381,4 +399,7 @@ _string_literal00038: FCB "           [OK]",0
 _string_literal00039: FCB "a                     ",0
 _string_literal00040: FCB "                ",0
 
+
+Banked functions
+================
 
