@@ -17,12 +17,6 @@
 		LDX #0
 	END
 	
-	equ SPECIAL_CHARS_LEN, 18	;1+15+2
-	special_chars:
-	FCB CHAR_QUOTE				;1
-	FCB " .$+-*/'!@:;=<>"		;15
-	FCB "SE"					;2
-	
 	FUNC ReadLine
 		VARS
 			BYTE cursor, cursor_timer
@@ -44,29 +38,16 @@
 		STA cursor_timer
 		
 		.loop:
-			LDA #0
-			STA arg
-			TODO: require shift for special characters
 			CALL ReadKey
+            CMP #0  ;Flags may not be set correctly
 			BNE .key_read
 				JMP .no_key
 			.key_read:
-			
-				;Enter key
-                ;=========
-                ;KEY_ENTER defined as 13 in src/const.asm which works in Windows
-                ;when loading key input from file, but newline in Linux is just 10, 
-                ;so doesn't work when loading key input in Linux.
-                ;Confirmed editing existing key input file from Linux with notepad 
-                ;in Windows doesn't insert 13, so ok to edit existing files but
-                ;not to create file on Windows.
-                ;Check for 13 and 10 below, though note could cause problems if
-                ;keys.txt created in Windows as would be read as two new lines.
+                STA arg
+	           
+                ;Enter
 				CMP #KEY_ENTER
-				BEQ .key_enter
-                CMP #KEY_ENTER_ALT
                 BNE .not_enter
-                .key_enter:
 					LDA index
 					BEQ .loop
 					LDA #0
@@ -99,74 +80,27 @@
 							LDY index
 							DEY
 							JMP .scroll_buffer
-						
 					.backspace_done:
-					JMP .no_key
+					JMP .keys_done
 				.not_backspace:
-				
-                ;Special character
-				LDY #0
-				.special_loop:
-					CMP special_chars,Y
-					BNE .special_next
-						STA arg
-						
-						;;Recode m for minus as c since c assigned to minus sign
-						;CMP #'m'
-						;BNE .key_done
-						;	LDA #CHAR_MINUS
-						;	STA arg
-						
-						;Recode uppercase S for STO as d which is store arrow. s is letter s
-						CMP #'S'
-						BNE .key_E
-							LDA #CHAR_STO
-							STA arg
-							BNE .key_done
-							
-						;Recode uppercase E for exponent. e is letter e
-						.key_E:
-						CMP #'E'
-						BNE .key_done
-							LDA #CHAR_EXP
-							STA arg
-							BNE .key_done
-							
-					.special_next:
-					INY
-					CPY #SPECIAL_CHARS_LEN
-					BNE .special_loop
-				
-				;Number
-				CMP #'0'
-				BCC .not_num
-				CMP #'9'+1
-				BCS .not_num
-					STA arg
-					JMP .key_done
-				.not_num:
-				
-				;Uppercase
-				CMP #'A'
-				BCC .not_upper
-				CMP #'Z'+1
-				BCS .not_upper
-					STA arg
-					JMP .key_done
-				.not_upper:
-				
-				;Lowercase
-				CMP #'a'
-				BCC .not_lower
-				CMP #'z'+1
-				BCS .not_lower
-					;Convert to uppercase
-					SEC
-					SBC #$20
-					STA arg
-				.not_lower:
-				
-				.key_done:
+
+                ;Alpha key
+                CMP #KEY_ALPHA
+                BNE .not_alpha
+                    LDA keys_alpha
+                    EOR #$FF
+                    STA keys_alpha
+                    LDA screen_ptr  ;Works same on emu and hardware
+                    STA screen_ptr_temp
+                    CALL DrawAlpha
+                    LDA screen_ptr_temp
+                    CALL LCD_Col
+                    LDA #INPUT_Y
+                    CALL LCD_Row
+                    JMP .keys_done
+                .not_alpha:
+                
+                ;Key to add to input
 				LDA arg
 				BEQ .not_valid
 					LDY index
@@ -211,6 +145,7 @@
 					.buffer_full:
 				.not_valid:
 
+            .keys_done:
 			.no_key:
             CALL GetTimer
 			CMP cursor_timer

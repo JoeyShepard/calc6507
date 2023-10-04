@@ -3,112 +3,174 @@
 <table border="1">
 <tr>
 <td>0x1</td>
+<td>BYTE BCD_Reverse.count</td>
+<td>BYTE DigitHigh.digit</td>
+<td>BYTE DigitLow.digit</td>
+<td>BYTE DrawHex.arg</td>
+<td>BYTE DrawString.arg</td>
+<td>WORD ErrorMsg.msg</td>
+<td>BYTE FindWord.address_temp</td>
 <td>BYTE LCD_Byte.data</td>
-<td>BYTE LCD_char.c_out</td>
 <td>BYTE LCD_clrscr.col_count</td>
-<td>BYTE ReadKey.col_count</td>
+<td>BYTE MemCopy.count</td>
 <td>BYTE SetBank.bank</td>
+<td>BYTE WriteToken.token</td>
 </tr
 
 ><tr>
 <td>0x2</td>
-<td>BYTE LCD_char.char_counter</td>
+<td>WORD BCD_Reverse.source</td>
+<td>BYTE DrawFloat.arg</td>
+<td>WORD DrawHex.source</td>
+<td>BYTE DrawString.index</td>
+<td>WORD ErrorMsg.msg</td>
 <td>BYTE LCD_clrscr.row_count</td>
-<td>BYTE ReadKey.cycles</td>
+<td>BYTE ReadLine.arg</td>
+<td>BYTE WriteToken.user_defined</td>
 </tr
 
 ><tr>
 <td>0x3</td>
-<td>WORD LCD_char.pixel_ptr</td>
-<td>BYTE ReadKey.key</td>
+<td>WORD BCD_Reverse.source</td>
+<td>WORD DrawFloat.buff</td>
+<td>WORD DrawHex.source</td>
+<td>WORD DrawString.source</td>
+<td>BYTE LCD_print.arg</td>
+<td>BYTE ReadKey.col_count</td>
 </tr
 
 ><tr>
 <td>0x4</td>
-<td>WORD LCD_char.pixel_ptr</td>
-<td>BYTE ReadKey.mask</td>
+<td>BYTE CheckData.dec_found</td>
+<td>WORD DrawFloat.buff</td>
+<td>WORD DrawString.source</td>
+<td>BYTE HexHigh.arg</td>
+<td>BYTE HexLow.arg</td>
+<td>BYTE LCD_print.index</td>
+<td>BYTE ReadKey.cycles</td>
 </tr
 
 ><tr>
 <td>0x5</td>
-<td>BYTE LCD_print.arg</td>
-<td>BYTE ReadKey.row_count</td>
+<td>BYTE CheckData.digit_count</td>
+<td>BYTE DrawFloat.index</td>
+<td>BYTE HexHigh.digit</td>
+<td>BYTE HexLow.digit</td>
+<td>STRING LCD_print.source</td>
+<td>BYTE ReadKey.key</td>
 </tr
 
 ><tr>
 <td>0x6</td>
-<td>BYTE LCD_print.index</td>
+<td>BYTE CheckData.digit_found</td>
+<td>BYTE DrawFloat.sign</td>
+<td>STRING LCD_print.source</td>
+<td>BYTE ReadKey.mask</td>
 </tr
 
 ><tr>
 <td>0x7</td>
-<td>STRING LCD_print.source</td>
+<td>BYTE CheckData.exp_count</td>
+<td>WORD DrawFloat.source</td>
+<td>BYTE ReadKey.row_count</td>
 </tr
 
 ><tr>
 <td>0x8</td>
-<td>STRING LCD_print.source</td>
+<td>BYTE CheckData.exp_digit_count</td>
+<td>WORD DrawFloat.source</td>
+<td>BYTE ReadLine.cursor</td>
 </tr
 
 ><tr>
 <td>0x9</td>
-<td>BYTE main.arg</td>
+<td>BYTE CheckData.exp_found</td>
+<td>WORD DrawStack.address</td>
+<td>BYTE ReadLine.cursor_timer</td>
 </tr
 
 ><tr>
 <td>0xa</td>
+<td>BYTE CheckData.exp_negative</td>
+<td>WORD DrawStack.address</td>
+<td>BYTE ReadLine.index</td>
 </tr
 
 ><tr>
 <td>0xb</td>
+<td>BYTE CheckData.float_buff</td>
+<td>BYTE DrawStack.character</td>
+<td>BYTE ReadLine.screen_ptr_temp</td>
 </tr
 
 ><tr>
 <td>0xc</td>
+<td>BYTE CheckData.index</td>
+<td>BYTE DrawStack.counter</td>
+<td>BYTE ReadLine.str_index</td>
 </tr
 
 ><tr>
 <td>0xd</td>
+<td>BYTE CheckData.input_mode</td>
+<td>BYTE LCD_char.c_out</td>
+<td>WORD MemCopy.dest</td>
 </tr
 
 ><tr>
 <td>0xe</td>
+<td>BYTE CheckData.negative</td>
+<td>BYTE LCD_char.char_counter</td>
+<td>WORD MemCopy.dest</td>
 </tr
 
 ><tr>
 <td>0xf</td>
+<td>BYTE CheckData.nonzero_found</td>
+<td>WORD LCD_char.pixel_ptr</td>
+<td>WORD MemCopy.source</td>
 </tr
 
 ><tr>
 <td>0x10</td>
+<td>BYTE CheckData.num_buff</td>
+<td>WORD LCD_char.pixel_ptr</td>
+<td>WORD MemCopy.source</td>
 </tr
 
 ><tr>
 <td>0x11</td>
+<td>BYTE CheckData.which_digit</td>
 </tr
 
 ><tr>
 <td>0x12</td>
+<td>BYTE CheckData.y_buff</td>
 </tr
 
 ><tr>
 <td>0x13</td>
+<td>BYTE ForthLoop.arg</td>
 </tr
 
 ><tr>
 <td>0x14</td>
+<td>WORD ForthLoop.dest</td>
 </tr
 
 ><tr>
 <td>0x15</td>
+<td>WORD ForthLoop.dest</td>
 </tr
 
 ><tr>
 <td>0x16</td>
+<td>BYTE ForthLoop.type</td>
 </tr
 
 ><tr>
 <td>0x17</td>
+<td>BYTE main.arg</td>
 </tr
 
 ><tr>

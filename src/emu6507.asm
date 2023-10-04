@@ -10,6 +10,17 @@
 	equ CHAR_HEIGHT, 		16
     equ WORDS_Y,            7
 
+	special_chars:
+	FCB CHAR_QUOTE
+    FCB ":;[],"
+    FCB "'<=>^"
+    FCB "$E"    ;E = EE
+    FCB "A/"    ;A = alpha
+    FCB "S!*"   ;S = store arrow
+    FCB "@?_-"
+    FCB ". +"
+	equ SPECIAL_CHARS_LEN, *-special_chars
+
 	FUNC setup
 		SEI
 		CLD
@@ -67,7 +78,7 @@
 		STA mode
 
         ;Alpha not used in emulator version but check functionality
-        LDA #$FF
+        LDA #0
         STA keys_alpha
 		
 		;Point to RAM so tests can run
@@ -89,6 +100,108 @@
 
 	FUNC ReadKey
 		LDA KB_INPUT
+       
+        ;Enter key
+        ;=========
+        ;KEY_ENTER defined as 13 in src/const.asm which works in Windows
+        ;when loading key input from file, but newline in Linux is just 10, 
+        ;so doesn't work when loading key input in Linux.
+        ;Confirmed editing existing key input file from Linux with notepad 
+        ;in Windows doesn't insert 13, so ok to edit existing files but
+        ;not to create file on Windows.
+        ;Check for 13 and 10 below, though note could cause problems if
+        ;keys.txt created in Windows as would be read as two new lines.
+        CMP #KEY_ENTER
+        BEQ .key_enter
+        CMP #KEY_ENTER_ALT
+        BNE .not_enter
+            .key_enter:
+            RTS
+        .not_enter:
+
+        ;Backspace
+        CMP #KEY_BACKSPACE
+        BNE .not_backspace
+            RTS
+        .not_backspace:
+
+        ;Alpha
+        ;(Not useful on emu but test here for hardware)
+        CMP #KEY_ALPHA
+        BNE .not_alpha
+            RTS
+        .not_alpha:
+
+        ;Special character
+        LDY #0
+        .special_loop:
+            CMP special_chars,Y
+            BNE .special_next
+                
+                ;;Recode m for minus as c since c assigned to minus sign
+                ;CMP #'m'
+                ;BNE .key_done
+                ;	LDA #CHAR_MINUS
+                ;	STA arg
+                
+                ;Recode uppercase S for STO as d which is store arrow. s is letter s
+                CMP #'S'
+                BNE .key_E
+                    LDA #CHAR_STO
+                    RTS
+
+                ;Recode uppercase E for exponent. e is letter e
+                .key_E:
+                CMP #'E'
+                BNE .key_A
+                    LDA #CHAR_EXP
+                    RTS
+
+                ;Recode uppercase A for alpha
+                .key_A:
+                CMP #'A'
+                BNE .special_done
+                    LDA #KEY_ALPHA
+                    RTS
+                
+                .special_done:
+                RTS
+
+            .special_next:
+            INY
+            CPY #SPECIAL_CHARS_LEN
+            BNE .special_loop
+        
+        ;Number
+        CMP #'0'
+        BCC .not_num
+        CMP #'9'+1
+        BCS .not_num
+            RTS
+        .not_num:
+        
+        ;Uppercase
+        CMP #'A'
+        BCC .not_upper
+        CMP #'Z'+1
+        BCS .not_upper
+            RTS
+        .not_upper:
+        
+        ;Lowercase
+        CMP #'a'
+        BCC .not_lower
+        CMP #'z'+1
+        BCS .not_lower
+            ;Convert to uppercase
+            SEC
+            SBC #$20
+            RTS
+        .not_lower:
+        
+        ;No matches found - return 0
+        LDA #0
+
 	END
 
 	FUNC LCD_clrscr

@@ -6,6 +6,8 @@
 ;RTS from there goes back to fixed bank which pulls and restores
 ;bank then returns.
 
+banking_begin:
+
 ;Count of table entries to check for mismatch
     SET Bank1TrampolineCount,0
     SET Bank1IDCount,0
@@ -172,3 +174,5 @@ TableCheckError MACRO trampoline,id,table
     ELSEIF ((Bank4TrampolineCount<>Bank4IDCount)||(Bank4IDCount<>Bank4TableCount))
         TableCheckError Bank4TrampolineCount,Bank4IDCount,Bank4TableCount
     ENDIF
+
+    banking_end:

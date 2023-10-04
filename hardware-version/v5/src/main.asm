@@ -91,14 +91,9 @@
     include words.asm           ;4389 bytes
         ;words 1230
 
-    ;size_check_begin:
-    ;size_check_end:
-
 	ORG FIXED_EEPROM
-    banking_begin:
     include banking.asm
-    banking_end:
-	include system.asm          ;13 bytes
+	include system.asm
 
     FUNC setup
         SEI        
@@ -172,43 +167,9 @@
         CALL LCD_Setup
         CALL LCD_clrscr
 
-        LDA #0
-        STA arg
-        JMP .draw
-
-        .loop:
-            CALL ReadKey
-            BEQ .loop
-            STA arg
-            .draw:
-            CALL LCD_clrscr
-            CALL LCD_print,"TESTING"
-
-            LDA #0
-            CALL LCD_Col
-            LDA #2
-            CALL LCD_Row
-            CALL LCD_Byte, #$A9
-
-            LDA #0
-            CALL LCD_Col
-            LDA #1
-            CALL LCD_Row
-            CALL LCD_char, arg
-            LDA keys_alpha
-            BEQ .not_alpha
-                LDA #120
-                CALL LCD_Col
-                LDA #'A'
-                STA arg
-                CALL LCD_char, arg
-            .not_alpha:
-
-            JMP .loop
-
-            ;Jump to ForthLoop function and never return
-            ;(Needs to be CALL for optimizer)
-            ;CALL ForthLoop
+        ;Jump to ForthLoop function and never return
+        ;(Needs to be CALL for optimizer)
+        CALL ForthLoop
 
 	END
 

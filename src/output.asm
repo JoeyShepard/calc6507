@@ -194,7 +194,24 @@
 		.done:
 		CALL LCD_char, #CHAR_QUOTE
 	END
-	
+
+    FUNC DrawAlpha
+        LDA #0
+        CALL LCD_Row
+        LDA #CHAR_WIDTH*19
+        CALL LCD_Col
+        LDA keys_alpha
+        BEQ .no_alpha
+            CALL LCD_Byte,#$FF
+            MOV #$FF,font_inverted
+            CALL LCD_char, #'A'
+            MOV #0,font_inverted
+            RTS
+        .no_alpha:
+            CALL LCD_Byte,#0
+            CALL LCD_char, #' '
+    END
+
 	FUNC DrawStack
 		VARS
 			BYTE character
@@ -213,17 +230,7 @@
 		STA address+1
 		
 		CALL LCD_clrscr
-
-        LDA keys_alpha
-        BEQ .no_alpha
-            LDA #CHAR_WIDTH*19
-            CALL LCD_Col
-            ;LSB is on top to match hardware LCD
-            CALL LCD_Byte,#$FF
-            MOV #$FF,font_inverted
-            CALL LCD_char, #'A'
-            MOV #0,font_inverted
-        .no_alpha:
+        CALL DrawAlpha
 
         IF FALSE
 

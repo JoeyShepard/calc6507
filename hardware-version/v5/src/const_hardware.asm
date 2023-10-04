@@ -45,7 +45,7 @@ WORDS_Y         = 7
 
 ;Keypad constants
 KEY_MASK            = $1F
-KEY_ALPHA           = 20
+KEY_MASK_ALPHA      = 20
 KEY_SETTLE_CYCLES   = 100
 KEY_DEBOUNCE_CYCLES = 5
 

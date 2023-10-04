@@ -47,6 +47,7 @@
 	equ KEY_ENTER_ALT, 		10  ;Compatibility for key input files on Linux
 	equ KEY_ESCAPE,			27
 	equ KEY_ON,		        KEY_ESCAPE
+    equ KEY_ALPHA,          20  ;Caps lock
 	
 	;Floats
 	equ DEC_COUNT,			12

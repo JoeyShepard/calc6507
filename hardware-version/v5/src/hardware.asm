@@ -7,9 +7,9 @@ keypad_table:
     FCB "ABCDE"
     FCB ":;[],"
     FCB "'<=>^"
-    FCB KEY_ENTER,"$\"ed"   ;e=exponent, a=left arrow
+    FCB KEY_ENTER,"$\"e",KEY_BACKSPACE  ;e=exponent
     FCB 0,"789/"
-    FCB "d456*"             ;d=store arrow
+    FCB "d456*"                         ;d=store arrow
     FCB "@123-"
     FCB KEY_ON,"0. +"
 
@@ -17,7 +17,7 @@ keypad_alpha_table:
     FCB "ABCDE"
     FCB "FGHIJ"
     FCB "KLMNO"
-    FCB KEY_ENTER,"PQRa"    ;a=left arrow
+    FCB KEY_ENTER,"PQR",KEY_BACKSPACE
     FCB 0,"STU/"
     FCB "!VWX*"
     FCB "?YZ_-"
@@ -195,10 +195,11 @@ keypad_alpha_table:
             BEQ .done
             CPY #5
             BNE .char_data
-                LDA #0
-                BEQ .write_data
+                LDA font_inverted
+                JMP .write_data
             .char_data:
                 LDA (pixel_ptr),Y 
+                EOR font_inverted
             .write_data:
             TAY
             LDA screen_ptr+1
@@ -318,13 +319,11 @@ keypad_alpha_table:
         ;Key debounced
         LDY key
         DEY
-        CPY #KEY_ALPHA
+        CPY #KEY_MASK_ALPHA
         BNE .not_alpha
-            ;Alpha pressed - invert state but return no key code
-            LDA keys_alpha
-            EOR #$FF
-            STA keys_alpha
-            LDA #0
+            ;Alpha pressed
+            ;(Handled separately here at first but better to handle in main loop)
+            LDA #KEY_ALPHA
             RTS
         .not_alpha:
         ;Return alpha or non-alpha key
