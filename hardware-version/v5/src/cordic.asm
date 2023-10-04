@@ -1,6 +1,8 @@
 ;CORDIC routines for transcendentals
 ;===================================
 
+cordic_asm_begin:
+
 ;Links
 ;=====
 ;https://www.hpmuseum.org/forum/thread-12180.html
@@ -1062,4 +1064,5 @@ TODO: more accurate answer at cost of added complexity
 ;		STA DEBUG
 ;		
 ;		RTS
-		
+	
+cordic_asm_end:

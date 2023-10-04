@@ -1,6 +1,8 @@
 ;Error message functions
 ;=======================
 
+error_asm_begin:
+
 	TODO: shorten messages?
 	TODO: remove ending 0
 	ERROR_MSG_INPUT:
@@ -90,3 +92,5 @@
 			CMP #KEY_ENTER
 			BNE .loop
 	END
+
+error_asm_end:

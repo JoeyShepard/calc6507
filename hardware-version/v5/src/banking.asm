@@ -175,4 +175,4 @@ TableCheckError MACRO trampoline,id,table
         TableCheckError Bank4TrampolineCount,Bank4IDCount,Bank4TableCount
     ENDIF
 
-    banking_end:
+banking_end:

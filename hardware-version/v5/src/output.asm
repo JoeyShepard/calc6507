@@ -1,6 +1,8 @@
 ;Output functions
 ;================
 
+output_asm_begin:
+
 	FUNC DigitHigh
 		ARGS
 			BYTE digit
@@ -309,4 +311,4 @@
             BNE .line_loop
 	END
 		
-	
+output_asm_end:

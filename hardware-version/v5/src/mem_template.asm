@@ -22,6 +22,16 @@ Align4 MACRO num
     SET align_return,"\{num}\{substr(spaces,0,4-strlen(align_return))}"
     ENDM
 
+HeaderSize MACRO hname
+    Align4 hname_asm_end-hname_asm_begin
+    set hname_asm_size, align_return
+    ENDM
+
+BankAlignSize MACRO bname
+    Align4 bname_END-BANKED_EEPROM
+    set bname_ALIGNED_SIZE, align_return
+    ENDM
+
 ;Display memory usage in console
 ;===============================
 	;MESSAGE " "
@@ -54,11 +64,38 @@ Align4 MACRO num
     ;MESSAGE "Banks: 1:\{BANK1_ALIGN}|2:\{BANK1_ALIGN}|3:\{BANK1_ALIGN}|4:\{BANK1_ALIGN} of 4096 bytes"
    
     ;v3
+    ;MESSAGE "Fixed ROM size: \{code_end-FIXED_EEPROM} of \{BANKED_EEPROM-FIXED_EEPROM} bytes"
+    ;MESSAGE "- Banking code: \{banking_end-banking_begin} bytes (7+1+2 bytes per function)"
+    ;MESSAGE "Bank 1:\{BANK1_END-BANKED_EEPROM} | 2:\{BANK2_END-BANKED_EEPROM} | 3:\{BANK3_END-BANKED_EEPROM} | 4:\{BANK4_END-BANKED_EEPROM} of 4096 bytes"
+    ;MESSAGE "Size check: \{size_check_end-size_check_begin} bytes"
+
+    ;v4
     MESSAGE "Fixed ROM size: \{code_end-FIXED_EEPROM} of \{BANKED_EEPROM-FIXED_EEPROM} bytes"
-    MESSAGE "- Banking code: \{banking_end-banking_begin} bytes (7+1+2 bytes per function)"
-    MESSAGE "Bank 1:\{BANK1_END-BANKED_EEPROM} | 2:\{BANK2_END-BANKED_EEPROM} | 3:\{BANK3_END-BANKED_EEPROM} | 4:\{BANK4_END-BANKED_EEPROM} of 4096 bytes"
-    MESSAGE "Size check: \{size_check_end-size_check_begin} bytes"
+    ;MESSAGE "- Banking code: \{banking_end-banking_begin} bytes (7+1+2 bytes per function)"
+    ;MESSAGE "Bank 1:\{BANK1_END-BANKED_EEPROM} | 2:\{BANK2_END-BANKED_EEPROM} | 3:\{BANK3_END-BANKED_EEPROM} | 4:\{BANK4_END-BANKED_EEPROM} of 4096 bytes"
+    ;MESSAGE "Size check: \{size_check_end-size_check_begin} bytes"
+    MESSAGE "Bank            1      2      3"
+    HeaderSize hardware
+    HeaderSize output
+    HeaderSize forth
+    HeaderSize forthloop
+    HeaderSize error
+    HeaderSize math
+    HeaderSize cordic
+    HeaderSize words
+    HeaderSize word_stubs
+    HeaderSize aux_stack
+    BankAlignSize BANK1
+    BankAlignSize BANK2
+    BankAlignSize BANK3
+    BankAlignSize BANK4
+    MESSAGE "hardware.asm    \{hardware_asm_size}   \{math_asm_size}   \{words_asm_size}"
+    MESSAGE "output.asm      \{output_asm_size}   \{cordic_asm_size}   \{word_stubs_asm_size}"
+    MESSAGE "forth.asm       \{forth_asm_size}          \{aux_stack_asm_size}"
+    MESSAGE "forth_loop.asm  \{forthloop_asm_size}"
+    MESSAGE "error.asm       \{error_asm_size}"
+    MESSAGE "Total           \{BANK1_ALIGNED_SIZE}   \{BANK2_ALIGNED_SIZE}   \{BANK3_ALIGNED_SIZE}   \{BANK4_ALIGNED_SIZE}"
 
 	;Tell script that prints assembler output to stop outputting
-	;Eliminates double output (because of multiple passes???)
+	;Eliminates double output (because of multiple passes?)
 	MESSAGE "END"

@@ -3,6 +3,8 @@
 ;abstracted here so emulated and hardware main functions can
 ;be different
 
+forthloop_asm_begin:
+
     FUNC ForthLoop
         VARS
             WORD dest
@@ -199,3 +201,6 @@
 			
 			JMP .process_loop
     END
+
+    
+forthloop_asm_end:

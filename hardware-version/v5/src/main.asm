@@ -45,13 +45,11 @@
     ;Bank 1    
     ORG BANK1_ADDRESS
     PHASE BANKED_EEPROM
-        include hardware.asm                ;|
-        font_table:                         ;|-932 bytes combined
-        include font_5x8_flipped.asm        ;|
-        include font_custom_flipped.asm     ;|
+        include hardware.asm                
         include output.asm                  ;657 bytes
         include forth.asm                   ;1793 bytes
         include forth_loop.asm              ;317 bytes
+        include error.asm                   ;346 bytes
     EQU BANK1_END,*
     DEPHASE
 
@@ -60,7 +58,6 @@
     PHASE BANKED_EEPROM
         include math.asm                    ;1416 bytes
         include cordic.asm                  ;1067 bytes
-        include error.asm                   ;346 bytes
     EQU BANK2_END,*
     DEPHASE
 
@@ -90,6 +87,9 @@
     ;Sizes are when when started moving to banking - may increase
     include words.asm           ;4389 bytes
         ;words 1230
+
+    size_check_begin:
+    size_check_end:
 
 	ORG FIXED_EEPROM
     include banking.asm

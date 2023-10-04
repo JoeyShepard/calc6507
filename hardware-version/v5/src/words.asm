@@ -1,6 +1,8 @@
 ;Forth word list
 ;===============
 
+words_asm_begin:
+
 	FORTH_WORDS:
 	
 	WORD_DUP:
@@ -3258,4 +3260,5 @@
 		FDB CODE_WORDS              ;144 $90
         FDB CODE_BROKEN_REF         ;146 $92
         FDB CODE_LN                 ;148 $94
-        
+       
+words_asm_end:

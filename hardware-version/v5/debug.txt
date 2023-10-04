@@ -51,143 +51,143 @@ Line numbers
 666: GLOBAL BYTE aux_stack_count
 668: GLOBAL BYTE aux_word_counter
 702: include hardware.asm
-732: FUNC LCD_Data
-747: FUNC LCD_Instruction
-761: FUNC LCD_Row
-772: FUNC LCD_Col
-808: FUNC LCD_Setup
-848: FUNC LCD_clrscr
+734: FUNC LCD_Data
+749: FUNC LCD_Instruction
+763: FUNC LCD_Row
+774: FUNC LCD_Col
+810: FUNC LCD_Setup
+850: FUNC LCD_clrscr
       VARS: BYTE row_count, BYTE col_count
       2 bytes used
-886: FUNC LCD_char
+888: FUNC LCD_char
       ARGS: BYTE c_out, WORD pixel_ptr, BYTE char_counter
       4 bytes used
-960: FUNC LCD_print
+962: FUNC LCD_print
       ARGS: STRING source, BYTE index, BYTE arg
       4 bytes used
-985: FUNC LCD_Byte
+987: FUNC LCD_Byte
       ARGS: BYTE data
       1 byte used
-1004: FUNC ReadKey
+1006: FUNC ReadKey
       VARS: BYTE mask, BYTE row_count, BYTE col_count, BYTE key, BYTE cycles
       5 bytes used
-1095: FUNC GetTimer
-1105: include font_5x8_flipped.asm
-1304: include font_custom_flipped.asm
-1338: include output.asm
-1342: FUNC DigitHigh
+1097: FUNC GetTimer
+1107: include font_5x8_flipped.asm
+1306: include font_custom_flipped.asm
+1343: include output.asm
+1349: FUNC DigitHigh
       ARGS: BYTE digit
       1 byte used
-1363: FUNC DigitLow
+1370: FUNC DigitLow
       ARGS: BYTE digit
       1 byte used
-1381: FUNC DrawFloat
+1388: FUNC DrawFloat
       ARGS: WORD source, BYTE index, BYTE arg, BYTE sign, WORD buff
       7 bytes used
-1504: FUNC HexHigh
+1511: FUNC HexHigh
       ARGS: BYTE digit, BYTE arg
       2 bytes used
-1534: FUNC HexLow
+1541: FUNC HexLow
       ARGS: BYTE digit, BYTE arg
       2 bytes used
-1561: FUNC DrawHex
+1568: FUNC DrawHex
       ARGS: WORD source, BYTE arg
       3 bytes used
-1602: FUNC DrawString
+1609: FUNC DrawString
       ARGS: WORD source, BYTE arg, BYTE index
       4 bytes used
-1640: FUNC DrawAlpha
-1680: FUNC DrawStack
+1647: FUNC DrawAlpha
+1687: FUNC DrawStack
       VARS: BYTE character, BYTE counter, WORD address
       4 bytes used
-1842: include forth.asm
-1845: FUNC InitForth
-1865: FUNC ReadLine
+1849: include forth.asm
+1855: FUNC InitForth
+1875: FUNC ReadLine
       VARS: BYTE cursor, BYTE cursor_timer, BYTE arg, BYTE index, BYTE str_index, BYTE screen_ptr_temp
       6 bytes used
-2088: FUNC LineWord
-2145: FUNC FindWord
+2098: FUNC LineWord
+2155: FUNC FindWord
       VARS: BYTE address_temp
       1 byte used
-2214: FUNC CheckData
+2224: FUNC CheckData
       VARS: BYTE input_mode, BYTE y_buff, BYTE index, BYTE which_digit, BYTE negative, BYTE exp_negative, BYTE exp_count, BYTE exp_found, BYTE dec_found, BYTE nonzero_found, BYTE digit_count, BYTE exp_digit_count, BYTE digit_found, BYTE num_buff, BYTE float_buff
       15 bytes used
-2736: FUNC ExecToken
-2871: FUNC ExecThread
-2898: FUNC StackAddItem
-2911: FUNC DictEnd
-2961: FUNC IncDictPtr
-2974: FUNC IncExecPtr
-2987: FUNC AllocMem
-3017: FUNC WriteToken
+2746: FUNC ExecToken
+2881: FUNC ExecThread
+2908: FUNC StackAddItem
+2921: FUNC DictEnd
+2971: FUNC IncDictPtr
+2984: FUNC IncExecPtr
+2997: FUNC AllocMem
+3027: FUNC WriteToken
       VARS: BYTE token, BYTE user_defined
       2 bytes used
-3076: FUNC WriteHeader
-3144: FUNC TokenArgThread
-3182: FUNC HexFalse
-3190: FUNC HexTrue
-3210: include forth_loop.asm
-3216: FUNC ForthLoop
+3086: FUNC WriteHeader
+3154: FUNC TokenArgThread
+3192: FUNC HexFalse
+3200: FUNC HexTrue
+3221: include forth_loop.asm
+3229: FUNC ForthLoop
       VARS: WORD dest, BYTE arg, BYTE type
       4 bytes used
-3451: include math.asm
-3468: FUNC BCD_Reverse
-      ARGS: WORD source, BYTE count
-      3 bytes used
-3490: FUNC BCD_RevExp
-3504: FUNC BCD_RevSig
-3528: FUNC ZeroReg
-3542: FUNC MaxReg
-3570: FUNC IncRansExp
-3586: FUNC SwapR0R1
-3607: FUNC CopyRegs
-3626: FUNC TosR0R1
-3653: FUNC RansTos
-3677: FUNC HalfShift
-3699: FUNC HalfShiftForward
-3719: FUNC HalfShiftBackward
-3739: FUNC HalfShiftWide
-3765: FUNC HalfShiftWideForward
-3790: FUNC ShiftR0
-3880: FUNC ShiftRx
-3968: FUNC NormRans
-4059: FUNC BCD_Round
-4098: FUNC BCD_Unpack
-4120: FUNC BCD_Pack
-4163: FUNC BCD_Exp_diff
-4176: FUNC BCD_StickyRound
-4222: FUNC BCD_Add
-4401: FUNC BCD_Mult
-4543: FUNC BCD_Div
-4684: include cordic.asm
-4802: FUNC BCD_CORDIC
-5089: FUNC CORDIC_ShiftR0
-5099: FUNC CORDIC_MarkSign
-5117: FUNC CORDIC_Trig
-5276: FUNC CORDIC_Atrig1
-5289: FUNC CORDIC_Atan
-5451: FUNC CORDIC_AsinAcos
-5608: FUNC CORDIC_Pack
-5661: FUNC CORDIC_Push
-5780: include error.asm
-5834: FUNC ErrorMsg
+3461: include error.asm
+3517: FUNC ErrorMsg
       VARS: WORD msg
       2 bytes used
-5919: include aux_stack.asm
-5924: FUNC AuxPushShort
-5949: FUNC AuxPopShort
-5973: include word_stubs.asm
-6302: include words.asm
-9624: include banking.asm
-9806: include system.asm
-9809: FUNC MemCopy
+3604: include math.asm
+3623: FUNC BCD_Reverse
+      ARGS: WORD source, BYTE count
+      3 bytes used
+3645: FUNC BCD_RevExp
+3659: FUNC BCD_RevSig
+3683: FUNC ZeroReg
+3697: FUNC MaxReg
+3725: FUNC IncRansExp
+3741: FUNC SwapR0R1
+3762: FUNC CopyRegs
+3781: FUNC TosR0R1
+3808: FUNC RansTos
+3832: FUNC HalfShift
+3854: FUNC HalfShiftForward
+3874: FUNC HalfShiftBackward
+3894: FUNC HalfShiftWide
+3920: FUNC HalfShiftWideForward
+3945: FUNC ShiftR0
+4035: FUNC ShiftRx
+4123: FUNC NormRans
+4214: FUNC BCD_Round
+4253: FUNC BCD_Unpack
+4275: FUNC BCD_Pack
+4318: FUNC BCD_Exp_diff
+4331: FUNC BCD_StickyRound
+4377: FUNC BCD_Add
+4556: FUNC BCD_Mult
+4698: FUNC BCD_Div
+4839: include cordic.asm
+4959: FUNC BCD_CORDIC
+5246: FUNC CORDIC_ShiftR0
+5256: FUNC CORDIC_MarkSign
+5274: FUNC CORDIC_Trig
+5433: FUNC CORDIC_Atrig1
+5446: FUNC CORDIC_Atan
+5608: FUNC CORDIC_AsinAcos
+5765: FUNC CORDIC_Pack
+5818: FUNC CORDIC_Push
+5944: include aux_stack.asm
+5951: FUNC AuxPushShort
+5976: FUNC AuxPopShort
+6003: include word_stubs.asm
+6322: include words.asm
+9650: include banking.asm
+9832: include system.asm
+9835: FUNC MemCopy
       ARGS: WORD source, WORD dest, BYTE count
       5 bytes used
-9828: FUNC setup
-9885: FUNC SetBank
+9854: FUNC setup
+9911: FUNC SetBank
       ARGS: BYTE bank
       1 byte used
-9898: FUNC main BEGIN
+9924: FUNC main BEGIN
       VARS: BYTE arg
       1 byte used
 

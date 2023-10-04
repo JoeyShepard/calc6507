@@ -1,6 +1,8 @@
 ;Hardware specific functions
 ;===========================
 
+hardware_asm_begin:
+
 ;Data
 ;====
 keypad_table:
@@ -341,3 +343,9 @@ keypad_alpha_table:
     FUNC GetTimer
         LDA #0
     END
+
+font_table:                 
+include font_5x8_flipped.asm    
+include font_custom_flipped.asm 
+
+hardware_asm_end:
