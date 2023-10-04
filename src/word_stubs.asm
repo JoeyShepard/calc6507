@@ -1,6 +1,8 @@
 ;Helper stub functions for Forth words
 ;=====================================
 
+word_stubs_asm_begin:
+
 	;Used by smart hex
 	HEX_RECALC:
         ;Ignore any offsets if base is null - ie points to deleted object
@@ -137,8 +139,6 @@
 		
 		RTS
 	
-    size_check_begin:
-
 	SHIFT_STUB:
 	
 		;Smart
@@ -175,8 +175,6 @@
 		PLA
 		PLA
 		JMP CODE_DROP+EXEC_HEADER
-	
-    size_check_end:
 
 	TODO: delete and use function?
 	TODO: change to use pointer rather than embedded data?
@@ -211,6 +209,7 @@
 		BCC .skip
 			INC ret_address+1
 		.skip:
+        ;Jump ok as long as in same bank or in fixed bank
 		JMP (ret_address)
 		
 	PUSH_STUB_0:
@@ -293,12 +292,4 @@
 	;	RTS
 		
 
-		
-		
-		
-		
-		
-		
-		
-		
-		
+word_stubs_asm_end:

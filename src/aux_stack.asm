@@ -1,6 +1,8 @@
 ;Auxiliary stack
 ;===============
 
+aux_stack_asm_begin:
+
 ;Type in A
 FUNC AuxPushShort
 	
@@ -42,3 +44,6 @@ END
 
 
 TODO: reset aux stack on error
+
+
+aux_stack_asm_end:

@@ -1,6 +1,8 @@
 ;Output functions
 ;================
 
+output_asm_begin:
+
 	FUNC DigitHigh
 		ARGS
 			BYTE digit
@@ -219,10 +221,8 @@
 			WORD address
 		END
 		
-        IF FALSE
 		JSR StackAddItem
-        JSR CODE_FREE+EXEC_HEADER
-		ENDIF
+        JSR CODE_FREE_bank1
 
 		TXA
 		STA address
@@ -232,8 +232,6 @@
 		CALL LCD_clrscr
         CALL DrawAlpha
 
-        IF FALSE
-
         TODO: magic number
         LDA #CHAR_WIDTH*6
         CALL LCD_Col
@@ -241,10 +239,8 @@
 		CALL DrawHex, address
 		CALL LCD_print, " FREE]"
 	
-		JSR CODE_DROP+EXEC_HEADER
+		JSR CODE_DROP_bank1
 		
-        ENDIF
-
 		MOV #'5',character
 		MOV #5,counter
 		
@@ -309,4 +305,4 @@
             BNE .line_loop
 	END
 		
-	
+output_asm_end:

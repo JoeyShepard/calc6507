@@ -45,27 +45,28 @@
     ;Bank 1    
     ORG BANK1_ADDRESS
     PHASE BANKED_EEPROM
-        include hardware.asm                
-        include output.asm                  ;657 bytes
-        include forth.asm                   ;1793 bytes
-        include forth_loop.asm              ;317 bytes
-        include error.asm                   ;346 bytes
+        include hardware.asm    
+        include output.asm      
+        include forth.asm       
+        include forth_loop.asm  
+        include error.asm       
+        include bank1.asm
     EQU BANK1_END,*
     DEPHASE
 
     ;Bank 2
     ORG BANK2_ADDRESS
     PHASE BANKED_EEPROM
-        include math.asm                    ;1416 bytes
-        include cordic.asm                  ;1067 bytes
+        include math.asm        
+        include cordic.asm      
+        include bank2.asm
     EQU BANK2_END,*
     DEPHASE
 
     ;Bank 3
     ORG BANK3_ADDRESS
     PHASE BANKED_EEPROM
-        include aux_stack.asm       ;54 bytes
-        include word_stubs.asm      ;289 bytes
+        include aux_stack.asm
     EQU BANK3_END,*
     DEPHASE
 
@@ -85,8 +86,7 @@
     ORG $C000
 
     ;Sizes are when when started moving to banking - may increase
-    include words.asm           ;4389 bytes
-        ;words 1230
+    include words.asm 
 
     size_check_begin:
     size_check_end:
@@ -94,6 +94,7 @@
 	ORG FIXED_EEPROM
     include banking.asm
 	include system.asm
+    include word_stubs.asm
 
     FUNC setup
         SEI        

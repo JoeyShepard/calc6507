@@ -2,29 +2,8 @@
 
 from sys import argv
 
-#Parses one or more arguments separated by commas
-def arg_parse(arg_list,error_obj):
-    comma=False
-    ret_val=[]
-    for arg in arg_list[1:]:
-        if not comma:
-            ret_val+=[arg]
-        else:
-            pass
-        comma=not comma
-    if not comma or ret_val==[]:
-        #not comma = last processed was comma
-        error_exit(f"could not parse declaration - {arg_list}",error_obj)
-    return ret_val
-    
-#Display error, print partial output, exit
-def error_exit(msg,error_obj):
-    print("Error: "+msg)
-    error_obj["output_f"].write("OUTPUT TERMINATED:\n")
-    error_obj["output_f"].write("Error: "+msg+"\n")
-    error_obj["output_f"].write(f"In file {error_obj['filename_list'][-1]}\n")
-    exit(1)
-
+#Inital check before startup
+#===========================
 #Expects one filename as input from command line
 if len(argv)==1:
     print("Error: missing filename")
@@ -47,7 +26,16 @@ except:
     print("Error: unable to open debug.txt for output")
     exit(1)
 
+#Constants
+#=========
+TYPE_TEXT=0                 #Constants for final_text - source text block
+TYPE_CALL=1                 #Constants for final_text - call to be filled in
+TYPE_VARS=2                 #Constants for final_text - function args and vars declaration
+TYPE_STRINGS=3              #Constants for final_text - string literals from CALL
+TYPE_BCALL=4                #Constants for final_text - banked call to be filled in
+
 #Variables
+#=========
 running=True                        #Loop until reaches end of last source file
 file_list=[]                        #Stack of files included from source
 filename_list=[argv[1]]             #List of filenames matching file_list for adding comments to combined source
@@ -79,15 +67,34 @@ regs_counter=0                      #Counter for floating point registers reused
 bank_funcs=[]                       #List of functions reached by bank jump
 banking_enabled=False               #Whether BCALL should generate banked call or normal call
 
-
-#Constants
+#Functions
 #=========
-TYPE_TEXT=0                 #Constants for final_text - source text block
-TYPE_CALL=1                 #Constants for final_text - call to be filled in
-TYPE_VARS=2                 #Constants for final_text - function args and vars declaration
-TYPE_STRINGS=3              #Constants for final_text - string literals from CALL
-TYPE_BCALL=4                #Constants for final_text - banked call to be filled in
+#Parses one or more arguments separated by commas
+def arg_parse(arg_list,error_obj):
+    comma=False
+    ret_val=[]
+    for arg in arg_list[1:]:
+        if not comma:
+            ret_val+=[arg]
+        else:
+            pass
+        comma=not comma
+    if not comma or ret_val==[]:
+        #not comma = last processed was comma
+        error_exit(f"could not parse declaration - {arg_list}",error_obj)
+    return ret_val
+    
+#Display error, print partial output, exit
+def error_exit(msg,error_obj):
+    print("Error: "+msg)
+    error_obj["output_f"].write("OUTPUT TERMINATED:\n")
+    error_obj["output_f"].write("Error: "+msg+"\n")
+    error_obj["output_f"].write(f"In file {error_obj['filename_list'][-1]}\n")
+    exit(1)
 
+
+#Main program
+#============
 #Process file lines until last line of last included file
 while running:
     #Try to open input file then any included file
@@ -178,15 +185,13 @@ while running:
                 line=";"+line
                 print_line=True
             elif first_word in ["CALL","BCALL"]:
-                #Only useful if within FUNC. No harm if outside of FUNC.
-                if line_objs[1] not in calls_list:
-                    calls_list+=[line_objs[1]]
-                    
                 #Make space in list of text objects for call to be filled in
                 if file_state=="None":
                     final_text+=[[TYPE_TEXT,file_output]]
                     file_output=""
                 else:
+                    if line_objs[1] not in calls_list:
+                        calls_list+=[line_objs[1]]
                     if func_name_inserted==False:
                         func_temp+=f"\t{func_name}:\n"
                         func_name_inserted=True
@@ -217,7 +222,7 @@ while running:
                 elif line_objs[1]=="OFF":
                     banking_enabled=False
                 else:
-                    error_exit(f"invalid value for {first_word} - {num}",error_obj)
+                    error_exit(f"invalid value for {first_word} - {line_objs[1]}",error_obj)
             #These words depend on state machine state
             else:
                 #Check argument counts regardless of input state machine
@@ -304,7 +309,7 @@ while running:
                         func_dict[func_name]["BEGIN"]=func_begin
                         func_dict[func_name]["TOUCHES"]=set()
                         byte_total=0
-                        
+
                         #Insert ARGS definitions before function begin
                         debug_str="ARGS: "
                         for k,v in args_dict.items():
@@ -409,9 +414,9 @@ BYTES=2
 func_nodes=[[first_func,0]]
 byte_total=0
 func_used_list=[first_func]
+debug_line=""
 while True:
     node=func_nodes[-1]
-
     if node[INDEX]>=len(func_dict[node[NAME]]["CALLS"]):
         #Done with child node - remove from stack
         func_nodes.pop()        

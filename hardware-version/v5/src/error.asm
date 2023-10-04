@@ -3,7 +3,6 @@
 
 error_asm_begin:
 
-	TODO: shorten messages?
 	TODO: remove ending 0
 	ERROR_MSG_INPUT:
 	FCB " INPUT ERROR  ",0		;2
@@ -51,7 +50,6 @@ error_asm_begin:
 		FDB ERROR_MSG_NULL
         FDB ERROR_MSG_SYSTEM
 
-	TODO: adjust display and messages for new 5x8 font
 	;Error code in A
 	FUNC ErrorMsg
 		VARS

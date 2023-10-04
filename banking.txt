@@ -1,71 +1,30 @@
 list of jumps from one source file to another
 needed to plan banking setup
 
-system.asm
-==========
-none
 
-math.asm
-==========
-none
+forth.asm - bank 1 - ***NOT DONE***
+===================================
+***TODO***:
+    ***INDIRECT JUMP TO WORDS!***
+        ExecToken
+    math.asm
+        CheckData:
+        - CALL BCD_Reverse
+        - JSR BCD_Round
+    words.asm
+        ExecThread:
+        - JMP CODE_QUIT
+Same bank:
+    hardware.asm
+        Readline:
+        - CALL LCD_COL, LCD_Row, LCD_print, 
+               GetTimer, ReadKey, LCD_char
+    error.asm
+        ExecThread:
+        - CALL ErrorMsg
 
-cordic.asm
-==========
-math.asm
-- JMP ShiftR0, RansTos, 
-- JSR Copyregs, ZeroReg, TosR0R1, BCD_Add,
-      NormRan, BCD_StickyRound, BCD_Pack
-forth.asm
-- JSR StackAddItem
-word_stubs.asm
-- JSR PUSH_STUB
-words.asm
-- JSR CODE_DROP
-
-output.asm
-==========
-hardware.asm
-- CALL LCD_char, LCD_clrscr, LCD_Col,
-       LCD_Byte, LCD_print, LCD_Row
-system.asm
-- CALL MemCopy
-forth.asm
-- JSR StackAddItem
-words.asm
-- JSR CODE_FREE, CODE_DROP
-
-error.asm
-==========
-hardware.asm
-- CALL LCD_Col, LCD_Row, LCD_print, 
-       LCD_char
-
-aux_stack.asm
-==========
-none
-
-forth.asm
-==========
-hardware.asm
-    Readline:
-    - CALL LCD_COL, LCD_Row, LCD_print, 
-           GetTimer, ReadKey, LCD_char
-math.asm
-    CheckData:
-    - CALL BCD_Reverse
-    - JSR BCD_Round
-error.asm
-    ExecThread:
-    - CALL ErrorMsg
-words.asm
-    ExecThread:
-    - JMP CODE_QUIT
-
-***INDIRECT JUMP TO WORDS!***
-    ExecToken
-
-words.asm
-==========
+words.asm - bank 3 - ***NOT DONE***
+===================================
 forth.asm
     WORD_TICK:
     - CALL LineWord, FindWord
@@ -143,36 +102,6 @@ math.asm
     - WORD_MULT, WORD_DEG
     JSR BCD_Div
     - WORD_DIV, WORD_DEG
-word_stubs.asm
-    WORD_ADD:
-    - JMP HEX_RECALC
-    WORD_SUB:
-    - JMP HEX_RECALC
-    WORD_FLOAT, WORD_HEX, WORD_STRING:
-    - JMP COPY_STUB
-    WORD_WORDS:
-    - JMP ERROR_RESTART_STUB
-    - JSR IMMED_ONLY_STUB
-    WORD_COLON:
-    - JSR IMMED_ONLY_STUB
-    WORD_EQUAL:
-    - JSR COMPARISON_STUB
-    WORD_GT:
-    - JSR COMPARISON_STUB
-    WORD_I, WORD_J, WORD_K
-    - JSR WITHIN_WORD
-    WORD_AGAIN_THREAD:
-    - JSR ESC_CHECK_STUB
-    WORD_UNTIL_THREAD:
-    - JSR ESC_CHECK_STUB
-    WORD_MAX, MAX_MIN:
-    - JSR MIN_MAX_STUB
-    LOGIC_STUB
-    - WORD_AND, WORD_OR, WORD_XOR, WORD_NOT
-    WORD_PI:
-    - JSR PUSH_STUB
-    WORD_DEG:
-    - JSR PUSH_STUB
 hardware.asm
     WORD_WORDS:
     - CALL LCD_clrscr, LCD_print, LCD_Col,
@@ -180,28 +109,59 @@ hardware.asm
 output.asm
     WORD_WORDS:
     - CALL HexHigh, HexLow
-aux_stack.asm
-    WORD_DO:
-    - JSR AuxPushShort
-    WORD_LOOP:
-    - JSR AuxPopShort
-    WORD_BEGIN:
-    - JSR AuxPushShort
-    WORD_AGAIN:
-    - JSR AuxPopShort
-    WORD_UNTIL:
-    - JSR AuxPopShort
-    WORD LEAVE:
-    - JSR AuxPushShort
-    WORD_IF:
-    - JSR AuxPushShort
-word_stubs.asm
-    WORD_LSHIFT:
-    - JSR SHIFT_STUB
-    WORD_RSHIFT:
-    - JSR SHIFT_STUB
-    WORD_PI:
-    - JSR PUSH_STUB
+Fixed bank:
+    word_stubs.asm
+        WORD_LSHIFT:
+        - JSR SHIFT_STUB
+        WORD_RSHIFT:
+        - JSR SHIFT_STUB
+        WORD_PI:
+        - JSR PUSH_STUB
+        WORD_ADD:
+        - JMP HEX_RECALC
+        WORD_SUB:
+        - JMP HEX_RECALC
+        WORD_FLOAT, WORD_HEX, WORD_STRING:
+        - JMP COPY_STUB
+        WORD_WORDS:
+        - JMP ERROR_RESTART_STUB
+        - JSR IMMED_ONLY_STUB
+        WORD_COLON:
+        - JSR IMMED_ONLY_STUB
+        WORD_EQUAL:
+        - JSR COMPARISON_STUB
+        WORD_GT:
+        - JSR COMPARISON_STUB
+        WORD_I, WORD_J, WORD_K
+        - JSR WITHIN_WORD
+        WORD_AGAIN_THREAD:
+        - JSR ESC_CHECK_STUB
+        WORD_UNTIL_THREAD:
+        - JSR ESC_CHECK_STUB
+        WORD_MAX, MAX_MIN:
+        - JSR MIN_MAX_STUB
+        LOGIC_STUB
+        - WORD_AND, WORD_OR, WORD_XOR, WORD_NOT
+        WORD_PI:
+        - JSR PUSH_STUB
+        WORD_DEG:
+        - JSR PUSH_STUB
+Same bank:
+    aux_stack.asm
+        WORD_DO:
+        - JSR AuxPushShort
+        WORD_LOOP:
+        - JSR AuxPopShort
+        WORD_BEGIN:
+        - JSR AuxPushShort
+        WORD_AGAIN:
+        - JSR AuxPopShort
+        WORD_UNTIL:
+        - JSR AuxPopShort
+        WORD LEAVE:
+        - JSR AuxPushShort
+        WORD_IF:
+        - JSR AuxPushShort
 
 word_stubs.asm
 ==========
@@ -236,26 +196,75 @@ hardware.asm
     ESC_CHECK_STUB
     - JSR ReadKey
 
-***INDIRECT JUMP IN PUSH_STUB***
 
-forth_loop.asm
+
+
+
+
+
+-----Finished-----
+
+forth_loop.asm - Done
+=====================
+Fixed bank:
+    word_stubs.asm
+        JMP ERROR_RESTART_STUB
+Same bank:
+    forth.asm
+        CALL InitForth
+        CALL ReadLine
+        CALL LineWord
+        CALL FindWord
+        CALL WriteToken
+        CALL CheckData
+        JMP ExecThread
+        JSR StackAddItem
+        JSR AllocMem
+    output.asm
+        CALL DrawStack
+    error.asm
+        CALL ErrorMsg
+
+math.asm
 ==========
-forth.asm
-    CALL InitForth
-    CALL ReadLine
-    CALL LineWord
-    CALL FindWord
-    CALL WriteToken
-    CALL CheckData
-    JMP ExecThread
-    JSR StackAddItem
-    JSR AllocMem
-output.asm
-    CALL DrawStack
-system.asm
-    CALL MemCpy
-error.asm
-    CALL ErrorMsg
-word_stubs.asm
-    JMP ERROR_RESTART_STUB
+none
 
+cordic.asm - bank 2 - Done
+===================
+Fixed bank:
+    word_stubs.asm
+    - JSR PUSH_STUB
+Same bank:
+    math.asm
+    - JMP ShiftR0, RansTos, 
+    - JSR Copyregs, ZeroReg, TosR0R1, BCD_Add,
+          NormRan, BCD_StickyRound, BCD_Pack
+Local copy:
+    forth.asm
+    - JSR StackAddItem
+    words.asm
+    - JSR CODE_DROP
+
+
+output.asm - bank 1 - Done
+==========================
+Same bank:
+    hardware.asm
+    - CALL LCD_char, LCD_clrscr, LCD_Col,
+           LCD_Byte, LCD_print, LCD_Row
+    forth.asm
+    - JSR StackAddItem
+Local copy:
+    words.asm
+    - JSR CODE_FREE, CODE_DROP
+
+error.asm - bank 1 - Done
+=========================
+Same bank:
+    hardware.asm
+    - CALL LCD_Col, LCD_Row, LCD_print, 
+           LCD_char
+
+aux_stack.asm - Done
+====================
+none

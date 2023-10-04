@@ -5,7 +5,7 @@ declare -a files=( \
     "system.asm" "math.asm" "cordic.asm" "output.asm" \
     "error.asm" "aux_stack.asm" "forth.asm" "words.asm" \
     "word_stubs.asm" "forth_loop.asm" \
-    )
+    "bank1.asm" "bank2.asm" )
 
 
 for file in ${files[@]}; do

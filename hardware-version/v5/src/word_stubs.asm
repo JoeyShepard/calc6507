@@ -209,6 +209,7 @@ word_stubs_asm_begin:
 		BCC .skip
 			INC ret_address+1
 		.skip:
+        ;Jump ok as long as in same bank or in fixed bank
 		JMP (ret_address)
 		
 	PUSH_STUB_0:

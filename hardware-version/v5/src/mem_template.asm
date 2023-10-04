@@ -19,7 +19,8 @@ Align4 MACRO num
     IF strlen(align_return)>=4
         EXITM
     ENDIF
-    SET align_return,"\{num}\{substr(spaces,0,4-strlen(align_return))}"
+    ;SET align_return,"\{num}\{substr(spaces,0,4-strlen(align_return))}"
+    SET align_return,"\{substr(spaces,0,4-strlen(align_return))}\{num}"
     ENDM
 
 HeaderSize MACRO hname
@@ -74,27 +75,34 @@ BankAlignSize MACRO bname
     ;MESSAGE "- Banking code: \{banking_end-banking_begin} bytes (7+1+2 bytes per function)"
     ;MESSAGE "Bank 1:\{BANK1_END-BANKED_EEPROM} | 2:\{BANK2_END-BANKED_EEPROM} | 3:\{BANK3_END-BANKED_EEPROM} | 4:\{BANK4_END-BANKED_EEPROM} of 4096 bytes"
     ;MESSAGE "Size check: \{size_check_end-size_check_begin} bytes"
-    MESSAGE "Bank            1      2      3"
+    MESSAGE "Bank 1                Bank 2            Bank 3"
+    ;Bank 1
     HeaderSize hardware
     HeaderSize output
     HeaderSize forth
     HeaderSize forthloop
     HeaderSize error
+    HeaderSize bank1
+    ;Bank 2
     HeaderSize math
     HeaderSize cordic
+    HeaderSize bank2
+    ;Bank 3
     HeaderSize words
     HeaderSize word_stubs
     HeaderSize aux_stack
+    ;Total bank size
     BankAlignSize BANK1
     BankAlignSize BANK2
     BankAlignSize BANK3
     BankAlignSize BANK4
-    MESSAGE "hardware.asm    \{hardware_asm_size}   \{math_asm_size}   \{words_asm_size}"
-    MESSAGE "output.asm      \{output_asm_size}   \{cordic_asm_size}   \{word_stubs_asm_size}"
-    MESSAGE "forth.asm       \{forth_asm_size}          \{aux_stack_asm_size}"
-    MESSAGE "forth_loop.asm  \{forthloop_asm_size}"
-    MESSAGE "error.asm       \{error_asm_size}"
-    MESSAGE "Total           \{BANK1_ALIGNED_SIZE}   \{BANK2_ALIGNED_SIZE}   \{BANK3_ALIGNED_SIZE}   \{BANK4_ALIGNED_SIZE}"
+    MESSAGE "hardware.asm   \{hardware_asm_size}   math.asm   \{math_asm_size}   words.asm      \{words_asm_size}"
+    MESSAGE "output.asm     \{output_asm_size}   cordic.asm \{cordic_asm_size}   aux_stack.asm  \{aux_stack_asm_size}"
+    MESSAGE "forth.asm      \{forth_asm_size}   bank2.asm  \{bank2_asm_size}" 
+    MESSAGE "forth_loop.asm \{forthloop_asm_size}"
+    MESSAGE "error.asm      \{error_asm_size}"
+    MESSAGE "bank1.asm      \{bank1_asm_size}"
+    MESSAGE "Total          \{BANK1_ALIGNED_SIZE}              \{BANK2_ALIGNED_SIZE}                  \{BANK3_ALIGNED_SIZE}"
 
 	;Tell script that prints assembler output to stop outputting
 	;Eliminates double output (because of multiple passes?)

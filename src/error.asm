@@ -1,7 +1,8 @@
 ;Error message functions
 ;=======================
 
-	TODO: shorten messages?
+error_asm_begin:
+
 	TODO: remove ending 0
 	ERROR_MSG_INPUT:
 	FCB " INPUT ERROR  ",0		;2
@@ -49,7 +50,6 @@
 		FDB ERROR_MSG_NULL
         FDB ERROR_MSG_SYSTEM
 
-	TODO: adjust display and messages for new 5x8 font
 	;Error code in A
 	FUNC ErrorMsg
 		VARS
@@ -90,3 +90,5 @@
 			CMP #KEY_ENTER
 			BNE .loop
 	END
+
+error_asm_end:

@@ -1,6 +1,8 @@
 ;Math functions
 ;==============
 
+math_asm_begin:
+
 	;Constants
 	;=========
 	;This converts in both directions!
@@ -1147,5 +1149,5 @@
 		PLP
 	END
 	
-	
+math_asm_end:
 	

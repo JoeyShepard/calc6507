@@ -453,7 +453,7 @@ TODO: more accurate answer at cost of added complexity
 		
 		;x <= pi/2?
 		TODO: combine into one stub? used below too
-		JSR StackAddItem
+		JSR StackAddItem_bank2
 		JSR PUSH_STUB
 		;-pi/2 = 1.5 70 79 63 26 794 8966
 		;FCB OBJ_FLOAT, $79, $26, $63, $79, $70, $15, $00, $00|SIGN_BIT
@@ -464,7 +464,7 @@ TODO: more accurate answer at cost of added complexity
 		
 		JSR TosR0R1
 		JSR BCD_Add
-		JSR CODE_DROP+EXEC_HEADER
+		JSR CODE_DROP_bank2
 		
 		;sin(pi/2)=1, cos(pi/2)=0
 		LDA R_ans+FIRST_DIGIT
@@ -612,7 +612,7 @@ TODO: more accurate answer at cost of added complexity
 		.not_zero:
 		
 		;TODO: combine into one stub? used below too
-		;JSR StackAddItem
+		;JSR StackAddItem_bank2
 		;JSR PUSH_STUB
 		;FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00|SIGN_BIT
 		
@@ -620,7 +620,7 @@ TODO: more accurate answer at cost of added complexity
 		
 		;JSR TosR0R1
 		;JSR BCD_Add
-		;JSR CODE_DROP+EXEC_HEADER
+		;JSR CODE_DROP_bank2
 		
 		;;asin(1)=pi/2, acos(1)=0
 		;LDA R_ans+FIRST_DIGIT
@@ -773,7 +773,7 @@ TODO: more accurate answer at cost of added complexity
 		
 		;x <= 1? for asin and acos but not atan
 		TODO: combine into one stub? used below too
-		JSR StackAddItem
+		JSR StackAddItem_bank2
 		JSR PUSH_STUB
 		FCB OBJ_FLOAT, $00, $00, $00, $00, $00, $10, $00, $00|SIGN_BIT
 		
@@ -781,7 +781,7 @@ TODO: more accurate answer at cost of added complexity
 		
 		JSR TosR0R1
 		JSR BCD_Add
-		JSR CODE_DROP+EXEC_HEADER
+		JSR CODE_DROP_bank2
 		
 		;asin(1)=pi/2, acos(1)=0
 		LDA R_ans+FIRST_DIGIT
@@ -1064,5 +1064,5 @@ TODO: more accurate answer at cost of added complexity
 ;		STA DEBUG
 ;		
 ;		RTS
-	
+
 cordic_asm_end:

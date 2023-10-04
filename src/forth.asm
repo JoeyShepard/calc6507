@@ -1,5 +1,8 @@
 ;Forth related functions
 ;=======================
+
+forth_asm_begin:
+
 	FUNC InitForth
 		LDA #0
 		STA input_buff_begin
@@ -1236,4 +1239,5 @@
 		LDA #OBJ_HEX
 		STA 0,X
 		RTS 
-		
+	
+forth_asm_end:

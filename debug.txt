@@ -127,110 +127,113 @@ Line numbers
        ARGS: WORD source, WORD dest, BYTE count
        5 bytes used
 2695: include math.asm
-2712: FUNC BCD_Reverse
+2714: FUNC BCD_Reverse
        ARGS: WORD source, BYTE count
        3 bytes used
-2734: FUNC BCD_RevExp
-2748: FUNC BCD_RevSig
-2772: FUNC ZeroReg
-2786: FUNC MaxReg
-2814: FUNC IncRansExp
-2830: FUNC SwapR0R1
-2851: FUNC CopyRegs
-2870: FUNC TosR0R1
-2897: FUNC RansTos
-2921: FUNC HalfShift
-2943: FUNC HalfShiftForward
-2963: FUNC HalfShiftBackward
-2983: FUNC HalfShiftWide
-3009: FUNC HalfShiftWideForward
-3034: FUNC ShiftR0
-3124: FUNC ShiftRx
-3212: FUNC NormRans
-3303: FUNC BCD_Round
-3342: FUNC BCD_Unpack
-3364: FUNC BCD_Pack
-3407: FUNC BCD_Exp_diff
-3420: FUNC BCD_StickyRound
-3466: FUNC BCD_Add
-3645: FUNC BCD_Mult
-3787: FUNC BCD_Div
-3928: include cordic.asm
-4046: FUNC BCD_CORDIC
-4333: FUNC CORDIC_ShiftR0
-4343: FUNC CORDIC_MarkSign
-4361: FUNC CORDIC_Trig
-4520: FUNC CORDIC_Atrig1
-4533: FUNC CORDIC_Atan
-4695: FUNC CORDIC_AsinAcos
-4852: FUNC CORDIC_Pack
-4905: FUNC CORDIC_Push
-5024: include output.asm
-5028: FUNC DigitHigh
+2736: FUNC BCD_RevExp
+2750: FUNC BCD_RevSig
+2774: FUNC ZeroReg
+2788: FUNC MaxReg
+2816: FUNC IncRansExp
+2832: FUNC SwapR0R1
+2853: FUNC CopyRegs
+2872: FUNC TosR0R1
+2899: FUNC RansTos
+2923: FUNC HalfShift
+2945: FUNC HalfShiftForward
+2965: FUNC HalfShiftBackward
+2985: FUNC HalfShiftWide
+3011: FUNC HalfShiftWideForward
+3036: FUNC ShiftR0
+3126: FUNC ShiftRx
+3214: FUNC NormRans
+3305: FUNC BCD_Round
+3344: FUNC BCD_Unpack
+3366: FUNC BCD_Pack
+3409: FUNC BCD_Exp_diff
+3422: FUNC BCD_StickyRound
+3468: FUNC BCD_Add
+3647: FUNC BCD_Mult
+3789: FUNC BCD_Div
+3930: include cordic.asm
+4050: FUNC BCD_CORDIC
+4337: FUNC CORDIC_ShiftR0
+4347: FUNC CORDIC_MarkSign
+4365: FUNC CORDIC_Trig
+4524: FUNC CORDIC_Atrig1
+4537: FUNC CORDIC_Atan
+4699: FUNC CORDIC_AsinAcos
+4856: FUNC CORDIC_Pack
+4909: FUNC CORDIC_Push
+5029: include output.asm
+5035: FUNC DigitHigh
        ARGS: BYTE digit
        1 byte used
-5049: FUNC DigitLow
+5056: FUNC DigitLow
        ARGS: BYTE digit
        1 byte used
-5067: FUNC DrawFloat
+5074: FUNC DrawFloat
        ARGS: WORD source, BYTE index, BYTE arg, BYTE sign, WORD buff
        7 bytes used
-5190: FUNC HexHigh
+5197: FUNC HexHigh
        ARGS: BYTE digit, BYTE arg
        2 bytes used
-5220: FUNC HexLow
+5227: FUNC HexLow
        ARGS: BYTE digit, BYTE arg
        2 bytes used
-5247: FUNC DrawHex
+5254: FUNC DrawHex
        ARGS: WORD source, BYTE arg
        3 bytes used
-5288: FUNC DrawString
+5295: FUNC DrawString
        ARGS: WORD source, BYTE arg, BYTE index
        4 bytes used
-5326: FUNC DrawAlpha
-5366: FUNC DrawStack
+5333: FUNC DrawAlpha
+5373: FUNC DrawStack
        VARS: BYTE character, BYTE counter, WORD address
        4 bytes used
-5528: include error.asm
-5582: FUNC ErrorMsg
+5529: include error.asm
+5583: FUNC ErrorMsg
        VARS: WORD msg
        2 bytes used
-5661: include aux_stack.asm
-5666: FUNC AuxPushShort
-5691: FUNC AuxPopShort
-5715: include forth.asm
-5718: FUNC InitForth
-5738: FUNC ReadLine
+5664: include aux_stack.asm
+5671: FUNC AuxPushShort
+5696: FUNC AuxPopShort
+5723: include forth.asm
+5729: FUNC InitForth
+5749: FUNC ReadLine
        VARS: BYTE cursor, BYTE cursor_timer, BYTE arg, BYTE index, BYTE str_index, BYTE screen_ptr_temp
        6 bytes used
-5961: FUNC LineWord
-6018: FUNC FindWord
+5972: FUNC LineWord
+6029: FUNC FindWord
        VARS: BYTE address_temp
        1 byte used
-6087: FUNC CheckData
+6098: FUNC CheckData
        VARS: BYTE input_mode, BYTE y_buff, BYTE index, BYTE which_digit, BYTE negative, BYTE exp_negative, BYTE exp_count, BYTE exp_found, BYTE dec_found, BYTE nonzero_found, BYTE digit_count, BYTE exp_digit_count, BYTE digit_found, BYTE num_buff, BYTE float_buff
        15 bytes used
-6609: FUNC ExecToken
-6744: FUNC ExecThread
-6771: FUNC StackAddItem
-6784: FUNC DictEnd
-6834: FUNC IncDictPtr
-6847: FUNC IncExecPtr
-6860: FUNC AllocMem
-6890: FUNC WriteToken
+6620: FUNC ExecToken
+6755: FUNC ExecThread
+6782: FUNC StackAddItem
+6795: FUNC DictEnd
+6845: FUNC IncDictPtr
+6858: FUNC IncExecPtr
+6871: FUNC AllocMem
+6901: FUNC WriteToken
        VARS: BYTE token, BYTE user_defined
        2 bytes used
-6949: FUNC WriteHeader
-7017: FUNC TokenArgThread
-7055: FUNC HexFalse
-7063: FUNC HexTrue
-7083: include words.asm
-10402: include word_stubs.asm
-10712: include forth_loop.asm
-10718: FUNC ForthLoop
+6960: FUNC WriteHeader
+7028: FUNC TokenArgThread
+7066: FUNC HexFalse
+7074: FUNC HexTrue
+7095: include words.asm
+10417: include word_stubs.asm
+10718: include forth_loop.asm
+10726: FUNC ForthLoop
        VARS: WORD dest, BYTE arg, BYTE type
        4 bytes used
-10948: FUNC main BEGIN
+10958: include bank1.asm
+10991: include bank2.asm
+10998: FUNC StackAddItem_bank2
+11024: FUNC main BEGIN
 
 Call graph
 ==========
@@ -352,6 +355,7 @@ RansTos(0 bytes)
 ShiftR0(0 bytes)
 ShiftRx(0 bytes)
 StackAddItem(0 bytes)
+StackAddItem_bank2(0 bytes)
 SwapR0R1(0 bytes)
 TestFail(2 bytes)
 TestsPassed(0 bytes)

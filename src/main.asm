@@ -72,6 +72,8 @@
 	include words.asm
 	include word_stubs.asm
     include forth_loop.asm
+    include bank1.asm
+    include bank2.asm
 
 ;Main function
 ;=============
