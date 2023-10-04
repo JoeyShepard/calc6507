@@ -190,46 +190,46 @@ Line numbers
 5212: FUNC DrawStack
        VARS: BYTE character, BYTE counter, WORD address
        4 bytes used
-5389: include error.asm
-5443: FUNC ErrorMsg
+5392: include error.asm
+5446: FUNC ErrorMsg
        VARS: WORD msg
        2 bytes used
-5522: include aux_stack.asm
-5527: FUNC AuxPushShort
-5552: FUNC AuxPopShort
-5576: include forth.asm
-5579: FUNC InitForth
-5606: FUNC ReadLine
+5525: include aux_stack.asm
+5530: FUNC AuxPushShort
+5555: FUNC AuxPopShort
+5579: include forth.asm
+5582: FUNC InitForth
+5608: FUNC ReadLine
        VARS: BYTE cursor, BYTE cursor_timer, BYTE arg, BYTE index, BYTE str_index, BYTE screen_ptr_temp
        6 bytes used
-5882: FUNC LineWord
-5939: FUNC FindWord
+5884: FUNC LineWord
+5941: FUNC FindWord
        VARS: BYTE address_temp
        1 byte used
-6008: FUNC CheckData
+6010: FUNC CheckData
        VARS: BYTE input_mode, BYTE y_buff, BYTE index, BYTE which_digit, BYTE negative, BYTE exp_negative, BYTE exp_count, BYTE exp_found, BYTE dec_found, BYTE nonzero_found, BYTE digit_count, BYTE exp_digit_count, BYTE digit_found, BYTE num_buff, BYTE float_buff
        15 bytes used
-6530: FUNC ExecToken
-6665: FUNC ExecThread
-6692: FUNC StackAddItem
-6705: FUNC DictEnd
-6755: FUNC IncDictPtr
-6768: FUNC IncExecPtr
-6781: FUNC AllocMem
-6811: FUNC WriteToken
+6532: FUNC ExecToken
+6667: FUNC ExecThread
+6694: FUNC StackAddItem
+6707: FUNC DictEnd
+6757: FUNC IncDictPtr
+6770: FUNC IncExecPtr
+6783: FUNC AllocMem
+6813: FUNC WriteToken
        VARS: BYTE token, BYTE user_defined
        2 bytes used
-6870: FUNC WriteHeader
-6938: FUNC TokenArgThread
-6976: FUNC HexFalse
-6984: FUNC HexTrue
-7004: include words.asm
-10326: include word_stubs.asm
-10632: include forth_loop.asm
-10638: FUNC ForthLoop
+6872: FUNC WriteHeader
+6940: FUNC TokenArgThread
+6978: FUNC HexFalse
+6986: FUNC HexTrue
+7006: include words.asm
+10325: include word_stubs.asm
+10635: include forth_loop.asm
+10641: FUNC ForthLoop
        VARS: WORD dest, BYTE arg, BYTE type
        4 bytes used
-10868: FUNC main BEGIN
+10871: FUNC main BEGIN
 
 Call graph
 ==========

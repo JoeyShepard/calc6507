@@ -1047,7 +1047,7 @@
 		CODE_FREE:
 			FCB OBJ_PRIMITIVE	;Type
 			FCB ADD1			;Flags
-			
+		
 			LDA #OBJ_HEX
 			STA 0,X
 			LDA #lo(dict_end)
@@ -1060,6 +1060,7 @@
 			LDA #0
 			STA HEX_TYPE,X
 			RTS
+
     REGS
         BYTE word_temp
     END
@@ -2391,8 +2392,6 @@
 			JSR CODE_DROP+EXEC_HEADER
 			JMP RansTos
 
-    size_check_begin:
-
     REGS
         BYTE words_mode         ;Mode: primary, variables, or user-defined words
         BYTE skip_count         ;Words to skip before starting to print words. For scrolling.
@@ -3157,8 +3156,6 @@
                 FCB WORDS_NO_GC ; CODE_WORDS            ;144
                 FCB WORDS_SKIP2 ; CODE_BROKEN_REF       ;146
                 FCB WORDS_NO_GC ; CODE_LN               ;148
-
-    size_check_end:
 
 	WORD_BROKEN_REF:
 		FCB 0,""		            ;Name

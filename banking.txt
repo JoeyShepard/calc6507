@@ -1,0 +1,261 @@
+list of jumps from one source file to another
+needed to plan banking setup
+
+system.asm
+==========
+none
+
+math.asm
+==========
+none
+
+cordic.asm
+==========
+math.asm
+- JMP ShiftR0, RansTos, 
+- JSR Copyregs, ZeroReg, TosR0R1, BCD_Add,
+      NormRan, BCD_StickyRound, BCD_Pack
+forth.asm
+- JSR StackAddItem
+word_stubs.asm
+- JSR PUSH_STUB
+words.asm
+- JSR CODE_DROP
+
+output.asm
+==========
+hardware.asm
+- CALL LCD_char, LCD_clrscr, LCD_Col,
+       LCD_Byte, LCD_print, LCD_Row
+system.asm
+- CALL MemCopy
+forth.asm
+- JSR StackAddItem
+words.asm
+- JSR CODE_FREE, CODE_DROP
+
+error.asm
+==========
+hardware.asm
+- CALL LCD_Col, LCD_Row, LCD_print, 
+       LCD_char
+
+aux_stack.asm
+==========
+none
+
+forth.asm
+==========
+hardware.asm
+    Readline:
+    - CALL LCD_COL, LCD_Row, LCD_print, 
+           GetTimer, ReadKey, LCD_char
+math.asm
+    CheckData:
+    - CALL BCD_Reverse
+    - JSR BCD_Round
+error.asm
+    ExecThread:
+    - CALL ErrorMsg
+words.asm
+    ExecThread:
+    - JMP CODE_QUIT
+
+***INDIRECT JUMP TO WORDS!***
+    ExecToken
+
+words.asm
+==========
+forth.asm
+    WORD_TICK:
+    - CALL LineWord, FindWord
+    WORD_COLON:
+    - CALL LineWord, FindWord, CheckData,
+           WriteHeader
+    WORD_VAR:
+    - CALL LineWord, FindWord, CheckData,
+           WriteHeader, IndDictPtr,
+    WORD_STO:
+    - CALL LineWord, FindWord
+    WORD_EXEC:
+    - JMP ExecToken.address_ready
+    - JMP ExecThread
+    WORD_SEMI:
+    - JMP DictEnd
+    WORD_VAR:
+    - JMP DictEnd
+    WORD_VAR_THREAD:
+    - JMP IncExecPtr
+    WORD_STO:
+    - JMP TokenArgThread
+    WORD_SECONDARY:
+    - JMP ExecThread
+    WORD_LOOP:
+    - JMP TokenArgThread
+    WORD_LOOP_THREAD:
+    - JMP IncExecPtr
+    JMP HexTrue, HexFalse
+    - WORD EQUAL, WORD_GT
+    WORD_EXIT_THREAD:
+    - JMP ExecThread
+    WORD_AGAIN, WORD_UNTIL
+    - JMP TokenArgThread
+    WORD_UNTIL_THREAD:
+    - JMP IncExecPtr
+    WORD_LEAVE:
+    - JMP TokenArgThread
+    WORD_IF:
+    - JMP TokenArgThread
+    WORD_ELSE:
+    - JMP TokenArgThread
+    WORD_STO_THREAD:
+    - JSR IncExecPtr
+    WORD_DEG
+    - JSR StackAddItem
+cordic.asm
+    WORD_SIN, WORD_COS, WORD_TAN
+    - JMP CORDIC_Push
+    - JSR CORDIC_Trig
+    - JSR CORDIC_Pack
+    WORD_ATAN
+    - JSR CORDIC_Atan
+forth_loop.asm
+    WORD_EXIT:
+    - JMP ForthLoop.compile_word
+    WORD_BREAK:
+    - JMP ForthLoop.process_loop
+    WORD_QUIT:
+    - JMP ForthLoop.input_loop
+    WORD_DO:
+    - JMP ForthLoop.compile_word
+math.asm
+    JMP RansTos
+    - WORD_ADD, WORD_MULT, WORD_DIV, 
+      WORD_DEG
+    JSR RansTos
+    - WORD_DEG
+    JSR TosR0R1
+    - WORD_ADD, WORD_MULT, WORD_DIV,
+      WORD_DEG
+    JSR BCD_Add
+    - WORD_ADD, WORD_LOOP_THREAD
+    JSR BCD_Mult
+    - WORD_MULT, WORD_DEG
+    JSR BCD_Div
+    - WORD_DIV, WORD_DEG
+word_stubs.asm
+    WORD_ADD:
+    - JMP HEX_RECALC
+    WORD_SUB:
+    - JMP HEX_RECALC
+    WORD_FLOAT, WORD_HEX, WORD_STRING:
+    - JMP COPY_STUB
+    WORD_WORDS:
+    - JMP ERROR_RESTART_STUB
+    - JSR IMMED_ONLY_STUB
+    WORD_COLON:
+    - JSR IMMED_ONLY_STUB
+    WORD_EQUAL:
+    - JSR COMPARISON_STUB
+    WORD_GT:
+    - JSR COMPARISON_STUB
+    WORD_I, WORD_J, WORD_K
+    - JSR WITHIN_WORD
+    WORD_AGAIN_THREAD:
+    - JSR ESC_CHECK_STUB
+    WORD_UNTIL_THREAD:
+    - JSR ESC_CHECK_STUB
+    WORD_MAX, MAX_MIN:
+    - JSR MIN_MAX_STUB
+    LOGIC_STUB
+    - WORD_AND, WORD_OR, WORD_XOR, WORD_NOT
+    WORD_PI:
+    - JSR PUSH_STUB
+    WORD_DEG:
+    - JSR PUSH_STUB
+hardware.asm
+    WORD_WORDS:
+    - CALL LCD_clrscr, LCD_print, LCD_Col,
+           LCD_char, ReadKey
+output.asm
+    WORD_WORDS:
+    - CALL HexHigh, HexLow
+aux_stack.asm
+    WORD_DO:
+    - JSR AuxPushShort
+    WORD_LOOP:
+    - JSR AuxPopShort
+    WORD_BEGIN:
+    - JSR AuxPushShort
+    WORD_AGAIN:
+    - JSR AuxPopShort
+    WORD_UNTIL:
+    - JSR AuxPopShort
+    WORD LEAVE:
+    - JSR AuxPushShort
+    WORD_IF:
+    - JSR AuxPushShort
+word_stubs.asm
+    WORD_LSHIFT:
+    - JSR SHIFT_STUB
+    WORD_RSHIFT:
+    - JSR SHIFT_STUB
+    WORD_PI:
+    - JSR PUSH_STUB
+
+word_stubs.asm
+==========
+error.asm
+    ERROR_RESTART_SUB:
+    - CALL ErrorMsg
+math.asm
+    COMPARISON_STUB:
+    - JSR CODE_SUB
+forth.asm
+    MIN_MAX_STUB:
+    - JSR StackAddItem
+    COPY_STUB:
+    - JMP IncExecPtr
+words.asm
+    HEX_RECALC:
+    - JMP CODE_DROP
+    MIN_MAX_STUB:
+    - JSR CODE_OVER
+    - JSR CODE_GT
+    - JSR CODE_DROP
+    HEX_RECALC:
+    - JMP CODE_DROP
+    SHIFT_STUB:
+    - JMP CODE_DROP
+    ESC_CHECK_STUB:
+    - JMP CODE_QUIT
+aux_stack.asm
+    AUX_STUB
+    - JSR AuxPopShort
+hardware.asm
+    ESC_CHECK_STUB
+    - JSR ReadKey
+
+***INDIRECT JUMP IN PUSH_STUB***
+
+forth_loop.asm
+==========
+forth.asm
+    CALL InitForth
+    CALL ReadLine
+    CALL LineWord
+    CALL FindWord
+    CALL WriteToken
+    CALL CheckData
+    JMP ExecThread
+    JSR StackAddItem
+    JSR AllocMem
+output.asm
+    CALL DrawStack
+system.asm
+    CALL MemCpy
+error.asm
+    CALL ErrorMsg
+word_stubs.asm
+    JMP ERROR_RESTART_STUB
+

@@ -45,29 +45,30 @@
     ;Bank 1    
     ORG BANK1_ADDRESS
     PHASE BANKED_EEPROM
-
-        ;So far, worked with hardware in fixed and font in banked but not like below
-        include hardware.asm
-        font_table:
-        include font_5x8_flipped.asm
-        include font_custom_flipped.asm
-
+        include hardware.asm                ;|
+        font_table:                         ;|-932 bytes combined
+        include font_5x8_flipped.asm        ;|
+        include font_custom_flipped.asm     ;|
+        include output.asm                  ;657 bytes
+        include forth.asm                   ;1793 bytes
+        include forth_loop.asm              ;317 bytes
     EQU BANK1_END,*
     DEPHASE
 
     ;Bank 2
     ORG BANK2_ADDRESS
     PHASE BANKED_EEPROM
-
-
+        include math.asm                    ;1416 bytes
+        include cordic.asm                  ;1067 bytes
+        include error.asm                   ;346 bytes
     EQU BANK2_END,*
     DEPHASE
 
     ;Bank 3
     ORG BANK3_ADDRESS
     PHASE BANKED_EEPROM
-
-
+        include aux_stack.asm       ;54 bytes
+        include word_stubs.asm      ;289 bytes
     EQU BANK3_END,*
     DEPHASE
 
@@ -87,17 +88,8 @@
     ORG $C000
 
     ;Sizes are when when started moving to banking - may increase
-	include system.asm          ;13 bytes
-	include math.asm            ;1416 bytes
-	include cordic.asm          ;1067 bytes
-	include output.asm          ;657 bytes
-    include error.asm           ;346 bytes
-	include aux_stack.asm       ;54 bytes
-	include forth.asm           ;1793 bytes
-	include words.asm           ;4389 bytes
+    include words.asm           ;4389 bytes
         ;words 1230
-	include word_stubs.asm      ;289 bytes
-    include forth_loop.asm      ;317 bytes
 
     ;size_check_begin:
     ;size_check_end:
@@ -106,6 +98,7 @@
     banking_begin:
     include banking.asm
     banking_end:
+	include system.asm          ;13 bytes
 
     FUNC setup
         SEI        

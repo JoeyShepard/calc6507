@@ -23,7 +23,6 @@
 	FCB " .$+-*/'!@:;=<>"		;15
 	FCB "SE"					;2
 	
-	;Can save space here by removing cursor draw after key
 	FUNC ReadLine
 		VARS
 			BYTE cursor, cursor_timer

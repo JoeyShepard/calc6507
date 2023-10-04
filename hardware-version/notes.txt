@@ -10,4 +10,6 @@ v3 - second circuit board. replaced crystal then started over with tests.
 v4 - second circuit board. replaced power supply with tps61023 and seems to work.
      - still had problems with reliability
      - stopped using EEPROM adapter and now LCD and RAM good
-v5 - second circuit board. should be done with tests
+v5 - second circuit board - reliable so far
+
+deleted v1-v4 from directory tree since part of prior commit on git

@@ -136,9 +136,11 @@
 		LDA AUX_STACK-3,Y
 		
 		RTS
-		
+	
+    size_check_begin:
+
 	SHIFT_STUB:
-		
+	
 		;Smart
 		LDA HEX_TYPE,X
 		ORA HEX_TYPE+OBJ_SIZE,X
@@ -174,6 +176,8 @@
 		PLA
 		JMP CODE_DROP+EXEC_HEADER
 	
+    size_check_end:
+
 	TODO: delete and use function?
 	TODO: change to use pointer rather than embedded data?
 	;Push literal value onto stack

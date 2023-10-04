@@ -203,16 +203,16 @@
 		END
 		
 		JSR StackAddItem
-		JSR CODE_FREE+EXEC_HEADER
 		
+        ;IF FALSE
+        JSR CODE_FREE+EXEC_HEADER
+		;ENDIF
+
 		TXA
 		STA address
 		LDA #0
 		STA address+1
 		
-		TODO: stack usage in status? battery? takes up more room though
-		
-		TODO: shrink
 		CALL LCD_clrscr
 
         LDA keys_alpha
@@ -226,6 +226,8 @@
             MOV #0,font_inverted
         .no_alpha:
 
+        ;IF FALSE
+
         TODO: magic number
         LDA #CHAR_WIDTH*6
         CALL LCD_Col
@@ -235,6 +237,8 @@
 	
 		JSR CODE_DROP+EXEC_HEADER
 		
+        ;ENDIF
+
 		MOV #'5',character
 		MOV #5,counter
 		
