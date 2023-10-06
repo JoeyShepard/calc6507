@@ -39,7 +39,7 @@
 	FDB main
 	ORG RESET_VECTOR-$F000
 	FDB main
-	
+
 ;Banked ROM
 ;==========
     ;Bank 1    
@@ -66,6 +66,7 @@
     ;Bank 3
     ORG BANK3_ADDRESS
     PHASE BANKED_EEPROM
+        include words.asm 
         include aux_stack.asm
     EQU BANK3_END,*
     DEPHASE
@@ -73,28 +74,17 @@
     ;Bank 4
     ORG BANK4_ADDRESS
     PHASE BANKED_EEPROM
-
-
+        include bank4.asm
     EQU BANK4_END,*
     DEPHASE
 
 ;Fixed ROM
 ;=========
-
-    ;Space past used memory. Put code here while
-    ;arranging in banks
-    ORG $C000
-
-    ;Sizes are when when started moving to banking - may increase
-    include words.asm 
-
-    size_check_begin:
-    size_check_end:
-
 	ORG FIXED_EEPROM
     include banking.asm
 	include system.asm
     include word_stubs.asm
+    include bank_fixed.asm
 
     FUNC setup
         SEI        

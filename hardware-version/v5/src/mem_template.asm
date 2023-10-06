@@ -91,18 +91,21 @@ BankAlignSize MACRO bname
     HeaderSize words
     HeaderSize word_stubs
     HeaderSize aux_stack
+    ;Bank 4
+    HeaderSize bank4
+
     ;Total bank size
     BankAlignSize BANK1
     BankAlignSize BANK2
     BankAlignSize BANK3
     BankAlignSize BANK4
-    MESSAGE "hardware.asm   \{hardware_asm_size}   math.asm   \{math_asm_size}   words.asm      \{words_asm_size}"
+    MESSAGE "hardware.asm   \{hardware_asm_size}   math.asm   \{math_asm_size}   words.asm      \{words_asm_size}   bank4.asm \{bank4_asm_size}"
     MESSAGE "output.asm     \{output_asm_size}   cordic.asm \{cordic_asm_size}   aux_stack.asm  \{aux_stack_asm_size}"
     MESSAGE "forth.asm      \{forth_asm_size}   bank2.asm  \{bank2_asm_size}" 
     MESSAGE "forth_loop.asm \{forthloop_asm_size}"
     MESSAGE "error.asm      \{error_asm_size}"
     MESSAGE "bank1.asm      \{bank1_asm_size}"
-    MESSAGE "Total          \{BANK1_ALIGNED_SIZE}              \{BANK2_ALIGNED_SIZE}                  \{BANK3_ALIGNED_SIZE}"
+    MESSAGE "Total          \{BANK1_ALIGNED_SIZE}              \{BANK2_ALIGNED_SIZE}                  \{BANK3_ALIGNED_SIZE}             \{BANK4_ALIGNED_SIZE}"
 
 	;Tell script that prints assembler output to stop outputting
 	;Eliminates double output (because of multiple passes?)

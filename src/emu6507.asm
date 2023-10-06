@@ -19,6 +19,7 @@
     FCB "S!*"   ;S = store arrow
     FCB "@?_-"
     FCB ". +"
+    FCB KEY_BACKSPACE, KEY_ON
 	equ SPECIAL_CHARS_LEN, *-special_chars
 
 	FUNC setup
@@ -119,11 +120,16 @@
             RTS
         .not_enter:
 
-        ;Backspace
-        CMP #KEY_BACKSPACE
-        BNE .not_backspace
-            RTS
-        .not_backspace:
+        ;;Backspace
+        ;CMP #KEY_BACKSPACE
+        ;BNE .not_backspace
+        ;    RTS
+        ;.not_backspace:
+
+        ;CMP #KEY_ON
+        ;BNE .not_backspace
+        ;    RTS
+        ;.not_backspace:
 
         ;Alpha
         ;(Not useful on emu but test here for hardware)

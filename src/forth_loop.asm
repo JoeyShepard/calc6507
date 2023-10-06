@@ -64,7 +64,7 @@ forthloop_asm_begin:
                     JMP .error_sub
 				.still_processing:
 
-				CALL FindWord
+				CCALL FindWord
 				LDA ret_val
 				BEQ .word_not_found
 					

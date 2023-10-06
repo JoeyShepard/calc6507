@@ -74,6 +74,8 @@
     include forth_loop.asm
     include bank1.asm
     include bank2.asm
+    include bank4.asm
+    include bank_fixed.asm
 
 ;Main function
 ;=============

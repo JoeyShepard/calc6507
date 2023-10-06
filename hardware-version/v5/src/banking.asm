@@ -8,6 +8,9 @@
 
 banking_begin:
 
+;BCALL support
+;=============
+
 ;Count of table entries to check for mismatch
     SET Bank1TrampolineCount,0
     SET Bank1IDCount,0
@@ -111,7 +114,7 @@ BANK_ADDRESS MACRO funcname
         RTS
 
 
-;Trampolines in fixed EEPROM for banked functions
+;BCALL trampolines in fixed EEPROM for banked functions
 
 ;Bank 1
     SET banknum,1
@@ -124,6 +127,7 @@ BANK_ADDRESS MACRO funcname
 
 ;Bank 4
     SET banknum,4
+    BFUNC WORD_WORDS_GC
 
 
 ;List of bank numbers 
@@ -139,6 +143,7 @@ BANK_ADDRESS MACRO funcname
 
 ;Bank 4
     SET banknum,4
+    BANK_ID WORD_WORDS_GC
 
 
 ;Jump table
@@ -155,6 +160,7 @@ BANK_ADDRESS MACRO funcname
 
 ;Bank 4
     SET banknum,4
+    BANK_ADDRESS WORD_WORDS_GC
 
 
 ;Check for missing entries from 3 tables above
@@ -175,4 +181,19 @@ TableCheckError MACRO trampoline,id,table
         TableCheckError Bank4TrampolineCount,Bank4IDCount,Bank4TableCount
     ENDIF
 
+
+
+;Custom trampolines as needed
+;============================
+    ;Wrapper for FindWord in bank_fixed.asm
+    __FindWord_CUSTOM:
+        LDA sys_bank
+        PHA
+        CALL SetBank, #BANK3     ;FORTH_WORDS start here
+        JSR FindWord
+        PLA
+        STA bank_temp_A
+        CALL SetBank, bank_temp_A
+        RTS
+    
 banking_end:

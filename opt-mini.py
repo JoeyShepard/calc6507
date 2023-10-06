@@ -33,6 +33,7 @@ TYPE_CALL=1                 #Constants for final_text - call to be filled in
 TYPE_VARS=2                 #Constants for final_text - function args and vars declaration
 TYPE_STRINGS=3              #Constants for final_text - string literals from CALL
 TYPE_BCALL=4                #Constants for final_text - banked call to be filled in
+TYPE_CCALL=5                #Constants for final_text - custom banked call to be filled in
 
 #Variables
 #=========
@@ -65,7 +66,9 @@ func_name_inserted=False            #Whether label for FUNC name has been insert
 assignments=[]                      #List of zero page assignments made by optimizer
 regs_counter=0                      #Counter for floating point registers reused for temp mem
 bank_funcs=[]                       #List of functions reached by bank jump
-banking_enabled=False               #Whether BCALL should generate banked call or normal call
+banking_enabled=False               #Whether BCALL,CCALL,etc should generate banked call or normal call
+regs_list=""                        #List of variable declarations for current REGS statement
+regs_dict={}                        #Dict of variable declarations from RGS
 
 #Functions
 #=========
@@ -184,7 +187,7 @@ while running:
             elif first_word[:5] in ["TODO:","DONE:"]:
                 line=";"+line
                 print_line=True
-            elif first_word in ["CALL","BCALL"]:
+            elif first_word in ["CALL","BCALL","CCALL"]:
                 #Make space in list of text objects for call to be filled in
                 if file_state=="None":
                     final_text+=[[TYPE_TEXT,file_output]]
@@ -201,6 +204,8 @@ while running:
                     final_text+=[[TYPE_CALL,line+"\n",line_objs[:]]]
                 elif first_word=="BCALL":
                     final_text+=[[TYPE_BCALL,line+"\n",line_objs[:]]]
+                elif first_word=="CCALL":
+                    final_text+=[[TYPE_CCALL,line+"\n",line_objs[:]]]
             elif first_word in ["LOCALS_BEGIN","LOCALS_END"]:
                 num=line_objs[1]
                 if num.isnumeric():
@@ -226,7 +231,7 @@ while running:
             #These words depend on state machine state
             else:
                 #Check argument counts regardless of input state machine
-                if file_state in ["FUNC","ARGS","VARS","REGS"]:
+                if file_state in ["FUNC","ARGS","VARS"]:
                     if first_word in ["END"]:
                         if len(line_objs)!=1:
                             error_exit(f"bad argument to {first_word} - {line.lstrip()}",error_obj)
@@ -243,7 +248,7 @@ while running:
                         error_exit(f"{first_word} invalid outside of FUNC block - {line.lstrip()}",error_obj)
                      
                     #Check for words that should have no arguments
-                    if first_word in ["STRING_LITERALS","REGS"]:
+                    if first_word in ["STRING_LITERALS"]:
                         if len(line_objs)!=1:
                             error_exit(f"{first_word} does not take arguments - {line.lstrip()}",error_obj)
                      
@@ -289,8 +294,22 @@ while running:
                         file_output=""
                         final_text+=[[TYPE_STRINGS]]
                     elif first_word=="REGS":
+                        if len(line_objs)>2:
+                            error_exit(f"{first_word} does not take {len(line_objs)} arguments - {line.lstrip()}",error_obj)
+                        if len(line_objs)==2:
+                            regs_name=line_objs[1]
+                            regs_list=""
+                        else:
+                            regs_name=""
                         file_state="REGS"
                         regs_counter=0
+                    elif first_word=="REREGS":
+                        if len(line_objs)!=2:
+                            error_exit(f"wrong number of arguments for {first_word} - {line.lstrip()}",error_obj)
+                        reg_lookup=line_objs[1]
+                        if reg_lookup not in regs_dict:
+                            error_exit(f"no prior REGS set called {reg_lookup} - {line.lstrip()}",error_obj)
+                        file_output+=regs_dict[reg_lookup]
                     else:
                         print_line=True
                 #State machine state FUNC - inside a function but not in an ARGS or VARS block
@@ -384,6 +403,7 @@ while running:
                     if first_word in ["BYTE","WORD"]:
                         for arg in arg_parse(line_objs,error_obj):    
                             file_output+=f"\tset {arg}, (R{int(regs_counter/8)}+{regs_counter%8}) ;REGS {first_word} {arg}\n"
+                            regs_list+=f"\tset {arg}, (R{int(regs_counter/8)}+{regs_counter%8}) ;REGS {first_word} {arg}\n"
                             if first_word=="BYTE":
                                 regs_counter+=1
                             elif first_word=="WORD":
@@ -391,6 +411,8 @@ while running:
 
                     #End of REGS block
                     elif first_word=="END":
+                        if regs_name!="":
+                            regs_dict[regs_name]=regs_list
                         file_state="None"
 
             #No match to optimizer word above - output line to file        
@@ -546,7 +568,7 @@ for i,text_block in enumerate(final_text):
     elif text_block[0]==TYPE_STRINGS:
         output_f.write(string_assignments)
         string_assignments_written=True
-    elif text_block[0] in [TYPE_CALL,TYPE_BCALL]:
+    elif text_block[0] in [TYPE_CALL,TYPE_BCALL,TYPE_CCALL]:
         #Formulate CALL statement - do here at end after all functions read in
         func=text_block[2][1]
         func_args=func_dict[func]["ARGS"]
@@ -619,12 +641,18 @@ for i,text_block in enumerate(final_text):
             comma=not comma
         if comma==False:
             error_exit(f"missing value in CALL - {text_block[1].lstrip()}",error_obj)
-        if text_block[0]==TYPE_CALL or (TYPE_BCALL and banking_enabled==False):
+        if banking_enabled==False: 
             call_text+=f"\tJSR {func}\n\n"
-        elif text_block[0]==TYPE_BCALL and banking_enabled:
-            call_text+=f"\tJSR __{func}_BANK_JUMP\n\n"
-            if func not in bank_funcs:
-                bank_funcs+=[func]
+        elif banking_enabled==True:
+            if text_block[0]==TYPE_CALL:
+                call_text+=f"\tJSR {func}\n\n"
+            else:
+                if text_block[0]==TYPE_BCALL:
+                    call_text+=f"\tJSR __{func}_BANK_JUMP\n\n"
+                elif text_block[0]==TYPE_CCALL:
+                    call_text+=f"\tJSR __{func}_CUSTOM\n\n"
+                if func not in bank_funcs:
+                    bank_funcs+=[func]
         #Replace TYPE_CALL block in final_text with generated text
         final_text[i]=[TYPE_TEXT,call_text]
         output_f.write(call_text)        

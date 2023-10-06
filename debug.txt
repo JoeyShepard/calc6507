@@ -104,136 +104,140 @@ Line numbers
 1989: include font_5x8.asm
 2188: include font_custom.asm
 2221: include emu6507.asm
-2245: FUNC setup
-2318: FUNC GfxSetup
-2328: FUNC ReadKey
-2437: FUNC LCD_clrscr
+2246: FUNC setup
+2319: FUNC GfxSetup
+2329: FUNC ReadKey
+2443: FUNC LCD_clrscr
        VARS: BYTE counter
        1 byte used
-2460: FUNC LCD_char
+2466: FUNC LCD_char
        ARGS: BYTE c_out, WORD pixel_ptr, BYTE pixel_index, BYTE pixel, BYTE lc1, BYTE lc2
        7 bytes used
-2580: FUNC LCD_print
+2586: FUNC LCD_print
        ARGS: STRING source, BYTE index, BYTE arg
        4 bytes used
-2606: FUNC LCD_Col
-2614: FUNC LCD_Row
-2628: FUNC LCD_Byte
+2612: FUNC LCD_Col
+2620: FUNC LCD_Row
+2634: FUNC LCD_Byte
        ARGS: BYTE data, BYTE counter
        2 bytes used
-2661: FUNC GetTimer
-2672: include system.asm
-2675: FUNC MemCopy
+2667: FUNC GetTimer
+2678: include system.asm
+2681: FUNC MemCopy
        ARGS: WORD source, WORD dest, BYTE count
        5 bytes used
-2695: include math.asm
-2714: FUNC BCD_Reverse
+2701: include math.asm
+2720: FUNC BCD_Reverse
        ARGS: WORD source, BYTE count
        3 bytes used
-2736: FUNC BCD_RevExp
-2750: FUNC BCD_RevSig
-2774: FUNC ZeroReg
-2788: FUNC MaxReg
-2816: FUNC IncRansExp
-2832: FUNC SwapR0R1
-2853: FUNC CopyRegs
-2872: FUNC TosR0R1
-2899: FUNC RansTos
-2923: FUNC HalfShift
-2945: FUNC HalfShiftForward
-2965: FUNC HalfShiftBackward
-2985: FUNC HalfShiftWide
-3011: FUNC HalfShiftWideForward
-3036: FUNC ShiftR0
-3126: FUNC ShiftRx
-3214: FUNC NormRans
-3305: FUNC BCD_Round
-3344: FUNC BCD_Unpack
-3366: FUNC BCD_Pack
-3409: FUNC BCD_Exp_diff
-3422: FUNC BCD_StickyRound
-3468: FUNC BCD_Add
-3647: FUNC BCD_Mult
-3789: FUNC BCD_Div
-3930: include cordic.asm
-4050: FUNC BCD_CORDIC
-4337: FUNC CORDIC_ShiftR0
-4347: FUNC CORDIC_MarkSign
-4365: FUNC CORDIC_Trig
-4524: FUNC CORDIC_Atrig1
-4537: FUNC CORDIC_Atan
-4699: FUNC CORDIC_AsinAcos
-4856: FUNC CORDIC_Pack
-4909: FUNC CORDIC_Push
-5029: include output.asm
-5035: FUNC DigitHigh
+2742: FUNC BCD_RevExp
+2756: FUNC BCD_RevSig
+2780: FUNC ZeroReg
+2794: FUNC MaxReg
+2822: FUNC IncRansExp
+2838: FUNC SwapR0R1
+2859: FUNC CopyRegs
+2878: FUNC TosR0R1
+2905: FUNC RansTos
+2929: FUNC HalfShift
+2951: FUNC HalfShiftForward
+2971: FUNC HalfShiftBackward
+2991: FUNC HalfShiftWide
+3017: FUNC HalfShiftWideForward
+3042: FUNC ShiftR0
+3132: FUNC ShiftRx
+3220: FUNC NormRans
+3311: FUNC BCD_Round
+3350: FUNC BCD_Unpack
+3372: FUNC BCD_Pack
+3415: FUNC BCD_Exp_diff
+3428: FUNC BCD_StickyRound
+3474: FUNC BCD_Add
+3653: FUNC BCD_Mult
+3795: FUNC BCD_Div
+3936: include cordic.asm
+4056: FUNC BCD_CORDIC
+4343: FUNC CORDIC_ShiftR0
+4353: FUNC CORDIC_MarkSign
+4371: FUNC CORDIC_Trig
+4530: FUNC CORDIC_Atrig1
+4543: FUNC CORDIC_Atan
+4705: FUNC CORDIC_AsinAcos
+4862: FUNC CORDIC_Pack
+4915: FUNC CORDIC_Push
+5035: include output.asm
+5041: FUNC DigitHigh
        ARGS: BYTE digit
        1 byte used
-5056: FUNC DigitLow
+5062: FUNC DigitLow
        ARGS: BYTE digit
        1 byte used
-5074: FUNC DrawFloat
+5080: FUNC DrawFloat
        ARGS: WORD source, BYTE index, BYTE arg, BYTE sign, WORD buff
        7 bytes used
-5197: FUNC HexHigh
+5203: FUNC HexHigh
        ARGS: BYTE digit, BYTE arg
        2 bytes used
-5227: FUNC HexLow
+5233: FUNC HexLow
        ARGS: BYTE digit, BYTE arg
        2 bytes used
-5254: FUNC DrawHex
+5260: FUNC DrawHex
        ARGS: WORD source, BYTE arg
        3 bytes used
-5295: FUNC DrawString
+5301: FUNC DrawString
        ARGS: WORD source, BYTE arg, BYTE index
        4 bytes used
-5333: FUNC DrawAlpha
-5373: FUNC DrawStack
+5339: FUNC DrawAlpha
+5379: FUNC DrawStack
        VARS: BYTE character, BYTE counter, WORD address
        4 bytes used
-5529: include error.asm
-5583: FUNC ErrorMsg
+5535: include error.asm
+5589: FUNC ErrorMsg
        VARS: WORD msg
        2 bytes used
-5664: include aux_stack.asm
-5671: FUNC AuxPushShort
-5696: FUNC AuxPopShort
-5723: include forth.asm
-5729: FUNC InitForth
-5749: FUNC ReadLine
+5670: include aux_stack.asm
+5677: FUNC AuxPushShort
+5702: FUNC AuxPopShort
+5729: include forth.asm
+5735: FUNC InitForth
+5755: FUNC ReadLine
        VARS: BYTE cursor, BYTE cursor_timer, BYTE arg, BYTE index, BYTE str_index, BYTE screen_ptr_temp
        6 bytes used
-5972: FUNC LineWord
-6029: FUNC FindWord
-       VARS: BYTE address_temp
-       1 byte used
-6098: FUNC CheckData
+5978: FUNC LineWord
+6029: FUNC CheckData
        VARS: BYTE input_mode, BYTE y_buff, BYTE index, BYTE which_digit, BYTE negative, BYTE exp_negative, BYTE exp_count, BYTE exp_found, BYTE dec_found, BYTE nonzero_found, BYTE digit_count, BYTE exp_digit_count, BYTE digit_found, BYTE num_buff, BYTE float_buff
        15 bytes used
-6620: FUNC ExecToken
-6755: FUNC ExecThread
-6782: FUNC StackAddItem
-6795: FUNC DictEnd
-6845: FUNC IncDictPtr
-6858: FUNC IncExecPtr
-6871: FUNC AllocMem
-6901: FUNC WriteToken
+6551: FUNC ExecToken
+6686: FUNC ExecThread
+6713: FUNC StackAddItem
+6726: FUNC DictEnd
+6776: FUNC IncDictPtr
+6789: FUNC IncExecPtr
+6802: FUNC AllocMem
+6832: FUNC WriteToken
        VARS: BYTE token, BYTE user_defined
        2 bytes used
-6960: FUNC WriteHeader
-7028: FUNC TokenArgThread
-7066: FUNC HexFalse
-7074: FUNC HexTrue
-7095: include words.asm
-10417: include word_stubs.asm
-10718: include forth_loop.asm
-10726: FUNC ForthLoop
+6891: FUNC WriteHeader
+6959: FUNC TokenArgThread
+6997: FUNC HexFalse
+7005: FUNC HexTrue
+7026: include words.asm
+9564: include word_stubs.asm
+9865: include forth_loop.asm
+9873: FUNC ForthLoop
        VARS: WORD dest, BYTE arg, BYTE type
        4 bytes used
-10958: include bank1.asm
-10991: include bank2.asm
-10998: FUNC StackAddItem_bank2
-11024: FUNC main BEGIN
+10105: include bank1.asm
+10138: include bank2.asm
+10145: FUNC StackAddItem_bank2
+10170: include bank4.asm
+10190: FUNC WORD_WORDS_GC
+10596: include bank_fixed.asm
+10609: FUNC FindWord
+       VARS: BYTE address_temp, BYTE bank_temp
+       2 bytes used
+10696: FUNC WORD_WORDS_Search
+11102: FUNC main BEGIN
 
 Call graph
 ==========
@@ -287,7 +291,7 @@ main(0) > ForthLoop(4) > ReadLine(6) > DrawAlpha(0) > LCD_Col(0) - (10 bytes)
 main(0) > ForthLoop(4) > ReadLine(6) > DrawAlpha(0) > LCD_Byte(2) - (12 bytes)
 main(0) > ForthLoop(4) > ReadLine(6) > DrawAlpha(0) > LCD_char(7) - (17 bytes)
 main(0) > ForthLoop(4) > LineWord(0) - (4 bytes)
-main(0) > ForthLoop(4) > FindWord(1) - (5 bytes)
+main(0) > ForthLoop(4) > FindWord(2) - (6 bytes)
 main(0) > ForthLoop(4) > WriteToken(2) - (6 bytes)
 main(0) > ForthLoop(4) > WriteToken(2) > AllocMem(0) - (6 bytes)
 main(0) > ForthLoop(4) > CheckData(15) - (19 bytes)
@@ -361,6 +365,8 @@ TestFail(2 bytes)
 TestsPassed(0 bytes)
 TokenArgThread(0 bytes)
 TosR0R1(0 bytes)
+WORD_WORDS_GC(0 bytes)
+WORD_WORDS_Search(0 bytes)
 WriteHeader(0 bytes)
 ZeroReg(0 bytes)
 file_tests(0 bytes)
